@@ -248,7 +248,7 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::post('/getFilterNurseData', 'JobsController@getFilterNurseData')->name('getFilterNurseData');
   Route::post('/getFilterSpecialityData', 'JobsController@getFilterSpecialityData')->name('getFilterSpecialityData');  
   Route::post('/updateSectorData', 'JobsController@updateSectorData')->name('updateSectorData');
-  Route::post('/getJobsSorting', 'JobsController@getJobsSorting')->name('getJobsSorting');
+  Route::any('/getJobsSorting', 'JobsController@getJobsSorting')->name('getJobsSorting');
   Route::post('/applyJobs', 'JobsController@applyJobs')->name('applyJobs');
   Route::post('/addSavedSearches', 'JobsController@addSavedSearches')->name('addSavedSearches');
   Route::post('/deleteSearchJobsData', 'JobsController@deleteSearchJobsData')->name('deleteSearchJobsData');

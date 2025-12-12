@@ -758,17 +758,9 @@
                 <div class="top_filter sort_by_filter">
                     <label for="sort">Sort By</label>
                     <select onchange="sortBy(this.value)">
-                      {{-- @foreach ($find_job_sort as $sort_job )
-                                              <option value="{{$sort_job->id}}">{{$sort_job->name}}</option>
-
-                      @endforeach --}}
-                      <option value="match_percent">Match Percentage</option>
-                      <option value="most_recent">Most Recent/fresh listings</option>
-                      <option value="highest_salary">Highest Salary / Hourly Rate</option>
-                      <option value="nearest_location">Proximity / Nearest Location</option>
-                      <option value="urgent_hire">Urgent Hire</option>
-                      <option value="agency_rating">Facility/Agency Rating</option>
-                      <option value="application_deadline">Application Deadline Soonest</option>
+                      @foreach ($find_job_sort as $sort_job )
+                          <option value="{{$sort_job->id}}">{{$sort_job->name}}</option>
+                      @endforeach
                     </select>
                 </div>
               </div>
@@ -1876,7 +1868,7 @@ $('#renameCancel').click(function() {
    //     $container.append($cards);
    // });
    function sortBy(value){
-     if(value == 'most_recent' || value == 'urgent_hire' || value == 'application_deadline'){
+     if(value != null){
        $.ajax({
          type: "POST",
          url: "{{ url('/nurse/getJobsSorting') }}",
@@ -1885,6 +1877,7 @@ $('#renameCancel').click(function() {
          success: function(data){
            console.log("data",data);
            $(".job-listings").html(data);
+           initJobCardScripts();
          }  
        });
      }
@@ -1932,6 +1925,17 @@ $('#renameCancel').click(function() {
      }
    }
    
+      $(document).on("click", ".pagination a", function(e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: $(this).attr('href'),
+            type: "GET",
+            success: function(data) {
+                $(".job-listings").html(data);
+            }
+        });
+    });
   $(document).ready(function () {
     $("#keywords").on("keyup", function () {
         var value = $(this).val().toLowerCase().trim();
