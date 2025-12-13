@@ -789,7 +789,7 @@
                           </div>
                           <div class="subspec_level-{{ $parts[1] }}"></div>
                         </div>
-                        <div class="subspec_level-{{ $parts[1] }}">
+                        <div class="show_specialities-{{ $parts[1] }}">
                           <?php
                                 $speciality_status = isset($specialities_type['speciality_status'])?(array)$specialities_type['speciality_status']:[];
                                 //print_r($specialities_type['speciality_status']);
