@@ -131,19 +131,22 @@
     height: 50px;
   }
 
-  .info { display:inline-block; width:18px; height:18px; border-radius:50%; border:1px solid #999; text-align:center; line-height:16px; cursor:help; font-size:12px; margin-left:8px; }
+.info { display:inline-block; width:22px; height:22px; text-align:center; line-height:16px; cursor:help; font-size:12px; margin-left:5px; }
   .tooltip_speciality_status {
     display: none;
     position: absolute;
     top: 22px; /* adjust */
     left: 0;   /* show exactly below icon/label */
     background: white;
-    padding: 10px;
+    padding: 8px;
     border: 1px solid #ccc;
-    width: 280px;
     z-index: 9999;
     border-radius: 6px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    max-height: 200px;
+    overflow-y: hidden !important;
+    width: 516px !important;
+    overflow-x: hidden !important;
   }
 </style>
 @endsection
@@ -335,7 +338,241 @@
                     </form>
                   </div>
                   <div class="row form-contact">
-                    <div class="col-lg-12 col-md-12 update_profile">
+                       <div class="col-lg-12 col-md-12 update_profile">
+                      <form class="" id="EditProfile" onsubmit="return editedprofile()" method="POST">
+                        @csrf
+                        <div class="row">
+                          <div class="form-group col-md-6">
+                            <label class="font-sm color-text-mutted mb-10">First Name *</label>
+                            <input class="form-control" type="text" name="fullname" id="firstNameI" placeholder="Steven Job" value="{{  Auth::guard('nurse_middle')->user()->name }}">
+                          </div>
+                          <div class="form-group col-md-6">
+                            <label class="font-sm color-text-mutted mb-10">Last Name *</label>
+                            <input class="form-control" type="text" name="lastname" id="lastNameI" placeholder="Enter Your Last name" value="{{  Auth::guard('nurse_middle')->user()->lastname }}">
+                          </div>
+                          <div class="form-group col-md-6">
+                            <label class="font-sm color-text-mutted mb-10">Email *</label>
+                            <input class="form-control" type="text" name="email" id="emailI" readonly value="{{  Auth::guard('nurse_middle')->user()->email }}">
+                          </div>
+                          <div class="form-group col-md-6">
+                            <label class="form-label" for="input-3">Mobile Number *</label>
+                            <div class="row">
+                              <div class="col-md-12 mob-adj">
+                                <input type="hidden" name="countryCode" id="countryCode">
+                                <input type="hidden" name="countryiso" id="country_iso" value="{{  Auth::guard('nurse_middle')->user()->country_iso }}">
+                                <input class="form-control numbers" type="tel" required="" name="contact" id="contactI" value="{{  Auth::guard('nurse_middle')->user()->phone }}" maxlength="10">
+                                <span id="reqTxtcontactI" class="reqError text-danger valley"></span>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-lg-6">
+                            <div class="form-group">
+                              <label class="font-sm color-text-mutted mb-10">Date Of Birth</label>
+                              <input class="form-control" type="date" name="date_of_birth" id="date_of_birth" value="{{ Auth::guard('nurse_middle')->user()->date_of_birth }}">
+                            </div>
+                          </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label class="font-sm color-text-mutted mb-10">Gender</label>
+                                <select name="gender" class="form-control">
+                                    <option value="">Select Gender</option>
+                                    <option value="Female" {{ Auth::guard('nurse_middle')->user()->gender == 'Female' ? 'selected' : '' }}>Female</option>
+                                    <option value="Male" {{ Auth::guard('nurse_middle')->user()->gender == 'Male' ? 'selected' : '' }}>Male</option>
+                                    <option value="Non-binary" {{ Auth::guard('nurse_middle')->user()->gender == 'Non-binary' ? 'selected' : '' }}>Non-binary</option>
+                                    <option value="Other" {{ Auth::guard('nurse_middle')->user()->gender == 'Other' ? 'selected' : '' }}>Other</option>
+                                    <option value="Prefer not to say" {{ Auth::guard('nurse_middle')->user()->gender == 'Prefer not to say' ? 'selected' : '' }}>Prefer not to say</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {{-- Countries Block --}}
+                        <div class="col-12 mt-4">
+                            <div class="card p-4" >
+                                
+                                <h5 class="mb-3">Registration & Qualification</h5>
+
+                                {{-- Countries of Registration --}}
+                                <div class="form-group mb-3">
+                                    <label class="font-sm mb-2">
+                                        Countries of Registration <span class="text-danger">*</span>
+                                    </label>
+
+                                    <select
+                                        name="registration_countries[]"
+                                        id="registrationCountries"
+                                        class="form-control select2"
+                                        multiple
+                                        required
+                                    >
+                                        @php
+                                            $countries = country_name_from_db(); // Your helper
+                                            $selectedRegistrations = $registrationCountries ?? [Auth::guard('nurse_middle')->user()->active_search_country];
+                                        @endphp
+
+                                        @foreach ($countries as $country)
+                                            <option value="{{ $country->iso2 }}"
+                                                {{ in_array($country->iso2, $selectedRegistrations ?? []) ? 'selected' : '' }}>
+                                                {{ $country->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+
+                                    <small class="text-muted">
+                                        Select the countries where you are registered to practice.
+                                    </small>
+                                </div>
+
+                                {{-- Countries of Qualification --}}
+                                <div class="form-group">
+                                    <label class="font-sm mb-2">
+                                        Countries of Qualification <span class="text-danger">*</span>
+                                    </label>
+
+                                    <select
+                                        name="qualification_countries[]"
+                                        id="qualificationCountries"
+                                        class="form-control select2"
+                                        multiple
+                                        required
+                                    >
+                                        @foreach ($countries as $country)
+                                            <option value="{{ $country->iso2 }}"
+                                                {{ in_array($country->iso2, $qualificationCountries ?? $selectedRegistrations ?? []) ? 'selected' : '' }}>
+                                                {{ $country->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+
+                                    <small class="text-muted">
+                                        We’ve prefilled this based on your registration countries.
+                                        Update if your qualification was in a different country.
+                                    </small>
+                                </div>
+
+                            </div>
+                        </div>
+
+                          <!-- <div class="form-group col-md-12">
+                          <label class="font-sm color-text-mutted mb-10">Bio</label>
+                          <textarea class="form-control" rows="4" name="bio">{{ Auth::guard('nurse_middle')->user()->bio }}</textarea>
+                        </div> -->
+                          {{-- <div class="form-group">
+                            <label class="font-sm color-text-mutted mb-10">Nationality</label>
+
+                            <select name="nationality" class="form-control form-select ps-5">
+                              <option value="">Select Nationality</option>
+                              @php $country_data=country_name_from_db();@endphp
+                              @foreach ($country_data as $data)
+                              <option value="{{ $data->id }}" <?= isset(Auth::guard('nurse_middle')->user()->nationality) &&  Auth::guard('nurse_middle')->user()->nationality == $data->id ? 'selected' : '' ?>>{{ $data->nationality }}</option>
+                              @endforeach
+                            </select>
+                          </div> --}}
+                          {{-- <div class="form-group">
+                            <label class="font-sm color-text-mutted mb-10">Personal website</label>
+                            <input class="form-control" type="text" name="website" value="{{  Auth::guard('nurse_middle')->user()->personal_website }}">
+                          </div> --}}
+                        </div>
+
+
+                        <div class="row">
+                          <!--<div class="col-lg-6">-->
+                          <!--  <div class="form-group">-->
+                          <!--    <label class="font-sm color-text-mutted mb-10">Country</label>-->
+                          <!--    <input class="form-control" type="text"  name="country" value="United States">-->
+                          <!--  </div>-->
+                          <!--</div>-->
+                          <div class="form-group position-relative">
+                            <!-- <textarea type="text" class="form-control ps-5" placeholder="Address"></textarea> -->
+                            <label class="font-sm color-text-mutted mb-10">Country</label>
+                            <select class="form-control form-select ps-5" name="country" id="countryI">
+                              <option value="">Select Country</option>
+                              @php $country_data=country_name_from_db();@endphp
+                              @foreach ($country_data as $data)
+                              <option value="{{$data->iso2}}" <?= isset(Auth::guard('nurse_middle')->user()->country) &&  Auth::guard('nurse_middle')->user()->country == $data->iso2 ? 'selected' : '' ?>> {{$data->name}} </option>
+                              @endforeach
+                            </select>
+                          </div>
+
+                          <div class="col-md-12">
+                            <div class="form-group position-relative">
+                              <!-- <textarea type="text" class="form-control ps-5" placeholder="Address"></textarea> -->
+                              <label>State *</label>
+                              <select class="form-control form-select ps-5" name="state" id="stateI">
+                                @php
+                                if(isset( Auth::guard('nurse_middle')->user()->country)){
+                                $state_data =state_name_array( Auth::guard('nurse_middle')->user()->country);
+                                }else{
+                                $state_data = '';
+                                }
+                                @endphp
+
+                                @if(isset($state_data) && !empty($state_data))
+                                @foreach ($state_data as $data_state)
+                                <option value="{{$data_state->id}}" <?= isset(Auth::guard('nurse_middle')->user()->state) &&  Auth::guard('nurse_middle')->user()->state  == $data_state->id ? 'selected' : '' ?>> {{$data_state->name}} </option>
+                                @endforeach
+                                @endif
+
+                              </select>
+                              <!--<i class="fa-solid fa-location-dot position-absolute  start-0 translate-middle-y ms-3 fs-5 text-primary" style="    top: 25px!important;"></i>-->
+                            </div>
+                            <span id="reqTxtstateI" class="reqError text-danger valley"></span>
+                          </div>
+
+                          <div class="col-lg-6">
+                            <div class="form-group">
+                              <label class="font-sm color-text-mutted mb-10">City</label>
+                              <input class="form-control" type="text" name="city" value="{{  Auth::guard('nurse_middle')->user()->city }}">
+                            </div>
+                          </div>
+                          <div class="col-lg-6">
+                            <div class="form-group">
+                              <label class="font-sm color-text-mutted mb-10">Post code</label>
+                              <input class="form-control post_code" type="text" name="post_code" value="{{  Auth::guard('nurse_middle')->user()->post_code }}" maxlength="10">
+                            </div>
+                          </div>
+
+
+                          {{-- <div class="col-lg-6">
+                            <div class="form-group">
+                              <label class="font-sm color-text-mutted mb-10">Home Address</label>
+                              <input class="form-control" type="text" name="home_address" id="home_address" value="{{ Auth::guard('nurse_middle')->user()->home_address }}">
+                            </div>
+                          </div> --}}
+                          {{-- <h6 class="emergency_text">
+                            Emergency Contact Information
+                          </h6> --}}
+                          <div class="col-lg-6 row" style="display: none;">
+                            <div class="form-group">
+                              <label class="font-sm color-text-mutted mb-10">Mobile No</label>
+
+                              <div class="col-md-12 mob-adj">
+                                <input type="hidden" name="emergency_countryCode" id="emergency_countryCode">
+                                <input type="hidden" name="emergency_countryiso" id="emergency_country_iso">
+                                <input class="form-control numbers" type="text" required="" name="emergency_conact_numeber" id="contactI_emergency" value="{{ Auth::guard('nurse_middle')->user()->emergency_conact_numeber }}" maxlength="10">
+                                <span id="reqTxtcontactI" class="reqError valley"></span>
+                              </div>
+
+                            </div>
+                          </div>
+                          {{-- <div class="col-lg-6 row">
+                            <div class="form-group">
+                              <label class="font-sm color-text-mutted mb-10">Email*</label>
+
+                              <div class="col-md-12">
+
+                                <input class="form-control" type="email" required="" name="emergergency_contact_email" id="emergergency_contact_email" placeholder="Email" value="{{ Auth::guard('nurse_middle')->user()->emergergency_contact_email }}">
+
+                              </div>
+
+                            </div>
+                          </div> --}}
+                          <div class="box-button mt-15">
+                            <button class="btn btn-apply-big font-md font-bold" @if(!email_verified()) disabled @endif type="submit" id="submitfrm">Save Changes</button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                    {{-- <div class="col-lg-12 col-md-12 update_profile">
                       <form class="" id="EditProfile" onsubmit="return editedprofile()" method="POST">
                         @csrf
                         <div class="row">
@@ -515,7 +752,7 @@
                           </div>
                         </div>
                       </form>
-                    </div>
+                    </div>  --}}
 
                     <div class="col-lg-12 col-md-12 change_password_div" style="display: none;">
                       <!-- <div class="border-bottom pt-10 pb-10 mb-30"></div> -->
@@ -573,6 +810,75 @@
                     Please Select all specialties you have experience in:
 
                   </h6>
+                  <div class="profession_summury_table">
+                    <table class="table table-bordered">
+                      <thead>
+                        <tr>
+                          <th>Type of Nurse</th>
+                          <th>Specialty</th>
+                          <th>Status</th>
+                          <th>Years of Experience</th>
+                          <th>End Date / Last Practiced</th>
+                          <th>Employment Type</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @foreach ($specialities_data as $spec)
+                        <tr>
+                          <td>
+                            
+                            <ol type="1" style="list-style: decimal;">
+                              @foreach ($nurse_data as $values)
+                              @php
+                                $nurse_datas = DB::table("practitioner_type")->where("id",$values)->first();
+                              @endphp
+                              <li>{{ $nurse_datas->name }}</li>
+                             
+                              @endforeach
+                            </ol>
+                          </td>
+                          <td>
+                            
+                              
+                              @php
+                                $speciality_datas = DB::table("speciality")->where("id",$spec)->first();
+                              @endphp
+                              {{ $speciality_datas->name }}
+                            
+                          </td>
+                          <td>
+                            
+                            
+                              
+                              @php
+                                
+                                $speciality_status = isset($specialities_type['speciality_status'])?(array)$specialities_type['speciality_status']:[];
+                                
+                              @endphp
+                              @foreach($speciality_status as $key=>$s_status)
+                                <?php
+                                  $parts1 = explode('_', $key);
+                                  $sp_data_name = DB::table("speciality")->where('id', $parts1[1])->first();
+                                  $speciality_status_data = DB::table("speciality_status")->get();
+                                ?>
+                                @if ($parts1[1] == $spec)
+                                {{ $s_status->status }}
+                                @endif
+                              @endforeach
+                              
+                             
+                            
+                          </td>
+                          <td>{{ $user_data->assistent_level }} years</td>
+                          <td>-</td>
+                          <td>{{ $user_data->current_employee_status }}</td>
+                          <td><button class="btn">Edit</button></td>
+                        </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  </div>
                   <form id="profession_form" method="POST" onsubmit="return myFunction1()">
                     @csrf
                     <div class="condition_set">
@@ -789,7 +1095,7 @@
                           </div>
                           <div class="subspec_level-{{ $parts[1] }}"></div>
                         </div>
-                        <div class="subspec_level-{{ $parts[1] }}">
+                        <div class="show_specialities-{{ $parts[1] }}">
                           <?php
                                 $speciality_status = isset($specialities_type['speciality_status'])?(array)$specialities_type['speciality_status']:[];
                                 //print_r($specialities_type['speciality_status']);
@@ -809,9 +1115,9 @@
                                     <label class="form-label subspeclabel-{{ $parts1[1] }}" for="input-1">
                                       Specialty Status ({{ $sp_data_name->name }}) 
                                       <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>
-                                      <div id="statusTooltip" class="tooltip_speciality_status" role="tooltip">
-                                        <h3>Status definitions:</h3>
-                                        <ul style="padding-left:18px; margin:8px 0 0 0">
+                                      <!-- <div id="statusTooltip" class="tooltip_speciality_status" role="tooltip"> -->
+                                        <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">
+                                          <li><strong>Status definitions:</strong></li>
                                           <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>
                                           <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>
                                           <li><strong>First:</strong> First-ever specialty after qualification.</li>
@@ -819,13 +1125,13 @@
                                           <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>
                                           <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>
                                         </ul>
-                                      </div>
+                                      <!-- </div> -->
                                     </label>
                                     <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_list-{{ $parts1[1] }}" value="{{ $parts1[1] }}">
                                     <select class="custom-select speciality_status_column speciality_status_column-{{ $parts1[1] }} form-input mr-10 select-active langprof_level_valid-{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][status]" onchange="changeSpecialityStatus(this.value,{{ $parts1[1] }})">
                                       <option value="">select</option>
                                       @foreach($speciality_status_data as $s_status_data)
-                                      <option value="{{ $s_status_data->status_name }}" @if($s_status_data->status_name == $s_status) selected @endif>{{ $s_status_data->status_name }}</option>
+                                      <option value="{{ $s_status_data->status_name }}" @if($s_status_data->status_name == $s_status->status) selected @endif>{{ $s_status_data->status_name }}</option>
                                       @endforeach
                                       
                                     </select>
@@ -3292,7 +3598,7 @@
                           <label class="form-label" for="input-1">Type of Nurse?</label>
                           <input type="hidden" name="user_id" class="user_id" value="{{ Auth::guard('nurse_middle')->user()->id }}">
                           <input type="hidden" name="type_nurse" class="type_nurse_ep-{{ $i }}" value="{{ $data->nurseType }}">
-                          <ul id="type-of-nurse-experience-{{$i}}" style="display:none;">
+                          <ul id="type-of-nurse-experience-{{$i}}-0" style="display:none;">
                             @php $specialty = specialty();$spcl=$specialty[0]->id;@endphp
                             <?php
                             $j = 1;
@@ -3304,11 +3610,12 @@
                             ?>
                             @endforeach
                           </ul>
-                          <select class="js-example-basic-multiple addAll_removeAll_btn nurse_level_ep nurse_type_exp nurse_type_exp_{{$i}}" data-list-id="type-of-nurse-experience-{{$i}}" name="nurseType[{{$i}}][]" id="nurse_type_exp-{{ $i }}" multiple="multiple" onchange="handleNurseTypeChange('{{$i}}')"></select>
+                          <select class="js-example-basic-multiple addAll_removeAll_btn nurse_level_ep nurse_type_exp nurse_type_exp_{{$i}}" data-list-id="type-of-nurse-experience-{{$i}}-0" name="nurseType[{{$i}}][]" id="nurse_type_exp-{{ $i }}-0" multiple="multiple" onchange="getNurseTypeExperience('main',0,{{ $i }})"></select>
                           <span id="reqnurseTypeexpId-{{$i}}" class="reqError text-danger valley"></span>
                         </div>
+                        <div class="showNurseTypeExperience-{{$i}}-0"></div>
                         
-                        <div class="result--show nurse-res-rex nurse-res-rex-{{ $i }}">
+                        <div class="result--show nurse-res-rex nurse-res-rex-{{ $i }}" style="display:none;">
                           <input type="hidden" name="nursing_result_one_experience" class="nursing_result_one_experience_{{$i}}" value="{{$data->entry_level_nursing }}">
                           <input type="hidden" name="nursing_result_two_experience" class="nursing_result_two_experience_{{$i}}" value="{{ $data->registered_nurses }}">
                           <input type="hidden" name="nursing_result_three_experience" class="nursing_result_three_experience_{{$i}}" value="{{$data->advanced_practioner}}">
@@ -3370,7 +3677,7 @@
                           <div class="form-group drp--clr">
                             <input type="hidden" name="speciality_exp_value-{{$i}}" class="speciality_exp_value-{{$i}}" value="{{ $data->specialties }}">
                             <label class="form-label" for="input-1">Specialties</label>
-                            <ul id="specialties_type_experience-{{ $i }}" style="display:none;">
+                            <ul id="specialties_type_experience-{{ $i }}-0" style="display:none;">
                               @php $JobSpecialties = JobSpecialties(); @endphp
                               <?php
                               $k = 1;
@@ -3383,11 +3690,12 @@
                               @endforeach
 
                             </ul>
-                            <select id="specialties_experienceID" class="js-example-basic-multiple  spec_exp spec_exp_{{$i}} specialties_experience addAll_removeAll_btn exp_spe_type_{{$i}}" index_value="{{ $i}}" data-list-id="specialties_type_experience-{{ $i }}" name="specialties_experience[{{ $i }}][]" multiple="multiple"></select>
+                            <select id="specialties_experienceID" class="js-example-basic-multiple  spec_exp spec_exp_{{$i}} specialties_experience addAll_removeAll_btn exp_spe_type_{{$i}}" index_value="{{ $i}}" data-list-id="specialties_type_experience-{{ $i }}-0" name="specialties_experience[{{ $i }}][]" multiple="multiple" onchange="getSecialitiesExperience('main',0,{{ $i }})"></select>
                           </div>
                           <span id="reqspecialtiesexp-{{ $i }}" class="reqError text-danger valley"></span>
                         </div>
-                        <div class="speciality_boxes row result--show">
+                        <div class="show_specialitiesExperience-{{ $i }}-0"></div>
+                        <div class="speciality_boxes row result--show" style="display:none;">
                           <input type="hidden" name="adults_result_experience" class="adults_result_experience_{{$i}}" value="{{ $data->adults }}">
                           <input type="hidden" name="maternity_result_experience" class="maternity_result_experience_{{$i}}" value="{{ $data->maternity }}">
                           <input type="hidden" name="community_result_experience" class="community_result_experience_{{$i}}" value="{{ $data->community }}">
@@ -3933,7 +4241,7 @@
                           <div class="form-group drp--clr">
                             <label class="form-label" for="input-1">Type of Nurse?</label>
                             <input type="hidden" name="user_id" class="user_id" value="{{ Auth::guard('nurse_middle')->user()->id }}">
-                            <ul id="type-of-nurse-experience" style="display:none;">
+                            <ul id="type-of-nurse-experience-1-0" style="display:none;">
                               @php $specialty = specialty();$spcl=$specialty[0]->id;@endphp
                               <?php
                               $j = 1;
@@ -3945,10 +4253,10 @@
                               ?>
                               @endforeach
                             </ul>
-                            <select class="js-example-basic-multiple addAll_removeAll_btn nurse_type_exp nurse_type_exp_1" data-list-id="type-of-nurse-experience" name="nurseType[1][]" id="nurse_type_experience" multiple="multiple"></select>
+                            <select class="js-example-basic-multiple addAll_removeAll_btn nurse_type_exp nurse_type_exp_1" data-list-id="type-of-nurse-experience-1-0" name="nurseType[1][]" id="nurse_type_experience" multiple="multiple" onchange="getSecialitiesExperience('main',0,1)"></select>
                             <span id="reqnurseTypeexpId-1" class="reqError text-danger valley"></span>
                           </div>
-                          
+                          <div class="show_specialitiesExperience-1-0"></div>
                         </div>
                         <div class="result--show result_show_nurse">
                           <div class="container p-0">
@@ -4466,9 +4774,22 @@
                 <h6 class="emergency_text">
                   Please Add your professional References:
                 </h6>
+                <?php
+                $expId = request()->experience_id;
+
+                $experience = null;
+
+                if ($expId) {
+                    $experience = DB::table('user_experience')
+                        ->where('experience_id', $expId)
+                        ->where('user_id', Auth::guard('nurse_middle')->user()->id)
+                        ->first();
+                }
+                ?>
 
                 <form id="reference_form" method="POST" onsubmit="return updateReference()">
                   @csrf
+                  <input type="hidden" name="experience_id" value="{{ request()->experience_id }}">
                   <input type="hidden" name="user_id" value="{{ Auth::guard('nurse_middle')->user()->id }}">
                   <div class="reference_form">
                     <?php
@@ -4552,7 +4873,7 @@
                         <div class="col-md-6">
                           <div class="form-group level-drp">
                             <label class="form-label" for="input-1">You worked together at:</label>
-                            <input class="form-control worked_together worked_together-{{ $i }}" type="text" name="worked_together[]" value="{{ $referee_data->worked_together }}">
+                            <input class="form-control worked_together worked_together-{{ $i }}" type="text" name="worked_together[]" value="{{ $referee_data->worked_together }}" readonly>
                             <span id="reqworked_together-{{ $i }}" class="reqError text-danger valley"></span>
                           </div>
                         </div>
@@ -4740,7 +5061,7 @@
                         <div class="form-group level-drp">
                           <label class="form-label" for="input-1">You worked together at:</label>
                           
-                          <input class="form-control worked_together worked_together-1" type="text" name="worked_together[]">
+                          <input class="form-control worked_together worked_together-1" type="text" name="worked_together[]" value="{{ $experience->facility_workplace_name ?? '' }}" readonly>
                           <span id="reqworked_together-1" class="reqError text-danger valley"></span>
                         </div>
                       </div>
@@ -4773,7 +5094,7 @@
                       <div class="col-md-6">
                         <div class="form-group level-drp">
                           <label class="form-label" for="input-1">Start Date</label>
-                          <input class="form-control start_date start_date-1" type="date" name="start_date[]" onkeydown="return false">
+                          <input class="form-control start_date start_date-1" type="date" name="start_date[]" onkeydown="return false"  value="{{ $experience->employeement_start_date ?? '' }}" readonly>
                           <span id="reqempsdate" class="reqError text-danger valley"></span>
                         </div>
                         <div class="declaration_box">
@@ -4785,7 +5106,7 @@
                       <div class="col-md-6">
                         <div class="form-group level-drp working-1">
                           <label class="form-label" for="input-1">End Date</label>
-                          <input class="form-control end_date end_date-1" type="date" name="end_date[]" onkeydown="return false">
+                          <input class="form-control end_date end_date-1" type="date" name="end_date[]" onkeydown="return false" value="{{ $experience->employeement_end_date ?? '' }}" readonly>
                           <span id="reqrefereeedate-1" class="reqError text-danger valley"></span>
                         </div>
                       </div>
@@ -6676,6 +6997,66 @@ if (!empty($interviewReferenceData)) {
     }
   }
 
+  function getNurseTypeExperience(level,k,x){
+    // alert();
+
+    if(level == "main"){
+      var selectedValues = $('.js-example-basic-multiple[data-list-id="type-of-nurse-experience-'+x+"-"+k+'"]').val();
+    }else{
+      var selectedValues = $('.js-example-basic-multiple'+k+'[data-list-id="type-of-nurse-experience-'+x+"-"+k+'"]').val();
+    }
+    
+    console.log("selectedValues",x+"-"+k);
+
+    $(".showNurseTypeExperience-"+x+"-"+k+" .subnurse_list").each(function(i,val){
+        var val1 = $(val).val();
+        console.log("val",val1);
+        if(selectedValues.includes(val1) == false){
+          $(".subnurse_main_div-"+val1).remove();
+            
+        }
+    });
+
+    for(var i=0;i<selectedValues.length;i++){
+      if($(".showNurseTypeExperience-"+x+"-"+k+" .subnurse_main_div-"+selectedValues[i]).length < 1){
+        $.ajax({
+          type: "GET",
+          url: "{{ url('/nurse/getNurseDatas') }}",
+          data: {nurse_id:selectedValues[i]},
+          cache: false,
+          success: function(data){
+            var data1 = JSON.parse(data);
+            console.log("data1",data1);
+
+            var nurse_text = "";
+            for(var j=0;j<data1.sub_nurse_data.length;j++){
+              
+              nurse_text += "<li data-value='"+data1.sub_nurse_data[j].id+"'>"+data1.sub_nurse_data[j].name+"</li>"; 
+              
+            }
+            var sub = 'sub';
+
+            if(data1.sub_nurse_data.length > 0){
+              $(".showNurseTypeExperience-"+x+"-"+k).append('\<div class="subnurse_main_div subnurse_main_div-'+data1.main_nurse_id+'">\
+                            <div class="subnurse_div subnurse_div-'+data1.main_nurse_id+' form-group level-drp">\
+                            <label class="form-label subnurse_label subnurse_label-'+data1.main_nurse_id+'" for="input-1">'+data1.main_nurse_name+'</label>\
+                            <input type="hidden" name="subnurse_list" class="subnurse_list subnurse_list-'+data1.main_nurse_id+'" value="'+data1.main_nurse_id+'">\
+                            <ul id="type-of-nurse-experience-'+data1.main_nurse_id+"-"+x+'" style="display:none;">'+nurse_text+'</ul>\
+                            <select class="js-example-basic-multiple'+data1.main_nurse_id+' subnurse_valid-'+data1.main_nurse_id+' addAll_removeAll_btn" data-list-id="type-of-nurse-experience-'+data1.main_nurse_id+"-"+x+'" name="nurseType[type_'+data1.main_nurse_id+'][]" onchange="getNurseTypeExperience(\''+sub+'\',\''+data1.main_nurse_id+'\',\''+x+'\')" multiple="multiple"></select>\
+                            <span id="reqsubnursevalid-'+data1.main_nurse_id+'" class="reqError text-danger valley"></span>\
+                            </div>\
+                            <div class="subnurse_level-'+data1.main_nurse_id+'"></div>\
+                            </div><div class="show_nurse-'+data1.main_nurse_id+'"></div>');
+
+                            selectTwoFunction(data1.main_nurse_id);
+            }
+            
+          }
+        });
+      }
+    }
+  }
+
   function getSecialities(level,k){
       // alert();
 
@@ -6722,6 +7103,116 @@ if (!empty($interviewReferenceData)) {
                               <input type="hidden" name="subspec_list" class="subspec_list subspec_list-'+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
                               <ul id="speciality_preferences-'+data1.main_speciality_id+'" style="display:none;">'+speciality_text+'</ul>\
                               <select class="js-example-basic-multiple'+data1.main_speciality_id+' subspec_valid-'+data1.main_speciality_id+' addAll_removeAll_btn" data-list-id="speciality_preferences-'+data1.main_speciality_id+'" name="specialties[type_'+data1.main_speciality_id+'][]" onchange="getSecialities(\''+sub+'\',\''+data1.main_speciality_id+'\')" multiple="multiple"></select>\
+                              <span id="reqsubspecvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
+                              </div>\
+                              <div class="subspec_level-'+data1.main_speciality_id+'"></div>\
+                              </div><div class="show_specialities-'+data1.main_speciality_id+'"></div>');
+
+                              selectTwoFunction(data1.main_speciality_id);
+              
+              }else{
+                
+                if($(".show_specialities-"+k+" .subspecprofdiv-"+data1.main_speciality_id).length < 1){
+                  
+                  $(".show_specialities-"+k).append('<div class="custom-select-wrapper subspecprofdiv subspecprofdiv-'+data1.main_speciality_id+' form-group level-drp" style="margin-bottom: 5px;">\
+                    <label class="form-label subspeclabel-'+data1.main_speciality_id+'" for="input-1">\
+                    Specialty Status ('+data1.main_speciality_name+')\
+                    <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>\
+                      <div id="statusTooltip" class="tooltip_speciality_status" role="tooltip">\
+                        <h3>Status definitions:</h3>\
+                        <ul style="padding-left:18px; margin:8px 0 0 0">\
+                          <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>\
+                          <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>\
+                          <li><strong>First:</strong> First-ever specialty after qualification.</li>\
+                          <li><strong>Former:</strong> Previously practiced.</li>\
+                          <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>\
+                          <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>\
+                        </ul>\
+                      </div>\
+                    </label>\
+                    <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_list-'+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
+                    <select data-id="'+data1.main_speciality_id+'" class="custom-select speciality_status_column speciality_status_column-'+data1.main_speciality_id+' form-input mr-10 select-active langprof_level_valid-'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][status]" onchange="changeSpecialityStatus(this.value,'+data1.main_speciality_id+')">\
+                      <option value="">select</option>\
+                      <option value="Current">Current</option>\
+                      <option value="Principal">Principal</option>\
+                      <option value="First">First</option>\
+                      <option value="Former">Former</option>\
+                      <option value="Upskilling / Transitioning / Training">Upskilling / Transitioning / Training</option>\
+                    </select>\
+                    <input type="hidden" class="speciality_flag-'+data1.main_speciality_id+' is_current_'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][is_current]" value="0">\
+                    <input type="hidden" class="speciality_flag-'+data1.main_speciality_id+' is_principal_'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][is_principal]" value="0">\
+                    <input type="hidden" class="speciality_flag-'+data1.main_speciality_id+' is_first_'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][is_first]" value="0">\
+                    <input type="hidden" class="speciality_flag-'+data1.main_speciality_id+' is_former_'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][is_former]" value="0">\
+                    <input type="hidden" class="speciality_flag-'+data1.main_speciality_id+' is_upskilling_'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][is_upskilling]" value="0">\
+                    </div>\
+                    <span id="reqsubspeclevelvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
+                    ');
+
+                    document.querySelectorAll('.tooltip-btn').forEach(btn => {
+                        const tooltip = btn.parentElement.querySelector('.tooltip_speciality_status');
+
+                        btn.addEventListener('mouseenter', () => {
+                            tooltip.style.display = 'block';
+                        });
+
+                        btn.addEventListener('mouseleave', () => {
+                            tooltip.style.display = 'none';
+                        });
+                    });
+                }  
+              }
+            }
+          });
+        }
+      }
+    }
+
+    function getSecialitiesExperience(level,k,x){
+      // alert();
+
+      if(level == "main"){
+        var selectedValues = $('.js-example-basic-multiple[data-list-id="specialties_type_experience-'+x+"-"+k+'"]').val();
+      }else{
+        var selectedValues = $('.js-example-basic-multiple'+k+'[data-list-id="specialties_type_experience-'+x+"-"+k+'"]').val();
+      }
+      
+      console.log("selectedValues",selectedValues);
+
+      $(".show_specialitiesExperience-"+k+" .subspec_list").each(function(i,val){
+            var val1 = $(val).val();
+            console.log("val",val1);
+            if(selectedValues.includes(val1) == false){
+              $(".subspec_main_div-"+val1).remove();
+                
+            }
+        });
+
+      for(var i=0;i<selectedValues.length;i++){
+        if($(".show_specialitiesExperience-"+x+"-"+k+" .subspec_main_div-"+selectedValues[i]).length < 1){
+          $.ajax({
+            type: "GET",
+            url: "{{ url('/nurse/getSpecialityDatas1') }}",
+            data: {speciality_id:selectedValues[i]},
+            cache: false,
+            success: function(data){
+              var data1 = JSON.parse(data);
+              console.log("data1",data1);
+
+              var speciality_text = "";
+              for(var j=0;j<data1.sub_spciality_data.length;j++){
+                
+                speciality_text += "<li data-value='"+data1.sub_spciality_data[j].id+"'>"+data1.sub_spciality_data[j].name+"</li>"; 
+                
+              }
+              var sub = 'sub';
+
+              if(data1.sub_spciality_data.length > 0){
+                $(".show_specialitiesExperience-"+x+"-"+k).append('\<div class="subspec_main_div subspec_main_div-'+data1.main_speciality_id+'">\
+                              <div class="subspec_div subspec_div-'+data1.main_speciality_id+' form-group level-drp">\
+                              <label class="form-label subspec_label subspec_label-'+data1.main_speciality_id+'" for="input-1">'+data1.main_speciality_name+'</label>\
+                              <input type="hidden" name="subspec_list" class="subspec_list subspec_list-'+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
+                              <ul id="speciality_preferences-'+data1.main_speciality_id+'" style="display:none;">'+speciality_text+'</ul>\
+                              <select class="js-example-basic-multiple'+data1.main_speciality_id+' subspec_valid-'+data1.main_speciality_id+' addAll_removeAll_btn" data-list-id="speciality_preferences-'+data1.main_speciality_id+'" name="specialties[type_'+data1.main_speciality_id+'][]" onchange="getSecialitiesExperience(\''+sub+'\',\''+data1.main_speciality_id+'\',\''+x+'\')" multiple="multiple"></select>\
                               <span id="reqsubspecvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
                               </div>\
                               <div class="subspec_level-'+data1.main_speciality_id+'"></div>\
