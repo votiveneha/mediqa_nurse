@@ -149,7 +149,28 @@ class HomeController extends Controller
     public function manage_profile($message = '')
     {
         $employeement_type_preferences = DB::table("employeement_type_preferences")->where("sub_prefer_id","0")->get();
-        return view('nurse.profile', compact('message','employeement_type_preferences'));
+        $user_id = Auth::guard('nurse_middle')->user()->id;    
+        $user_data = User::where("id",$user_id)->first();
+        $nurse_data = [];
+        $specialities_data = [];
+
+        foreach (json_decode($user_data->nurse_data) as $key => $values) {
+            if ($key !== 'type_0') {
+                
+                $nurse_data = array_merge($nurse_data, $values);
+            }
+        }
+
+        foreach (json_decode($user_data->specialties) as $key => $values) {
+            if ($key !== 'type_0' && $key !== 'speciality_status') {
+                
+                $specialities_data = array_merge($specialities_data, $values);
+            }
+        }
+
+        $specialities_type = (array)json_decode($user_data->specialties);
+        //print_r($specialities_data);
+        return view('nurse.profile', compact('message','employeement_type_preferences','nurse_data','specialities_data','specialities_type','user_data'));
     }
     public function upload_profile_image(Request $request)
     {
@@ -2243,7 +2264,8 @@ public function ResetPassword(Request $request)
     {
 
         $user_id = $request->user_id;
-        
+        $experience_id = $request->experience_id;
+
         $first_name = $request->first_name;
         $last_name = $request->last_name;
         $email = $request->email;
@@ -2272,7 +2294,7 @@ public function ResetPassword(Request $request)
                 // } else {
                 //     $working = 0;
                 // }
-                $run = AddReferee::where('user_id', $user_id)->where('email', $email[$i])->update(['first_name' => $first_name[$i], 'last_name' => $last_name[$i], 'email' => $email[$i], 'phone_no' => $phone_no[$i], 'relationship' => $reference_relationship[$i], 'worked_together' => $worked_together[$i], 'position_with_referee' => json_encode($position_with_referee[$i+1]), 'start_date' => $start_date[$i], 'end_date' => $end_date[$i], 'still_working' => $still_working[$i], 'is_declare' => 1]);
+                $run = AddReferee::where('user_id', $user_id)->where('email', $email[$i])->update(['first_name' => $first_name[$i], 'last_name' => $last_name[$i], 'email' => $email[$i], 'phone_no' => $phone_no[$i], 'relationship' => $reference_relationship[$i], 'worked_together' => $worked_together[$i], 'position_with_referee' => json_encode($position_with_referee[$i+1]), 'start_date' => $start_date[$i], 'end_date' => $end_date[$i], 'still_working' => $still_working[$i], 'experience_id' => $experience_id, 'is_declare' => 1]);
             } else {
                 $user_stage = update_user_stage($user_id,"References");
                 if (isset($still_working[$i])) {
@@ -2293,6 +2315,7 @@ public function ResetPassword(Request $request)
                 $referee->start_date = $start_date[$i];
                 $referee->end_date = $end_date[$i];
                 $referee->still_working = $working;
+                $referee->experience_id = $experience_id;
                 $referee->is_declare = 1;
                 $referee->save();
             }
