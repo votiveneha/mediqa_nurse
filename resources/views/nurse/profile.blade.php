@@ -9,7 +9,28 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
 
 <style type="text/css">
-
+.profession-table-ui {
+    padding-left: 0px !important;
+    line-height: 23px !important;
+    font-size: 15px !important;
+    color: #212529 !important;
+    list-style: disc !important;
+    position: relative !important;
+    /* z-index: 2 !important; */
+    list-style: none !important;
+    text-align: left !important;
+    padding: 0 !important;
+    margin: 0 0 0 -1px !important;
+    box-shadow: 0px 0px 0px rgb(0 0 0 / 20%) !important;
+    background-color: #ffffff00 !important;
+    border: 0px solid #ccc !important;
+    white-space: nowrap !important;
+    max-height: 200px !important;
+    overflow-y: hidden !important;
+    width: 185px !important;
+    overflow-x: hidden !important;
+    white-space: normal !important;
+}
   .disabled-link {
       pointer-events: none;       /* Prevent clicking */
       opacity: 0.5;              /* Dimmed look */
@@ -386,68 +407,96 @@
                         </div>
 
                         {{-- Countries Block --}}
-                        <div class="col-12 mt-4">
-                            <div class="card p-4" >
-                                
+                       <div class="col-12 mt-4">
+                            <div class="card p-4">
+
                                 <h5 class="mb-3">Registration & Qualification</h5>
 
+                                @php
+                                    $user = Auth::guard('nurse_middle')->user();
+
+                                    $registrationCountries = (array) json_decode($user->registration_countries ?? '[]');
+                                    $qualificationCountries = (array) json_decode(
+                                        $user->qualification_countries ?? json_encode($registrationCountries)
+                                    );
+
+                                    $countries = country_name_from_db();
+                                @endphp
+
                                 {{-- Countries of Registration --}}
-                                <div class="form-group mb-3">
+                                <div class="form-group mb-4 drp--clr">
                                     <label class="font-sm mb-2">
                                         Countries of Registration <span class="text-danger">*</span>
                                     </label>
 
-                                    <select
-                                        name="registration_countries[]"
-                                        id="registrationCountries"
-                                        class="form-control select2"
-                                        multiple
-                                        required
-                                    >
-                                        @php
-                                            $countries = country_name_from_db(); // Your helper
-                                            $selectedRegistrations = $registrationCountries ?? [Auth::guard('nurse_middle')->user()->active_search_country];
-                                        @endphp
+                                    {{-- Hidden field to submit --}}
+                                    <input type="hidden"
+                                          name="registration_countries"
+                                          id="registrationCountriesInput"
+                                          value="{{ json_encode($registrationCountries) }}">
 
+                                    {{-- Dropdown list --}}
+                                    <ul id="registration-country-list" style="display:none;">
                                         @foreach ($countries as $country)
-                                            <option value="{{ $country->iso2 }}"
-                                                {{ in_array($country->iso2, $selectedRegistrations ?? []) ? 'selected' : '' }}>
+                                            <li
+                                                data-value="{{ $country->iso2 }}"
+                                                class="{{ in_array($country->iso2, $registrationCountries) ? 'selected' : '' }}"
+                                            >
                                                 {{ $country->name }}
-                                            </option>
+                                            </li>
                                         @endforeach
-                                    </select>
+                                    </ul>
+
+                                    {{-- Visible Select --}}
+                                    <select
+                                        class="js-example-basic-multiple addAll_removeAll_btn"
+                                        data-list-id="registration-country-list"
+                                        id="registrationCountries"
+                                        multiple
+                                    ></select>
 
                                     <small class="text-muted">
                                         Select the countries where you are registered to practice.
-                                    </small>
+                                    </small> 
                                 </div>
+                           
 
                                 {{-- Countries of Qualification --}}
-                                <div class="form-group">
+                                <div class="form-group drp--clr">
                                     <label class="font-sm mb-2">
                                         Countries of Qualification <span class="text-danger">*</span>
                                     </label>
 
-                                    <select
-                                        name="qualification_countries[]"
-                                        id="qualificationCountries"
-                                        class="form-control select2"
-                                        multiple
-                                        required
-                                    >
+                                    <input type="hidden"
+                                          name="qualification_countries"
+                                          id="qualificationCountriesInput"
+                                          value="{{ json_encode($qualificationCountries) }}">
+
+                                    <ul id="qualification-country-list" style="display:none;">
                                         @foreach ($countries as $country)
-                                            <option value="{{ $country->iso2 }}"
-                                                {{ in_array($country->iso2, $qualificationCountries ?? $selectedRegistrations ?? []) ? 'selected' : '' }}>
+                                            <li
+                                                data-value="{{ $country->iso2 }}"
+                                                class="{{ in_array($country->iso2, $qualificationCountries) ? 'selected' : '' }}"
+                                            >
                                                 {{ $country->name }}
-                                            </option>
+                                            </li>
                                         @endforeach
-                                    </select>
+                                    </ul>
+
+                                    <select
+                                        class="js-example-basic-multiple addAll_removeAll_btn"
+                                        data-list-id="qualification-country-list"
+                                        id="qualificationCountries"
+                                        multiple
+                                    ></select>
 
                                     <small class="text-muted">
                                         We’ve prefilled this based on your registration countries.
                                         Update if your qualification was in a different country.
                                     </small>
+                            
                                 </div>
+                          
 
                             </div>
                         </div>
@@ -811,24 +860,26 @@
 
                   </h6>
                   <div class="profession_summury_table">
-                    <table class="table table-bordered">
+                    <table class="table table-striped">
                       <thead>
                         <tr>
-                          <th>Type of Nurse</th>
-                          <th>Specialty</th>
-                          <th>Status</th>
-                          <th>Years of Experience</th>
-                          <th>End Date / Last Practiced</th>
-                          <th>Employment Type</th>
-                          <th>Action</th>
+                          <th scope="col">S. No.</th>
+                          <th scope="col">Type of Nurse</th>
+                          <th scope="col">Specialty</th>
+                          <th scope="col">Status</th>
+                          <th scope="col">Years of Experience</th>
+                          <th scope="col">End Date / Last Practiced</th>
+                          <th scope="col">Employment Type</th>
+                          <th scope="col">Action</th>
                         </tr>
                       </thead>
                       <tbody>
                         @foreach ($specialities_data as $spec)
                         <tr>
+                    <td>{{ $loop->iteration }}</td>
                           <td>
                             
-                            <ol type="1" style="list-style: decimal;">
+                            <ul class="profession-table-ui">
                               @foreach ($nurse_data as $values)
                               @php
                                 $nurse_datas = DB::table("practitioner_type")->where("id",$values)->first();
@@ -836,7 +887,7 @@
                               <li>{{ $nurse_datas->name }}</li>
                              
                               @endforeach
-                            </ol>
+                            </ul>
                           </td>
                           <td>
                             
@@ -4807,6 +4858,7 @@
                           <div class="form-group level-drp">
                             <label class="form-label" for="input-1">First name</label>
                             <input type="hidden" name="reference_no[]" value="{{ $i }}">
+                            <input type="hidden" name="referee_no[]" value="{{ $referee_data->referee_no }}">
                             <input class="form-control first_name first_name-{{ $i }}" type="text" name="first_name[]" value="{{ $referee_data->first_name }}">
                             <span id="reqfname-{{ $i }}" class="reqError text-danger valley"></span>
                           </div>
@@ -5061,7 +5113,7 @@
                         <div class="form-group level-drp">
                           <label class="form-label" for="input-1">You worked together at:</label>
                           
-                          <input class="form-control worked_together worked_together-1" type="text" name="worked_together[]" value="{{ $experience->facility_workplace_name ?? '' }}" readonly>
+                          <input class="form-control worked_together worked_together-1" type="text" name="worked_together[]" value="{{ $experience->facility_workplace_name ?? '' }}" {{ !empty($experience?->facility_workplace_name) ? 'readonly' : '' }}>
                           <span id="reqworked_together-1" class="reqError text-danger valley"></span>
                         </div>
                       </div>
@@ -5094,19 +5146,21 @@
                       <div class="col-md-6">
                         <div class="form-group level-drp">
                           <label class="form-label" for="input-1">Start Date</label>
-                          <input class="form-control start_date start_date-1" type="date" name="start_date[]" onkeydown="return false"  value="{{ $experience->employeement_start_date ?? '' }}" readonly>
+                          <input class="form-control start_date start_date-1" type="date" name="start_date[]" onkeydown="return false"  value="{{ $experience->employeement_start_date ?? '' }}" {{ !empty($experience?->employeement_start_date) ? 'readonly' : '' }}>
                           <span id="reqempsdate" class="reqError text-danger valley"></span>
                         </div>
                         <div class="declaration_box">
-                          <input type="hidden" name="still_working1[]" class="still_working1-1" value="0" />
-                          <input class="still_working-1" type="checkbox" name="still_working[]" onclick="stillWorking(1)">I'm still working with this referee
+						  <input type="hidden" name="still_working1[]" class="still_working1-1" value="{{ $experience->pre_box_status ?? 0 }}" />
+                          <input class="still_working-1" type="checkbox" name="still_working[]" value="1"
+                            {{ ($experience->pre_box_status ?? 0) == 1 ? 'checked' : '' }}
+                            onclick="stillWorking(1)">I'm still working with this referee
                           <span id="reqstillworking" class="reqError text-danger valley"></span>
                         </div>
                       </div>
                       <div class="col-md-6">
-                        <div class="form-group level-drp working-1">
+                        <div class="form-group level-drp working-1" {{ ($experience->pre_box_status ?? 0) == 1 ? 'style=display:none;' : '' }}>
                           <label class="form-label" for="input-1">End Date</label>
-                          <input class="form-control end_date end_date-1" type="date" name="end_date[]" onkeydown="return false" value="{{ $experience->employeement_end_date ?? '' }}" readonly>
+                          <input class="form-control end_date end_date-1" type="date" name="end_date[]" onkeydown="return false" value="{{ $experience->employeement_end_date ?? '' }}" {{ !empty($experience?->employeement_end_date) ? 'readonly' : '' }}>
                           <span id="reqrefereeedate-1" class="reqError text-danger valley"></span>
                         </div>
                       </div>
