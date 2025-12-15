@@ -2269,6 +2269,7 @@ public function ResetPassword(Request $request)
         $first_name = $request->first_name;
         $last_name = $request->last_name;
         $email = $request->email;
+        $referee_no = $request->referee_no;
         $phone_no = $request->phone_no;
         $reference_relationship = $request->reference_relationship;
         $worked_together = $request->worked_together;
@@ -2281,20 +2282,20 @@ public function ResetPassword(Request $request)
         $getrefereedata = DB::table("referee")->where("user_id", $user_id)->get();
 
         $referee_no_array = array();
-
+        
         foreach ($getrefereedata as $r_data) {
-            $referee_no_array[] = $r_data->email;
+            $referee_no_array[] = $r_data->referee_no;
         }
 
         //print_r($referee_no_array);die;
         for ($i = 0; $i < count($first_name); $i++) {
-            if (in_array($email[$i], $referee_no_array)) {
+            if (in_array($referee_no[$i], $referee_no_array)) {
                 // if (isset($still_working[$i])) {
                 //     $working = 1;
                 // } else {
                 //     $working = 0;
                 // }
-                $run = AddReferee::where('user_id', $user_id)->where('email', $email[$i])->update(['first_name' => $first_name[$i], 'last_name' => $last_name[$i], 'email' => $email[$i], 'phone_no' => $phone_no[$i], 'relationship' => $reference_relationship[$i], 'worked_together' => $worked_together[$i], 'position_with_referee' => json_encode($position_with_referee[$i+1]), 'start_date' => $start_date[$i], 'end_date' => $end_date[$i], 'still_working' => $still_working[$i], 'experience_id' => $experience_id, 'is_declare' => 1]);
+                $run = AddReferee::where('user_id', $user_id)->where('referee_no', $referee_no[$i])->update(['first_name' => $first_name[$i], 'last_name' => $last_name[$i], 'email' => $email[$i], 'phone_no' => $phone_no[$i], 'relationship' => $reference_relationship[$i], 'worked_together' => $worked_together[$i], 'position_with_referee' => json_encode($position_with_referee[$i+1]), 'start_date' => $start_date[$i], 'end_date' => $end_date[$i], 'still_working' => $still_working[$i], 'experience_id' => $experience_id, 'is_declare' => 1]);
             } else {
                 $user_stage = update_user_stage($user_id,"References");
                 if (isset($still_working[$i])) {
