@@ -82,25 +82,25 @@
    margin-right: 10px;
    }
    .job-card {
-   border: 1px solid #ddd;
+   border: 1px solid #E5E7EB;
    border-radius: 10px;
    padding: 16px;
    margin-bottom: 16px;
-   background: #fff;
+   background: #FFFFFF;
    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
    }
-   .job-card-header {
-   display: flex;
-   justify-content: space-between;
-   align-items: start;
-   }
+   .job-card.item {
+    margin-top: 0px;
+    margin-bottom: 24px;
+    position: relative;
+  }
    .job-company {
    display: flex;
-   align-items: center;
+   width: 100% !important;
    }
    .job-logo {
-   width: 40px;
-   height: 40px;
+   width: 48px;
+   height: 48px;
    background: #007bff;
    border-radius: 8px;
    color: white;
@@ -114,6 +114,9 @@
    color: #555;
    font-size: 0.9rem;
    }
+   .job-details.d-flex.align-items-center.justify-content-between {
+    width: 100%;
+  }
    .job-sort-dropdown select {
    font-size: 0.85rem;
    padding: 5px 8px;
@@ -121,7 +124,7 @@
    .job-role {
    font-size: 1.1rem;
    font-weight: bold;
-   margin-top: 12px;
+   /* margin-top: 12px; */
    }
    .job-meta {
    display: flex;
@@ -153,7 +156,7 @@
    }
    .job-footer {
    display: flex;
-   justify-content: space-between;
+   justify-content: end;
    align-items: center;
    border-top: 1px solid #eee;
    padding-top: 10px;
@@ -165,7 +168,7 @@
    font-size: 0.95rem;
    }
    .apply-btn {
-   background-color: black;
+   background-color: #3C8093;
    color: white;
    border: none;
    padding: 6px 14px;
@@ -174,10 +177,10 @@
    font-weight: 500;
    }
    .apply-btn:hover {
-   background-color: #0056b3;
+   background-color: #326A7A;
    }
    .apply-btn.applied {
-   background: none;
+   background: #7BA9B7;
    color: #28a745; /* green */
    font-weight: 600;
    display: flex;
@@ -459,15 +462,19 @@
    color: #333;
    border: 1px solid #ccc;
    }
-   .urgent-tag {
-   background: #000000ff; /* red */
-   color: #fff;
-   font-size: 12px;
-   font-weight: bold;
-   padding: 4px 10px;
-   border-radius: 12px;
-   height: fit-content;
-   }
+  .urgent-tag {
+      background: #000000ff;
+      color: #fff;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 4px 10px;
+      border-radius: 12px;
+      height: fit-content;
+      position: absolute;
+      margin-top: -68px;
+      width: 14%;
+      margin-left: -30px;
+  }
    .custom-multiselect {
    position: relative;
    width: 220px; /* same as other selects */
@@ -562,6 +569,7 @@
    border: 1px solid #333;
    cursor: pointer;
    background: #f2f2f2;
+   border-radius: 10px;
    }
    .pagination .active {
    background: #333;
@@ -660,6 +668,218 @@
    #saveSearchModal .modal-content{
    width:100%;
    }
+
+   /* match circle  */
+   .match-circle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+      width: 85px;
+      height: 85px;
+      border-radius: 50%;
+      background: conic-gradient(
+          #16A34A calc(var(--percent) * 1%), 
+          #9CA3AF 0
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* position: relative; */
+    }
+
+    .match-inner {
+        width: 70px;
+        height: 70px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .match-inner .percent {
+        font-size: 20px;
+        font-weight: bold;
+        color: #16A34A;
+    }
+
+    .match-inner .label {
+        font-size: 12px;
+        color: #16A34A;
+    }
+
+    /* action-row  */
+    .action-row {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-left: 10px;
+    }
+
+    /* Apply Button */
+    .apply-btn {
+        background: #3C8093;
+        color: white;
+        padding: 8px 18px;
+        border-radius: 8px;
+        border: none;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .apply-btn.applied {
+        background: #7BA9B7;
+        color: white;
+        padding: 8px 18px;
+        border-radius: 8px;
+        border: none;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    /* Details link */
+    .details-link {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #0EA5E9;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .details-link i {
+        width: 18px;
+        height: 18px;
+        stroke-width: 1.7;
+    }
+
+    .details-link:hover {
+      color: #0284C7;
+    }
+
+    /* heart icon  */
+    .heart-toggle {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+
+    .heart-toggle svg {
+        width: 30px;
+        height: 30px;
+        margin-right: 10px;
+        stroke: #9CA3AF;
+        fill: transparent;
+        transition: 0.25s ease;
+    }
+
+    .heart-toggle:hover svg {
+        stroke: #0EA5E9;
+    }
+
+    .heart-toggle.active svg {
+        stroke: #3C8093; 
+        fill: #3C8093;
+    }
+
+    /* priority tag  */
+    .priority-tags {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        position: relative;
+    }
+
+    .tag {
+        padding: 2px 6px;
+        font-size: 13.5px;
+        font-weight: 500;
+        border-radius: 10px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .tag-new { background:#D1FAE5; color:#065F46; }
+    .tag-urgent { background:#FEE2E2; color:#B91C1C; }
+    .tag-last_minute { background:#DBEAFE; color:#1E40AF; }
+    .tag-immediate { background:#EDE9FE; color:#5B21B6; }
+
+    .tag-more {
+        padding: 2px 6px;
+        background: #F3F4F6;
+        color: #374151;
+        border-radius: 10px;
+        font-size: 13px;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .tags-tooltip {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 8px;
+        background: #fff;
+        border-radius: 10px;
+        padding: 10px;
+        box-shadow: 0 10px 25px rgba(0,0,0,.12);
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 200px;
+        z-index: 10;
+    }
+
+    .tags-tooltip .tag {
+        display: inline-flex;
+        width: fit-content;
+    }
+
+    /* .tooltip-tag {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: #374151;
+    }
+
+    .tooltip-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    } */
+
+    .tag-more:hover .tags-tooltip {
+        display: flex;
+    }
+
+    .job-right-col {
+      position: relative;
+      min-height: 200px;
+    }
+
+    /* Feature list */
+    .job-features {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 14px;
+        color: #374151;
+    }
+
+    .feature-item img {
+        width: 30px;
+        height: 30px;
+        object-fit: contain;
+    }
+
 </style>
 @endsection
 @section('content')
@@ -759,8 +979,10 @@
                     <label for="sort">Sort By</label>
                     <select onchange="sortBy(this.value)">
                       @foreach ($find_job_sort as $sort_job )
-                          <option value="{{$sort_job->id}}">{{$sort_job->name}}</option>
+                                              <option value="{{$sort_job->id}}">{{$sort_job->name}}</option>
+
                       @endforeach
+
                     </select>
                 </div>
               </div>
@@ -859,7 +1081,7 @@
                           <div class="job-card-header">
                             <div class="job-company">
                                 <div class="job-logo">🏥</div>
-                                <div class="job-details">
+                                <div class="job-details d-flex align-items-center justify-content-between">
                                   <?php
                                       $nurse_type = json_decode($job->nurse_type);
                                       $nurse_arr = array();  
@@ -953,102 +1175,272 @@
                                           //$speciality_arr[] = $speciality_data?->name : '';
                                         }
                                       }
-                                      
                                       $speciality_arr_string = implode(",",$speciality_arr);
-                                      
-                                      
                                       ?>
-                                  <strong>{{ $nurse_arr_string }}</strong>
-                                  <div class="location">{{ $job->location_name }}</div>
+                                  <div>
+                                    <strong class="fs-5">{{ $nurse_arr_string }}</strong>
+                                  </div>
+                                  <div>
+                                    <div class="heart-toggle" data-active="0">
+                                        <i data-lucide="heart"></i>
+                                    </div>
+                                    @if($job->urgent_hire == 1)
+                                      <div class="urgent-tag">Urgent Hiring</div>
+                                    @endif
+                                  </div>
+                                  <script>
+                                  document.addEventListener("DOMContentLoaded", () => {
+                                      lucide.createIcons();
+
+                                      document.querySelectorAll('.heart-toggle').forEach(el => {
+                                          el.addEventListener('click', () => {
+                                              el.classList.toggle('active');
+                                          });
+                                      });
+                                  });
+                                  </script>
                                 </div>
                             </div>
-                            @if($job->urgent_hire == 1)
-                            <div class="urgent-tag">Urgent Hiring</div>
-                            @endif
                           </div>
+                          <hr>
                           <!-- Job Role / Hospital Name -->
-                          <div class="job-role">{{ $job->agency_name }}</div>
+                          <!-- <div class="job-role">{{ $job->agency_name }}</div> -->
                           <!-- Main Job Info -->
-                          <div class="job-meta">
+                          <!-- <div class="job-meta">
                             <span><strong>Position:</strong> {{ $emp_pos_arr_string }}</span>
                             <span class="salary"><strong>Salary:</strong> ${{ $job->salary }}/hr</span>
-                          </div>
+                          </div> -->
                           <!-- Expanded Job Details -->
-                          <div class="job-info-details">
-                            <div><strong>Sector:</strong> {{ $job->sector }}</div>
-                            <div><strong>Employment Type:</strong> {{ $emplyeement_type_arr_string }}</div>
-                            <div><strong>Shift Type:</strong> {{ $shift_type_arr_string }}</div>
-                            <div><strong>Work Environment:</strong> {{ $work_environment_arr_string }}</div>
-                            <div><strong>Benefits:</strong> {{ $benefits_arr_string }}</div>
-                            <div><strong>Specialty:</strong> {{ $speciality_arr_string }}</div>
-                            <div><strong>Experience Required:</strong>
-                                {{ $job->experience_level }}{{ $job->experience_level == 1 ? 'st' : ($job->experience_level == 2 ? 'nd' : ($job->experience_level == 3 ? 'rd' : 'th')) }} Year
+                          <div class="job-info-details col-12 d-flex">
+                            <div class="col-4">
+                              <div class="job-role">{{ $job->agency_name }}</div>
+                              <div class="location d-flex align-items-center"><i data-lucide="map-pin" width="18" height="18"></i>{{ $job->location_name }}</div>
                             </div>
-                            <div class="last-date">
-                                Last Date:
-                                <?php
-                                  echo $formattedDate = date("d M Y", strtotime($job->application_submission_date));
-                                  ?>
+                            <div class="col-4">
+                                  <div class="job-meta">
+                                      <span><strong>Position:</strong> {{ $emp_pos_arr_string }}</span>
+                                    </div>
                             </div>
-                          </div>
-                          <?php
-                            $sector_percent = (!empty($work_preferences_data) && $work_preferences_data->sector_preferences == $job->sector) ? 1 : 0;
-                            $emptype_preferences = (!empty($work_preferences_data))?$work_preferences_data->emptype_preferences:'';
-                            $emp_type = (array)json_decode($emptype_preferences);
-                            $mainIndex = array_key_first($emp_type);
-                            
-                            if($mainIndex != ""){
-                              $ids = $emp_type[$mainIndex];
-                            }else{
-                              $ids = [0];
-                            }
-                            
-                            $names = DB::table('employeement_type_preferences')
-                                        ->whereIn('emp_prefer_id', $ids)
-                                        ->pluck('emp_type')
-                                        ->toArray();
-                            $mainIndexName = DB::table('employeement_type_preferences')
-                                              ->where('emp_prefer_id', $mainIndex)
-                                              ->value('emp_type');        
-                                              
-                            $result = [
-                              "main_index" => $mainIndexName,
-                              "children"   => $names
-                            ];             
-                            
-                            $searchValues = array_map('trim', explode(',', $emplyeement_type_arr_string));
-                            //print_r($searchValues);
-                            $getEmp = '';
-                            foreach ($searchValues as $searchValue) {
-                                if ($result['main_index'] === $searchValue) {
-                                    $getEmp = 1;
-                                } elseif (in_array($searchValue, $result['children'])) {
-                                    $getEmp = 1;
+                            <div class="col-4">
+                                <div class="priority-tags" 
+                                    data-tags='[
+                                      {"key":"new","label":"New"},
+                                      {"key":"urgent","label":"Urgent"},
+                                      {"key":"last_minute","label":"Last Minute"},
+                                      {"key":"immediate","label":"Immediate Start"}
+                                    ]'>
+                                </div>
+
+                            </div>
+                            <script>
+                            function renderTagsBySpace(container) {
+                                const tags = JSON.parse(container.dataset.tags || "[]");
+
+                                container.innerHTML = "";
+                                container.style.position = "relative";
+
+                                const hidden = [];
+
+                                const more = document.createElement("span");
+                                more.className = "tag-more";
+                                more.textContent = "+0 more";
+                                more.style.visibility = "hidden";
+                                container.appendChild(more);
+
+                                const availableWidth = container.clientWidth;
+                                let usedWidth = more.offsetWidth;
+
+                                tags.forEach(tag => {
+                                    const el = document.createElement("span");
+                                    el.className = `tag tag-${tag.key}`;
+                                    el.textContent = tag.label;
+                                    container.insertBefore(el, more);
+
+                                    const tagWidth = el.offsetWidth + 6;
+
+                                    if (usedWidth + tagWidth > availableWidth) {
+                                        container.removeChild(el);
+                                        hidden.push(tag);
+                                    } else {
+                                        usedWidth += tagWidth;
+                                    }
+                                });
+
+                                if (hidden.length) {
+                                    more.textContent = `+${hidden.length} more`;
+                                    more.style.visibility = "visible";
+
+                                    const tooltip = document.createElement("div");
+                                    tooltip.className = "tags-tooltip";
+
+                                    hidden.forEach(tag => {
+                                        const pill = document.createElement("span");
+                                        pill.className = `tag tag-${tag.key}`;
+                                        pill.textContent = tag.label;
+                                        tooltip.appendChild(pill);
+                                    });
+
+                                    more.appendChild(tooltip);
                                 } else {
-                                    $getEmp = 0;
+                                    container.removeChild(more);
                                 }
                             }
-                            
-                            $shift_values = (array)json_decode($job->shift_type);
-                            $shift_percent = '';
-                            foreach ($shift_values as $shiftKey) {
-                              $work_shift_preferences = (!empty($work_preferences_data))?$work_preferences_data->work_shift_preferences:'';        
-                              if (array_key_exists($shiftKey, (array)json_decode($work_shift_preferences))) {
-                                $shift_percent = 1;
-                              } else {
-                                $shift_percent = 0;
-                              }
+
+                            function initPriorityTags() {
+                                document.querySelectorAll(".priority-tags").forEach(container => {
+                                    renderTagsBySpace(container);
+                                });
                             }
-                            
-                            $match_percent_add = $sector_percent + $getEmp + $shift_percent;
-                            
-                            $total_percent = $match_percent_add * 100/10;
-                            
-                            
-                            $work_environment_preferences = (!empty($work_preferences_data))?$work_preferences_data->work_environment_preferences:'';        
-                            $workEnvPrefs = (array)json_decode($work_environment_preferences);
-                            
-                            
+
+                            window.addEventListener("load", () => {
+                                requestAnimationFrame(() => {
+                                    initPriorityTags();
+
+                                    const observer = new ResizeObserver(() => {
+                                        initPriorityTags();
+                                    });
+
+                                    document.querySelectorAll(".priority-tags").forEach(el => {
+                                        observer.observe(el);
+                                    });
+                                });
+                            });
+                            </script>
+                          </div>  
+                          <div class="job-info-details col-12 d-flex">
+                            <div class="col-4">
+                              <div><strong>Employment Type:</strong> </div>
+                              <div><strong>Shift Type:</strong> </div>
+                              <div><strong>Sector:</strong></div>
+                              <div><strong>Work Environment:</strong> </div>
+                              <div><strong>Benefits:</strong> </div>
+                              <div><strong>Specialty:</strong> </div>
+                              <div><strong>Experience Required:</strong></div>
+                              <div>
+                                <span class="salary"><strong>Salary:</strong> </span>
+                              </div>
+                              <div class="last-date"><strong>Last Date:</strong></div>
+                            </div>
+                            <div class="col-4">
+                              <div>{{ $emplyeement_type_arr_string }}</div>
+                              <div>{{ $shift_type_arr_string }}</div>
+                              <div> {{ $job->sector }}</div>
+                              <div>{{ $work_environment_arr_string }}</div>
+                              <div>{{ $benefits_arr_string }}</div>
+                              <div>{{ $speciality_arr_string }}</div>
+                              <div>{{ $job->experience_level }}{{ $job->experience_level == 1 ? 'st' : ($job->experience_level == 2 ? 'nd' : ($job->experience_level == 3 ? 'rd' : 'th')) }} Year</div>
+                              <div>${{ $job->salary }}/hr</div>
+                              <div><?php
+                                    echo $formattedDate = date("d M Y", strtotime($job->application_submission_date));
+                                  ?></div>
+                            </div>
+                            <div class="col-4 job-right-col">
+                              <div class="job-features">
+                                  <div class="feature-item">
+                                      <img src="{{ asset('imgs/Overtime Pay.png') }}" alt="">
+                                      <span>Overtime Pay</span>
+                                  </div>
+
+                                  <div class="feature-item">
+                                      <img src="{{ asset('imgs/Shift loading.png') }}" alt="">
+                                      <span>Shift Loading</span>
+                                  </div>
+
+                                  <div class="feature-item">
+                                      <img src="{{ asset('imgs/Bonuses.png') }}" alt="">
+                                      <span>Bonuses</span>
+                                  </div>
+
+                                  <div class="feature-item">
+                                      <img src="{{ asset('imgs/Sign-on bonus.png') }}" alt="">
+                                      <span>Sign-on bonus</span>
+                                  </div>
+
+                                  <div class="feature-item">
+                                      <img src="{{ asset('imgs/Flexible rosters.png') }}" alt="">
+                                      <span>Flexible rosters</span>
+                                  </div>
+
+                                  <div class="feature-item">
+                                      <img src="{{ asset('imgs/Self-scheduling.png') }}" alt="">
+                                      <span>Self-scheduling</span>
+                                  </div>
+                              </div>
+                              <div>
+                                <?php
+                                  $sector_percent = (!empty($work_preferences_data) && $work_preferences_data->sector_preferences == $job->sector) ? 1 : 0;
+                                  $emptype_preferences = (!empty($work_preferences_data))?$work_preferences_data->emptype_preferences:'';
+                                  $emp_type = (array)json_decode($emptype_preferences);
+                                  $mainIndex = array_key_first($emp_type);
+                                  
+                                  if($mainIndex != ""){
+                                    $ids = $emp_type[$mainIndex];
+                                  }else{
+                                    $ids = [0];
+                                  }
+                                  
+                                  $names = DB::table('employeement_type_preferences')
+                                              ->whereIn('emp_prefer_id', $ids)
+                                              ->pluck('emp_type')
+                                              ->toArray();
+                                  $mainIndexName = DB::table('employeement_type_preferences')
+                                                    ->where('emp_prefer_id', $mainIndex)
+                                                    ->value('emp_type');        
+                                                    
+                                  $result = [
+                                    "main_index" => $mainIndexName,
+                                    "children"   => $names
+                                  ];             
+                                  
+                                  $searchValues = array_map('trim', explode(',', $emplyeement_type_arr_string));
+                                  //print_r($searchValues);
+                                  $getEmp = '';
+                                  foreach ($searchValues as $searchValue) {
+                                      if ($result['main_index'] === $searchValue) {
+                                          $getEmp = 1;
+                                      } elseif (in_array($searchValue, $result['children'])) {
+                                          $getEmp = 1;
+                                      } else {
+                                          $getEmp = 0;
+                                      }
+                                  }
+                                  
+                                  $shift_values = (array)json_decode($job->shift_type);
+                                  $shift_percent = '';
+                                  foreach ($shift_values as $shiftKey) {
+                                    $work_shift_preferences = (!empty($work_preferences_data))?$work_preferences_data->work_shift_preferences:'';        
+                                    if (array_key_exists($shiftKey, (array)json_decode($work_shift_preferences))) {
+                                      $shift_percent = 1;
+                                    } else {
+                                      $shift_percent = 0;
+                                    }
+                                  }
+                                  
+                                  $match_percent_add = $sector_percent + $getEmp + $shift_percent;
+                                  
+                                  $total_percent = $match_percent_add * 100/10;
+                                  
+                                  
+                                  $work_environment_preferences = (!empty($work_preferences_data))?$work_preferences_data->work_environment_preferences:'';        
+                                  $workEnvPrefs = (array)json_decode($work_environment_preferences);
+                                  ?>        
+                                    <div class="match-circle" data-value="{{ $total_percent }}">
+                                    <div class="match-inner">
+                                        <div class="percent">{{ $total_percent }}%</div>
+                                        <div class="label">Match</div>
+                                    </div>
+                                </div>
+                                <script>
+                                    document.querySelectorAll('.match-circle').forEach(el => {
+                                        const val = el.getAttribute('data-value') || 0;
+                                        el.style.setProperty('--percent', val);
+                                    });
+                                </script>
+                              </div>
+                            </div>
+                          </div>  
+                          <!-- Footer: Match & Apply -->
+                          <?php
                             $user_id = Auth::guard("nurse_middle")->user()->id;
                             
                             $apply_job_data = DB::table("job_apply")->where("user_id",$user_id)->where("job_id",$job->id)->first();
@@ -1056,15 +1448,32 @@
                             ?>        
                           <!-- Footer: Match & Apply -->
                           <div class="job-footer">
-                            <div class="match-score">{{ $total_percent }}% Match</div>
-                            <button class="apply-btn apply-btn-{{ $job->id }} @if(!empty($apply_job_data)) applied @endif" onclick="applyNow('{{ $user_id }}','{{ $job->id }}')">
-                            @if(!empty($apply_job_data))
-                            Applied
-                            @else
-                            Apply Now
-                            @endif
-                            </button>
-                          </div>
+                            <!-- <div class="match-score">{{ $total_percent }}% Match</div> -->
+                              <!-- <button class="apply-btn apply-btn-{{ $job->id }} @if(!empty($apply_job_data)) applied @endif" onclick="applyNow('{{ $user_id }}','{{ $job->id }}')">
+                              @if(!empty($apply_job_data))
+                              Applied
+                              @else
+                              Apply Now
+                              @endif
+                              </button> -->
+                              <div class="action-row">
+                                  <button 
+                                      class="apply-btn apply-btn-{{ $job->id }} @if(!empty($apply_job_data)) applied @endif" 
+                                      onclick="applyNow('{{ $user_id }}','{{ $job->id }}')"
+                                  >
+                                      @if(!empty($apply_job_data))
+                                          Applied
+                                      @else
+                                          Apply Now
+                                      @endif
+                                  </button>
+
+                                  <a href="#" class="details-link">
+                                      <i data-lucide="bookmark"></i>
+                                      View Details
+                                  </a>
+                                </div>
+                            </div>
                       </div>
                       @endforeach
                     </div>
@@ -1867,6 +2276,18 @@ $('#renameCancel').click(function() {
    //     // Re-append in sorted order
    //     $container.append($cards);
    // });
+   $(document).on("click", ".pagination a", function(e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: $(this).attr('href'),
+            type: "GET",
+            success: function(data) {
+                $(".job-listings").html(data);
+            }
+        });
+    });
+
    function sortBy(value){
      if(value != null){
        $.ajax({
@@ -1877,7 +2298,6 @@ $('#renameCancel').click(function() {
          success: function(data){
            console.log("data",data);
            $(".job-listings").html(data);
-           initJobCardScripts();
          }  
        });
      }
@@ -1925,17 +2345,6 @@ $('#renameCancel').click(function() {
      }
    }
    
-      $(document).on("click", ".pagination a", function(e) {
-        e.preventDefault();
-
-        $.ajax({
-            url: $(this).attr('href'),
-            type: "GET",
-            success: function(data) {
-                $(".job-listings").html(data);
-            }
-        });
-    });
   $(document).ready(function () {
     $("#keywords").on("keyup", function () {
         var value = $(this).val().toLowerCase().trim();
@@ -2406,5 +2815,9 @@ $('#renameCancel').click(function() {
    
    
    
+</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    lucide.createIcons();
 </script>
 @endsection
