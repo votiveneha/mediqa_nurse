@@ -407,7 +407,7 @@
                         </div>
 
                         {{-- Countries Block --}}
-                       <div class="col-12 mt-4">
+                         <div class="col-12 mt-4">
                             <div class="card p-4">
 
                                 <h5 class="mb-3">Registration & Qualification</h5>
@@ -498,6 +498,87 @@
                                 </div>
                           
 
+                            </div>
+                        </div>
+                        @php
+                          $user = Auth::guard('nurse_middle')->user();
+                           $registration_country = DB::table('registration_profiles_countries')->where('status',1)->where('user_Id',$user->id)->get();
+                        @endphp
+
+                        <div class="mb-4 card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    Registration & Licences — {{ country_name($reg_country->country_code) ?? "" }}
+                                    
+                                    {{-- <span class="badge badge-status {{ $reg_country->status }}">
+                                        {{ ucwords(str_replace('_', ' ', $reg_country->status)) }}
+                                    </span> --}}
+                                </h5>
+
+                                {{-- Jurisdiction --}}
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Jurisdiction / Registration Authority</label>
+                                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                                        {{ $reg_country->jurisdiction ?? 'Not specified' }}
+                                    </div>
+                                </div>
+
+                                {{-- License Number --}}
+                                <div class="form-group">
+                                    <label class="font-weight-bold">License / Registration Number</label>
+                                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                                        {{ $reg_country->license_number ?? 'Not specified' }}
+                                    </div>
+                                </div>
+
+                                {{-- Expiry Date --}}
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Expiry Date</label>
+                                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                                        @if($reg_country->expiry_date)
+                                            {{ \Carbon\Carbon::parse($reg_country->expiry_date)->format('F d, Y') }}
+                                            @php
+                                                $isExpired = \Carbon\Carbon::parse($reg_country->expiry_date)->isPast();
+                                            @endphp
+                                            @if($isExpired)
+                                                <span class="badge badge-danger ml-2">Expired</span>
+                                            @else
+                                                <span class="badge badge-success ml-2">Active</span>
+                                            @endif
+                                        @else
+                                            No expiry date set
+                                        @endif
+                                    </div>
+                                </div>
+
+                                {{-- Documents --}}
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Evidence Documents</label>
+                                    <div class="mt-2">
+                                        @if(isset($reg_country->documents) && count($reg_country->documents) > 0)
+                                            @foreach ($reg_country->documents as $index => $document)
+                                                <div class="trans_img border rounded p-2 mb-2 d-flex align-items-center">
+                                                    <i class="fa fa-file-pdf text-danger mr-2"></i>
+                                                    <div class="flex-grow-1">
+                                                        <div class="font-weight-bold">{{ $document->name ?? "Document " . ($index + 1) }}</div>
+                                                        @if(isset($document->upload_date))
+                                                            <small class="text-muted">
+                                                                Uploaded: {{ \Carbon\Carbon::parse($document->upload_date)->format('M d, Y') }}
+                                                            </small>
+                                                        @endif
+                                                    </div>
+                                                    @if(isset($document->url))
+                                                        <a href="{{ $document->url }}" target="_blank" class="btn btn-sm btn-outline-primary ml-2">
+                                                            <i class="fa fa-download"></i> View
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        @else
+                                            <div class="text-muted font-italic">No documents uploaded</div>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -924,7 +1005,7 @@
                           <td>{{ $user_data->assistent_level }} years</td>
                           <td>-</td>
                           <td>{{ $user_data->current_employee_status }}</td>
-                          <td><button class="btn">Edit</button></td>
+                          <td><button class="btn btn-dark px-4 py-2">Edit</button></td>
                         </tr>
                         @endforeach
                       </tbody>
@@ -3759,35 +3840,7 @@
                           <?php
                           $l = 1;
                           ?>
-                          @foreach($JobSpecialties as $ptl)
-                          <?php
-                          $speciality_data = DB::table("speciality")->where('parent', $ptl->id)->get();
-                          if ($data->specialties != 'NULL') {
-                            if (in_array((string)$ptl->id, json_decode($data->specialties, true))) {
-                              $d = '';
-                            } else {
-                              $d = 'd-none';
-                            }
-                          } else {
-                            $d = 'd-none';
-                          }
-                          ?>
-                          <input type="hidden" value1="{{$data->specialties}}" name="speciality_exp_result" class="speciality_exp_result-{{ $l }}-{{$i}}" value="{{ $ptl->id }}">
-                          <div class="speciality_data_exp form-group drp--clr drpdown-set {{ $d }} col-md-6 speciality_exp_{{ $ptl->id }} speciality_exps_{{$i}}{{ $l }}" id="specility_level_exp-{{ $l }}-{{$i}}">
-                            <label class="form-label speciality_name_label-{{ $i }}{{ $l }}" for="input-2">{{ $ptl->name }}</label>
-                            <input type="hidden" name="type_specialities_input" class="type_specialities_input type_specialities_input-{{$i}}" value="{{ $l }}">
-                            <ul id="speciality_entry_exp-{{ $l }}-{{ $i }}" style="display:none;">
-                              @foreach($speciality_data as $sd)
-                              <li data-value="{{ $sd->id }}">{{ $sd->name }}</li>
-                              @endforeach
-                            </ul>
-                            <select class="subspecialities-{{ $i }} subspecialities-{{ $i }}{{ $l }} js-example-basic-multiple addAll_removeAll_btn  specilitysubtype specility_sub_type_{{ $ptl->id }}_{{$i}}" data-list-id="speciality_entry_exp-{{ $l }}-{{ $i }}" name="speciality_entry_experience_{{ $l }}[{{$i}}][]" index_name="{{ $i }}" multiple="multiple"></select>
-                            <span id="reqnsubspecialities-{{ $i }}{{ $l }}" class="reqError text-danger valley"></span>
-                          </div>
-                          <?php
-                          $l++;
-                          ?>
-                          @endforeach
+                          
                         </div>
                         <div class="surgical_div_experience_{{$i}}">
                           <input type="hidden" name="surgical_preoperative_result_experience" class="surgical_preoperative_result_experience-{{$i}}" value="{{ $data->surgical_preoperative }}">
@@ -4840,7 +4893,7 @@
 
                 <form id="reference_form" method="POST" onsubmit="return updateReference()">
                   @csrf
-                  <input type="hidden" name="experience_id" value="{{ request()->experience_id }}">
+                  
                   <input type="hidden" name="user_id" value="{{ Auth::guard('nurse_middle')->user()->id }}">
                   <div class="reference_form">
                     <?php
@@ -4857,6 +4910,7 @@
                         <div class="col-md-6">
                           <div class="form-group level-drp">
                             <label class="form-label" for="input-1">First name</label>
+                            <input type="hidden" name="experience_id[]" value="{{ $referee_data->experience_id }}">
                             <input type="hidden" name="reference_no[]" value="{{ $i }}">
                             <input type="hidden" name="referee_no[]" value="{{ $referee_data->referee_no }}">
                             <input class="form-control first_name first_name-{{ $i }}" type="text" name="first_name[]" value="{{ $referee_data->first_name }}">
@@ -5046,6 +5100,7 @@
                       <div class="col-md-6">
                         <div class="form-group level-drp">
                           <label class="form-label" for="input-1">First name</label>
+                          <input type="hidden" name="experience_id[]" value="{{ request()->get('experience_id') }}">
                           <input class="form-control first_name first_name-1" type="text" name="first_name[]">
                           <span id="reqfname-1" class="reqError text-danger valley"></span>
                         </div>
@@ -5269,10 +5324,14 @@
                   
                   }
 
+                  const params = new URLSearchParams(window.location.search);
+
+                  const experience_id = params.get('experience_id');
+
                   console.log("emp_data", new_emp_data);
                   ////console.log("licence_div_count", referee_div_count);
                   referee_div_count++;
-                  $(".reference_form").append('<div class="referee_data referee_data-' + referee_div_count + '"><h6 class="mt-0 color-brand-1 mb-20 referee_no">REFEREE ' + referee_div_count + '</h6><div class="row"><div class="col-md-6"><div class="form-group level-drp"><label class="form-label" for="input-1">First name</label><input class="form-control first_name first_name-' + referee_div_count + '" type="text" name="first_name[]"><span id="reqfname-' + referee_div_count + '" class="reqError text-danger valley"></span></div></div><div class="col-md-6"><div class="form-group level-drp"><label class="form-label" for="input-1">Last name</label><input class="form-control last_name last_name-' + referee_div_count + '" type="text" name="last_name[]"><span id="reqlname-' + referee_div_count + '" class="reqError text-danger valley"></span></div></div></div><div class="row"><div class="col-md-6"><div class="form-group level-drp"><label class="form-label" for="input-1">Email</label><input class="form-control reference_email reference_email-' + referee_div_count + '" type="text" name="email[]"><span id="reqemail-' + referee_div_count + '" class="reqError text-danger valley"></span></div></div><div class="col-md-6"><div class="form-group level-drp"><label class="form-label" for="input-1">Phone number</label><input class="form-control phone_no phone_no-' + referee_div_count + '" type="text" name="phone_no[]"><span id="reqphoneno-' + referee_div_count + '" class="reqError text-danger valley"></span></div></div></div><div class="row"><div class="col-md-6"><div class="form-group level-drp"><label class="form-label" for="input-1">Referee relationship to you</label><select class="form-input reference_relationship reference_relationship-' + referee_div_count + '" name="reference_relationship[]"><option value="" data-select2-id="9">select</option><option value="Worked in Same Group">Worked in Same Group</option><option value="Referee Managed Me">Referee Managed Me</option><option value="I Managed Referee">I Managed Referee</option><option value="Worked Together on a Project">Worked Together on a Project</option><option value="Worked Together in Different Departments">Worked Together in Different Departments</option><option value="Colleague">Colleague</option><option value="Peer Mentor">Peer Mentor</option><option value="Clinical Supervisor">Clinical Supervisor</option><option value="Educational Supervisor">Educational Supervisor</option><option value="Preceptor">Preceptor</option><option value="Instructor or Teacher">Instructor or Teacher</option><option value="Collaborated on Research">Collaborated on Research</option><option value="Clinical Educator">Clinical Educator</option><option value="Patient Advocate">Patient Advocate</option><option value="Coordinated Care Together">Coordinated Care Together</option><option value="Advisory Role">Advisory Role</option><option value="Worked Together on Committees">Worked Together on Committees</option><option value="Consultant Relationship">Consultant Relationship</option><option value="Professional Mentor">Professional Mentor</option><option value="Team Leader">Team Leader</option><option value="Subordinate in a Leadership Role">Subordinate in a Leadership Role</option><option value="Provided Professional Development Support">Provided Professional Development Support</option><option value="Oversaw my Certification Process">Oversaw my Certification Process</option><option value="External Collaborator">External Collaborator</option><option value="Other">Other</option></select><span id="reqreferencerel-' + referee_div_count + '" class="reqError text-danger valley"></span></div></div><div class="col-md-6"><div class="form-group level-drp"><label class="form-label" for="input-1">You worked together at:</label><input class="form-control worked_together worked_together-' + referee_div_count + '" type="text" name="worked_together[]"><span id="reqworked_together-' + referee_div_count + '" class="reqError text-danger valley"></span></div></div></div><div class="row"><div class="col-md-12"><div class="form-group level-drp"><label class="form-label" for="input-1">What was your position when you worked with this referee?</label><ul id="position_held_fieldr-' + referee_div_count + '" style="display:none;">'+ref_text+'</ul><select class="js-example-basic-multiple'+referee_div_count+' addAll_removeAll_btn pos_heldr pos_heldr_' + referee_div_count + '" data-list-id="position_held_fieldr-' + referee_div_count + '" name="position_with_referee[' + referee_div_count + ']" id="position_held_fieldr-' + referee_div_count + '" onchange="getPostionsr(\''+ap+'\',\'' + referee_div_count + '\')" multiple></select></div><div class="show_positionsr-' + referee_div_count + '"></div></div></div><div class="row"><div class="col-md-6"><div class="form-group level-drp"><label class="form-label" for="input-1">Start Date</label><input class="form-control start_date start_date-' + referee_div_count + '" type="date" name="start_date[]" onchange="startDate(' + referee_div_count + ')" onkeydown="return false"><span id="reqrefereesdate-' + referee_div_count + '" class="reqError text-danger valley"></span><div class="declaration_box"><input type="hidden" name="still_working1[]" class="still_working1-'+referee_div_count+'" value="0" /><input class="still_working still_working-' + referee_div_count + '" type="checkbox" name="still_working[]" onclick="stillWorking(' + referee_div_count + ')">I am still working with this referee<span id="reqstillworking-' + referee_div_count + '" class="reqError text-danger valley"></span></div></div></div><div class="col-md-6"><div class="form-group level-drp working-' + referee_div_count + '"><label class="form-label" for="input-1">End Date</label><input class="form-control end_date end_date-' + referee_div_count + '" type="date" name="end_date[]" onkeydown="return false"><span id="reqrefereeedate-' + referee_div_count + '" class="reqError text-danger valley"></span></div></div><div class="row"><div class="col-md-6"><div class="add_new_certification_div mb-3 mt-3"><a style="cursor: pointer;" class="deleteReferee">- Delete Referee</a></div></div></div></div>');
+                  $(".reference_form").append('<div class="referee_data referee_data-' + referee_div_count + '"><h6 class="mt-0 color-brand-1 mb-20 referee_no">REFEREE ' + referee_div_count + '</h6><div class="row"><div class="col-md-6"><div class="form-group level-drp"><input type="hidden" name="experience_id[]" value="'+experience_id+'"><label class="form-label" for="input-1">First name</label><input class="form-control first_name first_name-' + referee_div_count + '" type="text" name="first_name[]"><span id="reqfname-' + referee_div_count + '" class="reqError text-danger valley"></span></div></div><div class="col-md-6"><div class="form-group level-drp"><label class="form-label" for="input-1">Last name</label><input class="form-control last_name last_name-' + referee_div_count + '" type="text" name="last_name[]"><span id="reqlname-' + referee_div_count + '" class="reqError text-danger valley"></span></div></div></div><div class="row"><div class="col-md-6"><div class="form-group level-drp"><label class="form-label" for="input-1">Email</label><input class="form-control reference_email reference_email-' + referee_div_count + '" type="text" name="email[]"><span id="reqemail-' + referee_div_count + '" class="reqError text-danger valley"></span></div></div><div class="col-md-6"><div class="form-group level-drp"><label class="form-label" for="input-1">Phone number</label><input class="form-control phone_no phone_no-' + referee_div_count + '" type="text" name="phone_no[]"><span id="reqphoneno-' + referee_div_count + '" class="reqError text-danger valley"></span></div></div></div><div class="row"><div class="col-md-6"><div class="form-group level-drp"><label class="form-label" for="input-1">Referee relationship to you</label><select class="form-input reference_relationship reference_relationship-' + referee_div_count + '" name="reference_relationship[]"><option value="" data-select2-id="9">select</option><option value="Worked in Same Group">Worked in Same Group</option><option value="Referee Managed Me">Referee Managed Me</option><option value="I Managed Referee">I Managed Referee</option><option value="Worked Together on a Project">Worked Together on a Project</option><option value="Worked Together in Different Departments">Worked Together in Different Departments</option><option value="Colleague">Colleague</option><option value="Peer Mentor">Peer Mentor</option><option value="Clinical Supervisor">Clinical Supervisor</option><option value="Educational Supervisor">Educational Supervisor</option><option value="Preceptor">Preceptor</option><option value="Instructor or Teacher">Instructor or Teacher</option><option value="Collaborated on Research">Collaborated on Research</option><option value="Clinical Educator">Clinical Educator</option><option value="Patient Advocate">Patient Advocate</option><option value="Coordinated Care Together">Coordinated Care Together</option><option value="Advisory Role">Advisory Role</option><option value="Worked Together on Committees">Worked Together on Committees</option><option value="Consultant Relationship">Consultant Relationship</option><option value="Professional Mentor">Professional Mentor</option><option value="Team Leader">Team Leader</option><option value="Subordinate in a Leadership Role">Subordinate in a Leadership Role</option><option value="Provided Professional Development Support">Provided Professional Development Support</option><option value="Oversaw my Certification Process">Oversaw my Certification Process</option><option value="External Collaborator">External Collaborator</option><option value="Other">Other</option></select><span id="reqreferencerel-' + referee_div_count + '" class="reqError text-danger valley"></span></div></div><div class="col-md-6"><div class="form-group level-drp"><label class="form-label" for="input-1">You worked together at:</label><input class="form-control worked_together worked_together-' + referee_div_count + '" type="text" name="worked_together[]"><span id="reqworked_together-' + referee_div_count + '" class="reqError text-danger valley"></span></div></div></div><div class="row"><div class="col-md-12"><div class="form-group level-drp"><label class="form-label" for="input-1">What was your position when you worked with this referee?</label><ul id="position_held_fieldr-' + referee_div_count + '" style="display:none;">'+ref_text+'</ul><select class="js-example-basic-multiple'+referee_div_count+' addAll_removeAll_btn pos_heldr pos_heldr_' + referee_div_count + '" data-list-id="position_held_fieldr-' + referee_div_count + '" name="position_with_referee[' + referee_div_count + ']" id="position_held_fieldr-' + referee_div_count + '" onchange="getPostionsr(\''+ap+'\',\'' + referee_div_count + '\')" multiple></select></div><div class="show_positionsr-' + referee_div_count + '"></div></div></div><div class="row"><div class="col-md-6"><div class="form-group level-drp"><label class="form-label" for="input-1">Start Date</label><input class="form-control start_date start_date-' + referee_div_count + '" type="date" name="start_date[]" onchange="startDate(' + referee_div_count + ')" onkeydown="return false"><span id="reqrefereesdate-' + referee_div_count + '" class="reqError text-danger valley"></span><div class="declaration_box"><input type="hidden" name="still_working1[]" class="still_working1-'+referee_div_count+'" value="0" /><input class="still_working still_working-' + referee_div_count + '" type="checkbox" name="still_working[]" onclick="stillWorking(' + referee_div_count + ')">I am still working with this referee<span id="reqstillworking-' + referee_div_count + '" class="reqError text-danger valley"></span></div></div></div><div class="col-md-6"><div class="form-group level-drp working-' + referee_div_count + '"><label class="form-label" for="input-1">End Date</label><input class="form-control end_date end_date-' + referee_div_count + '" type="date" name="end_date[]" onkeydown="return false"><span id="reqrefereeedate-' + referee_div_count + '" class="reqError text-danger valley"></span></div></div><div class="row"><div class="col-md-6"><div class="add_new_certification_div mb-3 mt-3"><a style="cursor: pointer;" class="deleteReferee">- Delete Referee</a></div></div></div></div>');
                   selectTwoFunction(referee_div_count);
                 }
               </script>
