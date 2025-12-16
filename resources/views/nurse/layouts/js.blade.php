@@ -1447,179 +1447,179 @@
       o++;
     });
     
-    var a = 1;
-    $(".nurse_type_exp").each(function() {
-      if ($(".nurse_type_exp_" + a).length > 0) {
-        if ($(".nurse_type_exp_" + a).val() == '') {
-          document.getElementById("reqnurseTypeexpId-" + a).innerHTML = "* Please select the type of nurse";
-          isValid = false;
-        }
-      }
-      a++;
-    });
+    // var a = 1;
+    // $(".nurse_type_exp").each(function() {
+    //   if ($(".nurse_type_exp_" + a).length > 0) {
+    //     if ($(".nurse_type_exp_" + a).val() == '') {
+    //       document.getElementById("reqnurseTypeexpId-" + a).innerHTML = "* Please select the type of nurse";
+    //       isValid = false;
+    //     }
+    //   }
+    //   a++;
+    // });
 
-    var x = 1;
-    $(".type_nurse_input").each(function(i,val) {
+    // var x = 1;
+    // $(".type_nurse_input").each(function(i,val) {
       
       
-      $(".type_nurse_input-"+x).each(function(i,val) {
-        var ntypeval = $(this).val();
-        var st_value = x.toString()+ntypeval.toString();
-        if($(".nursing_exps_"+st_value).hasClass("d-none") == false){
+    //   $(".type_nurse_input-"+x).each(function(i,val) {
+    //     var ntypeval = $(this).val();
+    //     var st_value = x.toString()+ntypeval.toString();
+    //     if($(".nursing_exps_"+st_value).hasClass("d-none") == false){
           
-          console.log("st_value_exp",st_value);
-          var label_name = $(".nursing_type_label-"+st_value).text();
+    //       console.log("st_value_exp",st_value);
+    //       var label_name = $(".nursing_type_label-"+st_value).text();
           
-          if ($(".subtype_nurses-" +st_value).val() == '') {
-            document.getElementById("reqnsubtypenurse-" +st_value).innerHTML = "* Please select the "+label_name;
-            isValid = false;
-          }
+    //       if ($(".subtype_nurses-" +st_value).val() == '') {
+    //         document.getElementById("reqnsubtypenurse-" +st_value).innerHTML = "* Please select the "+label_name;
+    //         isValid = false;
+    //       }
           
-        }
-      });
-      x++;
-    });
+    //     }
+    //   });
+    //   x++;
+    // });
 
-    var y = 1;
-    $(".nurse_prac_valid").each(function(i,val) {
-      if($(".np_submenu_experience_"+y).hasClass("d-none") == false){
-        if ($(".nurse_prac_valid_"+y).val() == '') {
-          document.getElementById("reqnp-" +y).innerHTML = "* Please select the Nurse Practitioner (NP)";
-          isValid = false;
-        }
-        y++;
-      }
+    // var y = 1;
+    // $(".nurse_prac_valid").each(function(i,val) {
+    //   if($(".np_submenu_experience_"+y).hasClass("d-none") == false){
+    //     if ($(".nurse_prac_valid_"+y).val() == '') {
+    //       document.getElementById("reqnp-" +y).innerHTML = "* Please select the Nurse Practitioner (NP)";
+    //       isValid = false;
+    //     }
+    //     y++;
+    //   }
       
-    });
+    // });
 
-    var p = 1;
-    $(".neonatal_exp").each(function(i,val) {
-      if($(".neonatal_row_exp_"+p).hasClass("d-none") == false){
+    // var p = 1;
+    // $(".neonatal_exp").each(function(i,val) {
+    //   if($(".neonatal_row_exp_"+p).hasClass("d-none") == false){
         
-        if ($(".neonatal_exp_"+p).val() == '') {
-          document.getElementById("reqneonatal-"+p).innerHTML = "* Please select the Neonatal Care";
-          isValid = false;
-        }
+    //     if ($(".neonatal_exp_"+p).val() == '') {
+    //       document.getElementById("reqneonatal-"+p).innerHTML = "* Please select the Neonatal Care";
+    //       isValid = false;
+    //     }
         
-      }
-      p++;
-    });
+    //   }
+    //   p++;
+    // });
 
-    var q = 1;
-    $(".surgicalobstrics").each(function(i,val) {
-      if($(".surgicalobs_row_experience-"+q).hasClass("d-none") == false){
+    // var q = 1;
+    // $(".surgicalobstrics").each(function(i,val) {
+    //   if($(".surgicalobs_row_experience-"+q).hasClass("d-none") == false){
         
-        if ($(".surgicalobstrics-"+q).val() == '') {
-          document.getElementById("reqsurgicalobstrics-"+q).innerHTML = "* Please select the Surgical Obstetrics and Gynecology (OB/GYN)";
-          isValid = false;
-        }
+    //     if ($(".surgicalobstrics-"+q).val() == '') {
+    //       document.getElementById("reqsurgicalobstrics-"+q).innerHTML = "* Please select the Surgical Obstetrics and Gynecology (OB/GYN)";
+    //       isValid = false;
+    //     }
         
-      }
-      q++;
-    });
+    //   }
+    //   q++;
+    // });
 
-    var t = 1;
-    $(".reqlevelexp").each(function(i,val) {
+    // var t = 1;
+    // $(".reqlevelexp").each(function(i,val) {
       
         
-        if ($(".reqlevelexp-"+t).val() == 'select') {
-          document.getElementById("reqlevelexp-"+t).innerHTML = "* Please select the Level of experience in this specialty";
-          isValid = false;
-        }
+    //     if ($(".reqlevelexp-"+t).val() == 'select') {
+    //       document.getElementById("reqlevelexp-"+t).innerHTML = "* Please select the Level of experience in this specialty";
+    //       isValid = false;
+    //     }
         
       
-      t++;
-    });
+    //   t++;
+    // });
 
-    var z = 1;
-    $(".type_specialities_input").each(function(i,val) {
+    // var z = 1;
+    // $(".type_specialities_input").each(function(i,val) {
       
       
-      $(".type_specialities_input-"+z).each(function(i,val) {
-        var stypeval = $(this).val();
-        var st_value = z.toString()+stypeval.toString();
-        if($(".speciality_exps_"+st_value).hasClass("d-none") == false){
+    //   $(".type_specialities_input-"+z).each(function(i,val) {
+    //     var stypeval = $(this).val();
+    //     var st_value = z.toString()+stypeval.toString();
+    //     if($(".speciality_exps_"+st_value).hasClass("d-none") == false){
           
-          console.log("x",st_value);
-          var label_name = $(".speciality_name_label-"+st_value).text();
+    //       console.log("x",st_value);
+    //       var label_name = $(".speciality_name_label-"+st_value).text();
           
-          if ($(".subspecialities-" +st_value).val() == '') {
-            document.getElementById("reqnsubspecialities-" +st_value).innerHTML = "* Please select the "+label_name;
-            isValid = false;
-          }
+    //       if ($(".subspecialities-" +st_value).val() == '') {
+    //         document.getElementById("reqnsubspecialities-" +st_value).innerHTML = "* Please select the "+label_name;
+    //         isValid = false;
+    //       }
           
-        }
-      });
-      z++;
-    });
+    //     }
+    //   });
+    //   z++;
+    // });
 
-    var w = 1;
-    $(".surgicalp_input").each(function(i,val) {
+    // var w = 1;
+    // $(".surgicalp_input").each(function(i,val) {
       
       
-      $(".surgicalp_input-"+w).each(function(i,val) {
-        var stypeval = $(this).val();
-        var st_value = w.toString()+stypeval.toString();
-        console.log("stypeval",stypeval);
-        if($(".surgicalp_experience-"+st_value).hasClass("d-none") == false){
+    //   $(".surgicalp_input-"+w).each(function(i,val) {
+    //     var stypeval = $(this).val();
+    //     var st_value = w.toString()+stypeval.toString();
+    //     console.log("stypeval",stypeval);
+    //     if($(".surgicalp_experience-"+st_value).hasClass("d-none") == false){
           
-          console.log("x",st_value);
-          var label_name = $(".surgicalprelabel-"+st_value).text();
+    //       console.log("x",st_value);
+    //       var label_name = $(".surgicalprelabel-"+st_value).text();
           
-          if ($(".surgicalspec-" +st_value).val() == '') {
-            document.getElementById("reqnsurgicalspecialities-" +st_value).innerHTML = "* Please select the "+label_name;
-            isValid = false;
-          }
+    //       if ($(".surgicalspec-" +st_value).val() == '') {
+    //         document.getElementById("reqnsurgicalspecialities-" +st_value).innerHTML = "* Please select the "+label_name;
+    //         isValid = false;
+    //       }
           
-        }
-      });
-      w++;
-    });
+    //     }
+    //   });
+    //   w++;
+    // });
 
-    var u = 1;
-    $(".surgical_specialities_input").each(function(i,val) {
+    // var u = 1;
+    // $(".surgical_specialities_input").each(function(i,val) {
       
       
-      $(".surgical_specialities_input-"+u).each(function(i,val) {
-        var ntypeval = $(this).val();
-        var st_value = u.toString()+ntypeval.toString();
-        if($(".surgicalspeciality_exps_"+st_value).hasClass("d-none") == false){
+    //   $(".surgical_specialities_input-"+u).each(function(i,val) {
+    //     var ntypeval = $(this).val();
+    //     var st_value = u.toString()+ntypeval.toString();
+    //     if($(".surgicalspeciality_exps_"+st_value).hasClass("d-none") == false){
           
-          console.log("xsurgical",st_value);
-          var label_name = $(".surgicalspeciality_name_label-"+st_value).text();
+    //       console.log("xsurgical",st_value);
+    //       var label_name = $(".surgicalspeciality_name_label-"+st_value).text();
           
-          if ($(".surgicalspecialities-" +st_value).val() == '') {
-            document.getElementById("reqsurgicalspecialities-" +st_value).innerHTML = "* Please select the "+label_name;
-            isValid = false;
-          }
+    //       if ($(".surgicalspecialities-" +st_value).val() == '') {
+    //         document.getElementById("reqsurgicalspecialities-" +st_value).innerHTML = "* Please select the "+label_name;
+    //         isValid = false;
+    //       }
           
-        }
-      });
-      u++;
-    });
+    //     }
+    //   });
+    //   u++;
+    // });
 
-    var x = 1;
-    $(".padsurgical_specialities_input").each(function(i,val) {
+    // var x = 1;
+    // $(".padsurgical_specialities_input").each(function(i,val) {
       
       
-      $(".padsurgical_specialities_input-"+x).each(function(i,val) {
-        var ntypeval = $(this).val();
-        var st_value = x.toString()+ntypeval.toString();
-        if($(".padsurgicalspeciality_exps_"+st_value).hasClass("d-none") == false){
+    //   $(".padsurgical_specialities_input-"+x).each(function(i,val) {
+    //     var ntypeval = $(this).val();
+    //     var st_value = x.toString()+ntypeval.toString();
+    //     if($(".padsurgicalspeciality_exps_"+st_value).hasClass("d-none") == false){
           
           
-          var label_name = $(".padsurgicalspeciality_name_label-"+st_value).text();
+    //       var label_name = $(".padsurgicalspeciality_name_label-"+st_value).text();
           
-          if ($(".padsurgicalspecialities-"+st_value).val() == '') {
-            console.log("xsurgicalpad",st_value);
-            document.getElementById("reqpadsurgicalspecialities-"+st_value).innerHTML = "* Please select the "+label_name;
-            isValid = false;
-          }
+    //       if ($(".padsurgicalspecialities-"+st_value).val() == '') {
+    //         console.log("xsurgicalpad",st_value);
+    //         document.getElementById("reqpadsurgicalspecialities-"+st_value).innerHTML = "* Please select the "+label_name;
+    //         isValid = false;
+    //       }
           
-        }
-      });
-      x++;
-    });
+    //     }
+    //   });
+    //   x++;
+    // });
 
     
 
