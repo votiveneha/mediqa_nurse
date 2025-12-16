@@ -149,7 +149,28 @@ class HomeController extends Controller
     public function manage_profile($message = '')
     {
         $employeement_type_preferences = DB::table("employeement_type_preferences")->where("sub_prefer_id","0")->get();
-        return view('nurse.profile', compact('message','employeement_type_preferences'));
+        $user_id = Auth::guard('nurse_middle')->user()->id;    
+        $user_data = User::where("id",$user_id)->first();
+        $nurse_data = [];
+        $specialities_data = [];
+
+        foreach (json_decode($user_data->nurse_data) as $key => $values) {
+            if ($key !== 'type_0') {
+                
+                $nurse_data = array_merge($nurse_data, $values);
+            }
+        }
+
+        foreach (json_decode($user_data->specialties) as $key => $values) {
+            if ($key !== 'type_0' && $key !== 'speciality_status') {
+                
+                $specialities_data = array_merge($specialities_data, $values);
+            }
+        }
+
+        $specialities_type = (array)json_decode($user_data->specialties);
+        //print_r($specialities_data);
+        return view('nurse.profile', compact('message','employeement_type_preferences','nurse_data','specialities_data','specialities_type','user_data'));
     }
     public function upload_profile_image(Request $request)
     {
@@ -2097,7 +2118,7 @@ public function ResetPassword(Request $request)
             $surgical_operative_carep_2_1 = $surgical_operative_carep_2[$key] ?? null;
             $surgical_operative_carep_3_1 = $surgical_operative_carep_3[$key] ?? null;
             //$positions_held1 = json_encode($positions_held[$key]) ?? null;
-            $subpwork1 = json_encode($subpwork[$key]) ?? null;
+            //$subpwork1 = json_encode($subpwork[$key]) ?? null;
             $start_date1 = $start_date[$key] ?? '0000-00-00';
             $end_date1 = $end_date[$key] ?? '0000-00-00';
             $job_responeblities1 = $job_responeblities[$key] ?? null;
@@ -2153,7 +2174,7 @@ public function ResetPassword(Request $request)
                     'neonatal_care' => json_encode($neonatal_care_1),
                     'paedia_surgical_preoperative' => json_encode($surgical_rowpad_box_1),
                     //'position_held' => $positions_held1,
-                    'facility_workplace_type' => $subpwork1,
+                    //'facility_workplace_type' => $subpwork1,
                     'employeement_start_date' => $start_date1,
                     'employeement_end_date' => $end_date1,
                     'responsiblities' => $job_responeblities1,
@@ -2173,6 +2194,7 @@ public function ResetPassword(Request $request)
                     'tech_and_soft_pro' => json_encode($sub_skills_compantancies4_1),
                     'declaration_status' => $dec_status
                 ]);
+                $experi_id = "";
             } else {
                 $user_stage = update_user_stage($userId,"Experience");
                 
@@ -2200,7 +2222,7 @@ public function ResetPassword(Request $request)
                 $newExperience->neonatal_care = json_encode($neonatal_care_1);
                 $newExperience->paedia_surgical_preoperative = json_encode($surgical_rowpad_box_1);
                 //$newExperience->position_held = $positions_held1;
-                $newExperience->facility_workplace_type = $subpwork1;
+                //$newExperience->facility_workplace_type = $subpwork1;
                 $newExperience->employeement_start_date = $start_date1;
                 $newExperience->employeement_end_date = $end_date1;
                 $newExperience->responsiblities = $job_responeblities1;
@@ -2222,10 +2244,11 @@ public function ResetPassword(Request $request)
                 $newExperience->declaration_status = $dec_status;
 
                 $run = $newExperience->save();
+                $experi_id = $newExperience->id;
             }
         }
 
-        $experi_id = $newExperience->id;
+        
         // echo $experi_id;die;
         if ($run) {
             $json['status'] = 1;
@@ -2243,10 +2266,12 @@ public function ResetPassword(Request $request)
     {
 
         $user_id = $request->user_id;
-        
+        $experience_id = $request->experience_id;
+
         $first_name = $request->first_name;
         $last_name = $request->last_name;
         $email = $request->email;
+        $referee_no = $request->referee_no;
         $phone_no = $request->phone_no;
         $reference_relationship = $request->reference_relationship;
         $worked_together = $request->worked_together;
@@ -2259,20 +2284,21 @@ public function ResetPassword(Request $request)
         $getrefereedata = DB::table("referee")->where("user_id", $user_id)->get();
 
         $referee_no_array = array();
-
+        
         foreach ($getrefereedata as $r_data) {
-            $referee_no_array[] = $r_data->email;
+            $referee_no_array[] = $r_data->referee_no;
         }
 
         //print_r($referee_no_array);die;
         for ($i = 0; $i < count($first_name); $i++) {
-            if (in_array($email[$i], $referee_no_array)) {
+            if (isset($referee_no[$i]) && in_array($referee_no[$i], $referee_no_array)) {
                 // if (isset($still_working[$i])) {
                 //     $working = 1;
                 // } else {
                 //     $working = 0;
                 // }
-                $run = AddReferee::where('user_id', $user_id)->where('email', $email[$i])->update(['first_name' => $first_name[$i], 'last_name' => $last_name[$i], 'email' => $email[$i], 'phone_no' => $phone_no[$i], 'relationship' => $reference_relationship[$i], 'worked_together' => $worked_together[$i], 'position_with_referee' => json_encode($position_with_referee[$i+1]), 'start_date' => $start_date[$i], 'end_date' => $end_date[$i], 'still_working' => $still_working[$i], 'is_declare' => 1]);
+                
+                $run = AddReferee::where('user_id', $user_id)->where('referee_no', $referee_no[$i])->update(['first_name' => $first_name[$i], 'last_name' => $last_name[$i], 'email' => $email[$i], 'phone_no' => $phone_no[$i], 'relationship' => $reference_relationship[$i], 'worked_together' => $worked_together[$i], 'position_with_referee' => json_encode($position_with_referee[$i+1]), 'start_date' => $start_date[$i], 'end_date' => $end_date[$i], 'still_working' => $still_working[$i], 'experience_id' => $experience_id[$i], 'is_declare' => 1]);
             } else {
                 $user_stage = update_user_stage($user_id,"References");
                 if (isset($still_working[$i])) {
@@ -2293,6 +2319,7 @@ public function ResetPassword(Request $request)
                 $referee->start_date = $start_date[$i];
                 $referee->end_date = $end_date[$i];
                 $referee->still_working = $working;
+                $referee->experience_id = $experience_id[$i];
                 $referee->is_declare = 1;
                 $referee->save();
             }
