@@ -730,6 +730,14 @@
       document.getElementById("reqdeclare_information").innerHTML = "* Please check this checkbox";
       isValid = false;
     }
+
+    $(".subspecprof_list").each(function(){
+      var val = $(this).val();
+      if ($(".speciality_status_columns-"+val).prop('checked') == false) {
+        document.getElementById("reqsubspeclevelvalid-"+val).innerHTML = "* Please select the speciality status";
+        isValid = false;
+      }
+    });
     
     if (isValid == true) {
       $.ajax({
@@ -1394,7 +1402,7 @@
 
   function updateExperience() {
     var isValid = true;
-
+    
     var s = 1;
     $(".facworktype").each(function() {
       if ($(".facworktype-" + s).length > 0) {
@@ -1641,33 +1649,33 @@
     });
 
 
-    var c = 1;
-    $(".pos_held").each(function() {
-      if ($(".pos_held_" + c).length > 0) {
-        if ($(".pos_held_" + c).val() == '') {
-          document.getElementById("reqpositionheld-" + c).innerHTML = "* Please select the position held";
-          isValid = false;
-        }
-      }
+    // var c = 1;
+    // $(".pos_held").each(function() {
+    //   if ($(".pos_held_" + c).length > 0) {
+    //     if ($(".pos_held_" + c).val() == '') {
+    //       document.getElementById("reqpositionheld-" + c).innerHTML = "* Please select the position held";
+    //       isValid = false;
+    //     }
+    //   }
 
-      var r = 1;
-      $(".show_positions-"+c+" .subpos_list").each(function() {
-        var subpos = $(this).val();
+    //   var r = 1;
+    //   $(".show_positions-"+c+" .subpos_list").each(function() {
+    //     var subpos = $(this).val();
         
-        var label_text = $(".pos_label-"+ c+subpos).text();
-        console.log("subpos",c+subpos);
-        if ($(".position_valid-" + c+subpos).length > 0) {
+    //     var label_text = $(".pos_label-"+ c+subpos).text();
+    //     console.log("subpos",c+subpos);
+    //     if ($(".position_valid-" + c+subpos).length > 0) {
           
-          if ($(".position_valid-" + c+subpos).val() == '') {
+    //       if ($(".position_valid-" + c+subpos).val() == '') {
             
-            document.getElementById("reqsubpositionheld-" + c+subpos).innerHTML = "* Please select the "+label_text;
-            isValid = false;
-          }
-        }
-        r++;
-      });
-      c++;
-    });
+    //         document.getElementById("reqsubpositionheld-" + c+subpos).innerHTML = "* Please select the "+label_text;
+    //         isValid = false;
+    //       }
+    //     }
+    //     r++;
+    //   });
+    //   c++;
+    // });
 
     var d = 1;
     $(".employeement_start_date_exp").each(function() {
@@ -3467,6 +3475,43 @@
       });
     });
 </script>
+<script>
+$(document).ready(function () {
+
+    const savedRegistration = @json($registrationCountries ?? []);
+    const savedQualification = @json($qualificationCountries ?? []);
+
+    const $regSelect  = $('#registrationCountries');
+    const $qualSelect = $('#qualificationCountries');
+
+    // ---------- Registration Countries ----------
+    if ($regSelect.length && savedRegistration.length) {
+        savedRegistration.forEach(code => {
+            const text = $('#registration-country-list li[data-value="' + code + '"]').text();
+            if (text) {
+                $regSelect.append(new Option(text, code, true, true));
+            }
+        });
+        $regSelect.trigger('change');
+    }
+
+    // ---------- Qualification Countries ----------
+    if ($qualSelect.length && savedQualification.length) {
+        savedQualification.forEach(code => {
+            const text = $('#qualification-country-list li[data-value="' + code + '"]').text();
+            if (text) {
+                $qualSelect.append(new Option(text, code, true, true));
+            }
+        });
+        $qualSelect.trigger('change');
+    }
+
+    // Initialize Select2 AFTER appending options
+    $('.js-example-basic-multiple').select2();
+});
+</script>
+
+
 <!-- =================================
 
     Change password  Script

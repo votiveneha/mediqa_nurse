@@ -50,6 +50,8 @@ class AuthServices
             //$companyinsert['user_stage'] = "5";
             $companyinsert['basic_info_status'] = "1";
             $companyinsert['nationality'] = $request->nationality;
+            $companyinsert['registration_countries'] = $request->registration_countries;
+            $companyinsert['qualification_countries'] = $request->qualification_countries;
             //$companyinsert['created_at'] = Carbon::now('Asia/Kolkata');
 
             $id = Auth::guard('nurse_middle')->user()->id;

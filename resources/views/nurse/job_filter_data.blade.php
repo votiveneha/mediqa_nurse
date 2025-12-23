@@ -159,6 +159,6 @@
     </div>
 </div>
 @endforeach
-<div class="pagination-wrapper">
+{{-- <div class="pagination-wrapper">
     {{ $jobs->links() }}
-</div>
+</div> --}}

@@ -167,10 +167,15 @@ class HomeController extends Controller
                 $specialities_data = array_merge($specialities_data, $values);
             }
         }
-
+        
         $specialities_type = (array)json_decode($user_data->specialties);
+
+        //registration profile
+        $registration_profile = DB::table("registration_profiles_countries")->where("user_id", $user_id)->get();
+        
         //print_r($specialities_data);
-        return view('nurse.profile', compact('message','employeement_type_preferences','nurse_data','specialities_data','specialities_type','user_data'));
+        $experience_data = DB::table("user_experience")->where("user_id",$user_id)->get();
+        return view('nurse.profile', compact('message','employeement_type_preferences','nurse_data','specialities_data','specialities_type','user_data','experience_data', 'registration_profile'));
     }
     public function upload_profile_image(Request $request)
     {
@@ -254,6 +259,7 @@ class HomeController extends Controller
         $companyinsert['pad_op_room']                    = json_encode($request->surgical_operative_carep_1);
         $companyinsert['pad_qr_scout']                   = json_encode($request->surgical_operative_carep_2);
         $companyinsert['pad_qr_scrub']                   = json_encode($request->surgical_operative_carep_3);
+        $companyinsert['profession_banner_status']                   = 1;
 
         $run = User::insert($companyinsert);
         $r   = User::where('email', $request->email)->first();
@@ -1095,6 +1101,7 @@ public function ResetPassword(Request $request)
         $post->long_unemplyeed = $long_unemplyeed;
         $post->professional_info_status = "1";
         $post->career_advancement_goals = $career_advancement_goals;
+        $post->profession_banner_status = 0;
         $run = $post->save();
 
         if ($run) {
@@ -2118,7 +2125,7 @@ public function ResetPassword(Request $request)
             $surgical_operative_carep_2_1 = $surgical_operative_carep_2[$key] ?? null;
             $surgical_operative_carep_3_1 = $surgical_operative_carep_3[$key] ?? null;
             //$positions_held1 = json_encode($positions_held[$key]) ?? null;
-            //$subpwork1 = json_encode($subpwork[$key]) ?? null;
+            $subpwork1 = json_encode($subpwork[$key]) ?? null;
             $start_date1 = $start_date[$key] ?? '0000-00-00';
             $end_date1 = $end_date[$key] ?? '0000-00-00';
             $job_responeblities1 = $job_responeblities[$key] ?? null;
@@ -2174,7 +2181,7 @@ public function ResetPassword(Request $request)
                     'neonatal_care' => json_encode($neonatal_care_1),
                     'paedia_surgical_preoperative' => json_encode($surgical_rowpad_box_1),
                     //'position_held' => $positions_held1,
-                    //'facility_workplace_type' => $subpwork1,
+                    'facility_workplace_type' => $subpwork1,
                     'employeement_start_date' => $start_date1,
                     'employeement_end_date' => $end_date1,
                     'responsiblities' => $job_responeblities1,
@@ -2222,7 +2229,7 @@ public function ResetPassword(Request $request)
                 $newExperience->neonatal_care = json_encode($neonatal_care_1);
                 $newExperience->paedia_surgical_preoperative = json_encode($surgical_rowpad_box_1);
                 //$newExperience->position_held = $positions_held1;
-                //$newExperience->facility_workplace_type = $subpwork1;
+                $newExperience->facility_workplace_type = $subpwork1;
                 $newExperience->employeement_start_date = $start_date1;
                 $newExperience->employeement_end_date = $end_date1;
                 $newExperience->responsiblities = $job_responeblities1;
@@ -2262,73 +2269,166 @@ public function ResetPassword(Request $request)
     }
 
 
+    // public function updateReference(Request $request)
+    // {
+
+    //     $user_id = $request->user_id;
+    //     $experience_id = $request->experience_id;
+
+    //     $first_name = $request->first_name;
+    //     $last_name = $request->last_name;
+    //     $email = $request->email;
+    //     $referee_no = $request->referee_no;
+    //     // $phone_no = $request->phone_no;
+    //     $reference_relationship = $request->reference_relationship;
+    //     $worked_together = $request->worked_together;
+    //     $position_with_referee = $request->subpositions_heldr;
+    //     $start_date = $request->start_date;
+    //     $end_date = $request->end_date;
+    //     $still_working = $request->still_working1;
+    //     $reference_no = $request->reference_no;
+    //     //print_r($position_with_referee);die;
+    //     $getrefereedata = DB::table("referee")->where("user_id", $user_id)->get();
+
+    //     $referee_no_array = array();
+        
+    //     foreach ($getrefereedata as $r_data) {
+    //         $referee_no_array[] = $r_data->referee_no;
+    //     }
+
+    //     //print_r($referee_no_array);die;
+    //     for ($i = 0; $i < count($first_name); $i++) {
+    //         if (isset($referee_no[$i]) && in_array($referee_no[$i], $referee_no_array)) {
+    //             // if (isset($still_working[$i])) {
+    //             //     $working = 1;
+    //             // } else {
+    //             //     $working = 0;
+    //             // }
+                
+    //             $run = AddReferee::where('user_id', $user_id)->where('referee_no', $referee_no[$i])->update(['first_name' => $first_name[$i], 'last_name' => $last_name[$i], 'email' => $email[$i], 
+    //                 // 'phone_no' => $phone_no[$i], 
+    //                 'relationship' => $reference_relationship[$i], 'worked_together' => $worked_together[$i], 'position_with_referee' => json_encode($position_with_referee[$i+1]), 'start_date' => $start_date[$i], 'end_date' => $end_date[$i], 'still_working' => $still_working[$i], 'experience_id' => $experience_id[$i], 'is_declare' => 1]);
+    //         } else {
+    //             $user_stage = update_user_stage($user_id,"References");
+    //             if (isset($still_working[$i])) {
+    //                 $working = 1;
+    //             } else {
+    //                 $working = 0;
+    //             }
+    //             $referee = new AddReferee;
+    //             $referee->referee_no = $i + 1;
+    //             $referee->user_id = $user_id;
+    //             $referee->first_name = $first_name[$i];
+    //             $referee->last_name = $last_name[$i];
+    //             $referee->email = $email[$i];
+    //             // $referee->phone_no = $phone_no[$i];
+    //             $referee->relationship = $reference_relationship[$i];
+    //             $referee->worked_together = $worked_together[$i];
+    //             $referee->position_with_referee = json_encode($position_with_referee[$i+1]);
+    //             $referee->start_date = $start_date[$i];
+    //             $referee->end_date = $end_date[$i];
+    //             $referee->still_working = $working;
+    //             $referee->experience_id = $experience_id[$i];
+    //             $referee->is_declare = 1;
+    //             $referee->save();
+    //         }
+    //     }
+
+
+
+
+    //     $json['status'] = 1;
+
+    //     echo json_encode($json);
+    // }
     public function updateReference(Request $request)
     {
+        try {
+            $user_id = $request->user_id;
+            $experience_id = $request->experience_id;
 
-        $user_id = $request->user_id;
-        $experience_id = $request->experience_id;
+            $first_name = $request->first_name;
+            $last_name = $request->last_name;
+            $email = $request->email;
+            $referee_no = $request->referee_no;
+            $reference_relationship = $request->reference_relationship;
+            $worked_together = $request->worked_together;
+            $nurse_type = $request->nurse_type;
+            $start_date = $request->start_date;
+            $end_date = $request->end_date;
+            $still_working = $request->still_working1;
+            $reference_no = $request->reference_no;
+            
+            $getrefereedata = DB::table("referee")->where("user_id", $user_id)->get();
 
-        $first_name = $request->first_name;
-        $last_name = $request->last_name;
-        $email = $request->email;
-        $referee_no = $request->referee_no;
-        $phone_no = $request->phone_no;
-        $reference_relationship = $request->reference_relationship;
-        $worked_together = $request->worked_together;
-        $position_with_referee = $request->subpositions_heldr;
-        $start_date = $request->start_date;
-        $end_date = $request->end_date;
-        $still_working = $request->still_working1;
-        $reference_no = $request->reference_no;
-        //print_r($position_with_referee);die;
-        $getrefereedata = DB::table("referee")->where("user_id", $user_id)->get();
-
-        $referee_no_array = array();
-        
-        foreach ($getrefereedata as $r_data) {
-            $referee_no_array[] = $r_data->referee_no;
-        }
-
-        //print_r($referee_no_array);die;
-        for ($i = 0; $i < count($first_name); $i++) {
-            if (isset($referee_no[$i]) && in_array($referee_no[$i], $referee_no_array)) {
-                // if (isset($still_working[$i])) {
-                //     $working = 1;
-                // } else {
-                //     $working = 0;
-                // }
-                
-                $run = AddReferee::where('user_id', $user_id)->where('referee_no', $referee_no[$i])->update(['first_name' => $first_name[$i], 'last_name' => $last_name[$i], 'email' => $email[$i], 'phone_no' => $phone_no[$i], 'relationship' => $reference_relationship[$i], 'worked_together' => $worked_together[$i], 'position_with_referee' => json_encode($position_with_referee[$i+1]), 'start_date' => $start_date[$i], 'end_date' => $end_date[$i], 'still_working' => $still_working[$i], 'experience_id' => $experience_id[$i], 'is_declare' => 1]);
-            } else {
-                $user_stage = update_user_stage($user_id,"References");
-                if (isset($still_working[$i])) {
-                    $working = 1;
-                } else {
-                    $working = 0;
-                }
-                $referee = new AddReferee;
-                $referee->referee_no = $i + 1;
-                $referee->user_id = $user_id;
-                $referee->first_name = $first_name[$i];
-                $referee->last_name = $last_name[$i];
-                $referee->email = $email[$i];
-                $referee->phone_no = $phone_no[$i];
-                $referee->relationship = $reference_relationship[$i];
-                $referee->worked_together = $worked_together[$i];
-                $referee->position_with_referee = json_encode($position_with_referee[$i+1]);
-                $referee->start_date = $start_date[$i];
-                $referee->end_date = $end_date[$i];
-                $referee->still_working = $working;
-                $referee->experience_id = $experience_id[$i];
-                $referee->is_declare = 1;
-                $referee->save();
+            $referee_no_array = array();
+            
+            foreach ($getrefereedata as $r_data) {
+                $referee_no_array[] = $r_data->referee_no;
             }
+
+            for ($i = 0; $i < count($first_name); $i++) {
+                $expId = $experience_id[$i] ?? 0;
+                $isLinked = $expId && $expId != 0;
+                $working = isset($still_working[$i]) && $still_working[$i] == 1 ? 1 : 0;
+
+
+                // Prepare data array
+                $data = [
+                    'first_name'   => $first_name[$i] ?? null,
+                    'last_name'    => $last_name[$i] ?? null,
+                    'email'        => $email[$i] ?? null,
+                    'phone_no'     => '', // Empty string since we don't use phone anymore
+                    'relationship' => $reference_relationship[$i] ?? null,
+                    'worked_together' => $worked_together[$i] ?? null,
+                    'start_date'   => $start_date[$i] ?? null,
+                    'end_date'     => $working ? null : ($end_date[$i] ?? null),
+                    'still_working'=> $working,
+                    'experience_id'=> $expId,
+                    'position_with_referee' => null, // Set to null since we don't use this field
+                    'is_declare'   => 1,
+                    'updated_at'   => now()
+                ];
+
+                // Only set nurse_type_id for unlinked referees (experience_id = 0)
+                // Since your table doesn't have nurse_type_id field, we'll use position_with_referee
+                if (!$isLinked && isset($nurse_type[$i])) {
+                    $data['position_with_referee'] = $nurse_type[$i]; // Store nurse type ID here
+                }
+
+                // Update or create referee record
+                if (!empty($referee_no[$i])) {
+
+                    $updated = AddReferee::where('user_id', $user_id)
+                        ->where('referee_no', $referee_no[$i])
+                        ->update($data);
+
+                    // If no row updated → insert new referee
+                    if ($updated === 0) {
+                        $data['user_id'] = $user_id;
+                        $data['referee_no'] = AddReferee::where('user_id', $user_id)->max('referee_no') + 1;
+                        $data['created_at'] = now();
+                        AddReferee::create($data);
+                    }
+
+                } else {
+                    // Brand new referee
+                    $data['user_id'] = $user_id;
+                    $data['referee_no'] = AddReferee::where('user_id', $user_id)->max('referee_no') + 1;
+                    $data['created_at'] = now();
+                    AddReferee::create($data);
+                }
+
+            }
+
+            $json['status'] = 1;
+            $json['message'] = 'References updated successfully';
+
+        } catch (\Exception $e) {
+            $json['status'] = 0;
+            $json['message'] = 'Error: ' . $e->getMessage();
+            \Log::error('Update Reference Error: ' . $e->getMessage());
         }
-
-
-
-
-        $json['status'] = 1;
 
         echo json_encode($json);
     }

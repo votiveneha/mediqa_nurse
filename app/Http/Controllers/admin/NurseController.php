@@ -2387,4 +2387,38 @@ class NurseController extends Controller
 
         echo json_encode($json);
     }
+    
+        public function getRegisteredCountries(Request $request)
+    {
+        $data = DB::table('registration_profiles_countries')
+            ->where('user_id', $request->user_id)
+            ->where('type', 1)
+            ->get();
+
+        // attach country_name using helper
+        $data = $data->map(function ($item) {
+            $item->country_name = country_name($item->country_code);
+            return $item;
+        });
+
+        return response()->json([
+            'data' => $data
+        ]);
+    }
+
+
+    public function updateRegisteredCountryStatus(Request $request)
+    {
+        DB::table('registration_profiles_countries')
+            ->where('id', $request->id)
+            ->update([
+                'status' => $request->status,
+                'updated_at' => now()
+            ]);
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Status updated successfully'
+        ]);
+    }
 }
