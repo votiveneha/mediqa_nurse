@@ -725,18 +725,11 @@ p.highlight-text {
                                 @if(!empty($reg_country->upload_evidence))
                                     @foreach(json_decode($reg_country->upload_evidence, true) as $file)
                                         <div class="trans_img">
-                                            <div>
-                                                <i class="fa fa-file"></i> 
-                                            </div>
-                                            <div>
-                                                {{ $file }}
-                                            </div>
-                                            <div>
-                                                <span class="close_btn"
-                                                      onclick="removeRegistrationEvidence('{{ $file }}', {{ $reg_country->id }})">
-                                                    <i class="fa fa-close"></i>
-                                                </span>
-                                            </div>
+                                            <i class="fa fa-file"></i> {{ $file }}
+                                            <span class="close_btn"
+                                                  onclick="removeRegistrationEvidence('{{ $file }}', {{ $reg_country->id }})">
+                                                <i class="fa fa-close"></i>
+                                            </span>
                                         </div>
                                     @endforeach
                                 @endif
@@ -1590,62 +1583,65 @@ p.highlight-text {
                           <span id="reqsubspecvalid-{{ $parts[1] }}" class="reqError text-danger valley"></span>
                           </div>
                           <div class="subspec_level-{{ $parts[1] }}"></div>
-                        </div>
-                        <div class="show_specialities-{{ $parts[1] }}">
-                          <?php
-                                $speciality_status = isset($specialities_type['speciality_status'])?(array)$specialities_type['speciality_status']:[];
-                                //print_r($specialities_type['speciality_status']);
+                          <div class="show_specialities-{{ $parts[1] }}"></div>
+                        
+                        
+                          <div class="show_specialitiesStatus-{{ $parts[1] }}">
+                            <?php
+                                  $speciality_status = isset($specialities_type['speciality_status'])?(array)$specialities_type['speciality_status']:[];
+                                  //print_r($specialities_type['speciality_status']);
 
-                                
-                              ?>
+                                  
+                                ?>
 
-                              @foreach($speciality_status as $key=>$s_status)
+                                @foreach($speciality_status as $key=>$s_status)
 
-                                  <?php
-                                    $parts1 = explode('_', $key);
-                                    $sp_data_name = DB::table("speciality")->where('id', $parts1[1])->first();
-                                    $speciality_status_data = DB::table("speciality_status")->get();
-                                  ?>
-                                  @if (in_array($parts1[1], $stypes))
-                                  <div class="custom-select-wrapper subspecprofdiv subspecprofdiv-{{ $parts1[1] }} form-group level-drp" style="margin-bottom: 5px;">
-                                    <label class="form-label subspeclabel-{{ $parts1[1] }}" for="input-1">
-                                      Specialty Status ({{ $sp_data_name->name }}) 
-                                      <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>
-                                      <!-- <div id="statusTooltip" class="tooltip_speciality_status" role="tooltip"> -->
-                                        <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">
-                                          <li><strong>Status definitions:</strong></li>
-                                          <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>
-                                          <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>
-                                          <li><strong>First:</strong> First-ever specialty after qualification.</li>
-                                          <li><strong>Former:</strong> Previously practiced.</li>
-                                          <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>
-                                          <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>
-                                        </ul>
-                                      <!-- </div> -->
-                                    </label>
-                                    <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_list-{{ $parts1[1] }}" value="{{ $parts1[1] }}">
-                                    <select class="custom-select speciality_status_column speciality_status_column-{{ $parts[1] }} speciality_status_columns-{{ $parts1[1] }} form-input mr-10 select-active langprof_level_valid-{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][status]" onchange="changeSpecialityStatus(this.value,{{ $parts1[1] }},{{ $parts[1] }})">
-                                      <option value="">select</option>
-                                      @foreach($speciality_status_data as $s_status_data)
-                                      <option value="{{ $s_status_data->status_name }}" @if($s_status_data->status_name == $s_status->status) selected @endif>{{ $s_status_data->status_name }}</option>
-                                      @endforeach
+                                    <?php
+                                      $parts1 = explode('_', $key);
+                                      $sp_data_name = DB::table("speciality")->where('id', $parts1[1])->first();
+                                      $speciality_status_data = DB::table("speciality_status")->get();
+                                    ?>
+                                    @if (in_array($parts1[1], $stypes))
+                                    <div class="custom-select-wrapper subspecprofdiv subspecprofdiv-{{ $parts1[1] }} form-group level-drp" style="margin-bottom: 5px;">
+                                      <label class="form-label subspeclabel-{{ $parts1[1] }}" for="input-1">
+                                        Specialty Status ({{ $sp_data_name->name }}) 
+                                        <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>
+                                        <!-- <div id="statusTooltip" class="tooltip_speciality_status" role="tooltip"> -->
+                                          <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">
+                                            <li><strong>Status definitions:</strong></li>
+                                            <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>
+                                            <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>
+                                            <li><strong>First:</strong> First-ever specialty after qualification.</li>
+                                            <li><strong>Former:</strong> Previously practiced.</li>
+                                            <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>
+                                            <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>
+                                          </ul>
+                                        <!-- </div> -->
+                                      </label>
                                       
-                                    </select>
-                                    <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_current_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_current]" value="0">
-                                    <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_principal_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_principal]" value="0">
-                                    <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_first_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_first]" value="0">
-                                    <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_former_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_former]" value="0">
-                                    <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_upskilling_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_upskilling]" value="0">
-                                  </div>
-                                  
-                                  <span id="reqsubspeclevelvalid-{{ $parts1[1] }}" class="reqError text-danger valley"></span>
-                                  @endif
-                                  
-                                  
+                                      <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_list-{{ $parts1[1] }}" value="{{ $parts1[1] }}">
+                                      <select class="custom-select speciality_status_column speciality_status_column-{{ $parts[1] }} speciality_status_columns-{{ $parts1[1] }} form-input mr-10 select-active langprof_level_valid-{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][status]" onchange="changeSpecialityStatus(this.value,{{ $parts1[1] }},{{ $parts[1] }})">
+                                        <option value="">select</option>
+                                        @foreach($speciality_status_data as $s_status_data)
+                                        <option value="{{ $s_status_data->status_name }}" @if($s_status_data->status_name == $s_status->status) selected @endif>{{ $s_status_data->status_name }}</option>
+                                        @endforeach
+                                        
+                                      </select>
+                                      <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_current_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_current]" value="0">
+                                      <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_principal_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_principal]" value="0">
+                                      <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_first_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_first]" value="0">
+                                      <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_former_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_former]" value="0">
+                                      <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_upskilling_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_upskilling]" value="0">
+                                    </div>
+                                    
+                                    <span id="reqsubspeclevelvalid-{{ $parts1[1] }}" class="reqError text-danger valley"></span>
+                                    @endif
+                                    
+                                    
 
-                              @endforeach
+                                @endforeach
+                          </div>
                         </div>
-                      
 
                       @endforeach
                       @endif
@@ -4959,7 +4955,7 @@ p.highlight-text {
                             <label class="form-label" for="input-1">Specialties</label>
                             @php
                               $specialities_typeExperience = (array)json_decode($user->specialties);
-                              $specialties_data = json_encode($specialities_typeExperience['type_0']);
+                              $specialties_data = isset($specialities_typeExperience['type_0'])?json_encode($specialities_typeExperience['type_0']):'';
                               //print_r($specialties_data);
                             @endphp 
                             <input type="hidden" name="speciality_exp_value-1" class="speciality_exp-1" value="{{ $specialties_data }}">
@@ -8271,6 +8267,16 @@ if (!empty($interviewReferenceData)) {
                 
             }
         });
+        
+        $(".show_specialitiesStatus-"+k+" .subspecprof_list").each(function(i,val){
+            var val2 = $(val).val();
+            console.log("val2",val2);
+            if(selectedValues.includes(val2) == false){
+              
+              $(".subspecprofdiv-"+val2).remove();
+                
+            }
+        });
 
       for(var i=0;i<selectedValues.length;i++){
         if($(".show_specialities-"+k+" .subspec_main_div-"+selectedValues[i]).length < 1){
@@ -8301,15 +8307,17 @@ if (!empty($interviewReferenceData)) {
                               <span id="reqsubspecvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
                               </div>\
                               <div class="subspec_level-'+data1.main_speciality_id+'"></div>\
-                              </div><div class="show_specialities-'+data1.main_speciality_id+'"></div>');
+                              <div class="show_specialities-'+data1.main_speciality_id+'"></div>\
+                              <div class="show_specialitiesStatus-'+data1.main_speciality_id+'"></div>\
+                              </div>');
 
                               selectTwoFunction(data1.main_speciality_id);
               
               }else{
                 
-                if($(".show_specialities-"+k+" .subspecprofdiv-"+data1.main_speciality_id).length < 1){
+                if($(".show_specialitiesStatus-"+k+" .subspecprofdiv-"+data1.main_speciality_id).length < 1){
                   
-                  $(".show_specialities-"+k).append('<div class="custom-select-wrapper subspecprofdiv subspecprofdiv-'+data1.main_speciality_id+' form-group level-drp" style="margin-bottom: 5px;">\
+                  $(".show_specialitiesStatus-"+k).append('<div class="custom-select-wrapper subspecprofdiv subspecprofdiv-'+data1.main_speciality_id+' form-group level-drp" style="margin-bottom: 5px;">\
                     <label class="form-label subspeclabel-'+data1.main_speciality_id+'" for="input-1">\
                     Specialty Status ('+data1.main_speciality_name+')\
                     <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>\
@@ -8417,7 +8425,7 @@ if (!empty($interviewReferenceData)) {
                               <span id="reqsubspecvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
                               </div>\
                               <div class="subspec_level-'+data1.main_speciality_id+'"></div>\
-                              </div><div class="show_specialities-'+data1.main_speciality_id+'"></div>');
+                              </div><div class="show_specialitiesExperience-'+x+"-"+data1.main_speciality_id+'"></div>');
 
                               selectTwoFunction(data1.main_speciality_id);
               
