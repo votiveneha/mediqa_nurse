@@ -666,6 +666,15 @@ function pad(number) {
       isValid = false;
     }
 
+    $(".subspecprof_list").each(function(){
+      var val = $(this).val();
+      alert(val);
+      if ($('.speciality_status_columns-'+val).val() == '') {
+        document.getElementById("reqsubspeclevelvalid-"+val).innerHTML = "* Please select the Specialty Status";
+        isValid = false;
+      }
+    });
+
     // if ($('[name="degree[]"]').val() == '') {
     //   document.getElementById("reqdegree").innerHTML = "* Please select degree.";
     //   isValid = false;
@@ -686,49 +695,49 @@ function pad(number) {
       isValid = false;
     }
 
-    if(isValid == true){
-      $.ajax({
-        url: "{{ route('nurse.updateProfession') }}",
-        type: "POST",
-        cache: false,
-        contentType: false,
-        processData: false,
-        data: new FormData($('#profession_form')[0]),
-        dataType: 'json',
-        beforeSend: function() {
-          $('#submitProfession').prop('disabled', true);
-          $('#submitProfession').text('Process....');
-        },
-        success: function(res) {
-          $('#submitProfession').prop('disabled', false);
-          $('#submitProfession').text('Update Profile');
+    // if(isValid == true){
+    //   $.ajax({
+    //     url: "{{ route('nurse.updateProfession') }}",
+    //     type: "POST",
+    //     cache: false,
+    //     contentType: false,
+    //     processData: false,
+    //     data: new FormData($('#profession_form')[0]),
+    //     dataType: 'json',
+    //     beforeSend: function() {
+    //       $('#submitProfession').prop('disabled', true);
+    //       $('#submitProfession').text('Process....');
+    //     },
+    //     success: function(res) {
+    //       $('#submitProfession').prop('disabled', false);
+    //       $('#submitProfession').text('Update Profile');
 
-          if (res.status == '1') {
-            Swal.fire({
-              icon: 'success',
-              title: 'Success',
-              text: 'Professional Information Updated Successfully',
-            }).then(function() {
-              window.location.href = "{{ route('nurse.my-profile') }}?page=profession";
-            });
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: res.message,
-            })
-          }
+    //       if (res.status == '1') {
+    //         Swal.fire({
+    //           icon: 'success',
+    //           title: 'Success',
+    //           text: 'Professional Information Updated Successfully',
+    //         }).then(function() {
+    //           window.location.href = "{{ route('nurse.my-profile') }}?page=profession";
+    //         });
+    //       } else {
+    //         Swal.fire({
+    //           icon: 'error',
+    //           title: 'Error',
+    //           text: res.message,
+    //         })
+    //       }
           
-        },
-        error: function(errorss) {
-          $('#submitProfession').prop('disabled', false);
-          $('#submitProfession').text('Submit');
-          for (var err in errorss.responseJSON.errors) {
-            $("#submitProfession").find("[name='" + err + "']").after("<div class='text-danger'>" + errorss.responseJSON.errors[err] + "</div>");
-          }
-        }
-      });
-    }
+    //     },
+    //     error: function(errorss) {
+    //       $('#submitProfession').prop('disabled', false);
+    //       $('#submitProfession').text('Submit');
+    //       for (var err in errorss.responseJSON.errors) {
+    //         $("#submitProfession").find("[name='" + err + "']").after("<div class='text-danger'>" + errorss.responseJSON.errors[err] + "</div>");
+    //       }
+    //     }
+    //   });
+    // }
     return false;
   }
   function vaccinationForm(){

@@ -284,11 +284,11 @@ p.highlight-text {
 
               $registrations = \DB::table('registration_profiles_countries')
                   ->where('user_id', $user->id)
-                  ->where('type', 1)
+           
                   ->orderBy('created_at')
                   ->get();
               @endphp
-              @php
+             @php
               $statusMap = [
                   1 => ['label' => 'Not Started', 'class' => 'status-not-started'],
                   2 => ['label' => 'Pending', 'class' => 'status-pending'],
@@ -299,7 +299,17 @@ p.highlight-text {
                   7 => ['label' => 'Expired', 'class' => 'status-expired'],
               ];
 
-              $activeRegistration = $registrations->first();
+              $activeCountry = $user->active_country;
+
+              $activeRegistration = $registrations->firstWhere(
+                  'country_code',
+                  $activeCountry
+              );
+
+              if (!$activeRegistration) {
+                  $activeRegistration = $registrations->first();
+              }
+
               $activeStatus = $activeRegistration->status ?? 1;
               @endphp
 
@@ -311,48 +321,24 @@ p.highlight-text {
                     </span>
                   </div>
                   <div>
-                    <select class="form-select" id="countrySwitcher">
+                    @php
+                    $activeCountry = $user->active_country;
+                    @endphp
 
+                    <select class="form-select" id="countrySwitcher">
                         @forelse ($registrations as $registration)
                             <option value="{{ $registration->country_code }}"
                                     data-status="{{ $registration->status ?? 1 }}"
-                                    {{ $loop->first ? 'selected' : '' }}>
+                                    {{ $activeCountry === $registration->country_code ? 'selected' : '' }}>
                                 {{ country_name($registration->country_code) }}
                             </option>
                         @empty
                             <option disabled selected>No registered countries</option>
                         @endforelse
-
-                        <!--<option disabled>────────────</option>-->
-                        <!--<option value="manage">Manage registrations</option>-->
                     </select>
                   </div>
               </div>
-              <script>
-              const statusMap = {
-                  1: { label: 'Not Started', class: 'status-not-started' },
-                  2: { label: 'Pending', class: 'status-pending' },
-                  3: { label: 'Submitted', class: 'status-submitted' },
-                  4: { label: 'In Review', class: 'status-in-review' },
-                  5: { label: 'Verified', class: 'status-verified' },
-                  6: { label: 'Incomplete', class: 'status-incomplete' },
-                  7: { label: 'Expired', class: 'status-expired' },
-              };
 
-              document.getElementById('countrySwitcher')?.addEventListener('change', function () {
-
-                  if (this.value === 'manage') {
-                      window.location.href = '#registrations-section';
-                      return;
-                  }
-
-                  const status = this.options[this.selectedIndex].dataset.status || 1;
-
-                  const pill = document.getElementById('statusPill');
-                  pill.className = 'status-pill ' + statusMap[status].class;
-                  pill.innerText = statusMap[status].label;
-              });
-              </script>
 
             <div class="profile-chklst">
               <span>Profile basics</span>
@@ -566,10 +552,8 @@ p.highlight-text {
                         </div>
 
                         {{-- Countries Block --}}
-                               <div class="col-12 mt-1" id="registrations-section">
-  
+                   <div class="col-12 mt-1">
                                 <h5 class="mb-3">Registration & Qualification</h5>
-
                                 @php
                                     $user = Auth::guard('nurse_middle')->user();
 
@@ -578,54 +562,41 @@ p.highlight-text {
                                         $user->qualification_countries ?? '[]'
                                     );
                                  
-                                    // echo $user->registration_countries;
                                     $countries = country_name_from_db();
-                                @endphp
-
-                                {{-- Countries of Registration --}}
+                                @endphp                    
                                 <div class="form-group mb-4 drp--clr">
                                     <label class="font-sm mb-2">
                                         Countries of Registration <span class="text-danger">*</span>
                                     </label>
 
-                                    {{-- Hidden field to submit --}}
                                     <input type="hidden"
-                                          name="registration_countries[]"
-                                          id="registrationCountriesInput"
-                                          value="{{ json_encode($registrationCountries) }}">
+                                        name="country_r"
+                                        class="country_r"
+                                        value='{{ json_encode($registrationCountries ?? []) }}'>
 
-                                    {{-- Dropdown list --}}
-                                    <ul id="registration-country-list" style="display:none;">
-                                        @foreach ($countries as $country)
-                                            <li
-                                                data-value="{{ $country->iso2 }}"
-                                                class="{{ in_array($country->iso2, $registrationCountries) ? 'selected' : '' }}"
-                                            >
-                                                {{ $country->name }}
-                                            </li>
-                                        @endforeach
-                                    </ul>
-
-                                    {{-- Visible Select --}}
-                                    <select
-                                        class="js-example-basic-multiple addAll_removeAll_btn"
-                                        data-list-id="registration-country-list"
-                                        id="registrationCountries"
-                                        multiple
-                                    ></select>
-
+                                  <ul id="register_record" style="display:none;">
+                                      @foreach($countries as $r_record)
+                                          <li data-value="{{ $r_record->iso2 }}">
+                                              {{ $r_record->name }}
+                                          </li>
+                                      @endforeach
+                                  </ul>
+                                  <select
+                                      class="js-example-basic-multiple addAll_removeAll_btn"
+                                      data-list-id="register_record"
+                                      name="register_record[]"
+                                      id="registerCountries"
+                                      multiple>
+                                  </select>
+                                    <span id="reqempsdate" class="reqError text-danger valley"></span>
                                     <small class="text-muted">
                                         Select the countries where you are registered to practice.
                                     </small> 
-                                </div>
-                           
-
-                                {{-- Countries of Qualification --}}
+                                </div>          
                                 <div class="form-group drp--clr">
                                     <label class="font-sm mb-2">
                                         Countries of Qualification <span class="text-danger">*</span>
                                     </label>
-
                                     <input type="hidden"
                                           name="qualification_countries"
                                           id="qualificationCountriesInput"
@@ -652,37 +623,62 @@ p.highlight-text {
                                     <small class="text-muted">
                                         We’ve prefilled this based on your registration countries.
                                         Update if your qualification was in a different country.
-                                    </small>
-                            
+                                    </small>                           
                                 </div>
                         </div>
+                      <div id="registrationCardsContainer"></div>
 
                         @php
                           $user = Auth::guard('nurse_middle')->user();
-                           $registration_country = DB::table('registration_profiles_countries')->where('status',1)->where('user_Id',$user->id)->get();
+                           $registration_country = DB::table('registration_profiles_countries')->where('user_Id',$user->id)->where('country_code',$user->active_country)->first();
                         @endphp
 
-                        @if (count($registration_country) > 0)
-                        @foreach ($registration_country as $reg_country)
-
-                                             <div class="p-2">
-                       <div class="mb-4 p-3 card registration-card registration-card-{{  $reg_country->country_code }}">
+                    @if (!empty($user->active_country))
+                    <div class="mb-4 card registration-card registration-card-{{$registration_country->country_code }}">
                           <h5 class="d-flex justify-content-between align-items-center">
                               <span>
-                                  Registration & Licences — {{ country_name($reg_country->country_code) }}
+                                  Registration & Licences — {{ country_name($registration_country->country_code) }}
                               </span>
 
-                              <span class="badge badge-status badge-{{ $reg_country->status }}">
-                                  {{ ucwords(str_replace('_',' ',$reg_country->status)) }}
+                              <span class="badge badge-status badge-{{ $registration_country->status }}">
+                                  {{ ucwords(str_replace('_',' ',$registration_country->status)) }}
                               </span>
                           </h5>
 
+                           @if ($registration_country->status == 2 || $registration_country->status == 3)
+                            <div class="form-group">
+                                <label>Status</label>
+                                <div class="d-flex gap-3">
+                                    <label class="me-3">
+                                        <input type="radio"
+                                              name="registration[{{ $registration_country->id }}][status]"
+                                              value="2"
+                                              {{ $registration_country->status == 2 ? 'checked' : '' }}
+                                              class="status-radio"
+                                              data-code="{{ $registration_country->country_code }}"
+                                              style="width:16px;height:16px;margin-right:6px">
+                                        Draft
+                                    </label>
+
+                                    <label>
+                                        <input type="radio"
+                                              name="registration[{{ $registration_country->id }}][status]"
+                                              value="3"
+                                              {{ $registration_country->status == 3 ? 'checked' : '' }}
+                                              class="status-radio"
+                                              data-code="{{ $registration_country->country_code }}"
+                                              style="width:16px;height:16px;margin-right:6px">
+                                        Submitted (for Review)
+                                    </label>
+                                </div>
+                            </div>
+                          @endif
                           {{-- Jurisdiction --}}
                           <div class="form-group">
                               <label>Jurisdiction / Registration Authority</label>
                               <input type="text"
-                                    name="registration[{{ $reg_country->id }}][jurisdiction]"
-                                    value="{{ $reg_country->registration_authority_name }}"
+                                    name="registration[{{ $registration_country->id }}][jurisdiction]"
+                                    value="{{ $registration_country->registration_authority_name }}"
                                     class="form-control">
                           </div>
 
@@ -690,19 +686,21 @@ p.highlight-text {
                           <div class="form-group">
                               <label>License / Registration Number</label>
                               <input type="text"
-                                    name="registration[{{ $reg_country->id }}][registration_number]"
-                                    value="{{ $reg_country->registration_number }}"
+                                    name="registration[{{ $registration_country->id }}][registration_number]"
+                                    value="{{ $registration_country->registration_number }}"
                                     class="form-control">
                           </div>
 
                           {{-- Expiry Date --}}
-                          <div class="form-group">
-                              <label>Expiry Date</label>
-                              <input type="date"
-                                    name="registration[{{ $reg_country->id }}][expiry_date]"
-                                    value="{{ $reg_country->expiry_date }}"
-                                    class="form-control">
-                          </div>
+                        <div class="form-group">
+                            <label>Expiry Date</label>
+                            <input type="date"
+                              name="registration[{{ $registration_country->id }}][expiry_date]"
+                              value="{{ \Carbon\Carbon::parse($registration_country->expiry_date)->format('Y-m-d') }}"
+                              min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}"
+                              class="form-control">
+                        </div>
+
 
             
                         <div class="form-group">
@@ -710,46 +708,38 @@ p.highlight-text {
 
                
                             <input type="hidden"
-                                  name="registration[{{ $reg_country->id }}][upload_evidence]"
-                                  class="registration_evidence_input-{{ $reg_country->id }}"
-                                  value='{{ $reg_country->upload_evidence }}'>
+                                  name="registration[{{ $registration_country->id }}][upload_evidence]"
+                                  class="registration_evidence_input-{{ $registration_country->id }}"
+                                  value='{{ $registration_country->upload_evidence }}'>
 
                             <input type="file"
                                   class="form-control"
                                   multiple
-                                  onchange="uploadRegistrationEvidence({{ $reg_country->id }})">
+                                  onchange="uploadRegistrationEvidence({{ $registration_country->id }})">
 
-                            <span class="text-danger error-upload-{{ $reg_country->id }}"></span>
+                            <span class="text-danger error-upload-{{ $registration_country->id }}"></span>
 
-                            <div class="mt-2 registration-evidence-preview-{{ $reg_country->id }}">
-                                @if(!empty($reg_country->upload_evidence))
-                                    @foreach(json_decode($reg_country->upload_evidence, true) as $file)
-                                        <div class="trans_img">
-                                            <div>
-                                                <i class="fa fa-file"></i> 
-                                            </div>
-                                            <div>
-                                                {{ $file }}
-                                            </div>
-                                            <div>
-                                                <span class="close_btn"
-                                                      onclick="removeRegistrationEvidence('{{ $file }}', {{ $reg_country->id }})">
-                                                    <i class="fa fa-close"></i>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                @endif
-                            </div>
+                          <div class="mt-2 registration-evidence-preview-{{ $registration_country->id }}">
+                              @if(!empty($registration_country->upload_evidence))
+                                  @foreach(json_decode($registration_country->upload_evidence, true) as $file)
+                                      <div class="trans_img">
+                                          <i class="fa fa-file"></i> 
+                                          <a href="{{ url('/public/uploads/registration/' . $file) }}" target="_blank">
+                                              {{ preg_replace('/^\d+_\d+_/', '', $file) }}
+                                          </a>
+                                          <span class="close_btn"
+                                                onclick="removeRegistrationEvidence('{{ $file }}', {{ $registration_country->id }})">
+                                              <i class="fa fa-close"></i>
+                                          </span>
+                                      </div>
+                                  @endforeach
+                              @endif
+                          </div>
+
                         </div>
 
                       </div>
-                      </div>
-
-
-                    @endforeach     
                     @endif
-
                           <!-- <div class="form-group col-md-12">
                           <label class="font-sm color-text-mutted mb-10">Bio</label>
                           <textarea class="form-control" rows="4" name="bio">{{ Auth::guard('nurse_middle')->user()->bio }}</textarea>
@@ -781,7 +771,7 @@ p.highlight-text {
                           <!--</div>-->
                           <div class="form-group position-relative">
                             <!-- <textarea type="text" class="form-control ps-5" placeholder="Address"></textarea> -->
-                            <label class="font-sm color-text-mutted mb-10">Country</label>
+                            <label class="font-sm color-text-mutted mb-10">Country of residence</label>
                             <select class="form-control form-select ps-5" name="country" id="countryI">
                               <option value="">Select Country</option>
                               @php $country_data=country_name_from_db();@endphp
@@ -1385,8 +1375,14 @@ p.highlight-text {
 
                             $nurse_type = (array)json_decode($user->nurse_data);
                             
-                            $specialities_type = (array)json_decode($user->specialties);
-
+                            $specialities_type = [];
+                           
+                            //print_r($user->specialties);die;
+                             if($user->specialties != NULL){
+                              $specialities_type = (array)json_decode($user->specialties);
+                            }else{
+                              $specialities_type = [];
+                            }
                         @endphp
                         <input type="hidden" name="user_id" class="user_id" value="{{ Auth::guard('nurse_middle')->user()->id }}">
                         <input type="hidden" name="ntype" class="ntype" value="{{ isset($nurse_type['type_0'])?json_encode($nurse_type['type_0']):'' }}">
@@ -1552,7 +1548,8 @@ p.highlight-text {
                       
 
                       @php
-                        $specialities_type = (array)json_decode($user->specialties);
+                        
+                        
                         $specTypes = [];
                         if(!empty($specialities_type)){        
                           foreach ($specialities_type as $key => $value) {
@@ -1563,6 +1560,7 @@ p.highlight-text {
                               }
                           }
                         }
+                        
                       @endphp
 
                       @if(!empty($specTypes))
@@ -1571,6 +1569,7 @@ p.highlight-text {
                           $parts = explode('_', $key);
                           
                           $s_data = json_encode($stypes);
+                          
                         @endphp
                         <input type="hidden" name="subspectype" class="subspectype-{{ $parts[1] }}" value="{{ $s_data }}">
                         <div class="subspec_main_div subspec_main_div-{{ $parts[1] }}">
@@ -1588,64 +1587,68 @@ p.highlight-text {
                           </ul>
                           <select class="js-example-basic-multiple subspec_valid-{{ $parts[1] }} addAll_removeAll_btn" data-list-id="speciality_preferences-{{ $parts[1] }}" name="specialties[type_{{ $parts[1] }}][]" multiple="multiple" onchange="getSecialities('main',{{ $parts[1] }})"></select>
                           <span id="reqsubspecvalid-{{ $parts[1] }}" class="reqError text-danger valley"></span>
-                          </div>
+                          
                           <div class="subspec_level-{{ $parts[1] }}"></div>
+                          <div class="show_specialities-{{ $parts[1] }}"></div>
+                          <div class="show_specialitiesStatus-{{ $parts[1] }}">
+                            <?php
+                                  
+                                  $speciality_status = isset($specialities_type['speciality_status'])?(array)$specialities_type['speciality_status']:[];
+                                  //print_r($specialities_type['speciality_status']);
+
+                                  
+                                ?>
+
+                                @foreach($speciality_status as $key=>$s_status)
+
+                                    <?php
+                                      $parts1 = explode('_', $key);
+                                      $sp_data_name = DB::table("speciality")->where('id', $parts1[1])->first();
+                                      $speciality_status_data = DB::table("speciality_status")->get();
+                                    ?>
+                                    @if (in_array($parts1[1], $stypes))
+                                    <div class="custom-select-wrapper subspecprofdiv subspecprofdiv-{{ $parts1[1] }} form-group level-drp" style="margin-bottom: 5px;">
+                                      <label class="form-label subspeclabel-{{ $parts1[1] }}" for="input-1">
+                                        Specialty Status ({{ $sp_data_name->name }}) 
+                                        <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>
+                                        
+                                          <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">
+                                            <li><strong>Status definitions:</strong></li>
+                                            <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>
+                                            <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>
+                                            <li><strong>First:</strong> First-ever specialty after qualification.</li>
+                                            <li><strong>Former:</strong> Previously practiced.</li>
+                                            <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>
+                                            <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>
+                                          </ul>
+                                        
+                                      </label>
+                                      <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_listProfession subspecprof_listProfession-{{ $parts1[1] }} subspecprof_list-{{ $parts1[1] }}" value="{{ $parts1[1] }}">
+                                      <input type="hidden" name="subspecprof_list" class="subspecprofpart_list subspecprofpart_list-{{ $parts1[1] }}" value="{{ $parts[1] }}">
+                                      <select class="custom-select speciality_status_column speciality_status_column-{{ $parts[1] }} speciality_status_columns-{{ $parts1[1] }} form-input mr-10 langprof_level_valid-{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][status]" onchange="changeSpecialityStatus(this.value,{{ $parts1[1] }},{{ $parts[1] }})">
+                                        <option value="">select</option>
+                                        @foreach($speciality_status_data as $s_status_data)
+                                       
+                                        <option value="{{ $s_status_data->status_name }}" @if($s_status_data->status_name == $s_status->status) selected @endif>{{ $s_status_data->status_name }}</option>
+                                        @endforeach
+                                        
+                                      </select>
+                                      <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_current_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_current]" value="0">
+                                      <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_principal_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_principal]" value="0">
+                                      <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_first_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_first]" value="0">
+                                      <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_former_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_former]" value="0">
+                                      <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_upskilling_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_upskilling]" value="0">
+                                    </div>
+                                    
+                                    <span id="reqsubspeclevelvalid-{{ $parts1[1] }}" class="reqError text-danger valley"></span>
+                                    @endif
+                                    
+                                    
+
+                                @endforeach
+                          </div>
+                          </div>
                         </div>
-                        <div class="show_specialities-{{ $parts[1] }}">
-                          <?php
-                                $speciality_status = isset($specialities_type['speciality_status'])?(array)$specialities_type['speciality_status']:[];
-                                //print_r($specialities_type['speciality_status']);
-
-                                
-                              ?>
-
-                              @foreach($speciality_status as $key=>$s_status)
-
-                                  <?php
-                                    $parts1 = explode('_', $key);
-                                    $sp_data_name = DB::table("speciality")->where('id', $parts1[1])->first();
-                                    $speciality_status_data = DB::table("speciality_status")->get();
-                                  ?>
-                                  @if (in_array($parts1[1], $stypes))
-                                  <div class="custom-select-wrapper subspecprofdiv subspecprofdiv-{{ $parts1[1] }} form-group level-drp" style="margin-bottom: 5px;">
-                                    <label class="form-label subspeclabel-{{ $parts1[1] }}" for="input-1">
-                                      Specialty Status ({{ $sp_data_name->name }}) 
-                                      <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>
-                                      <!-- <div id="statusTooltip" class="tooltip_speciality_status" role="tooltip"> -->
-                                        <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">
-                                          <li><strong>Status definitions:</strong></li>
-                                          <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>
-                                          <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>
-                                          <li><strong>First:</strong> First-ever specialty after qualification.</li>
-                                          <li><strong>Former:</strong> Previously practiced.</li>
-                                          <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>
-                                          <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>
-                                        </ul>
-                                      <!-- </div> -->
-                                    </label>
-                                    <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_list-{{ $parts1[1] }}" value="{{ $parts1[1] }}">
-                                    <select class="custom-select speciality_status_column speciality_status_column-{{ $parts[1] }} speciality_status_columns-{{ $parts1[1] }} form-input mr-10 select-active langprof_level_valid-{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][status]" onchange="changeSpecialityStatus(this.value,{{ $parts1[1] }},{{ $parts[1] }})">
-                                      <option value="">select</option>
-                                      @foreach($speciality_status_data as $s_status_data)
-                                      <option value="{{ $s_status_data->status_name }}" @if($s_status_data->status_name == $s_status->status) selected @endif>{{ $s_status_data->status_name }}</option>
-                                      @endforeach
-                                      
-                                    </select>
-                                    <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_current_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_current]" value="0">
-                                    <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_principal_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_principal]" value="0">
-                                    <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_first_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_first]" value="0">
-                                    <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_former_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_former]" value="0">
-                                    <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_upskilling_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_upskilling]" value="0">
-                                  </div>
-                                  
-                                  <span id="reqsubspeclevelvalid-{{ $parts1[1] }}" class="reqError text-danger valley"></span>
-                                  @endif
-                                  
-                                  
-
-                              @endforeach
-                        </div>
-                      
 
                       @endforeach
                       @endif
@@ -4312,9 +4315,8 @@ p.highlight-text {
                                     <label class="form-label subspeclabel-{{ $parts1[1] }}" for="input-1">
                                       Specialty Status ({{ $sp_data_name->name }}) 
                                       <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>
-                                        <div id="statusTooltip" class="tooltip_speciality_status" role="tooltip">
-                                        <h3>Status definitions:</h3>
-                                        <ul style="padding-left:18px; margin:8px 0 0 0">
+                                        <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">
+                                          <li><strong>Status definitions:</strong></li>
                                           <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>
                                           <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>
                                           <li><strong>First:</strong> First-ever specialty after qualification.</li>
@@ -4322,7 +4324,6 @@ p.highlight-text {
                                           <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>
                                           <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>
                                         </ul>
-                                      </div>
                                     </label>
                                     <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_list-{{ $parts1[1] }}" value="{{ $parts1[1] }}">
                                     <select class="custom-select speciality_status_column speciality_status_column-{{ $parts1[1] }} form-input mr-10 select-active langprof_level_valid-{{ $parts1[1] }}" name="specialties_experience[speciality_status][type_{{ $parts1[1] }}][status]" onchange="changeSpecialityStatus(this.value,{{ $parts1[1] }})">
@@ -4959,7 +4960,7 @@ p.highlight-text {
                             <label class="form-label" for="input-1">Specialties</label>
                             @php
                               $specialities_typeExperience = (array)json_decode($user->specialties);
-                              $specialties_data = json_encode($specialities_typeExperience['type_0']);
+                              $specialties_data = isset($specialities_typeExperience['type_0'])?json_encode($specialities_typeExperience['type_0']):'';
                               //print_r($specialties_data);
                             @endphp 
                             <input type="hidden" name="speciality_exp_value-1" class="speciality_exp-1" value="{{ $specialties_data }}">
@@ -5041,11 +5042,10 @@ p.highlight-text {
                                   @if (in_array($parts1[1], $stypes))
                                   <div class="custom-select-wrapper subspecprofdiv subspecprofdiv-{{ $parts1[1] }} form-group level-drp" style="margin-bottom: 5px;">
                                     <label class="form-label subspeclabel-{{ $parts1[1] }}" for="input-1">
-                                      Specialty Status ({{ $sp_data_name->name }}) 
+                                      Specialty Status1 ({{ $sp_data_name->name }}) 
                                       <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>
-                                        <div id="statusTooltip" class="tooltip_speciality_status" role="tooltip">
-                                        <h3>Status definitions:</h3>
-                                        <ul style="padding-left:18px; margin:8px 0 0 0">
+                                        <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">
+                                          <li><strong>Status definitions:</strong></li>
                                           <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>
                                           <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>
                                           <li><strong>First:</strong> First-ever specialty after qualification.</li>
@@ -5053,8 +5053,8 @@ p.highlight-text {
                                           <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>
                                           <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>
                                         </ul>
-                                      </div>
                                     </label>
+                                    
                                     <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_list-{{ $parts1[1] }}" value="{{ $parts1[1] }}">
                                     <select class="custom-select speciality_status_column speciality_status_column-{{ $parts1[1] }} form-input mr-10 select-active langprof_level_valid-{{ $parts1[1] }}" name="specialties_experience[1][speciality_status][type_{{ $parts1[1] }}][status]" onchange="changeSpecialityStatus(this.value,{{ $parts1[1] }})">
                                       <option value="">select</option>
@@ -5803,14 +5803,14 @@ p.highlight-text {
                                                                     onchange="startDate('{{ $i }}')">
                                                           </div>
                                                       </div>
-                                                      <div class="col-md-6">
-                                                          <div class="form-group level-drp">
-                                                              <label class="form-label">End Date</label>
-                                                              <input class="form-control end_date end_date-{{ $i }}" 
-                                                                    type="date" name="end_date[]" 
-                                                                    value="{{ $referee_data->end_date ?? '' }}">
-                                                          </div>
-                                                      </div>
+                                                      <div class="col-md-6 end_date_container-{{ $i }}">
+                                                        <div class="form-group level-drp">
+                                                            <label class="form-label">End Date</label>
+                                                            <input class="form-control end_date end_date-{{ $i }}" 
+                                                                  type="date" name="end_date[]" 
+                                                                  value="{{ $referee_data->end_date ?? '' }}">
+                                                        </div>
+                                                    </div>
                                                   </div>
                                               </div>
                                           @endif
@@ -5827,7 +5827,7 @@ p.highlight-text {
                                                         name="still_working[]" 
                                                         value="1"
                                                         {{ isset($referee_data->still_working) && $referee_data->still_working == 1 ? 'checked' : '' }}
-                                                        onclick="stillWorking({{ $i }})">
+                                                        onclick="toggleEndDate(this, {{ $i }})">
                                                   I'm still working with this referee
                                                   <span id="reqstillworking-{{ $i }}" class="reqError text-danger valley"></span>
                                               </div>
@@ -6051,14 +6051,14 @@ p.highlight-text {
                                                                 onchange="startDate('1')">
                                                       </div>
                                                   </div>
-                                                  <div class="col-md-6">
-                                                      <div class="form-group level-drp">
-                                                          <label class="form-label">End Date</label>
-                                                          <input class="form-control end_date end_date-1" 
-                                                                type="date" 
-                                                                name="end_date[]">
-                                                      </div>
-                                                  </div>
+                                                  <div class="col-md-6 end_date_container-1">
+                                                    <div class="form-group level-drp">
+                                                        <label class="form-label">End Date</label>
+                                                        <input class="form-control end_date end_date-1" 
+                                                              type="date" 
+                                                              name="end_date[]">
+                                                    </div>
+                                                </div>
                                               </div>
                                           </div>
                                       @endif
@@ -6075,7 +6075,7 @@ p.highlight-text {
                                                     name="still_working[]" 
                                                     value="1"
                                                     {{ isset($experience->pre_box_status) && $experience->pre_box_status == 1 ? 'checked' : '' }}
-                                                    onclick="stillWorking(1)">
+                                                    onclick="toggleEndDate(this, 1)">
                                               I'm still working with this referee
                                               <span id="reqstillworking" class="reqError text-danger valley"></span>
                                           </div>
@@ -6115,6 +6115,34 @@ p.highlight-text {
               ?>
 
               <script type="text/javascript">
+                    
+                  function toggleEndDate(checkbox, index) {
+                  const isChecked = checkbox.checked;
+                  const endDateContainer = $(`.end_date_container-${index}`);
+                  
+                    if (isChecked) {
+                        // Hide end date and clear its value
+                        endDateContainer.hide();
+                        $(`.end_date-${index}`).val('');
+                        $(`.still_working1-${index}`).val('1');
+                    } else {
+                        // Show end date
+                        endDateContainer.show();
+                        $(`.still_working1-${index}`).val('0');
+                    }
+                  }
+
+                  // Initialize on page load
+                  $(document).ready(function() {
+                      // For each checkbox, trigger the toggle to set initial state
+                      $('.still_working').each(function() {
+                          const classList = $(this).attr('class');
+                          const match = classList.match(/still_working-(\d+)/);
+                          if (match && match[1]) {
+                              toggleEndDate(this, match[1]);
+                          }
+                      });
+                  });    
                   // Function to add another referee
                   function add_another_referee() {
                       var referee_div_count = $(".referee_no").length;
@@ -6234,7 +6262,7 @@ p.highlight-text {
                                                         onchange="startDate('${referee_div_count}')">
                                               </div>
                                           </div>
-                                          <div class="col-md-6">
+                                          <div class="col-md-6 end_date_container-${referee_div_count}">
                                               <div class="form-group level-drp">
                                                   <label class="form-label">End Date</label>
                                                   <input class="form-control end_date end_date-${referee_div_count}" 
@@ -6250,7 +6278,7 @@ p.highlight-text {
                                       <div class="declaration_box mt-3">
                                           <input type="hidden" name="still_working1[]" class="still_working1-${referee_div_count}" value="0" />
                                           <input class="still_working still_working-${referee_div_count}" type="checkbox" 
-                                                name="still_working[]" onclick="stillWorking(${referee_div_count})">
+                                                name="still_working[]" onclick="toggleEndDate(this, ${referee_div_count})">
                                           I'm still working with this referee
                                           <span id="reqstillworking-${referee_div_count}" class="reqError text-danger valley"></span>
                                       </div>
@@ -7401,41 +7429,50 @@ if (!empty($interviewReferenceData)) {
 @include('nurse.front_profile_js');
 
 <script>
-  $(document).ready(function() {
-    // Add an additional search box and extra buttons to the dropdown
-    $('.addAll_removeAll_btn').on('select2:open', function() {
-      var $dropdown = $(this);
-      var searchBoxHtml = `               
-                <div class="extra-buttons">
-                    <button class="select-all-button" type="button">Select All</button>
-                    <button class="remove-all-button" type="button">Remove All</button>
-                </div>`;
+    $(document).ready(function() {
 
-      // Remove any existing extra buttons before adding new ones
-      $('.select2-results .extra-search-container').remove();
-      $('.select2-results .extra-buttons').remove();
+        $(document).on('select2:open', '.addAll_removeAll_btn', function () {
+    const $select = $(this);
+    const select2 = $select.data('select2');
 
-      // Append the new extra buttons and search box
-      $('.select2-results').prepend(searchBoxHtml);
+    // Avoid duplicate buttons
+    if ($('.select2-results .extra-buttons').length === 0) {
 
-      // Handle Select All button for the current dropdown
-      $('.select-all-button').on('click', function() {
-        console.log('6e6yyyhj');
-        var $currentDropdown = $dropdown;
-        var allValues = $currentDropdown.find('option').map(function() {
-          return $(this).val();
-        }).get();
-        $currentDropdown.val(allValues).trigger('change');
-      });
+        const buttonsHtml = `
+            <div class="extra-buttons" style="padding:8px;border-bottom:1px solid #eee;">
+                <button type="button" class="select-all-button">Select All</button>
+                <button type="button" class="remove-all-button">Remove All</button>
+            </div>
+        `;
 
-      // Handle Remove All button for the current dropdown
-      $('.remove-all-button').on('click', function() {
-        var $currentDropdown = $dropdown;
-        $currentDropdown.val(null).trigger('change');
-      });
+        $('.select2-results').prepend(buttonsHtml);
+    }
+
+    // Select All
+    $('.select-all-button').off('click').on('click', function () {
+        const allValues = [];
+
+        $select.find('option').each(function () {
+            allValues.push($(this).val());
+        });
+
+        $select.val(allValues).trigger('change');
+
+        // ✅ CLOSE DROPDOWN
+        $select.select2('close');
     });
 
-  });
+    // Remove All
+    $('.remove-all-button').off('click').on('click', function () {
+        $select.val(null).trigger('change');
+
+        // ✅ CLOSE DROPDOWN
+        $select.select2('close');
+    });
+});
+
+
+    });
 </script>
 <script>
   $(document).ready(function() {
@@ -8272,6 +8309,16 @@ if (!empty($interviewReferenceData)) {
             }
         });
 
+        $(".show_specialitiesStatus-"+k+" .subspecprof_list").each(function(i,val){
+            var val2 = $(val).val();
+            console.log("val2",val2);
+            if(selectedValues.includes(val2) == false){
+              
+              $(".subspecprofdiv-"+val2).remove();
+                
+            }
+        });
+
       for(var i=0;i<selectedValues.length;i++){
         if($(".show_specialities-"+k+" .subspec_main_div-"+selectedValues[i]).length < 1){
           $.ajax({
@@ -8301,32 +8348,32 @@ if (!empty($interviewReferenceData)) {
                               <span id="reqsubspecvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
                               </div>\
                               <div class="subspec_level-'+data1.main_speciality_id+'"></div>\
-                              </div><div class="show_specialities-'+data1.main_speciality_id+'"></div>');
+                              <div class="show_specialities-'+data1.main_speciality_id+'"></div>\
+                              <div class="show_specialitiesStatus-'+data1.main_speciality_id+'"></div>\
+                              </div>');
 
                               selectTwoFunction(data1.main_speciality_id);
               
               }else{
                 
-                if($(".show_specialities-"+k+" .subspecprofdiv-"+data1.main_speciality_id).length < 1){
+                if($(".show_specialitiesStatus-"+k+" .subspecprofdiv-"+data1.main_speciality_id).length < 1){
                   
-                  $(".show_specialities-"+k).append('<div class="custom-select-wrapper subspecprofdiv subspecprofdiv-'+data1.main_speciality_id+' form-group level-drp" style="margin-bottom: 5px;">\
+                  $(".show_specialitiesStatus-"+k).append('<div class="custom-select-wrapper subspecprofdiv subspecprofdiv-'+data1.main_speciality_id+' form-group level-drp" style="margin-bottom: 5px;">\
                     <label class="form-label subspeclabel-'+data1.main_speciality_id+'" for="input-1">\
                     Specialty Status ('+data1.main_speciality_name+')\
                     <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>\
-                      <div id="statusTooltip" class="tooltip_speciality_status" role="tooltip">\
-                        <h3>Status definitions:</h3>\
-                        <ul style="padding-left:18px; margin:8px 0 0 0">\
-                          <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>\
-                          <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>\
-                          <li><strong>First:</strong> First-ever specialty after qualification.</li>\
-                          <li><strong>Former:</strong> Previously practiced.</li>\
-                          <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>\
-                          <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>\
-                        </ul>\
-                      </div>\
+                      <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">\
+                        <li><strong>Status definitions:</strong></li>\
+                        <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>\
+                        <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>\
+                        <li><strong>First:</strong> First-ever specialty after qualification.</li>\
+                        <li><strong>Former:</strong> Previously practiced.</li>\
+                        <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>\
+                        <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>\
+                      </ul>\
                     </label>\
                     <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_list-'+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
-                    <select data-id="'+data1.main_speciality_id+'" class="custom-select speciality_status_column speciality_status_columns-'+data1.main_speciality_id+' speciality_status_column-'+k+' form-input mr-10 select-active langprof_level_valid-'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][status]" onchange="changeSpecialityStatus(this.value,'+data1.main_speciality_id+','+k+')">\
+                    <select data-id="'+data1.main_speciality_id+'" class="custom-select speciality_status_column subspecprof_listProfession subspecprof_listProfession-'+data1.main_speciality_id+' speciality_status_columns-'+data1.main_speciality_id+' speciality_status_column-'+k+' form-input mr-10 langprof_level_valid-'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][status]" onchange="changeSpecialityStatus(this.value,'+data1.main_speciality_id+','+k+')">\
                       <option value="">select</option>\
                       <option value="Current">Current</option>\
                       <option value="Principal">Principal</option>\
@@ -8429,17 +8476,15 @@ if (!empty($interviewReferenceData)) {
                     <label class="form-label subspeclabel-'+data1.main_speciality_id+'" for="input-1">\
                     Specialty Status ('+data1.main_speciality_name+')\
                     <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>\
-                      <div id="statusTooltip" class="tooltip_speciality_status" role="tooltip">\
-                        <h3>Status definitions:</h3>\
-                        <ul style="padding-left:18px; margin:8px 0 0 0">\
-                          <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>\
-                          <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>\
-                          <li><strong>First:</strong> First-ever specialty after qualification.</li>\
-                          <li><strong>Former:</strong> Previously practiced.</li>\
-                          <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>\
-                          <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>\
-                        </ul>\
-                      </div>\
+                     <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">\
+                      <li><strong>Status definitions:</strong></li>\
+                      <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>\
+                      <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>\
+                      <li><strong>First:</strong> First-ever specialty after qualification.</li>\
+                      <li><strong>Former:</strong> Previously practiced.</li>\
+                      <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>\
+                      <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>\
+                    </ul>\
                     </label>\
                     <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_list-'+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
                     <select data-id="'+data1.main_speciality_id+'" class="custom-select speciality_status_column speciality_status_column-'+data1.main_speciality_id+' form-input mr-10 select-active langprof_level_valid-'+data1.main_speciality_id+'" name="specialties_experience['+x+'][speciality_status][type_'+data1.main_speciality_id+'][status]" onchange="changeSpecialityStatus(this.value,'+data1.main_speciality_id+')">\
@@ -8531,8 +8576,10 @@ if (!empty($interviewReferenceData)) {
               //alert("You can mark only one specialty as Principal, please select your main one.");
               $("#reqsubspeclevelvalid-"+data_id).text("You can mark only one specialty as Principal, please select your main one.");
               // Reset the current dropdown to previous value
-              
+              //alert(".speciality_status_columns-"+data_id);
               $(".speciality_status_columns-"+data_id).val("");
+              
+
           }
       }
     }

@@ -45,7 +45,36 @@ img, iframe, video {
   }
 }
 
+.tooltip-link {
+  position: relative;
+}
 
+.tooltip-link::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111827;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tooltip-link:hover::after {
+  opacity: 1;
+}
+
+.disabled-link {
+  pointer-events: none;   /* disables click */
+  opacity: 0.5;
+  cursor: not-allowed;
+  text-decoration: none;
+}
 
  </style>
 
@@ -455,17 +484,34 @@ img, iframe, video {
               <li>
                 <a class="{{ request()->is('nurse/my-profile') ?'active':'' }}  hover-up " href='{{ route("nurse.my-profile") }}?page=my_profile'>Profile</a>
               </li>
-              <li>
-                <a class="{{ request()->is('nurse/sector_preferences') ?'active':'' }} {{ request()->is('nurse/work_environment_preferences') ?'active':'' }} {{ request()->is('nurse/employeement_type_preferences') ?'active':'' }} {{ request()->is('nurse/WorkShiftPreferences') ?'active':'' }} {{ request()->is('nurse/position_preferences') ?'active':'' }} {{ request()->is('nurse/benefitsPreferences') ?'active':'' }} {{ request()->is('nurse/locationPreferences') ?'active':'' }} {{ request()->is('nurse/salaryExpectations') ?'active':'' }} hover-up " href='{{ route("nurse.position_preferences") }}?page=position_preferences'>Work Preferences</a>
+              @php
+                $user_id = Auth::guard("nurse_middle")->user()->id;
+                $tabs = DB::table("updated_tab_name")->where('user_id', $user_id)
+                        ->whereIn('tab_name', [
+                            'Profession',
+                            'Experience',
+                            'References'
+                        ])
+                        ->get();   
+                        
+                $all_tabs = DB::table("updated_tab_name")->where('user_id', $user_id)->get();           
+
+                @endphp
+                @if(count($tabs) == 3)
+                <li class="">
+                  <a class="{{ request()->is('nurse/sector_preferences') ?'active':'' }} {{ request()->is('nurse/work_environment_preferences') ?'active':'' }} {{ request()->is('nurse/employeement_type_preferences') ?'active':'' }} {{ request()->is('nurse/WorkShiftPreferences') ?'active':'' }} {{ request()->is('nurse/position_preferences') ?'active':'' }} {{ request()->is('nurse/benefitsPreferences') ?'active':'' }} {{ request()->is('nurse/locationPreferences') ?'active':'' }} {{ request()->is('nurse/salaryExpectations') ?'active':'' }} hover-up " href='{{ route("nurse.position_preferences") }}?page=position_preferences'>Work Preferences</a>
+                </li>
+                @else
+                <li class="tooltip-link" data-tooltip="Please complete the profile first"><a class="disabled-link hover-up" href='#'>Work Preferences</a></li>
+                @endif 
+              <li class="@if(count($all_tabs) < 15) tooltip-link @endif" @if(count($all_tabs) < 15) data-tooltip="Please complete the profile first" @endif>
+                <a class='@if(count($all_tabs) < 15) disabled-link @endif menu-link hover-up' href='{{ route("nurse.find_jobs") }}'>Find Jobs</a>
               </li>
-              <li class="">
-                <a class='menu-link hover-up' href='{{ route("nurse.find_jobs") }}'>Find Jobs</a>
+              <li class="@if(count($all_tabs) < 15) tooltip-link @endif" @if(count($all_tabs) < 15) data-tooltip="Please complete the profile first" @endif>
+                <a class='@if(count($all_tabs) < 15) disabled-link @endif menu-link hover-up' href='#'>Saved Jobs</a>
               </li>
-              <li class="">
-                <a class='menu-link hover-up' href='#'>Saved Jobs</a>
-              </li>
-              <li class="mega-dropdown career_dropdown">
-                <a class='menu-link hover-up' href='{{ route("nurse.match_percentage") }}'>My Career</i></a>
+              <li class="@if(count($all_tabs) < 15) tooltip-link @endif" @if(count($all_tabs) < 15) data-tooltip="Please complete the profile first" @endif>
+                <a class='@if(count($all_tabs) < 15) disabled-link @endif menu-link hover-up' href='{{ route("nurse.match_percentage") }}'>My Career</i></a>
                 
               </li>
               <!-- <li class="">
@@ -477,8 +523,8 @@ img, iframe, video {
               <li class="">
                   <a class='' href='{{ route("nurse.dashboard") }}'>Testimonial and Reviews</a>
               </li> -->
-              <li class="">
-                <a class=' hover-up' href='{{ route("nurse.dashboard") }}'>Community</a>
+              <li class="@if(count($all_tabs) < 15) tooltip-link @endif" @if(count($all_tabs) < 15) data-tooltip="Please complete the profile first" @endif>
+                <a class='@if(count($all_tabs) < 15) disabled-link @endif hover-up' href='{{ route("nurse.dashboard") }}'>Community</a>
               </li>
 
               <!-- <li>

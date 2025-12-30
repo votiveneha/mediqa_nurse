@@ -24,7 +24,8 @@ class AuthServices
     {
         
         try {
-            
+            // print_r($request->all());
+            // die;
             $companyinsert['name'] = $request->fullname;
             $companyinsert['lastname'] = $request->lastname;
             $companyinsert['country_code'] = $request->countryCode;
@@ -48,10 +49,11 @@ class AuthServices
             $companyinsert['emegency_country_code'] = $request->emergency_countryCode;
             $companyinsert['emergency_country_iso'] = $request->emergency_countryiso;
             //$companyinsert['user_stage'] = "5";
+            $companyinsert['registration_countries'] = array_values($request->register_record);
+            $companyinsert['qualification_countries'] = $request->qualification_countries;
             $companyinsert['basic_info_status'] = "1";
             $companyinsert['nationality'] = $request->nationality;
-            $companyinsert['registration_countries'] = $request->registration_countries;
-            $companyinsert['qualification_countries'] = $request->qualification_countries;
+ 
             //$companyinsert['created_at'] = Carbon::now('Asia/Kolkata');
 
             $id = Auth::guard('nurse_middle')->user()->id;

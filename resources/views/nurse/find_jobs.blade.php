@@ -280,6 +280,12 @@
    padding: 16px;
    overflow-y: auto;
    }
+   .modal-content-custom{
+    width: 100% !important;
+   }
+   button.btn.btn-link.p-0.show-more-btn {
+        text-align: left;
+    }
    .modal-header {
    display: flex;
    justify-content: space-between;
@@ -879,6 +885,23 @@
         height: 30px;
         object-fit: contain;
     }
+    .saved-add-search {
+        background: #e0f2fe;
+        color: #0369a1;
+        border: 1px dashed #7dd3fc;
+        font-weight: 500;
+        border-radius: 20px;
+        padding: 4px;
+        width: 100%;
+        text-wrap-mode: nowrap;
+    }
+
+    .chip-new {
+      text-wrap-mode: nowrap;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    
 
 </style>
 @endsection
@@ -922,7 +945,7 @@
               @endforeach
               @endif
             </div>
-            <div class="saved-search-tab add-new" @if($saved_searches_data->isEmpty()) style="display:none;" @endif>+ Save New</div>
+            <div class="add-new" @if($saved_searches_data->isEmpty()) style="display:none;" @endif><button class="saved-add-search">+ Save New</button></div>
             
          </div>
          <div class="job_tabs">
@@ -1313,7 +1336,7 @@
                               <div><strong>Shift Type:</strong> </div>
                               <div><strong>Sector:</strong></div>
                               <div><strong>Work Environment:</strong> </div>
-                              <div><strong>Benefits:</strong> </div>
+                              <!--<div><strong>Benefits:</strong> </div>-->
                               <div><strong>Specialty:</strong> </div>
                               <div><strong>Experience Required:</strong></div>
                               <div>
@@ -1326,7 +1349,7 @@
                               <div>{{ $shift_type_arr_string }}</div>
                               <div> {{ $job->sector }}</div>
                               <div>{{ $work_environment_arr_string }}</div>
-                              <div>{{ $benefits_arr_string }}</div>
+                              <!--<div>{{ $benefits_arr_string }}</div>-->
                               <div>{{ $speciality_arr_string }}</div>
                               <div>{{ $job->experience_level }}{{ $job->experience_level == 1 ? 'st' : ($job->experience_level == 2 ? 'nd' : ($job->experience_level == 3 ? 'rd' : 'th')) }} Year</div>
                               <div>${{ $job->salary }}/hr</div>
@@ -1335,37 +1358,70 @@
                                   ?></div>
                             </div>
                             <div class="col-4 job-right-col">
-                              <div class="job-features">
-                                  <div class="feature-item">
-                                      <img src="{{ asset('imgs/Overtime Pay.png') }}" alt="">
-                                      <span>Overtime Pay</span>
-                                  </div>
+                              @php
+                                  $benefitIds = json_decode($job->benefits, true) ?? [];
 
-                                  <div class="feature-item">
-                                      <img src="{{ asset('imgs/Shift loading.png') }}" alt="">
-                                      <span>Shift Loading</span>
-                                  </div>
+                                  $benefits = [];
+                                  if (!empty($benefitIds)) {
+                                      $benefits = DB::table('benefits_preferences')
+                                          ->whereIn('benefits_id', $benefitIds)
+                                          ->get();
+                                  }
 
-                                  <div class="feature-item">
-                                      <img src="{{ asset('imgs/Bonuses.png') }}" alt="">
-                                      <span>Bonuses</span>
-                                  </div>
+                                  $visibleBenefits = $benefits->take(3);
+                                  $extraBenefitsCount = $benefits->count() - 3;
+                                @endphp
+                                <div class="job-features">
+                                    <div><strong>Benefits:</strong></div>
 
-                                  <div class="feature-item">
-                                      <img src="{{ asset('imgs/Sign-on bonus.png') }}" alt="">
-                                      <span>Sign-on bonus</span>
-                                  </div>
+                                    @foreach($visibleBenefits as $benefit)
+                                        <div class="feature-item">
+                                            @if($benefit->icon)
+                                                <img src="{{ asset('uploads/benefits/'.$benefit->icon) }}" alt="{{ $benefit->benefits_name }}">
+                                            @endif
+                                            <span>{{ $benefit->benefits_name }}</span>
+                                        </div>
+                                    @endforeach
 
-                                  <div class="feature-item">
-                                      <img src="{{ asset('imgs/Flexible rosters.png') }}" alt="">
-                                      <span>Flexible rosters</span>
-                                  </div>
+                                    @if($extraBenefitsCount > 0)
+                                        <button
+                                            class="btn btn-link p-0 show-more-btn"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#benefitsModal-{{ $job->id }}">
+                                            +{{ $extraBenefitsCount }} more
+                                        </button>
+                                    @endif
+                                </div>
+                                <div class="modal fade" id="benefitsModal-{{ $job->id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-md">
+                                    <div class="modal-content modal-content-custom">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">All Benefits</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
 
-                                  <div class="feature-item">
-                                      <img src="{{ asset('imgs/Self-scheduling.png') }}" alt="">
-                                      <span>Self-scheduling</span>
-                                  </div>
-                              </div>
+                                        <div class="modal-body">
+                                            <div class="job-features">
+                                                @foreach($benefits as $benefit)
+                                                    <div class="feature-item">
+                                                        @if($benefit->icon)
+                                                            <img src="{{ asset('uploads/benefits/'.$benefit->icon) }}"
+                                                                alt="{{ $benefit->benefits_name }}">
+                                                        @endif
+                                                        <span>{{ $benefit->benefits_name }}</span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button class="btn btn-secondary" data-bs-dismiss="modal">
+                                                Close
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                               <div>
                                 <?php
                                   $sector_percent = (!empty($work_preferences_data) && $work_preferences_data->sector_preferences == $job->sector) ? 1 : 0;
@@ -1511,7 +1567,7 @@
                   @foreach($saved_searches_data as $saved_searches)
                   <tr data-id="{{ $i }}" data-value="{{ $saved_searches->searches_id }}" data-filters='{{ $saved_searches->filters }}' data-name='{{ $saved_searches->delivery }}'>
                     <td>
-                      @if($i != 1)
+                      @if($i != 0)
                       <input type="checkbox" class="select-item">
                       @endif
                     </td>
@@ -1525,7 +1581,7 @@
                           
                         @endphp
                         @if(!empty($filters))
-                          <span class="chip">{{ $filters[0] }}</span>
+                          <span class="chip-new">{{ $filters[0] }}</span>
                           <a href="#" class="btn-readmore" data-id="{{ $saved_searches->searches_id }}" data-filters='{{ $saved_searches->filters }}'>Read More</a>
                         @endif
                         
@@ -1564,22 +1620,21 @@
                       {{ $saved_searches->last_run_at }}
                     </td>
                     <td class="actions">
-                      <div class="alert_box">
+                      <div class="alert_box d-flex align-items-center gap-1">
                         <div class="alert-toggle-wrapper">
                           <label class="alert-toggle">
                             <input type="checkbox" class="alert-toggle-input" @if($saved_searches->alert != "Off") checked @endif data-id="{{ $saved_searches->searches_id }}">
                             <span class="alert-toggle-slider"></span>
                           </label>
-                          
                         </div>
-
-                      </div>
+                      
                       <button class="btn-run" data-id="{{ $saved_searches->searches_id }}">Run</button>
                       <button class="btn-edit">Edit</button>
                       <button class="btn-duplicate">Duplicate</button>
                       @if($i != 1)
                       <button class="btn-delete" data-name="single-delete">Delete</button>
                       @endif
+                      </div>
                     </td>
                   </tr>
                   

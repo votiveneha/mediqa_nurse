@@ -105,17 +105,98 @@ class NurseController extends Controller
 
             // $sendMail = Mail::to($request->email)->send(new \App\Mail\DemoMail($mailData));
 
-            $body  = 'Dear ' . $request->name . ',';
-            $body .= '<p>We hope this message finds you well.</p>';
-            $body .= '<p>We noticed that your profile is not yet complete. Finishing your profile will allow you to access a wide range of job opportunities from healthcare facilities, agencies, and individuals seeking nursing care at home.</p>';
-            $body .= '<p>To unlock these opportunities, please take a few minutes to complete your profile:</p>';
-            $body .= '<p>- Log in to your account: <a href="https://mediqa.com.au/nurse/login">Mediqa</a><br>- Fill in the remaining sections of your profile<br>- Submit your profile for approval.</p>';
-            $body .= '<p><strong>Once approved, you will be able to:</strong></p>';
-            $body .= '<p>- Apply for various shifts and permanent positions.<br>- Make your profile visible to potential employers.<br>- Receive interview requests and offers tailored to your preferences.</p>';
-            $body .= '<p>If you need any assistance, feel free to reach out to us at info@mediqa.com.au</p>';
-            $body .= '<p>Thank you for being part of our community. We look forward to seeing your completed profile soon.</p>';
-
             $subject = 'Complete Your Profile to Access Nursing Job Opportunities';
+
+            $body = '
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Complete Your Profile</title>
+                </head>
+                <body style="margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, Helvetica, sans-serif;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4; padding:30px 0;">
+                        <tr>
+                            <td align="center">
+                                <table width="100%" max-width="600" cellpadding="0" cellspacing="0"
+                                    style="max-width:600px; background:#ffffff; border-radius:8px; overflow:hidden;">
+
+                                    <!-- Header -->
+                                    <tr>
+                                        <td style="background:#000000; padding:20px; text-align:center;">
+                                            <h1 style="margin:0; color:#ffffff; font-size:22px;">
+                                                ' . e(env("APP_NAME")) . '
+                                            </h1>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Body -->
+                                    <tr>
+                                        <td style="padding:30px; color:#333333;">
+                                            <p style="margin:0 0 15px;">
+                                                Dear <strong>' . e($request->name) . '</strong>,
+                                            </p>
+
+                                            <p style="margin:0 0 15px;">
+                                                We hope this message finds you well.
+                                            </p>
+
+                                            <p style="margin:0 0 15px;">
+                                                We noticed that your profile is not yet complete. Completing your profile will allow
+                                                you to access a wide range of job opportunities from healthcare facilities, agencies,
+                                                and individuals seeking nursing care at home.
+                                            </p>
+
+                                            <p style="margin:0 0 15px;">
+                                                To unlock these opportunities, please take a few minutes to complete your profile:
+                                            </p>
+
+                                            <ul style="margin:0 0 20px 20px; padding:0; font-size:14px;">
+                                                <li style="margin-bottom:8px;">
+                                                    Log in to your account:
+                                                    <a href="https://mediqa.com/nurse/login" style="color:#0d6efd; text-decoration:none;">
+                                                        Mediqa
+                                                    </a>
+                                                </li>
+                                                <li style="margin-bottom:8px;">Fill in the remaining sections of your profile</li>
+                                                <li style="margin-bottom:8px;">Submit your profile for approval</li>
+                                            </ul>
+
+                                            <p style="margin:0 0 10px;"><strong>Once approved, you will be able to:</strong></p>
+
+                                            <ul style="margin:0 0 20px 20px; padding:0; font-size:14px;">
+                                                <li style="margin-bottom:8px;">Apply for various shifts and permanent positions</li>
+                                                <li style="margin-bottom:8px;">Make your profile visible to potential employers</li>
+                                                <li style="margin-bottom:8px;">Receive interview requests and offers tailored to your preferences</li>
+                                            </ul>
+
+                                            <p style="margin:0 0 15px; font-size:14px;">
+                                                If you need any assistance, feel free to contact us at
+                                                <a href="mailto:info@mediqa.com.au" style="color:#0d6efd; text-decoration:none;">
+                                                    info@mediqa.com.au
+                                                </a>.
+                                            </p>
+
+                                            <p style="margin:20px 0 0;">
+                                                Thank you for being part of our community. We look forward to seeing your completed profile soon.
+                                            </p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Footer -->
+                                    <tr>
+                                        <td style="background:#f0f0f0; padding:15px; text-align:center; font-size:12px; color:#777;">
+                                            © ' . '2024' . ' Mediqa. All rights reserved.
+                                        </td>
+                                    </tr>
+
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+                ';
 
             // --- Use ZeptoMailHelper here ---
             $sendMail = \App\Helpers\ZeptoMailHelper::sendMail(

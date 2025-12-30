@@ -8,8 +8,13 @@
             <label for="search-name">Search Name</label>
 
             <div class="tag-input-wrapper">
-                <div class="smart-input" id="smartInput">
-                    <input type="text" id="search-name" name="search_name" placeholder="Type location, shift, specialty...">
+                <div class="smart-input-wrapper" id="smartInput">
+                    <input
+                        type="text"
+                        id="search-name"
+                        name="search_name"
+                        placeholder="Type location, shift, specialty..."
+                    >
                 </div>
             </div>
 
@@ -62,10 +67,13 @@
 </div>
 <!-- DELETE CONFIRM MODAL -->
 <div class="modal-overlay" id="delete-modal" style="display: none;">
-    <div class="modal-content">
-        <p>This action cannot be undone. Are you sure?</p>
-        <button class="modal-cancel" id="delete-cancel">Cancel</button>
-        <button class="modal-confirm" id="delete-confirm">Delete</button>
+    <div class="modal-content p-4">
+        <p class="fs-4 p-0">This action cannot be undone.</p></br>
+        <p class="fs-5 p-0">Are you sure?</p></br>
+        <div class="d-flex align-items-center gap-2">
+            <button class="modal-confirm" id="delete-confirm">Delete</button>
+            <button class="modal-cancel" id="delete-cancel">Cancel</button>
+        </div>
     </div>
 </div>
 <!-- Rename Modal -->
@@ -513,7 +521,7 @@
                 removeTag(tagText);
             });
             tagEl.append(removeBtn);
-            $("#search-name").before(tagEl);
+            $("#smartInput").prepend(tagEl);
             //updateSuggestion();
             updateHiddenField();
         }
