@@ -18,7 +18,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Events\Registered;
-use App\Models\RegisteredProfile;
+
 use Illuminate\Support\Facades\Log;
 use App\Services\User\AuthServices;
 use App\Http\Requests\UserUpdateProfile;
@@ -1227,7 +1227,7 @@ public function ResetPassword(Request $request)
     }
 
     public function remove_qualification_country(Request $request)
-    { main
+    { 
         // print_r($request->all());die;
         $user = Auth::guard('nurse_middle')->user();
         // $userId = $user->id;
@@ -1369,52 +1369,6 @@ public function ResetPassword(Request $request)
 
 
 
-
-    public function removeRegistrationEvidence(Request $request)
-{
-    $request->validate([
-        'registration_id' => 'required|integer',
-        'file' => 'required|string',
-    ]);
-
-    $registration = DB::table('registration_profiles_countries')
-        ->where('id', $request->registration_id)
-        ->first();
-
-    if (!$registration) {
-        return response()->json(['error' => 'Record not found'], 404);
-    }
-
-    // Decode existing files
-    $files = $registration->upload_evidence
-        ? json_decode($registration->upload_evidence, true)
-        : [];
-
-    // Remove file from array
-    $files = array_values(array_filter($files, function ($f) use ($request) {
-        return $f !== $request->file;
-    }));
-
-    // Update DB
-    DB::table('registration_profiles_countries')
-        ->where('id', $request->registration_id)
-        ->update([
-            'upload_evidence' => json_encode($files),
-        ]);
-
-    // Remove file from storage
-    $filePath = public_path('uploads/registration/' . $request->file);
-    if (file_exists($filePath)) {
-        unlink($filePath);
-    }
-
-    return response()->json([
-        'success' => true,
-        'remaining_files' => $files
-    ]);
-}
-
-
     public function removeRegistrationEvidence(Request $request)
     {
         $request->validate([
@@ -1515,7 +1469,6 @@ public function ResetPassword(Request $request)
                         'expiry_date'                 => $registrations['expiry_date'] ?? null,
                         'status'                      => $registrations['status'] ?? null,
 
-                 
                     ]);
                 }
             }
@@ -1524,12 +1477,6 @@ public function ResetPassword(Request $request)
             // RegisteredProfile::whereDate('expiry_date', '<', $current_date)
             //     ->where('status', '!=', 'expired')
             //     ->update(['status' => 'expired']);
-
-
-
-                    ]);
-                }
-            }
 
             update_user_stage($userId, "My Profile");
 
@@ -1574,7 +1521,7 @@ public function ResetPassword(Request $request)
 
         return $uploadedFiles;
     }
-t
+
 
 
     // public function updateProfile(UserUpdateProfile $request)
