@@ -879,18 +879,6 @@ p.highlight-text {
                           <div class="form-group col-md-6">
                             <label class="form-label" for="input-3">Mobile Number *</label>
                             <div class="row">
-                              <!-- <div class="col-md-3">
-                              <select name="countryCode" id="countryCode" class="form-control" placeholder="C. Code" aria-label="Default select example">
-                                @php $country_phone_code = country_phone_code();@endphp
-                                @forelse($country_phone_code as $cpc)
-                                @if($cpc->phonecode!='0')
-                                <option data-countryCode="GB" {{ Auth::guard('nurse_middle')->user()->country_code == $cpc->phonecode ? 'selected' : '' }} value="{{ $cpc->phonecode }}">(+{{ $cpc->phonecode }})</option>
-                                <option data-countryCode="GB" {{ Auth::guard('nurse_middle')->user()->country_code == $cpc->phonecode ? 'selected' : '' }} value="{{ $cpc->phonecode }}">{{ $cpc->phonecode }}</option>
-                                @endif
-                                @empty
-                                @endforelse
-                              </select>
-                            </div> -->
                               <div class="col-md-12 mob-adj">
                                 <input type="hidden" name="countryCode" id="countryCode">
                                 <input type="hidden" name="countryiso" id="country_iso" value="{{  Auth::guard('nurse_middle')->user()->country_iso }}">
@@ -905,27 +893,218 @@ p.highlight-text {
                               <input class="form-control" type="date" name="date_of_birth" id="date_of_birth" value="{{ Auth::guard('nurse_middle')->user()->date_of_birth }}">
                             </div>
                           </div>
-                          <div class="col-lg-6">
-                            <div class="">
-                              <label class="font-sm color-text-mutted mb-10">Gender</label>
-                              <div class="gender_set">
-                                <div class="form-check">
-                                  <input type="radio" class="" id="gender" name="gender" value="Male" @if(Auth::guard("nurse_middle")->user()->gender == "Male") checked @endif>
-                                  <label class="form-check-label" for="radio1">Male</label>
-                                </div>
-                                <div class="form-check">
-                                  <input type="radio" class="" id="gender" name="gender" value="Female" @if(Auth::guard('nurse_middle')->user()->gender == "Female") checked @endif>
-                                  <label class="form-check-label" for="radio1">Female</label>
-                                </div>
-                              </div>
-
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label class="font-sm color-text-mutted mb-10">Gender</label>
+                                <select name="gender" class="form-control">
+                                    <option value="">Select Gender</option>
+                                    <option value="Female" {{ Auth::guard('nurse_middle')->user()->gender == 'Female' ? 'selected' : '' }}>Female</option>
+                                    <option value="Male" {{ Auth::guard('nurse_middle')->user()->gender == 'Male' ? 'selected' : '' }}>Male</option>
+                                    <option value="Non-binary" {{ Auth::guard('nurse_middle')->user()->gender == 'Non-binary' ? 'selected' : '' }}>Non-binary</option>
+                                    <option value="Other" {{ Auth::guard('nurse_middle')->user()->gender == 'Other' ? 'selected' : '' }}>Other</option>
+                                    <option value="Prefer not to say" {{ Auth::guard('nurse_middle')->user()->gender == 'Prefer not to say' ? 'selected' : '' }}>Prefer not to say</option>
+                                </select>
                             </div>
+                        </div>
+
+                        <div class="col-12 mt-1">
+                                <h5 class="mb-3">Registration & Qualification</h5>
+                                @php
+                                    $user = Auth::guard('nurse_middle')->user();
+
+                                    $registrationCountries = (array) json_decode($user->registration_countries ?? '[]');
+                                    $qualificationCountries = (array) json_decode(
+                                        $user->qualification_countries ?? '[]'
+                                    );
+                                 
+                                 
+                                    $countries = country_name_from_db();
+                                @endphp                    
+                                <div class="form-group mb-4 drp--clr">
+                                    <label class="font-sm mb-2">
+                                        Countries of Registration <span class="text-danger">*</span>
+                                    </label>
+
+                                    <input type="hidden"
+                                        name="country_r"
+                                        class="country_r"
+                                        value='{{ json_encode($registrationCountries ?? []) }}'>
+
+                                  <ul id="register_record" style="display:none;">
+                                      @foreach($countries as $r_record)
+                                          <li data-value="{{ $r_record->iso2 }}">
+                                              {{ $r_record->name }}
+                                          </li>
+                                      @endforeach
+                                  </ul>
+                                  <select
+                                      class="js-example-basic-multiple addAll_removeAll_btn"
+                                      data-list-id="register_record"
+                                      name="register_record[]"
+                                      id="registerCountries"
+                                      multiple>
+                                  </select>
+                                    <span id="reqempsdate" class="reqError text-danger valley"></span>
+                                    <small class="text-muted">
+                                        Select the countries where you are registered to practice.
+                                    </small> 
+                                </div>          
+                                <div class="form-group drp--clr">
+                                    <label class="font-sm mb-2">
+                                        Countries of Qualification <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="hidden"
+                                          name="qualification_countries"
+                                          id="qualificationCountriesInput"
+                                          value="{{ json_encode($qualificationCountries) }}">
+
+                                    <ul id="qualification-country-list" style="display:none;">
+                                        @foreach ($countries as $country)
+                                            <li
+                                                data-value="{{ $country->iso2 }}"
+                                                class="{{ in_array($country->iso2, $qualificationCountries) ? 'selected' : '' }}"
+                                            >
+                                                {{ $country->name }}
+                                            </li>
+                                        @endforeach
+                                    </ul>
+
+                                    <select
+                                        class="js-example-basic-multiple addAll_removeAll_btn"
+                                        data-list-id="qualification-country-list"
+                                        id="qualificationCountries"
+                                        multiple
+                                    ></select>
+                                   <span id="qualiempsdate" class="reqError text-danger valley"></span>
+                                    <small class="text-muted">
+                                        We’ve prefilled this based on your registration countries.
+                                        Update if your qualification was in a different country.
+                                    </small>                           
+                                </div>
+                        </div>
+                      <div id="registrationCardsContainer"></div>
+
+                        @php
+                          $user = Auth::guard('nurse_middle')->user();
+                           $registration_country = DB::table('registration_profiles_countries')->where('user_Id',$user->id)->where('country_code',$user->active_country)->first();
+                           $profile_register_country = DB::table('registration_profiles_countries')->where('user_Id',$user->id)->get();
+                        @endphp
+                  @if($profile_register_country->isNotEmpty() && !empty($user->active_country) && !empty($registration_country))
+                    <div class="mb-4 card registration-card registration-card-{{$registration_country->country_code }}">
+                          <h5 class="d-flex justify-content-between align-items-center">
+                              <span>
+                                  Registration & Licences — {{ country_name($registration_country->country_code) }}
+                              </span>
+
+                              <span class="badge badge-status badge-{{ $registration_country->status }}">
+                                  {{ ucwords(str_replace('_',' ',$registration_country->status)) }}
+                              </span>
+                          </h5>
+
+                         @if ($registration_country->status == 2 || $registration_country->status == 3)
+                        <div class="form-group">
+                            <label>Status</label>
+                            <div class="d-flex gap-3">
+                                <label class="me-3">
+                                    <input type="radio"
+                                          name="registration[{{ $registration_country->id }}][status]"
+                                          value="2"
+                                          {{ $registration_country->status == 2 ? 'checked' : '' }}
+                                          class="status-radio"
+                                          data-code="{{ $registration_country->country_code }}"
+                                          style="width:16px;height:16px;margin-right:6px">
+                                    Draft
+                                </label>
+
+                                <label>
+                                    <input type="radio"
+                                          name="registration[{{ $registration_country->id }}][status]"
+                                          value="3"
+                                          {{ $registration_country->status == 3 ? 'checked' : '' }}
+                                          class="status-radio"
+                                          data-code="{{ $registration_country->country_code }}"
+                                          style="width:16px;height:16px;margin-right:6px">
+                                    Submitted (for Review)
+                                </label>
+                            </div>
+                        </div>
+                       @else
+                          <input type="hidden"
+                            name="registration[{{ $registration_country->id }}][status]"
+                            value={{$registration_country->status}}
+                            data-code="{{ $registration_country->country_code }}">
+                       @endif
+                          {{-- Jurisdiction --}}
+                          <div class="form-group">
+                              <label>Jurisdiction / Registration Authority</label>
+                              <input type="text"
+                                    name="registration[{{ $registration_country->id }}][jurisdiction]"
+                                    value="{{ $registration_country->registration_authority_name }}"
+                                    class="form-control">
                           </div>
+
+                          {{-- License Number --}}
+                          <div class="form-group">
+                              <label>License / Registration Number</label>
+                              <input type="text"
+                                    name="registration[{{ $registration_country->id }}][registration_number]"
+                                    value="{{ $registration_country->registration_number }}"
+                                    class="form-control">
+                          </div>
+
+                          {{-- Expiry Date --}}
+                        <div class="form-group">
+                            <label>Expiry Date</label>
+                            <input type="date"
+                              name="registration[{{ $registration_country->id }}][expiry_date]"
+                              value="{{ \Carbon\Carbon::parse($registration_country->expiry_date)->format('Y-m-d') }}"
+                              min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}"
+                              class="form-control">
+                        </div>
+            
+                        <div class="form-group">
+                            <label>Upload Evidence</label>
+
+               
+                            <input type="hidden"
+                                  name="registration[{{ $registration_country->id }}][upload_evidence]"
+                                  class="registration_evidence_input-{{ $registration_country->id }}"
+                                  value='{{ $registration_country->upload_evidence }}'>
+
+                            <input type="file"
+                                  class="form-control"
+                                  multiple
+                                  onchange="uploadRegistrationEvidence({{ $registration_country->id }})">
+
+                            <span class="text-danger error-upload-{{ $registration_country->id }}"></span>
+
+                          <div class="mt-2 registration-evidence-preview-{{ $registration_country->id }}">
+                              @if(!empty($registration_country->upload_evidence))
+                                  @foreach(json_decode($registration_country->upload_evidence, true) as $file)
+                                      <div class="trans_img">
+                                          <i class="fa fa-file"></i> 
+                                          <a href="{{ url('/public/uploads/registration/' . $file) }}" target="_blank">
+                                              {{ preg_replace('/^\d+_\d+_/', '', $file) }}
+                                          </a>
+                                          <span class="close_btn"
+                                                onclick="removeRegistrationEvidence('{{ $file }}', {{ $registration_country->id }})">
+                                              <i class="fa fa-close"></i>
+                                          </span>
+                                      </div>
+                                  @endforeach
+                              @endif
+                          </div>
+
+                        </div>
+
+                      </div>
+                  
+                    @endif
                           <!-- <div class="form-group col-md-12">
                           <label class="font-sm color-text-mutted mb-10">Bio</label>
                           <textarea class="form-control" rows="4" name="bio">{{ Auth::guard('nurse_middle')->user()->bio }}</textarea>
                         </div> -->
-                          <div class="form-group">
+                          {{-- <div class="form-group">
                             <label class="font-sm color-text-mutted mb-10">Nationality</label>
 
                             <select name="nationality" class="form-control form-select ps-5">
@@ -935,11 +1114,12 @@ p.highlight-text {
                               <option value="{{ $data->id }}" <?= isset(Auth::guard('nurse_middle')->user()->nationality) &&  Auth::guard('nurse_middle')->user()->nationality == $data->id ? 'selected' : '' ?>>{{ $data->nationality }}</option>
                               @endforeach
                             </select>
-                          </div>
-                          <div class="form-group">
+                          </div> --}}
+                          {{-- <div class="form-group">
                             <label class="font-sm color-text-mutted mb-10">Personal website</label>
                             <input class="form-control" type="text" name="website" value="{{  Auth::guard('nurse_middle')->user()->personal_website }}">
-                          </div>
+                          </div> --}}
+
                         </div>
 
 
@@ -1001,16 +1181,16 @@ p.highlight-text {
                           </div>
 
 
-                          <div class="col-lg-6">
+                          {{-- <div class="col-lg-6">
                             <div class="form-group">
                               <label class="font-sm color-text-mutted mb-10">Home Address</label>
                               <input class="form-control" type="text" name="home_address" id="home_address" value="{{ Auth::guard('nurse_middle')->user()->home_address }}">
                             </div>
-                          </div>
-                          <h6 class="emergency_text">
+                          </div> --}}
+                          {{-- <h6 class="emergency_text">
                             Emergency Contact Information
-                          </h6>
-                          <div class="col-lg-6 row">
+                          </h6> --}}
+                          <div class="col-lg-6 row" style="display: none;">
                             <div class="form-group">
                               <label class="font-sm color-text-mutted mb-10">Mobile No</label>
 
@@ -1023,7 +1203,7 @@ p.highlight-text {
 
                             </div>
                           </div>
-                          <div class="col-lg-6 row">
+                          {{-- <div class="col-lg-6 row">
                             <div class="form-group">
                               <label class="font-sm color-text-mutted mb-10">Email*</label>
 
@@ -1034,7 +1214,7 @@ p.highlight-text {
                               </div>
 
                             </div>
-                          </div>
+                          </div> --}}
                           <div class="box-button mt-15">
                             <button class="btn btn-apply-big font-md font-bold" @if(!email_verified()) disabled @endif type="submit" id="submitfrm">Save Changes</button>
                           </div>

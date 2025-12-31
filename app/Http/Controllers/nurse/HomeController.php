@@ -9,6 +9,7 @@ use App\Models\EligibilityToWorkModel;
 use App\Models\WorkingChildrenCheckModel;
 use App\Models\PoliceCheckModel;
 use App\Models\OtherEvidance;
+use App\Models\RegisteredProfile;
 
 
 use App\Http\Requests\AddnewsletterRequest;
@@ -148,7 +149,13 @@ class HomeController extends Controller
     }
     public function manage_profile($message = '')
     {
-        
+        RegisteredProfile::whereNotNull('expiry_date')
+            ->whereDate('expiry_date', '<', Carbon::today())
+            ->where('status', '!=', 'expired')
+            ->update([
+                'status' => 7
+            ]);
+
         $employeement_type_preferences = DB::table("employeement_type_preferences")->where("sub_prefer_id","0")->get();
         $user_id = Auth::guard('nurse_middle')->user()->id;    
         $user_data = User::where("id",$user_id)->first();
@@ -1220,7 +1227,7 @@ public function ResetPassword(Request $request)
     }
 
     public function remove_qualification_country(Request $request)
-    {
+    { main
         // print_r($request->all());die;
         $user = Auth::guard('nurse_middle')->user();
         // $userId = $user->id;
@@ -1239,6 +1246,7 @@ public function ResetPassword(Request $request)
             'status' => true,
             'message' => 'Registration country removed successfully'
         ]);
+
     }
     public function remove_registration_country(Request $request)
     {
@@ -1247,6 +1255,11 @@ public function ResetPassword(Request $request)
         $countryCode = $request->country_code;
 
         $registrationCountries = json_decode($user->registration_countries, true) ?? [];
+
+
+
+        $registrationCountries = json_decode($user->registration_countries, true) ?? [];
+
 
 
         $registrationCountries = array_values(
@@ -1261,12 +1274,38 @@ public function ResetPassword(Request $request)
             ->where('country_code', $countryCode)
             ->delete();
 
+
+        //condition for acitve coutnry
+        $registered_country =  RegisteredProfile::where('user_id', $userId)->where('status',5)->first();
+        // print_r($registered_country);die;
+        if($registered_country){
+            $user->update(
+                [
+                    'active_country' => $registered_country->country_code
+                ]
+            );
+            
+        }else{
+            $user->update(
+                [
+                    'active_country' => $user->country
+                ]
+            );
+        }
+
+
+
+
         return response()->json([
             'status' => true,
             'message' => 'Registration country removed successfully'
         ]);
     }
+
+
+
     
+
     public function uploadRegistrationEvidence(Request $request)
     {
         $request->validate([
@@ -1327,6 +1366,54 @@ public function ResetPassword(Request $request)
             'all'    => $allFiles       // optional: full list
         ]);
     }
+
+
+
+
+    public function removeRegistrationEvidence(Request $request)
+{
+    $request->validate([
+        'registration_id' => 'required|integer',
+        'file' => 'required|string',
+    ]);
+
+    $registration = DB::table('registration_profiles_countries')
+        ->where('id', $request->registration_id)
+        ->first();
+
+    if (!$registration) {
+        return response()->json(['error' => 'Record not found'], 404);
+    }
+
+    // Decode existing files
+    $files = $registration->upload_evidence
+        ? json_decode($registration->upload_evidence, true)
+        : [];
+
+    // Remove file from array
+    $files = array_values(array_filter($files, function ($f) use ($request) {
+        return $f !== $request->file;
+    }));
+
+    // Update DB
+    DB::table('registration_profiles_countries')
+        ->where('id', $request->registration_id)
+        ->update([
+            'upload_evidence' => json_encode($files),
+        ]);
+
+    // Remove file from storage
+    $filePath = public_path('uploads/registration/' . $request->file);
+    if (file_exists($filePath)) {
+        unlink($filePath);
+    }
+
+    return response()->json([
+        'success' => true,
+        'remaining_files' => $files
+    ]);
+}
+
 
     public function removeRegistrationEvidence(Request $request)
     {
@@ -1428,6 +1515,18 @@ public function ResetPassword(Request $request)
                         'expiry_date'                 => $registrations['expiry_date'] ?? null,
                         'status'                      => $registrations['status'] ?? null,
 
+                 
+                    ]);
+                }
+            }
+
+            // $current_date = Carbon::now();
+            // RegisteredProfile::whereDate('expiry_date', '<', $current_date)
+            //     ->where('status', '!=', 'expired')
+            //     ->update(['status' => 'expired']);
+
+
+
                     ]);
                 }
             }
@@ -1475,6 +1574,9 @@ public function ResetPassword(Request $request)
 
         return $uploadedFiles;
     }
+t
+
+
     // public function updateProfile(UserUpdateProfile $request)
     // {
     //     try {

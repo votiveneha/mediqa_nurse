@@ -32,7 +32,11 @@ class UserUpdateProfile extends FormRequest
             //     if (!is_array($data) || count($data) < 1) {
             //         $fail('Please select at least one qualification country.');
             //     }
+
+            // }],
+
             // }],   
+
             'gender' => 'required'
         ];
     }
@@ -51,9 +55,14 @@ class UserUpdateProfile extends FormRequest
             'country.required' => 'Please Select Country.',
             'state.required' => 'Please Select State.',
             'city.required' => 'The City field is required.',
+
+
             // 'registration_countries.required' => 'Please select at least one registration country.',
             // 'qualification_countries.required' => 'Please select at least one qualification country.',
+
             'gender.required' => 'The Gender is required',
+            // 'registration_countries.required' => 'Please select at least one registration country.',
+            // 'qualification_countries.required' => 'Please select at least one qualification country.',
            
             // 'email.required' => 'The email field is required.',
         ];

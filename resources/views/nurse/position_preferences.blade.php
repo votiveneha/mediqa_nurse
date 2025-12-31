@@ -147,7 +147,11 @@
                          @php
                             // $user = Auth::guard('nurse_middle')->user();
                             // $nurse_type = (array)json_decode($user->nurse_data);
+
+                           $specialities_type = json_decode($work_preferences_data->position_preferences, true);
+
                            $specialities_type = (!empty($work_preferences_data))?json_decode($work_preferences_data->position_preferences, true):[];
+
 
                         @endphp
 
