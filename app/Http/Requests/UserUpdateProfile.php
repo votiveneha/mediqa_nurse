@@ -20,8 +20,19 @@ class UserUpdateProfile extends FormRequest
             'country' => 'required',
             'state' => 'required',
             'city' => 'required',
-            'emergency_conact_numeber' => 'required',
-            'emergergency_contact_email' => 'required',
+            // 'registration_countries' => ['required', function ($attr, $value, $fail) {
+            //     $data = json_decode($value, true);
+            //     if (!is_array($data) || count($data) < 1) {
+            //         $fail('Please select at least one registration country.');
+            //     }
+            // }],
+
+            // 'qualification_countries' => ['required', function ($attr, $value, $fail) {
+            //     $data = json_decode($value, true);
+            //     if (!is_array($data) || count($data) < 1) {
+            //         $fail('Please select at least one qualification country.');
+            //     }
+            // }],
             'gender' => 'required'
         ];
     }
@@ -40,9 +51,9 @@ class UserUpdateProfile extends FormRequest
             'country.required' => 'Please Select Country.',
             'state.required' => 'Please Select State.',
             'city.required' => 'The City field is required.',
-            'emergency_conact_numeber.required' => 'The Emergency Contact Number is required',
-            'emergergency_contact_email.required' => 'The Emergency Contact Email is required',
             'gender.required' => 'The Gender is required',
+            // 'registration_countries.required' => 'Please select at least one registration country.',
+            // 'qualification_countries.required' => 'Please select at least one qualification country.',
            
             // 'email.required' => 'The email field is required.',
         ];

@@ -104,6 +104,11 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
     Route::post('/update-profession', 'HomeController@update_profession')->name('update-profession');
     Route::post('/update-profession-user-ahpra_numberI', 'HomeController@update_profession_ahpra_numberI')->name('update-profession-user-ahpra_numberI');
     
+    Route::post('/upload-registration-evidence', 'HomeController@uploadRegistrationEvidence')->name('nurse.uploadRegistrationEvidenceI');
+    Route::post('/remove-registration-evidence', 'HomeController@removeRegistrationEvidence')->name('nurse.removeRegistrationEvidence');
+    Route::post('/remove-registration-country', 'HomeController@remove_registration_country')->name('nurse.remove-registration-country');
+    Route::post('/remove-qualification-country', 'HomeController@remove_qualification_country')->name('nurse.remove-qualification-country');
+    
     
     
     Route::post('/update-profession-user-emergency', 'HomeController@update_emergency')->name('update-profession-user-emergency');

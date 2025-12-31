@@ -9,6 +9,7 @@ use App\Models\EligibilityToWorkModel;
 use App\Models\WorkingChildrenCheckModel;
 use App\Models\PoliceCheckModel;
 use App\Models\OtherEvidance;
+use App\Models\RegisteredProfile;
 
 
 use App\Http\Requests\AddnewsletterRequest;
@@ -148,6 +149,13 @@ class HomeController extends Controller
     }
     public function manage_profile($message = '')
     {
+
+        RegisteredProfile::whereNotNull('expiry_date')
+            ->whereDate('expiry_date', '<', Carbon::today())
+            ->where('status', '!=', 'expired')
+            ->update([
+                'status' => 7
+            ]);
         $employeement_type_preferences = DB::table("employeement_type_preferences")->where("sub_prefer_id","0")->get();
         return view('nurse.profile', compact('message','employeement_type_preferences'));
     }
@@ -973,23 +981,290 @@ public function ResetPassword(Request $request)
         
         return view('nurse.dashboard');
     }
+
+    public function remove_qualification_country(Request $request){
+        // print_r($request->all());die;
+        $user = Auth::guard('nurse_middle')->user();
+        // $userId = $user->id;
+        $countryCode = $request->country_code;
+
+        $qualificationCountries = json_decode($user->qualification_countries, true) ?? [];
+        $qualificationCountries = array_values(
+            array_diff($qualificationCountries, [$countryCode])
+        );
+
+        $user->update([
+            'qualification_countries' => json_encode($qualificationCountries)
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Registration country removed successfully'
+        ]);
+
+    }
+    public function remove_registration_country(Request $request)
+    {
+        $user = Auth::guard('nurse_middle')->user();
+        $userId = $user->id;
+        $countryCode = $request->country_code;
+        $registrationCountries = json_decode($user->registration_countries, true) ?? [];
+
+        $registrationCountries = array_values(
+            array_diff($registrationCountries, [$countryCode])
+        );
+
+        $user->update([
+            'registration_countries' => json_encode($registrationCountries)
+        ]);
+
+        RegisteredProfile::where('user_id', $userId)
+            ->where('country_code', $countryCode)
+            ->delete();
+
+        //condition for acitve coutnry
+        $registered_country =  RegisteredProfile::where('user_id', $userId)->where('status',5)->first();
+        // print_r($registered_country);die;
+        if($registered_country){
+            $user->update(
+                [
+                    'active_country' => $registered_country->country_code
+                ]
+            );
+            
+        }else{
+            $user->update(
+                [
+                    'active_country' => $user->country
+                ]
+            );
+        }
+
+
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Registration country removed successfully'
+        ]);
+    }
+
+    public function uploadRegistrationEvidence(Request $request)
+    {
+        $request->validate([
+            'files.*' => 'file|max:5120',
+            'registration_id' => 'required'
+        ]);
+
+        $userId = Auth::guard('nurse_middle')->user()->id;
+
+        /* ===============================
+       FIND PROFILE
+    =============================== */
+        $profile = RegisteredProfile::where('id', $request->registration_id)
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$profile) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Registration record not found'
+            ], 404);
+        }
+
+        /* ===============================
+       UPLOAD NEW FILES
+    =============================== */
+        $newFiles = [];
+
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+
+                if ($file->isValid()) {
+                    $name = time() . '_' . rand(10000, 99999) . '_' . $file->getClientOriginalName();
+                    $file->move(public_path('uploads/registration'), $name);
+                    $newFiles[] = $name;
+                }
+            }
+        }
+
+        /* ===============================
+       MERGE WITH EXISTING FILES
+    =============================== */
+        $existingFiles = json_decode($profile->upload_evidence ?? '[]', true);
+        $existingFiles = is_array($existingFiles) ? $existingFiles : [];
+
+        $allFiles = array_values(array_unique(array_merge($existingFiles, $newFiles)));
+
+        /* ===============================
+       UPDATE DB
+    =============================== */
+        $profile->update([
+            'upload_evidence' => json_encode($allFiles)
+        ]);
+
+        return response()->json([
+            'status' => 1,
+            'files'  => $newFiles,      // return only newly uploaded files for UI
+            'all'    => $allFiles       // optional: full list
+        ]);
+    }
+
+
+
+    public function removeRegistrationEvidence(Request $request)
+{
+    $request->validate([
+        'registration_id' => 'required|integer',
+        'file' => 'required|string',
+    ]);
+
+    $registration = DB::table('registration_profiles_countries')
+        ->where('id', $request->registration_id)
+        ->first();
+
+    if (!$registration) {
+        return response()->json(['error' => 'Record not found'], 404);
+    }
+
+    // Decode existing files
+    $files = $registration->upload_evidence
+        ? json_decode($registration->upload_evidence, true)
+        : [];
+
+    // Remove file from array
+    $files = array_values(array_filter($files, function ($f) use ($request) {
+        return $f !== $request->file;
+    }));
+
+    // Update DB
+    DB::table('registration_profiles_countries')
+        ->where('id', $request->registration_id)
+        ->update([
+            'upload_evidence' => json_encode($files),
+        ]);
+
+    // Remove file from storage
+    $filePath = public_path('uploads/registration/' . $request->file);
+    if (file_exists($filePath)) {
+        unlink($filePath);
+    }
+
+    return response()->json([
+        'success' => true,
+        'remaining_files' => $files
+    ]);
+}
+
+
     public function updateProfile(UserUpdateProfile $request)
     {
+
+        // print_r($request->all());die;
         try {
-            $run = $this->authServices->updateAdminProfile($request);
-            $id = Auth::guard('nurse_middle')->user()->id;
-            $user_stage = update_user_stage($id,"My Profile");
-            if ($run) {
-                return response()->json(['status' => '2', 'message' => __('message.statusTwo', ['parameter' => 'Profile'])]);
-            } else {
-                return response()->json(['status' => '0', 'message' => __('message.statusZero')]);
+
+            $run    = $this->authServices->updateAdminProfile($request);
+            $userId = Auth::guard('nurse_middle')->user()->id;
+
+            if (!empty($request->registration)) {
+
+                foreach ($request->registration as $key => $registrations) {
+
+                    /* ===============================
+                   1️⃣ NEW REGISTRATIONS
+                =============================== */
+                    if ($key === 'new') {
+
+                        foreach ($registrations as $countryCode => $data) {
+
+                            // upload files
+                            $uploadedFiles = $this->uploadRegistrationFiles(
+                                $data['upload_evidence'] ?? []
+                            );
+
+                            RegisteredProfile::create([
+                                'user_id'       => $userId,
+                                'country_code'  => $countryCode,
+                                'status'         => $data['status'],
+                                'registration_authority_name' => $data['jurisdiction'] ?? null,
+                                'registration_number'         => $data['registration_number'] ?? null,
+                                'expiry_date'                 => $data['expiry_date'] ?? null,
+                                'upload_evidence'             => json_encode($uploadedFiles),
+                            ]);
+                        }
+
+                        continue;
+                    }
+
+                    /* ===============================
+                   2️⃣ EXISTING REGISTRATIONS
+                =============================== */
+                    $profile = RegisteredProfile::where('id', $key)
+                        ->where('user_id', $userId)
+                        ->first();
+
+                    if (!$profile) {
+                        continue;
+                    }
+
+                    $profile->update([
+                        'registration_authority_name' => $registrations['jurisdiction'] ?? null,
+                        'registration_number'         => $registrations['registration_number'] ?? null,
+                        'expiry_date'                 => $registrations['expiry_date'] ?? null,
+                        'status'                      => $registrations['status'] ?? null,
+                 
+                    ]);
+                }
             }
-            
+
+            // $current_date = Carbon::now();
+            // RegisteredProfile::whereDate('expiry_date', '<', $current_date)
+            //     ->where('status', '!=', 'expired')
+            //     ->update(['status' => 'expired']);
+
+            update_user_stage($userId, "My Profile");
+
+            return response()->json([
+                'status'  => '2',
+                'message' => __('message.statusTwo', ['parameter' => 'Profile'])
+            ]);
         } catch (\Exception $e) {
-            log::error('Error in SettingController/updateProfile :' . $e->getMessage() . 'in line' . $e->getLine());
-            return response()->json(['status' => '0', 'message' => __('message.statusZero')]);
+
+            Log::error(
+                'Error in SettingController/updateProfile : ' .
+                    $e->getMessage() .
+                    ' in line ' .
+                    $e->getLine()
+            );
+
+            return response()->json([
+                'status'  => '0',
+                'message' => __('message.statusZero')
+            ]);
         }
     }
+    private function uploadRegistrationFiles($files)
+    {
+        $uploadedFiles = [];
+
+        if (!is_array($files)) {
+            return [];
+        }
+
+        foreach ($files as $file) {
+
+            if ($file instanceof \Illuminate\Http\UploadedFile && $file->isValid()) {
+
+                $name = time() . '_' . rand(10000, 99999) . '_' . $file->getClientOriginalName();
+
+                $file->move(public_path('uploads/registration'), $name);
+
+                $uploadedFiles[] = $name;
+            }
+        }
+
+        return $uploadedFiles;
+    }
+
 
     public function updateProfession(Request $request)
     {
