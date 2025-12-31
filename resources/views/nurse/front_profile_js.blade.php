@@ -1416,7 +1416,7 @@
                     <label class="form-label" for="input-1">Type of Nurse?</label>
                     <input type="hidden" name="user_id" class="user_id" value="{{ Auth::guard('nurse_middle')->user()->id }}">
             
-                    <ul id="type-of-nurse-experience-${previous_employeers_head}" style="display:none;">
+                    <ul id="type-of-nurse-experience-${previous_employeers_head}-0" style="display:none;">
                     @php $specialty = specialty();$spcl=$specialty[0]->id;@endphp
                     <?php
                     $j = 1;
@@ -1428,11 +1428,12 @@
                     ?>
                     @endforeach
                     </ul>
-                    <select class="js-example-basic-multiple${previous_employeers_head} addAll_removeAll_btn nurse_type_exp nurse_type_exp_${previous_employeers_head}" data-list-id="type-of-nurse-experience-${previous_employeers_head}" name="nurseType[${previous_employeers_head}][]" id="nurse_type_experience" multiple="multiple" index_id="${previous_employeers_head}"></select>
+                    <select class="js-example-basic-multiple${previous_employeers_head} addAll_removeAll_btn nurse_type_exp nurse_type_exp_${previous_employeers_head}" data-list-id="type-of-nurse-experience-${previous_employeers_head}-0" name="nurseType[${previous_employeers_head}][type_0][]" id="nurse_type_experience" multiple="multiple" onchange="getNurseTypeExperience('add',0,${previous_employeers_head},'add')" index_id="${previous_employeers_head}"></select>
                     <span id="reqnurseTypeexpId-${previous_employeers_head}" class="reqError text-danger valley"></span>
                 </div>
+                <div class="showNurseTypeExperience-${previous_employeers_head}-0"></div>
                 
-                <div class="result--show result_show_nurse">
+                <div class="result--show result_show_nurse" style="display:none;">
                     <div class="container p-0">
                         <div class="row g-2">
                         @php $specialty = specialty();$spcl=$specialty[0]->id;@endphp
@@ -1483,7 +1484,7 @@
                     <div class="form-group drp--clr">
                         <input type="hidden" name="sub_speciality_value" class="sub_speciality_value" value="">
                         <label class="form-label" for="input-1">Specialties</label>
-                        <ul id="specialties_experience-${previous_employeers_head}" style="display:none;">
+                        <ul id="specialties_type_experience-${previous_employeers_head}-0" style="display:none;">
                             @php $JobSpecialties = JobSpecialties(); @endphp
                             <?php
                             $k = 1;
@@ -1495,12 +1496,13 @@
                             ?>
                             @endforeach
                         </ul>
-                        <select class="js-example-basic-multiple${previous_employeers_head} addAll_removeAll_btn spec_exp spec_exp_${previous_employeers_head}" data-list-id="specialties_experience-${previous_employeers_head}" name="specialties_experience[${previous_employeers_head}][]" multiple="multiple"></select>
+                        <select class="js-example-basic-multiple${previous_employeers_head} addAll_removeAll_btn spec_exp spec_exp_${previous_employeers_head}" data-list-id="specialties_type_experience-${previous_employeers_head}-0" name="specialties_experience[${previous_employeers_head}][type_0][]" onchange="getSecialitiesExperience('add',0,${previous_employeers_head})" multiple="multiple"></select>
                         <span id="reqspecialtiesexp-${previous_employeers_head}" class="reqError text-danger valley"></span>
                     </div>
                     
                 </div>
-                <div class="speciality_boxes row result--show">
+                <div class="show_specialitiesExperience-${previous_employeers_head}-0"></div>
+                <div class="speciality_boxes row result--show" style="display:none">
                     <?php
                     $l = 1;
                     ?>
@@ -2801,12 +2803,54 @@
                 if ($(".type_nurse_ep-" + l).val() != "") {
                     // Initialize select2
                     var nurse_type1 = JSON.parse($(".type_nurse_ep-" + l).val());
-                    $('#nurse_type_exp-' + l).select2().val(nurse_type1).trigger('change');
+                    console.log("nurse_type1",nurse_type1);
+                    $('#nurse_type_exp-' + l+"-0").select2().val(nurse_type1).trigger('change');
                 }
             }
             l++;
         });
 
+        $(".subspec_list_experience_count").each(function() {
+            var experience_count = $(this).val();
+            console.log("experience_count",$(".speciality_exp-" + experience_count).val());
+            
+                if ($(".speciality_exp-" + experience_count).val() != "") {
+                    var spec_type = JSON.parse($(".speciality_exp-" + experience_count).val());
+                    console.log("spec_type",spec_type);
+                    $('.exp_spe_type_' + experience_count).select2().val(spec_type).trigger('change');
+                }
+           
+
+            $(".subspec_list_experiences-"+experience_count).each(function(){
+                var subspec_val = $(this).val();
+                console.log("subspec_val_experience",subspec_val);
+                if ($(".subspectype_experience-"+subspec_val+"-"+experience_count).val() != "") {
+                    var spec_type_experience = JSON.parse($(".subspectype_experience-"+subspec_val+"-"+experience_count).val());
+                    console.log("spec_type_experience",spec_type_experience);
+                    $("#specialties_type_exp-"+subspec_val+"-"+experience_count).select2().val(spec_type_experience).trigger('change');
+                }
+            });    
+        });
+
+        $(".nursetype_list_experience_count").each(function() {
+        var experience_count = $(this).val();
+        console.log("nurse_type_experience2",experience_count);
+        $(".subnurse_list_experiences-"+experience_count).each(function(){
+                var subspec_val1 = $(this).val();
+                console.log("subnursetype_experience",$(".subnursetype_experiences-"+subspec_val1+"-"+experience_count).val());
+                if ($(".subnursetype_experiences-"+subspec_val1+"-"+experience_count).val() != "") {
+                    var nurse_type_experience = JSON.parse($(".subnursetype_experiences-"+subspec_val1+"-"+experience_count).val());
+                    console.log("nurse_type_experience1",nurse_type_experience);
+                    $("#type-of-nurse-experience-"+subspec_val1+"-"+experience_count).select2().val(nurse_type_experience).trigger('change');
+                }
+            });  
+        });
+        
+        $(document).ready(function () {
+            $('.profession_summury_table tbody tr').each(function (index) {
+                $(this).find('td.sno').text(index + 1);
+            });
+        });
         var a = 1;
         var triggerCount = 0; // Initialize the counter
         $(".nurse-res-rex").each(function() {
@@ -2853,16 +2897,16 @@
         });
 
 
-        var d = 1;
-        $(".condition_set").each(function() {
-            if ($(".exp_tab-" + d).length > 0) {
-                if ($(".speciality_exp_value-" + d).val() != "") {
-                    var spec_type = JSON.parse($(".speciality_exp_value-" + d).val());
-                    $('.exp_spe_type_' + d).select2().val(spec_type).trigger('change');
-                }
-            }
-            d++;
-        });
+        // var d = 1;
+        // $(".condition_set").each(function() {
+        //     if ($(".exp_tab-" + d).length > 0) {
+        //         if ($(".speciality_exp_value-" + d).val() != "") {
+        //             var spec_type = JSON.parse($(".speciality_exp_value-" + d).val());
+        //             $('.exp_spe_type_' + d).select2().val(spec_type).trigger('change');
+        //         }
+        //     }
+        //     d++;
+        // });
 
 
         var e = 1;

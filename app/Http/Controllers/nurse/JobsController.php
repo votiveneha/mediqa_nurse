@@ -286,20 +286,37 @@ class JobsController extends Controller{
             $query->orderBy('id', 'desc');
         } elseif ($sort_name == 5) {
             // Urgent Hire
-            $query->where('urgent_hire',1);
+            $query->orderBy('urgent_hire', 'desc');
         } elseif ($sort_name == 7) {
-            $today = date('Y-m-d');
-
-            $query->whereDate('application_submission_date', '>=', $today)
-                ->orderBy('application_submission_date', 'asc');
+            // Application Deadline Soonest
+            $query->orderBy('application_submission_date', 'asc');
         } else {
             // Default Sorting (optional)
             $query->orderBy('id', 'desc');
         }
 
-        $data['jobs'] = $query->paginate(2);
+        $data['jobs'] = $query->get();
 
         return view("nurse.job_filter_data", $data);
+    }
+    public function getJobsSorting_old(Request $request){
+        $sort_name = $request->sort_name;
+
+        if($sort_name == "most_recent"){
+            $data['jobs'] = DB::table("job_boxes")->orderBy('id','desc')->get();
+        }
+
+        if($sort_name == "urgent_hire"){
+            $data['jobs'] = DB::table("job_boxes")->orderBy('urgent_hire','desc')->get();
+            //print_r($data['jobs']);die;
+        }
+
+        if($sort_name == "application_deadline"){
+            $data['jobs'] = DB::table("job_boxes")->orderBy('application_submission_date','asc')->get();
+            //print_r($data['jobs']);die;
+        }
+        
+        return view("nurse.job_filter_data")->with($data);
     }
 
     public function getNurseData(Request $request)

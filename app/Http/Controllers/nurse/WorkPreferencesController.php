@@ -261,8 +261,12 @@ class WorkPreferencesController extends Controller{
     {
         $user_id = $request->user_id;
         $subpositions_held = json_encode($request->subpositions_held);
+
+        
+
         $specialties = json_encode($request->specialties);
 
+        
         
 
         $work_preferences_data = WorkPreferencesModel::where("user_id",$user_id)->first();
@@ -271,7 +275,11 @@ class WorkPreferencesController extends Controller{
 
         if(!empty($work_preferences_data)){
             
+
             $run = WorkPreferencesModel::where('user_id',$user_id)->update(['position_preferences'=> $specialties]);
+
+            $run = WorkPreferencesModel::where('user_id',$user_id)->update(['position_preferences'=>$specialties]);
+
         }else{
             
             $work_preferences = new WorkPreferencesModel();

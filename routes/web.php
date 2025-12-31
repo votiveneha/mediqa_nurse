@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\nurse\HomeController;
+use App\Http\Controllers\admin\NurseController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -106,6 +107,8 @@ Route::prefix('/admin')->name('admin.')->namespace('App\Http\Controllers\admin')
     Route::post('/uploadAnotherImgs', 'NurseController@uploadAnotherImgs')->name('uploadAnotherImgs');
     Route::post('/deleteAnoImg1', 'NurseController@deleteAnoImg1')->name('deleteAnoImg1');
     Route::get('/customer-list', 'NurseController@customerList')->name('customer-list');
+    Route::post('/get-registered-countries',[NurseController::class, 'getRegisteredCountries'])->name('get-registered-countries');
+    Route::post('/update-registered-country-status',[NurseController::class, 'updateRegisteredCountryStatus'])->name('update-registered-country-status');
 
 
     // Skill  Managemenent

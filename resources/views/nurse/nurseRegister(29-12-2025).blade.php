@@ -274,46 +274,38 @@
 <script>
     $(document).ready(function() {
 
-        $(document).on('select2:open', '.addAll_removeAll_btn', function () {
-    const $select = $(this);
-    const select2 = $select.data('select2');
+        // Add an additional search box and extra buttons to the dropdown
+        $('.addAll_removeAll_btn').on('select2:open', function() {
+            var $dropdown = $(this);
+            var searchBoxHtml = `
+                
+                <div class="extra-buttons">
+                    <button class="select-all-button" type="button">Select All</button>
+                    <button class="remove-all-button" type="button">Remove All</button>
+                </div>`;
 
-    // Avoid duplicate buttons
-    if ($('.select2-results .extra-buttons').length === 0) {
+            // Remove any existing extra buttons before adding new ones
+            $('.select2-results .extra-search-container').remove();
+            $('.select2-results .extra-buttons').remove();
 
-        const buttonsHtml = `
-            <div class="extra-buttons" style="padding:8px;border-bottom:1px solid #eee;">
-                <button type="button" class="select-all-button">Select All</button>
-                <button type="button" class="remove-all-button">Remove All</button>
-            </div>
-        `;
+            // Append the new extra buttons and search box
+            $('.select2-results').prepend(searchBoxHtml);
 
-        $('.select2-results').prepend(buttonsHtml);
-    }
+            // Handle Select All button for the current dropdown
+            $('.select-all-button').on('click', function() {
+                var $currentDropdown = $dropdown;
+                var allValues = $currentDropdown.find('option').map(function() {
+                    return $(this).val();
+                }).get();
+                $currentDropdown.val(allValues).trigger('change');
+            });
 
-    // Select All
-    $('.select-all-button').off('click').on('click', function () {
-        const allValues = [];
-
-        $select.find('option').each(function () {
-            allValues.push($(this).val());
+            // Handle Remove All button for the current dropdown
+            $('.remove-all-button').on('click', function() {
+                var $currentDropdown = $dropdown;
+                $currentDropdown.val(null).trigger('change');
+            });
         });
-
-        $select.val(allValues).trigger('change');
-
-        // ✅ CLOSE DROPDOWN
-        $select.select2('close');
-    });
-
-    // Remove All
-    $('.remove-all-button').off('click').on('click', function () {
-        $select.val(null).trigger('change');
-
-        // ✅ CLOSE DROPDOWN
-        $select.select2('close');
-    });
-});
-
 
     });
 </script>

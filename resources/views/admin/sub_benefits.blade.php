@@ -26,6 +26,9 @@
                                 <h6 class="fs-4 fw-semibold mb-0">Benefit Name</h6>
                             </th>
                             <th>
+                                <h6 class="fs-4 fw-semibold mb-0">Icon</h6>
+                            </th>
+                            <th>
                                 <h6 class="fs-4 fw-semibold ">Action</h6>
                             </th>
 
@@ -41,6 +44,11 @@
                                         <div class="">
                                             <span class="mb-0 fw-normal fs-3">{{ $item->benefits_name }}</span>
                                         </div>
+                                    </td>
+                                    <td>
+                                        @if($item->icon)
+                                            <img src="{{ asset('uploads/benefits/'.$item->icon) }}" width="40">
+                                        @endif
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-1">
@@ -91,7 +99,11 @@
                                 id="benefit_name">
                             <span id="benefit_nameErr" class="text-danger"></span>
                         </div>
-                        
+                        <div class="form-group mt-2">
+                            <label>Benefit Icon (SVG / PNG)</label>
+                            <input type="file" name="icon" class="form-control" accept=".svg,.png">
+                            <span class="text-danger" id="benefit_iconErr"></span>
+                        </div>
                     </div>
                     <div class="modal-footer pt-0">
                         <button type="submit" class="btn btn-primary font-medium waves-effect" id="signup_btn_btn"
@@ -126,7 +138,11 @@
                                 id="editbenefit_name">
                             <span id="editbenefit_nameErr" class="text-danger"></span>
                         </div>
-                        
+                        <div class="form-group mt-2">
+                            <label>Benefit Icon (SVG / PNG)</label>
+                            <input type="file" name="icon" class="form-control" accept=".svg,.png">
+                            <span class="text-danger" id="editbenefit_iconErr"></span>
+                        </div>
                     </div>
                     <div class="modal-footer pt-0">
                         <button type="submit" class="btn btn-primary font-medium waves-effect" id="edit_signup_btn_btn"

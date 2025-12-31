@@ -1,4 +1,13 @@
 @extends('admin.layouts.layout')
+@section('css')
+<style type="text/css">
+    .modal-body.modal-body-custom {
+        overflow-x: auto;
+        overflow-y: auto;
+        height: 500px;
+    }
+</style>
+@endsection
 @section('content')
 <x-card-component parentHeading="Complete Profile Nurse List" childHeading="Complete Profile Nurse List" parentUrl="{{route('admin.dashboard')}}" />
     <div class="card w-100  overflow-hidden ">
@@ -39,6 +48,9 @@
                                 </th>
                                 <th>
                                     <h6 class="fs-4 fw-semibold mb-0">Email</h6>
+                                </th>
+                                <th>
+                                    <h6 class="fs-4 fw-semibold mb-0">Registered Country</h6>
                                 </th>
                                 <th class="fs-4 fw-semibold mb-0">Date</th>
                                 <th>
@@ -82,6 +94,15 @@
                                         </td>
                                         <td>
                                             <div class="">
+                                                <button 
+                                                    class="btn btn-primary w-100"
+                                                    onclick="viewRegisteredCountries({{ $item->id }})">
+                                                    View
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="">
                                                 <span class="mb-0 fw-normal fs-3">{{ \Carbon\Carbon::parse($item->completed_date)->format('d-m-Y') }}</span>
                                             </div>
                                         </td>
@@ -111,6 +132,38 @@
             </div>
         </div>
     </div>
+    
+    {{-- registered country modal  --}}
+        <div class="modal fade" id="registeredCountryModal" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Registered Countries</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body modal-body-custom">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Country of Registration</th>
+                                    <th>Jurisdiction / Registration Authority</th>
+                                    <th>License / Registration Number</th>
+                                    <th>Expiry Date</th>
+                                    <th>Evidence</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="registeredCountryBody">
+                                <tr>
+                                    <td colspan="5" class="text-center">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
 @endsection
 @section('js')
     <script>
@@ -189,7 +242,94 @@
             });
             return false;
         }
+        
+                function viewRegisteredCountries(userId) {
+            $('#registeredCountryBody').html(
+                '<tr><td colspan="5" class="text-center">Loading...</td></tr>'
+            );
+
+            $.ajax({
+                url: "{{ route('admin.get-registered-countries') }}",
+                type: "POST",
+                data: {
+                    user_id: userId,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function (res) {
+                    console.log(res);
+                    let html = '';
+
+                    if (res.data.length === 0) {
+                        html = '<tr><td colspan="5" class="text-center">No Data Found</td></tr>';
+                    } else {
+                        res.data.forEach(item => {
+                            let disableDropdown = [1, 2, 7].includes(item.status);
+
+                            html += `
+                            <tr>
+                                <td>${item.country_name ?? '-'}</td>
+                                <td>${item.registration_authority_name ?? '-'}</td>
+                                <td>${item.registration_number ?? '-'}</td>
+                                <td>${item.expiry_date ?? '-'}</td>
+                                <td>
+                                    ${
+                                        item.upload_evidence
+                                        ? JSON.parse(item.upload_evidence).map((file, index) => {
+                                            return `
+                                                <a 
+                                                    href="{{ asset('nurse/assets/imgs') }}/${file}" 
+                                                    target="_blank" 
+                                                    class="d-block fw-semibold">
+                                                    View File ${index + 1}
+                                                </a>
+                                            `;
+                                        }).join('')
+                                        : '-'
+                                    }
+                                </td>
+                                <td class="w-100">
+                                    <select class="form-select"
+                                        ${disableDropdown ? 'disabled' : ''}
+                                        onchange="updateCountryStatus(${item.id}, this.value)">
+                                        <option value="1" ${item.status == 1 ? 'selected' : ''} disabled>Not Started</option>
+                                        <option value="4" ${item.status == 2 ? 'selected' : ''} disabled>Pending</option>
+                                        <option value="4" ${item.status == 3 ? 'selected' : ''} disabled>Submitted</option>
+                                        <option value="4" ${item.status == 4 ? 'selected' : ''}>Review</option>
+                                        <option value="5" ${item.status == 5 ? 'selected' : ''}>Approve</option>
+                                        <option value="6" ${item.status == 6 ? 'selected' : ''}>Reject</option>
+                                        <option value="7" ${item.status == 7 ? 'selected' : ''}>Expired</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            `;
+
+                        });
+                    }
+
+                    $('#registeredCountryBody').html(html);
+                    $('#registeredCountryModal').modal('show');
+                }
+            });
+        }
+
+        function updateCountryStatus(id, status) {
+            $.ajax({
+                url: "{{ route('admin.update-registered-country-status') }}",
+                type: "POST",
+                data: {
+                    id: id,
+                    status: status,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function (res) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Updated',
+                        text: res.message
+                    });
+                }
+            });
+        }
 
     </script>
 @endsection
-
