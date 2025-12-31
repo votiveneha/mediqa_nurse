@@ -130,36 +130,154 @@ class NurseServices
 
             if ($run == 1) {
 
-                $body = 'Hello ' . $userData->name . ' ' . $userData->lastname . ',';
-
                 if ($request->status == 2) {
-                    $body .= '
-                        <p>We are pleased to inform you that your profile on Mediqa has been <strong>approved</strong> by our team.</p>
-                        <p>You can now:</p>
-                        <p>
-                            - Apply for job opportunities<br>
-                            - Connect with healthcare facilities and agencies<br>
-                            - Access all features of Mediqa
-                        </p>
-                        <p><strong>Next Steps:</strong></p>
-                        <p>
-                            - Log in to your account: <a href="https://mediqa.com.au/nurse/login">Mediqa</a><br>
-                            - Keep your profile updated for better job matches
-                        </p>
-                        <p>If you have any questions, feel free to contact us at info@mediqa.com.au.</p>
-                    ';
 
                     $subject = 'Your Profile Has Been Approved on Mediqa';
 
-                } else {
+                    $body = '
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Profile Approved</title>
+                    </head>
+                    <body style="margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, Helvetica, sans-serif;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4; padding:30px 0;">
+                            <tr>
+                                <td align="center">
+                                    <table width="100%" max-width="600" cellpadding="0" cellspacing="0"
+                                        style="max-width:600px; background:#ffffff; border-radius:8px; overflow:hidden;">
 
-                    $body .= '
-                        <p>We regret to inform you that your account request has been <strong>rejected</strong> due to:</p>
-                        <p><b>' . $request->reasonData . '</b></p>
-                        <p>Please contact us if you need further clarification.</p>
+                                        <!-- Header -->
+                                        <tr>
+                                            <td style="background:#28a745; padding:20px; text-align:center;">
+                                                <h1 style="margin:0; color:#ffffff; font-size:22px;">
+                                                    Mediqa
+                                                </h1>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Body -->
+                                        <tr>
+                                            <td style="padding:30px; color:#333333;">
+                                                <p style="margin:0 0 15px;">
+                                                    Hello <strong>' . e($userData->name . ' ' . $userData->lastname) . '</strong>,
+                                                </p>
+
+                                                <p style="margin:0 0 15px;">
+                                                    🎉 We are pleased to inform you that your profile on <strong>Mediqa</strong>
+                                                    has been <strong style="color:#28a745;">approved</strong> by our team.
+                                                </p>
+
+                                                <p style="margin:0 0 10px;">You can now:</p>
+                                                <ul style="margin:0 0 20px 20px; padding:0; font-size:14px;">
+                                                    <li>Apply for job opportunities</li>
+                                                    <li>Connect with healthcare facilities and agencies</li>
+                                                    <li>Access all features of Mediqa</li>
+                                                </ul>
+
+                                                <p style="margin:0 0 10px;"><strong>Next Steps:</strong></p>
+                                                <ul style="margin:0 0 20px 20px; padding:0; font-size:14px;">
+                                                    <li>
+                                                        Log in to your account:
+                                                        <a href="https://mediqa.com.au/nurse/login" style="color:#0d6efd; text-decoration:none;">
+                                                            Mediqa
+                                                        </a>
+                                                    </li>
+                                                    <li>Keep your profile updated for better job matches</li>
+                                                </ul>
+
+                                                <p style="margin:0 0 15px; font-size:14px;">
+                                                    If you have any questions, feel free to contact us at
+                                                    <a href="mailto:info@mediqa.com.au" style="color:#0d6efd; text-decoration:none;">
+                                                        info@mediqa.com.au
+                                                    </a>.
+                                                </p>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Footer -->
+                                        <tr>
+                                            <td style="background:#f0f0f0; padding:15px; text-align:center; font-size:12px; color:#777;">
+                                                © ' . '2024' . ' Mediqa. All rights reserved.
+                                            </td>
+                                        </tr>
+
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </body>
+                    </html>
                     ';
 
+                } else {
+
                     $subject = 'Your Account Has Been Rejected';
+
+                    $body = '
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Account Rejected</title>
+                    </head>
+                    <body style="margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, Helvetica, sans-serif;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4; padding:30px 0;">
+                            <tr>
+                                <td align="center">
+                                    <table width="100%" max-width="600" cellpadding="0" cellspacing="0"
+                                        style="max-width:600px; background:#ffffff; border-radius:8px; overflow:hidden;">
+
+                                        <!-- Header -->
+                                        <tr>
+                                            <td style="background:#dc3545; padding:20px; text-align:center;">
+                                                <h1 style="margin:0; color:#ffffff; font-size:22px;">
+                                                    Mediqa
+                                                </h1>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Body -->
+                                        <tr>
+                                            <td style="padding:30px; color:#333333;">
+                                                <p style="margin:0 0 15px;">
+                                                    Hello <strong>' . e($userData->name . ' ' . $userData->lastname) . '</strong>,
+                                                </p>
+
+                                                <p style="margin:0 0 15px;">
+                                                    We regret to inform you that your account request has been
+                                                    <strong style="color:#dc3545;">rejected</strong>.
+                                                </p>
+
+                                                <p style="margin:0 0 10px;"><strong>Reason:</strong></p>
+                                                <p style="margin:0 0 20px; font-size:14px; color:#555;">
+                                                    ' . e($request->reasonData) . '
+                                                </p>
+
+                                                <p style="margin:0 0 15px; font-size:14px;">
+                                                    If you need further clarification, please contact us at
+                                                    <a href="mailto:info@mediqa.com.au" style="color:#0d6efd; text-decoration:none;">
+                                                        info@mediqa.com.au
+                                                    </a>.
+                                                </p>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Footer -->
+                                        <tr>
+                                            <td style="background:#f0f0f0; padding:15px; text-align:center; font-size:12px; color:#777;">
+                                                © ' . '2024' . ' Mediqa. All rights reserved.
+                                            </td>
+                                        </tr>
+
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </body>
+                    </html>
+                    ';
                 }
 
                 $sendMailUser = \App\Helpers\ZeptoMailHelper::sendMail(
@@ -318,24 +436,159 @@ class NurseServices
 
             if ($run == 1) {
 
-                $body = 'Hello ' . $userData->name . ' ' . $userData->lastname . ',';
-
                 if ($request->status == 2) {
 
-                    // BLOCK EMAIL BODY
-                    $body .= '<p>This is to inform you that your account has been <strong>blocked</strong>.</p>';
-                    $body .= '<p><strong>Reason:</strong><br>' . $request->reason_val . '</p>';
+                // ACCOUNT BLOCKED
+                $subject = 'Account Blocked';
 
-                    $subject = 'Account Blocked';
+                $body = '
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Account Blocked</title>
+                </head>
+                <body style="margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, Helvetica, sans-serif;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4; padding:30px 0;">
+                        <tr>
+                            <td align="center">
+                                <table width="100%" max-width="600" cellpadding="0" cellspacing="0"
+                                    style="max-width:600px; background:#ffffff; border-radius:8px; overflow:hidden;">
 
-                } else {
+                                    <!-- Header -->
+                                    <tr>
+                                        <td style="background:#dc3545; padding:20px; text-align:center;">
+                                            <h1 style="margin:0; color:#ffffff; font-size:22px;">
+                                                Mediqa
+                                            </h1>
+                                        </td>
+                                    </tr>
 
-                    // UNBLOCK EMAIL BODY
-                    $body .= '<p>Good news! Your account has been <strong>unblocked</strong> by the admin.</p>';
-                    $body .= '<p>You may now log in and continue using your account.</p>';
+                                    <!-- Body -->
+                                    <tr>
+                                        <td style="padding:30px; color:#333333;">
+                                            <p style="margin:0 0 15px;">
+                                                Hello <strong>' . e($userData->name . ' ' . $userData->lastname) . '</strong>,
+                                            </p>
 
-                    $subject = 'Account Unblocked';
-                }
+                                            <p style="margin:0 0 15px;">
+                                                This is to inform you that your account has been
+                                                <strong style="color:#dc3545;">blocked</strong>.
+                                            </p>
+
+                                            <p style="margin:0 0 10px;"><strong>Reason:</strong></p>
+                                            <p style="margin:0 0 20px; font-size:14px; color:#555;">
+                                                ' . e($request->reason_val) . '
+                                            </p>
+
+                                            <p style="margin:0 0 15px; font-size:14px;">
+                                                If you believe this is a mistake or need further clarification,
+                                                please contact us at
+                                                <a href="mailto:info@mediqa.com.au" style="color:#0d6efd; text-decoration:none;">
+                                                    info@mediqa.com.au
+                                                </a>.
+                                            </p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Footer -->
+                                    <tr>
+                                        <td style="background:#f0f0f0; padding:15px; text-align:center; font-size:12px; color:#777;">
+                                            © ' . '2024' . ' Mediqa. All rights reserved.
+                                        </td>
+                                    </tr>
+
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+                ';
+
+            } else {
+
+                // ACCOUNT UNBLOCKED
+                $subject = 'Account Unblocked';
+
+                $body = '
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Account Unblocked</title>
+                </head>
+                <body style="margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, Helvetica, sans-serif;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4; padding:30px 0;">
+                        <tr>
+                            <td align="center">
+                                <table width="100%" max-width="600" cellpadding="0" cellspacing="0"
+                                    style="max-width:600px; background:#ffffff; border-radius:8px; overflow:hidden;">
+
+                                    <!-- Header -->
+                                    <tr>
+                                        <td style="background:#28a745; padding:20px; text-align:center;">
+                                            <h1 style="margin:0; color:#ffffff; font-size:22px;">
+                                                Mediqa
+                                            </h1>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Body -->
+                                    <tr>
+                                        <td style="padding:30px; color:#333333;">
+                                            <p style="margin:0 0 15px;">
+                                                Hello <strong>' . e($userData->name . ' ' . $userData->lastname) . '</strong>,
+                                            </p>
+
+                                            <p style="margin:0 0 15px;">
+                                                ✅ Good news! Your account has been
+                                                <strong style="color:#28a745;">unblocked</strong> by the admin.
+                                            </p>
+
+                                            <p style="margin:0 0 20px;">
+                                                You may now log in and continue using your account.
+                                            </p>
+
+                                            <p style="margin:0 0 15px;">
+                                                <a href="https://mediqa.com.au/nurse/login"
+                                                style="
+                                                    display:inline-block;
+                                                    padding:12px 22px;
+                                                    background:#0d6efd;
+                                                    color:#ffffff;
+                                                    text-decoration:none;
+                                                    border-radius:5px;
+                                                    font-size:15px;
+                                                ">
+                                                    Log In to Mediqa
+                                                </a>
+                                            </p>
+
+                                            <p style="margin:0 0 15px; font-size:14px;">
+                                                If you have any questions, feel free to contact us at
+                                                <a href="mailto:info@mediqa.com.au" style="color:#0d6efd; text-decoration:none;">
+                                                    info@mediqa.com.au
+                                                </a>.
+                                            </p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Footer -->
+                                    <tr>
+                                        <td style="background:#f0f0f0; padding:15px; text-align:center; font-size:12px; color:#777;">
+                                            © ' . '2024' . ' Mediqa. All rights reserved.
+                                        </td>
+                                    </tr>
+
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+                ';
+            }
 
                 // ----------- SEND USING ZEPTO MAIL -----------
                 $sendMail = \App\Helpers\ZeptoMailHelper::sendMail(

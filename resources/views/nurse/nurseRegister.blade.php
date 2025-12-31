@@ -120,6 +120,9 @@
 .step-2 input{
   border: 1px solid #dedddd !important;
 }
+.assistent_level_field .clear-btn{
+  display:none !important;
+}
 </style>
 @endsection
 @section('content')
@@ -224,7 +227,7 @@
    </div>
 </div>
 <div class="show_specialities-0"></div>
-<div class="form-group level-drp">
+<div class="form-group level-drp assistent_level_field">
                     <label class="form-label" for="input-1">What is your overall level of experience in nursing/midwifery?</label>
                     <!-- <input class="form-control" type="text" required="" name="fullname" placeholder="Steven Job"> -->
                     <select class="form-input mr-10 select-active" name="assistent_level">
@@ -271,38 +274,46 @@
 <script>
     $(document).ready(function() {
 
-        // Add an additional search box and extra buttons to the dropdown
-        $('.addAll_removeAll_btn').on('select2:open', function() {
-            var $dropdown = $(this);
-            var searchBoxHtml = `
-                
-                <div class="extra-buttons">
-                    <button class="select-all-button" type="button">Select All</button>
-                    <button class="remove-all-button" type="button">Remove All</button>
-                </div>`;
+        $(document).on('select2:open', '.addAll_removeAll_btn', function () {
+    const $select = $(this);
+    const select2 = $select.data('select2');
 
-            // Remove any existing extra buttons before adding new ones
-            $('.select2-results .extra-search-container').remove();
-            $('.select2-results .extra-buttons').remove();
+    // Avoid duplicate buttons
+    if ($('.select2-results .extra-buttons').length === 0) {
 
-            // Append the new extra buttons and search box
-            $('.select2-results').prepend(searchBoxHtml);
+        const buttonsHtml = `
+            <div class="extra-buttons" style="padding:8px;border-bottom:1px solid #eee;">
+                <button type="button" class="select-all-button">Select All</button>
+                <button type="button" class="remove-all-button">Remove All</button>
+            </div>
+        `;
 
-            // Handle Select All button for the current dropdown
-            $('.select-all-button').on('click', function() {
-                var $currentDropdown = $dropdown;
-                var allValues = $currentDropdown.find('option').map(function() {
-                    return $(this).val();
-                }).get();
-                $currentDropdown.val(allValues).trigger('change');
-            });
+        $('.select2-results').prepend(buttonsHtml);
+    }
 
-            // Handle Remove All button for the current dropdown
-            $('.remove-all-button').on('click', function() {
-                var $currentDropdown = $dropdown;
-                $currentDropdown.val(null).trigger('change');
-            });
+    // Select All
+    $('.select-all-button').off('click').on('click', function () {
+        const allValues = [];
+
+        $select.find('option').each(function () {
+            allValues.push($(this).val());
         });
+
+        $select.val(allValues).trigger('change');
+
+        // ✅ CLOSE DROPDOWN
+        $select.select2('close');
+    });
+
+    // Remove All
+    $('.remove-all-button').off('click').on('click', function () {
+        $select.val(null).trigger('change');
+
+        // ✅ CLOSE DROPDOWN
+        $select.select2('close');
+    });
+});
+
 
     });
 </script>
@@ -868,7 +879,7 @@ $(document).ready(function() {
     if(level == "main"){
       var selectedValues = $('.js-example-basic-multiple[data-list-id="type-of-nurse-'+k+'"]').val();
     }else{
-      var selectedValues = $('.js-example-basic-multiple'+k+'[data-list-id="type-of-nurse-'+k+'"]').val();
+      var selectedValues = $('.js-example-basic-multiple-nurse'+k+'[data-list-id="type-of-nurse-'+k+'"]').val();
     }
     
     console.log("selectedValues",level);
@@ -907,13 +918,13 @@ $(document).ready(function() {
                             <label class="form-label subnurse_label subnurse_label-'+data1.main_nurse_id+'" for="input-1">'+data1.main_nurse_name+'</label>\
                             <input type="hidden" name="subnurse_list" class="subnurse_list subnurse_list-'+data1.main_nurse_id+'" value="'+data1.main_nurse_id+'">\
                             <ul id="type-of-nurse-'+data1.main_nurse_id+'" style="display:none;">'+nurse_text+'</ul>\
-                            <select class="js-example-basic-multiple'+data1.main_nurse_id+' subnurse_valid-'+data1.main_nurse_id+' addAll_removeAll_btn" data-list-id="type-of-nurse-'+data1.main_nurse_id+'" name="nurseType[type_'+data1.main_nurse_id+'][]" onchange="getNurseType(\''+sub+'\',\''+data1.main_nurse_id+'\')" multiple="multiple"></select>\
+                            <select class="js-example-basic-multiple-nurse'+data1.main_nurse_id+' subnurse_valid-'+data1.main_nurse_id+' addAll_removeAll_btn" data-list-id="type-of-nurse-'+data1.main_nurse_id+'" name="nurseType[type_'+data1.main_nurse_id+'][]" onchange="getNurseType(\''+sub+'\',\''+data1.main_nurse_id+'\')" multiple="multiple"></select>\
                             <span id="reqsubnursevalid-'+data1.main_nurse_id+'" class="reqError text-danger valley"></span>\
                             </div>\
                             <div class="subnurse_level-'+data1.main_nurse_id+'"></div>\
                             </div><div class="show_nurse-'+data1.main_nurse_id+'"></div>');
 
-                            selectTwoFunction(data1.main_nurse_id);
+                            selectTwoFunction("-nurse"+data1.main_nurse_id);
             }
             
           }

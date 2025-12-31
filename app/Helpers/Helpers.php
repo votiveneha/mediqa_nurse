@@ -273,18 +273,98 @@ function update_user_stage($user_id,$tab_name)
                 
                 // Mail::to($to)->send(new \App\Mail\DemoMail($mailData));
 
-                                $htmlBody = '
-                        <p>Dear Mediqa Team,</p>
-                        <p>A new Nurse/Midwife has started filling their profile on Mediqa.</p>
-                        <br>
-                        <p><strong>User Details:</strong></p>
-                        <p>- Name: ' . e($user_data->name . " " . $user_data->lastname) . '</p>
-                        <p>- Email: ' . e($user_data->email) . '</p>
-                        <p>- Registration Date: ' . $onlyDate . '</p>
-                        <p>- Profile Progress: ' . e($tab_name) . '</p>
-                        <br>
-                        <p>This is an automated notification to inform you of new user activity.</p>
-                ';
+                $htmlBody = '
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                        <meta charset="UTF-8">
+                        <title>New User Activity Notification</title>
+                        </head>
+                        <body style="margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, Helvetica, sans-serif;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4; padding:30px 0;">
+                                <tr>
+                                <td align="center">
+                                        <table width="100%" max-width="600" cellpadding="0" cellspacing="0"
+                                        style="max-width:600px; background:#ffffff; border-radius:8px; overflow:hidden;">
+
+                                        <!-- Header -->
+                                        <tr>
+                                                <td style="background:#0d6efd; padding:20px; text-align:center;">
+                                                <h1 style="margin:0; color:#ffffff; font-size:22px;">
+                                                        Mediqa Notification
+                                                </h1>
+                                                </td>
+                                        </tr>
+
+                                        <!-- Body -->
+                                        <tr>
+                                                <td style="padding:30px; color:#333333;">
+                                                <p style="margin:0 0 15px;">
+                                                        Dear <strong>Mediqa Team</strong>,
+                                                </p>
+
+                                                <p style="margin:0 0 20px;">
+                                                        A new <strong>Nurse / Midwife</strong> has started filling out their profile on Mediqa.
+                                                </p>
+
+                                                <p style="margin:0 0 10px;"><strong>User Details:</strong></p>
+
+                                                <table width="100%" cellpadding="8" cellspacing="0" 
+                                                        style="border-collapse:collapse; font-size:14px;">
+                                                        <tr>
+                                                        <td style="border:1px solid #e0e0e0; background:#f9f9f9; width:40%;">
+                                                                Name
+                                                        </td>
+                                                        <td style="border:1px solid #e0e0e0;">
+                                                                ' . e($user_data->name . ' ' . $user_data->lastname) . '
+                                                        </td>
+                                                        </tr>
+                                                        <tr>
+                                                        <td style="border:1px solid #e0e0e0; background:#f9f9f9;">
+                                                                Email
+                                                        </td>
+                                                        <td style="border:1px solid #e0e0e0;">
+                                                                ' . e($user_data->email) . '
+                                                        </td>
+                                                        </tr>
+                                                        <tr>
+                                                        <td style="border:1px solid #e0e0e0; background:#f9f9f9;">
+                                                                Registration Date
+                                                        </td>
+                                                        <td style="border:1px solid #e0e0e0;">
+                                                                ' . e($onlyDate) . '
+                                                        </td>
+                                                        </tr>
+                                                        <tr>
+                                                        <td style="border:1px solid #e0e0e0; background:#f9f9f9;">
+                                                                Profile Progress
+                                                        </td>
+                                                        <td style="border:1px solid #e0e0e0;">
+                                                                ' . e($tab_name) . '
+                                                        </td>
+                                                        </tr>
+                                                </table>
+
+                                                <p style="margin:25px 0 0; font-size:14px; color:#777;">
+                                                        This is an automated notification to inform you of new user activity.
+                                                </p>
+                                                </td>
+                                        </tr>
+
+                                        <!-- Footer -->
+                                        <tr>
+                                                <td style="background:#f0f0f0; padding:15px; text-align:center; font-size:12px; color:#777;">
+                                                © ' . '2024' . ' Mediqa. All rights reserved.
+                                                </td>
+                                        </tr>
+
+                                        </table>
+                                </td>
+                                </tr>
+                        </table>
+                        </body>
+                        </html>
+                        ';
 
                 \App\Helpers\ZeptoMailHelper::sendMail(
                         to: $to,
@@ -325,25 +405,82 @@ function update_user_stage($user_id,$tab_name)
                 // Mail::to($to)->send(new \App\Mail\DemoMail($mailData));
 
                 $htmlBodyUser = '
-                        <p>Dear ' . e($user_data->name . " " . $user_data->lastname) . ',</p>
-                        <p>Congratulations! You have successfully completed your profile on Mediqa.</p>
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                        <meta charset="UTF-8">
+                        <title>Profile Completed Successfully</title>
+                        </head>
+                        <body style="margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, Helvetica, sans-serif;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4; padding:30px 0;">
+                                <tr>
+                                <td align="center">
+                                        <table width="100%" max-width="600" cellpadding="0" cellspacing="0"
+                                        style="max-width:600px; background:#ffffff; border-radius:8px; overflow:hidden;">
 
-                        <p>Your profile is now ready for review, and once approved, you will be able to:</p>
-                        <ul>
-                                <li>Apply for job opportunities</li>
-                                <li>Connect with healthcare facilities and agencies</li>
-                                <li>Receive interview requests and offers that match your skills</li>
-                        </ul>
+                                        <!-- Header -->
+                                        <tr>
+                                                <td style="background:#0d6efd; padding:20px; text-align:center;">
+                                                <h1 style="margin:0; color:#ffffff; font-size:22px;">
+                                                        Mediqa
+                                                </h1>
+                                                </td>
+                                        </tr>
 
-                        <p><strong>Next Steps:</strong></p>
-                        <p>- Our team will review your profile.<br>
-                        - You will receive an email once your profile has been approved.</p>
+                                        <!-- Body -->
+                                        <tr>
+                                                <td style="padding:30px; color:#333333;">
+                                                <p style="margin:0 0 15px;">
+                                                        Dear <strong>' . e($user_data->name . ' ' . $user_data->lastname) . '</strong>,
+                                                </p>
 
-                        <p>If you have any questions, contact us at 
-                        <a href="mailto:info@mediqa.com.au">info@mediqa.com.au</a></p>
+                                                <p style="margin:0 0 15px;">
+                                                        <strong>Congratulations!</strong> You have successfully completed your profile on <strong>Mediqa</strong>.
+                                                </p>
 
-                        <p>Thank you for being part of Mediqa!</p>
-                ';
+                                                <p style="margin:0 0 15px;">
+                                                        Your profile is now ready for review. Once approved, you will be able to:
+                                                </p>
+
+                                                <ul style="margin:0 0 20px 20px; padding:0; font-size:14px;">
+                                                        <li style="margin-bottom:8px;">Apply for job opportunities</li>
+                                                        <li style="margin-bottom:8px;">Connect with healthcare facilities and agencies</li>
+                                                        <li style="margin-bottom:8px;">Receive interview requests and offers that match your skills</li>
+                                                </ul>
+
+                                                <p style="margin:0 0 10px;"><strong>Next Steps:</strong></p>
+                                                <p style="margin:0 0 20px; font-size:14px;">
+                                                        • Our team will review your profile<br>
+                                                        • You will receive an email once your profile has been approved
+                                                </p>
+
+                                                <p style="margin:0 0 15px; font-size:14px;">
+                                                        If you have any questions, feel free to contact us at
+                                                        <a href="mailto:info@mediqa.com.au" style="color:#0d6efd; text-decoration:none;">
+                                                        info@mediqa.com.au
+                                                        </a>
+                                                </p>
+
+                                                <p style="margin:20px 0 0;">
+                                                        Thank you for being part of <strong>Mediqa</strong>!
+                                                </p>
+                                                </td>
+                                        </tr>
+
+                                        <!-- Footer -->
+                                        <tr>
+                                                <td style="background:#f0f0f0; padding:15px; text-align:center; font-size:12px; color:#777;">
+                                                © ' . '2024' . ' Mediqa. All rights reserved.
+                                                </td>
+                                        </tr>
+
+                                        </table>
+                                </td>
+                                </tr>
+                        </table>
+                        </body>
+                        </html>
+                        ';
 
                 \App\Helpers\ZeptoMailHelper::sendMail(
                         to: $to,
@@ -378,17 +515,97 @@ function update_user_stage($user_id,$tab_name)
                 // Mail::to($to1)->send(new \App\Mail\DemoMail($mailData));
 
                 $htmlBodyAdmin = '
-                        <p>Dear Mediqa Team,</p>
-                        <p>A user has successfully completed all profile sections and is now awaiting approval.</p>
-                        <br>
-                        <p><strong>User Details:</strong></p>
-                        <p>- Name: ' . e($user_data->name . " " . $user_data->lastname) . '</p>
-                        <p>- Email: ' . e($user_data->email) . '</p>
-                        <p>- Registration Date: ' . $onlyDate . '</p>
-                        <p>- Completion Date: ' . $onlyDate1 . '</p>
-                        <br>
-                        <p>Please review the user’s profile for approval.</p>
-                ';
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                        <meta charset="UTF-8">
+                        <title>Profile Completed – Approval Required</title>
+                        </head>
+                        <body style="margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, Helvetica, sans-serif;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4; padding:30px 0;">
+                                <tr>
+                                <td align="center">
+                                        <table width="100%" max-width="600" cellpadding="0" cellspacing="0"
+                                        style="max-width:600px; background:#ffffff; border-radius:8px; overflow:hidden;">
+
+                                        <!-- Header -->
+                                        <tr>
+                                                <td style="background:#0d6efd; padding:20px; text-align:center;">
+                                                <h1 style="margin:0; color:#ffffff; font-size:22px;">
+                                                        Mediqa – Admin Notification
+                                                </h1>
+                                                </td>
+                                        </tr>
+
+                                        <!-- Body -->
+                                        <tr>
+                                                <td style="padding:30px; color:#333333;">
+                                                <p style="margin:0 0 15px;">
+                                                        Dear <strong>Mediqa Team</strong>,
+                                                </p>
+
+                                                <p style="margin:0 0 20px;">
+                                                        A user has successfully completed all profile sections and is now awaiting approval.
+                                                </p>
+
+                                                <p style="margin:0 0 10px;"><strong>User Details:</strong></p>
+
+                                                <table width="100%" cellpadding="8" cellspacing="0"
+                                                        style="border-collapse:collapse; font-size:14px;">
+                                                        <tr>
+                                                        <td style="border:1px solid #e0e0e0; background:#f9f9f9; width:40%;">
+                                                                Name
+                                                        </td>
+                                                        <td style="border:1px solid #e0e0e0;">
+                                                                ' . e($user_data->name . ' ' . $user_data->lastname) . '
+                                                        </td>
+                                                        </tr>
+                                                        <tr>
+                                                        <td style="border:1px solid #e0e0e0; background:#f9f9f9;">
+                                                                Email
+                                                        </td>
+                                                        <td style="border:1px solid #e0e0e0;">
+                                                                ' . e($user_data->email) . '
+                                                        </td>
+                                                        </tr>
+                                                        <tr>
+                                                        <td style="border:1px solid #e0e0e0; background:#f9f9f9;">
+                                                                Registration Date
+                                                        </td>
+                                                        <td style="border:1px solid #e0e0e0;">
+                                                                ' . e($onlyDate) . '
+                                                        </td>
+                                                        </tr>
+                                                        <tr>
+                                                        <td style="border:1px solid #e0e0e0; background:#f9f9f9;">
+                                                                Completion Date
+                                                        </td>
+                                                        <td style="border:1px solid #e0e0e0;">
+                                                                ' . e($onlyDate1) . '
+                                                        </td>
+                                                        </tr>
+                                                </table>
+
+                                                <p style="margin:25px 0 0; font-size:14px;">
+                                                        Please review the user’s profile and proceed with approval.
+                                                </p>
+                                                </td>
+                                        </tr>
+
+                                        <!-- Footer -->
+                                        <tr>
+                                                <td style="background:#f0f0f0; padding:15px; text-align:center; font-size:12px; color:#777;">
+                                                © ' . '2024' . ' Mediqa. All rights reserved.
+                                                </td>
+                                        </tr>
+
+                                        </table>
+                                </td>
+                                </tr>
+                        </table>
+                        </body>
+                        </html>
+                        ';
 
                 \App\Helpers\ZeptoMailHelper::sendMail(
                         to: $to1,
@@ -427,5 +644,3 @@ function vaccination_name_by_id($id)
         $vaccination_data =  VaccinationModel::where('id', $id)->first();
         return $vaccination_data->name;
 }
-
-

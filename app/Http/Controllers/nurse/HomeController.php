@@ -9,6 +9,7 @@ use App\Models\EligibilityToWorkModel;
 use App\Models\WorkingChildrenCheckModel;
 use App\Models\PoliceCheckModel;
 use App\Models\OtherEvidance;
+use App\Models\RegisteredProfile;
 
 
 use App\Http\Requests\AddnewsletterRequest;
@@ -148,29 +149,52 @@ class HomeController extends Controller
     }
     public function manage_profile($message = '')
     {
+        RegisteredProfile::whereNotNull('expiry_date')
+            ->whereDate('expiry_date', '<', Carbon::today())
+            ->where('status', '!=', 'expired')
+            ->update([
+                'status' => 7
+            ]);
+
         $employeement_type_preferences = DB::table("employeement_type_preferences")->where("sub_prefer_id","0")->get();
         $user_id = Auth::guard('nurse_middle')->user()->id;    
         $user_data = User::where("id",$user_id)->first();
         $nurse_data = [];
         $specialities_data = [];
 
-        foreach (json_decode($user_data->nurse_data) as $key => $values) {
-            if ($key !== 'type_0') {
-                
-                $nurse_data = array_merge($nurse_data, $values);
+        if($user_data->nurse_data != NULL){
+            foreach (json_decode($user_data->nurse_data) as $key => $values) {
+                if ($key !== 'type_0') {
+                    
+                    $nurse_data = array_merge($nurse_data, $values);
+                }
             }
         }
-
-        foreach (json_decode($user_data->specialties) as $key => $values) {
-            if ($key !== 'type_0' && $key !== 'speciality_status') {
-                
-                $specialities_data = array_merge($specialities_data, $values);
+        if($user_data->specialties != NULL){
+            foreach (json_decode($user_data->specialties) as $key => $values) {
+                if ($key !== 'type_0' && $key !== 'speciality_status') {
+                    
+                    $specialities_data = array_merge($specialities_data, $values);
+                }
             }
         }
-
+        
         $specialities_type = (array)json_decode($user_data->specialties);
+
+        //registration profile
+        $registration_profile = DB::table("registration_profiles_countries")->where("user_id", $user_id)->get();
+        
         //print_r($specialities_data);
-        return view('nurse.profile', compact('message','employeement_type_preferences','nurse_data','specialities_data','specialities_type','user_data'));
+        $experience_data = DB::table("user_experience")->where("user_id",$user_id)->get();
+
+        //Auto status update when date is expired 
+        RegisteredProfile::whereNotNull('expiry_date')
+            ->whereDate('expiry_date', '<', Carbon::today())
+            ->where('status', '!=', 'expired')
+            ->update([
+                'status' => 7
+            ]);
+        return view('nurse.profile', compact('message','employeement_type_preferences','nurse_data','specialities_data','specialities_type','user_data','experience_data', 'registration_profile'));
     }
     public function upload_profile_image(Request $request)
     {
@@ -254,6 +278,7 @@ class HomeController extends Controller
         $companyinsert['pad_op_room']                    = json_encode($request->surgical_operative_carep_1);
         $companyinsert['pad_qr_scout']                   = json_encode($request->surgical_operative_carep_2);
         $companyinsert['pad_qr_scrub']                   = json_encode($request->surgical_operative_carep_3);
+        $companyinsert['profession_banner_status']                   = 1;
 
         $run = User::insert($companyinsert);
         $r   = User::where('email', $request->email)->first();
@@ -296,14 +321,90 @@ class HomeController extends Controller
             // }
 
             //zepto mail helper function
-            $htmlBody = "
-                <p>Hello <strong>{$r->name}</strong>,</p>
-                <p>Welcome and thank you for registering at Mediqa.</p>
-                <p>Please click the link below to verify your account:</p>
-                <p><a href='{$verificationUrl}' style='color:#0d6efd;'>Verify Now</a></p>
-                <p>If the above link does not work, copy & paste the link below:</p>
-                <p>{$verificationUrl}</p>
-            ";
+            $htmlBody = '
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Verify Your Account</title>
+                </head>
+                <body style="margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, Helvetica, sans-serif;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4; padding:30px 0;">
+                        <tr>
+                            <td align="center">
+                                <table width="100%" max-width="600" cellpadding="0" cellspacing="0"
+                                    style="max-width:600px; background:#ffffff; border-radius:8px; overflow:hidden;">
+
+                                    <!-- Header -->
+                                    <tr>
+                                            <td style="background:#000; padding:20px; text-align:center;">
+                                                <h1 style="margin:0; color:#ffffff; font-size:22px;">
+                                                    ' . e(env("APP_NAME")) . '
+                                                </h1>
+                                            </td>
+                                    </tr>
+
+                                    <!-- Body -->
+                                    <tr>
+                                        <td style="padding:30px; color:#333333;">
+                                            <p style="margin:0 0 15px;">
+                                                Hello <strong>' . e($r->name) . '</strong>,
+                                            </p>
+
+                                            <p style="margin:0 0 15px;">
+                                                Welcome and thank you for registering at <strong>Mediqa</strong>.
+                                            </p>
+
+                                            <p style="margin:0 0 25px;">
+                                                Please verify your account by clicking the button below.
+                                            </p>
+
+                                            <!-- Button -->
+                                            <p style="text-align:center; margin:0 0 25px;">
+                                                <a href="' . $verificationUrl . '" target="_blank"
+                                                style="
+                                                    display:inline-block;
+                                                    padding:14px 26px;
+                                                    background:#000000;
+                                                    color:#ffffff;
+                                                    text-decoration:none;
+                                                    border-radius:5px;
+                                                    font-size:16px;
+                                                ">
+                                                    Verify Account
+                                                </a>
+                                            </p>
+
+                                            <p style="margin:0 0 10px; font-size:14px; color:#555;">
+                                                If the button doesn’t work, copy and paste this link into your browser:
+                                            </p>
+
+                                            <p style="word-break:break-all; font-size:14px;">
+                                                <a href="' . $verificationUrl . '" target="_blank" style="color:#0d6efd;">
+                                                    ' . $verificationUrl . '
+                                                </a>
+                                            </p>
+
+                                            <p style="margin:25px 0 0; font-size:14px; color:#777;">
+                                                If you did not create an account, no action is required.
+                                            </p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Footer -->
+                                    <tr>
+                                        <td style="background:#f0f0f0; padding:15px; text-align:center; font-size:12px; color:#777;">
+                                            © ' . '2024' . ' Mediqa. All rights reserved.
+                                        </td>
+                                    </tr>
+
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+                ';
 
             try {
                 \App\Helpers\ZeptoMailHelper::sendMail(
@@ -553,99 +654,80 @@ class HomeController extends Controller
             return redirect()->route('nurse.login');
         }
     }
-    public function email_verification($emailToken)
+        public function email_verification($emailToken)
     {
-
-        $email = Crypt::decryptString($emailToken);
         $title = "email-verification";
 
-        if (User::where("email", $email)->exists()) {
-            if (User::where("email", $email)->where("emailVerified", '1')->exists()) {
-                $message = '<h6 style="color:green">Your email address already verified.!</h6>';
-                $status = 1;
-                if (!Auth::guard('nurse_middle')->check()) {
-                    $title = "Login";
-
-                    return view('nurse.login', compact('message', 'title', 'status'))->with('do', '0');
-                } else {
-
-
-                    // return redirect()->route('nurse.dashboard')->with([
-                    return redirect('/nurse/my-profile?page=profession')->with([
-                        'message' => $message,
-                        'title' => '',
-                        'status' => $status
-                    ]);
-                }
-            } else {
-                if (User::where("emailToken", $emailToken)->exists()) {
-
-                    $r = User::where("email", $email)->first();
-
-                    $update['emailVerified'] = '1';
-                    $update['user_stage'] = '1';
-                    $update['emailToken'] = '';
-
-                    $run = User::where(['email' => $email])->update($update);
-                    if (!Auth::guard('nurse_middle')->user()) {
-                        Session::put('user_id', $r->id);
-                        Auth::guard('nurse_middle')->attempt(['email' => $r->email, 'password' => $r->ps]);
-                    }
-                    
-                    $currentDate = date("Y-m-d");
-
-                    $to = "votivetester.vijendra@gmail.com";
-
-                    $mailData = [
-
-                        'subject' => 'New Nurse',
-    
-                        'email' => $to,
-    
-    
-                        'body' => '<p>Dear Mediqa Team,</p><p>A new Nurse/Midwife has successfully verified their email on Mediqa.</p><br><p>User Details:  </p><p>- Name: '.$r->name." ".$r->lastname.'</p><p>- Email: '.$r->email.'</p><p>- Verification Date: '.$currentDate.'</p><br><p>This is an automated notification to confirm that the users email has been successfully verified.</p>',
-    
-    
-                    ];
-    
-                    
-                    Mail::to($to)->send(new \App\Mail\DemoMail($mailData));
-                    
-                    if ($run) {
-                        $msg = "Email has been Verified Successfully";
-                        $message = '<h6 style="color:green">Your email address has been verified successfully. Now You can access to you account!</h6>';
-                        $status = 1;
-
-                        // return redirect()->route('nurse.dashboard')->with([
-                        return redirect('/nurse/my-profile?page=profession')->with([
-                            'message' => $message,
-                            'title' => '',
-                            'status' => $status
-                        ]);
-
-                        // return view('auth.verification-screen', compact('message', 'title', 'status'))->with('do', '1');
-                    } else {
-                        return back()->with('error', '<div claas="alert alert-danger mt-3">Something went wrong.</div>');
-                    }
-                } else {
-                    $message = '<h6 style="color:red">Verification link has been expired.!</h6>';
-                    $status = 0;
-
-                    // return view('auth.verification-screen', compact('message', 'title', 'status'))->with('do', '0');
-                    if (!Auth::guard('nurse_middle')->check()) {
-                        $title = "Login";
-
-                        return view('nursenurse.login', compact('message', 'title', 'status'))->with('do', '0');
-                    } elseif (Auth::guard('user')->user()->emailVerified == 0) {
-                        return redirect()->route('nurse.email-verification-pending');
-                    } else {
-
-
-                        return view('nurse.profile', compact('message', 'status'));
-                    }
-                }
-            }
+        if (!User::where('emailToken', $emailToken)->exists()) {
+            return $this->expiredLink();
         }
+
+        try {
+            $email = Crypt::decryptString($emailToken);
+        } catch (\Throwable $e) {
+            return $this->expiredLink();
+        }
+
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            return $this->expiredLink();
+        }
+
+        if ($user->emailVerified == '1') {
+            return $this->expiredLink();
+        }
+
+        $update = [
+            'emailVerified'     => '1',
+            'email_verify'      => 1,
+            'email_verified_at' => now(),
+            'emailToken'        => '',
+            'user_stage'        => '1',
+        ];
+
+        $run = User::where('email', $email)->update($update);
+
+        if (!$run) {
+            return back()->with('error', 'Something went wrong.');
+        }
+
+        if (!Auth::guard('nurse_middle')->check()) {
+            Session::put('user_id', $user->id);
+            Auth::guard('nurse_middle')->attempt([
+                'email'    => $user->email,
+                'password' => $user->ps
+            ]);
+        }
+
+        Mail::to("votivetester.vijendra@gmail.com")->send(
+            new \App\Mail\DemoMail([
+                'subject' => 'New Nurse',
+                'email'   => 'votivetester.vijendra@gmail.com',
+                'body'    => "
+                    <p>Dear Mediqa Team,</p>
+                    <p>A new Nurse/Midwife has successfully verified their email.</p>
+                    <p><strong>Name:</strong> {$user->name} {$user->lastname}</p>
+                    <p><strong>Email:</strong> {$user->email}</p>
+                    <p><strong>Date:</strong> " . now()->format('Y-m-d') . "</p>
+                "
+            ])
+        );
+
+        return redirect('/nurse/my-profile?page=profession')->with([
+            'message' => '<h6 style="color:green">Your email has been verified successfully.</h6>',
+            'status'  => 1
+        ]);
+    }
+    private function expiredLink()
+    {
+        $message = '<h6 style="color:red">Verification link has expired.</h6>';
+        $status  = 0;
+        $title   = 'Email Verification';
+
+        return response()
+            ->view('nurse.verification-expired', compact('message', 'status', 'title'))
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     }
 
     public function userloginAction(Request $request)
@@ -785,18 +867,91 @@ class HomeController extends Controller
             // }
 
             $htmlBody = '
-                <p>Hello ' . e($user->name) . ',</p>
-                <p>We\'ve received a password reset request for your ' . e(env('APP_NAME')) . ' account (' . e($user->email) . ').</p>
-                <p>If you initiated this request, click the button below to reset your password:</p>
-                <p>
-                    <a href="' . $verificationUrl . '" target="_blank" 
-                        style="font-size: 16px; padding: 12px 20px; background:#000; color:#fff; text-decoration:none; display:inline-block;">
-                        Reset Password
-                    </a>
-                </p>
-                <p>If the button doesn\'t work, copy and paste this link into your browser:</p>
-                <p>' . $verificationUrl . '</p>
-            ';
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Password Reset</title>
+                    </head>
+                    <body style="margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, Helvetica, sans-serif;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4; padding:30px 0;">
+                            <tr>
+                                <td align="center">
+                                    <table width="100%" max-width="600" cellpadding="0" cellspacing="0" 
+                                        style="max-width:600px; background:#ffffff; border-radius:8px; overflow:hidden;">
+                                        
+                                        <!-- Header -->
+                                        <tr>
+                                            <td style="background:#000; padding:20px; text-align:center;">
+                                                <h1 style="margin:0; color:#ffffff; font-size:22px;">
+                                                    ' . e(env("APP_NAME")) . '
+                                                </h1>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Body -->
+                                        <tr>
+                                            <td style="padding:30px; color:#333333;">
+                                                <p style="margin:0 0 15px;">
+                                                    Hello <strong>' . e($user->name) . '</strong>,
+                                                </p>
+
+                                                <p style="margin:0 0 15px;">
+                                                    We received a request to reset the password for your 
+                                                    <strong>' . e(env("APP_NAME")) . '</strong> account 
+                                                    (' . e($user->email) . ').
+                                                </p>
+
+                                                <p style="margin:0 0 25px;">
+                                                    If you made this request, click the button below to reset your password.
+                                                </p>
+
+                                                <!-- Button -->
+                                                <p style="text-align:center; margin:0 0 25px;">
+                                                    <a href="' . $verificationUrl . '" target="_blank"
+                                                    style="
+                                                        display:inline-block;
+                                                        padding:14px 26px;
+                                                        background:#000000;
+                                                        color:#ffffff;
+                                                        text-decoration:none;
+                                                        border-radius:5px;
+                                                        font-size:16px;
+                                                    ">
+                                                        Reset Password
+                                                    </a>
+                                                </p>
+
+                                                <p style="margin:0 0 10px; font-size:14px; color:#555;">
+                                                    If the button doesn’t work, copy and paste this link into your browser:
+                                                </p>
+
+                                                <p style="word-break:break-all; font-size:14px; color:#0066cc;">
+                                                    <a href="' . $verificationUrl . '" target="_blank" style="color:#0066cc;">
+                                                        ' . $verificationUrl . '
+                                                    </a>
+                                                </p>
+
+                                                <p style="margin:25px 0 0; font-size:14px; color:#777;">
+                                                    If you didn’t request a password reset, you can safely ignore this email.
+                                                </p>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Footer -->
+                                        <tr>
+                                            <td style="background:#f0f0f0; padding:15px; text-align:center; font-size:12px; color:#777;">
+                                                © ' . '2024' . ' ' . e(env("APP_NAME")) . '. All rights reserved.
+                                            </td>
+                                        </tr>
+
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </body>
+                    </html>
+                    ';
 
             try {
                 // Send mail using your custom helper
@@ -961,13 +1116,89 @@ public function ResetPassword(Request $request)
     $verificationUrl = url('nurse/email-verification/' . $user->emailToken);
 
      $htmlBody = '
-        <p>Hello ' . e($user->name) . ',</p>
-        <p>Welcome and thank you for registering.</p>
-        <p>Click the link below to verify your account:</p>
-        <p><a href="' . e($verificationUrl) . '">Verify Now</a></p>
-        <p>If the link doesn\'t work, copy & paste into your browser:</p>
-        <p>' . e($verificationUrl) . '</p>
-    ';
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>Verify Your Account</title>
+        </head>
+        <body style="margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, Helvetica, sans-serif;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4; padding:30px 0;">
+                <tr>
+                    <td align="center">
+                        <table width="100%" max-width="600" cellpadding="0" cellspacing="0"
+                            style="max-width:600px; background:#ffffff; border-radius:8px; overflow:hidden;">
+
+                            <!-- Header -->
+                            <tr>
+                                <td style="background:#000000; padding:20px; text-align:center;">
+                                    <h1 style="margin:0; color:#ffffff; font-size:22px;">
+                                        ' . e(env("APP_NAME")) . '
+                                    </h1>
+                                </td>
+                            </tr>
+
+                            <!-- Body -->
+                            <tr>
+                                <td style="padding:30px; color:#333333;">
+                                    <p style="margin:0 0 15px;">
+                                        Hello <strong>' . e($user->name) . '</strong>,
+                                    </p>
+
+                                    <p style="margin:0 0 15px;">
+                                        Welcome and thank you for registering with <strong>' . e(env("APP_NAME")) . '</strong>.
+                                    </p>
+
+                                    <p style="margin:0 0 25px;">
+                                        Please verify your account by clicking the button below.
+                                    </p>
+
+                                    <!-- Button -->
+                                    <p style="text-align:center; margin:0 0 25px;">
+                                        <a href="' . e($verificationUrl) . '" target="_blank"
+                                        style="
+                                            display:inline-block;
+                                            padding:14px 26px;
+                                            background:#000000;
+                                            color:#ffffff;
+                                            text-decoration:none;
+                                            border-radius:5px;
+                                            font-size:16px;
+                                        ">
+                                            Verify Account
+                                        </a>
+                                    </p>
+
+                                    <p style="margin:0 0 10px; font-size:14px; color:#555;">
+                                        If the button doesn’t work, copy and paste this link into your browser:
+                                    </p>
+
+                                    <p style="word-break:break-all; font-size:14px;">
+                                        <a href="' . e($verificationUrl) . '" target="_blank" style="color:#0066cc;">
+                                            ' . e($verificationUrl) . '
+                                        </a>
+                                    </p>
+
+                                    <p style="margin:25px 0 0; font-size:14px; color:#777;">
+                                        If you did not create an account, no action is required.
+                                    </p>
+                                </td>
+                            </tr>
+
+                            <!-- Footer -->
+                            <tr>
+                                <td style="background:#f0f0f0; padding:15px; text-align:center; font-size:12px; color:#777;">
+                                    © ' . '2024' . ' ' . e(env("APP_NAME")) . '. All rights reserved.
+                                </td>
+                            </tr>
+
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        ';
 
     try {
         \App\Helpers\ZeptoMailHelper::sendMail(
@@ -994,23 +1225,322 @@ public function ResetPassword(Request $request)
         
         return view('nurse.dashboard');
     }
+
+    public function remove_qualification_country(Request $request)
+    { 
+        // print_r($request->all());die;
+        $user = Auth::guard('nurse_middle')->user();
+        // $userId = $user->id;
+        $countryCode = $request->country_code;
+
+        $qualificationCountries = json_decode($user->qualification_countries, true) ?? [];
+        $qualificationCountries = array_values(
+            array_diff($qualificationCountries, [$countryCode])
+        );
+
+        $user->update([
+            'qualification_countries' => json_encode($qualificationCountries)
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Registration country removed successfully'
+        ]);
+
+    }
+    public function remove_registration_country(Request $request)
+    {
+        $user = Auth::guard('nurse_middle')->user();
+        $userId = $user->id;
+        $countryCode = $request->country_code;
+
+        $registrationCountries = json_decode($user->registration_countries, true) ?? [];
+
+
+
+        $registrationCountries = json_decode($user->registration_countries, true) ?? [];
+
+
+
+        $registrationCountries = array_values(
+            array_diff($registrationCountries, [$countryCode])
+        );
+
+        $user->update([
+            'registration_countries' => json_encode($registrationCountries)
+        ]);
+
+        RegisteredProfile::where('user_id', $userId)
+            ->where('country_code', $countryCode)
+            ->delete();
+
+
+        //condition for acitve coutnry
+        $registered_country =  RegisteredProfile::where('user_id', $userId)->where('status',5)->first();
+        // print_r($registered_country);die;
+        if($registered_country){
+            $user->update(
+                [
+                    'active_country' => $registered_country->country_code
+                ]
+            );
+            
+        }else{
+            $user->update(
+                [
+                    'active_country' => $user->country
+                ]
+            );
+        }
+
+
+
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Registration country removed successfully'
+        ]);
+    }
+
+
+
+    
+
+    public function uploadRegistrationEvidence(Request $request)
+    {
+        $request->validate([
+            'files.*' => 'file|max:5120',
+            'registration_id' => 'required'
+        ]);
+
+        $userId = Auth::guard('nurse_middle')->user()->id;
+
+        /* ===============================
+       FIND PROFILE
+    =============================== */
+        $profile = RegisteredProfile::where('id', $request->registration_id)
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$profile) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Registration record not found'
+            ], 404);
+        }
+
+        /* ===============================
+       UPLOAD NEW FILES
+    =============================== */
+        $newFiles = [];
+
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+
+                if ($file->isValid()) {
+                    $name = time() . '_' . rand(10000, 99999) . '_' . $file->getClientOriginalName();
+                    $file->move(public_path('uploads/registration'), $name);
+                    $newFiles[] = $name;
+                }
+            }
+        }
+
+        /* ===============================
+       MERGE WITH EXISTING FILES
+    =============================== */
+        $existingFiles = json_decode($profile->upload_evidence ?? '[]', true);
+        $existingFiles = is_array($existingFiles) ? $existingFiles : [];
+
+        $allFiles = array_values(array_unique(array_merge($existingFiles, $newFiles)));
+
+        /* ===============================
+       UPDATE DB
+    =============================== */
+        $profile->update([
+            'upload_evidence' => json_encode($allFiles)
+        ]);
+
+        return response()->json([
+            'status' => 1,
+            'files'  => $newFiles,      // return only newly uploaded files for UI
+            'all'    => $allFiles       // optional: full list
+        ]);
+    }
+
+
+
+    public function removeRegistrationEvidence(Request $request)
+    {
+        $request->validate([
+            'registration_id' => 'required|integer',
+            'file' => 'required|string',
+        ]);
+
+        $registration = DB::table('registration_profiles_countries')
+            ->where('id', $request->registration_id)
+            ->first();
+
+        if (!$registration) {
+            return response()->json(['error' => 'Record not found'], 404);
+        }
+
+        // Decode existing files
+        $files = $registration->upload_evidence
+            ? json_decode($registration->upload_evidence, true)
+            : [];
+
+        // Remove file from array
+        $files = array_values(array_filter($files, function ($f) use ($request) {
+            return $f !== $request->file;
+        }));
+
+        // Update DB
+        DB::table('registration_profiles_countries')
+            ->where('id', $request->registration_id)
+            ->update([
+                'upload_evidence' => json_encode($files),
+            ]);
+
+        // Remove file from storage
+        $filePath = public_path('uploads/registration/' . $request->file);
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+
+        return response()->json([
+            'success' => true,
+            'remaining_files' => $files
+        ]);
+    }
+
     public function updateProfile(UserUpdateProfile $request)
     {
+
+        // print_r($request->all());die;
         try {
-            $run = $this->authServices->updateAdminProfile($request);
-            $id = Auth::guard('nurse_middle')->user()->id;
-            $user_stage = update_user_stage($id,"My Profile");
-            if ($run) {
-                return response()->json(['status' => '2', 'message' => __('message.statusTwo', ['parameter' => 'Profile'])]);
-            } else {
-                return response()->json(['status' => '0', 'message' => __('message.statusZero')]);
+
+            $run    = $this->authServices->updateAdminProfile($request);
+            $userId = Auth::guard('nurse_middle')->user()->id;
+
+            if (!empty($request->registration)) {
+
+                foreach ($request->registration as $key => $registrations) {
+
+                    /* ===============================
+                   1️⃣ NEW REGISTRATIONS
+                =============================== */
+                    if ($key === 'new') {
+
+                        foreach ($registrations as $countryCode => $data) {
+
+                            // upload files
+                            $uploadedFiles = $this->uploadRegistrationFiles(
+                                $data['upload_evidence'] ?? []
+                            );
+
+                            RegisteredProfile::create([
+                                'user_id'       => $userId,
+                                'country_code'  => $countryCode,
+                                'status'         => $data['status'],
+                                'registration_authority_name' => $data['jurisdiction'] ?? null,
+                                'registration_number'         => $data['registration_number'] ?? null,
+                                'expiry_date'                 => $data['expiry_date'] ?? null,
+                                'upload_evidence'             => json_encode($uploadedFiles),
+                            ]);
+                        }
+
+                        continue;
+                    }
+
+                    /* ===============================
+                   2️⃣ EXISTING REGISTRATIONS
+                =============================== */
+                    $profile = RegisteredProfile::where('id', $key)
+                        ->where('user_id', $userId)
+                        ->first();
+
+                    if (!$profile) {
+                        continue;
+                    }
+
+                    $profile->update([
+                        'registration_authority_name' => $registrations['jurisdiction'] ?? null,
+                        'registration_number'         => $registrations['registration_number'] ?? null,
+                        'expiry_date'                 => $registrations['expiry_date'] ?? null,
+                        'status'                      => $registrations['status'] ?? null,
+
+                    ]);
+                }
             }
-            
+
+            // $current_date = Carbon::now();
+            // RegisteredProfile::whereDate('expiry_date', '<', $current_date)
+            //     ->where('status', '!=', 'expired')
+            //     ->update(['status' => 'expired']);
+
+            update_user_stage($userId, "My Profile");
+
+            return response()->json([
+                'status'  => '2',
+                'message' => __('message.statusTwo', ['parameter' => 'Profile'])
+            ]);
         } catch (\Exception $e) {
-            log::error('Error in SettingController/updateProfile :' . $e->getMessage() . 'in line' . $e->getLine());
-            return response()->json(['status' => '0', 'message' => __('message.statusZero')]);
+
+            Log::error(
+                'Error in SettingController/updateProfile : ' .
+                    $e->getMessage() .
+                    ' in line ' .
+                    $e->getLine()
+            );
+
+            return response()->json([
+                'status'  => '0',
+                'message' => __('message.statusZero')
+            ]);
         }
     }
+    private function uploadRegistrationFiles($files)
+    {
+        $uploadedFiles = [];
+
+        if (!is_array($files)) {
+            return [];
+        }
+
+        foreach ($files as $file) {
+
+            if ($file instanceof \Illuminate\Http\UploadedFile && $file->isValid()) {
+
+                $name = time() . '_' . rand(10000, 99999) . '_' . $file->getClientOriginalName();
+
+                $file->move(public_path('uploads/registration'), $name);
+
+                $uploadedFiles[] = $name;
+            }
+        }
+
+        return $uploadedFiles;
+    }
+
+
+
+    // public function updateProfile(UserUpdateProfile $request)
+    // {
+    //     try {
+    //         $run = $this->authServices->updateAdminProfile($request);
+    //         $id = Auth::guard('nurse_middle')->user()->id;
+    //         $user_stage = update_user_stage($id,"My Profile");
+    //         if ($run) {
+    //             return response()->json(['status' => '2', 'message' => __('message.statusTwo', ['parameter' => 'Profile'])]);
+    //         } else {
+    //             return response()->json(['status' => '0', 'message' => __('message.statusZero')]);
+    //         }
+            
+    //     } catch (\Exception $e) {
+    //         log::error('Error in SettingController/updateProfile :' . $e->getMessage() . 'in line' . $e->getLine());
+    //         return response()->json(['status' => '0', 'message' => __('message.statusZero')]);
+    //     }
+    // }
 
     public function updateProfession(Request $request)
     {
@@ -1095,6 +1625,7 @@ public function ResetPassword(Request $request)
         $post->long_unemplyeed = $long_unemplyeed;
         $post->professional_info_status = "1";
         $post->career_advancement_goals = $career_advancement_goals;
+        $post->profession_banner_status = 0;
         $run = $post->save();
 
         if ($run) {
@@ -2118,7 +2649,7 @@ public function ResetPassword(Request $request)
             $surgical_operative_carep_2_1 = $surgical_operative_carep_2[$key] ?? null;
             $surgical_operative_carep_3_1 = $surgical_operative_carep_3[$key] ?? null;
             //$positions_held1 = json_encode($positions_held[$key]) ?? null;
-            //$subpwork1 = json_encode($subpwork[$key]) ?? null;
+            $subpwork1 = json_encode($subpwork[$key]) ?? null;
             $start_date1 = $start_date[$key] ?? '0000-00-00';
             $end_date1 = $end_date[$key] ?? '0000-00-00';
             $job_responeblities1 = $job_responeblities[$key] ?? null;
@@ -2174,7 +2705,7 @@ public function ResetPassword(Request $request)
                     'neonatal_care' => json_encode($neonatal_care_1),
                     'paedia_surgical_preoperative' => json_encode($surgical_rowpad_box_1),
                     //'position_held' => $positions_held1,
-                    //'facility_workplace_type' => $subpwork1,
+                    'facility_workplace_type' => $subpwork1,
                     'employeement_start_date' => $start_date1,
                     'employeement_end_date' => $end_date1,
                     'responsiblities' => $job_responeblities1,
@@ -2222,7 +2753,7 @@ public function ResetPassword(Request $request)
                 $newExperience->neonatal_care = json_encode($neonatal_care_1);
                 $newExperience->paedia_surgical_preoperative = json_encode($surgical_rowpad_box_1);
                 //$newExperience->position_held = $positions_held1;
-                //$newExperience->facility_workplace_type = $subpwork1;
+                $newExperience->facility_workplace_type = $subpwork1;
                 $newExperience->employeement_start_date = $start_date1;
                 $newExperience->employeement_end_date = $end_date1;
                 $newExperience->responsiblities = $job_responeblities1;
@@ -2262,73 +2793,166 @@ public function ResetPassword(Request $request)
     }
 
 
+    // public function updateReference(Request $request)
+    // {
+
+    //     $user_id = $request->user_id;
+    //     $experience_id = $request->experience_id;
+
+    //     $first_name = $request->first_name;
+    //     $last_name = $request->last_name;
+    //     $email = $request->email;
+    //     $referee_no = $request->referee_no;
+    //     // $phone_no = $request->phone_no;
+    //     $reference_relationship = $request->reference_relationship;
+    //     $worked_together = $request->worked_together;
+    //     $position_with_referee = $request->subpositions_heldr;
+    //     $start_date = $request->start_date;
+    //     $end_date = $request->end_date;
+    //     $still_working = $request->still_working1;
+    //     $reference_no = $request->reference_no;
+    //     //print_r($position_with_referee);die;
+    //     $getrefereedata = DB::table("referee")->where("user_id", $user_id)->get();
+
+    //     $referee_no_array = array();
+        
+    //     foreach ($getrefereedata as $r_data) {
+    //         $referee_no_array[] = $r_data->referee_no;
+    //     }
+
+    //     //print_r($referee_no_array);die;
+    //     for ($i = 0; $i < count($first_name); $i++) {
+    //         if (isset($referee_no[$i]) && in_array($referee_no[$i], $referee_no_array)) {
+    //             // if (isset($still_working[$i])) {
+    //             //     $working = 1;
+    //             // } else {
+    //             //     $working = 0;
+    //             // }
+                
+    //             $run = AddReferee::where('user_id', $user_id)->where('referee_no', $referee_no[$i])->update(['first_name' => $first_name[$i], 'last_name' => $last_name[$i], 'email' => $email[$i], 
+    //                 // 'phone_no' => $phone_no[$i], 
+    //                 'relationship' => $reference_relationship[$i], 'worked_together' => $worked_together[$i], 'position_with_referee' => json_encode($position_with_referee[$i+1]), 'start_date' => $start_date[$i], 'end_date' => $end_date[$i], 'still_working' => $still_working[$i], 'experience_id' => $experience_id[$i], 'is_declare' => 1]);
+    //         } else {
+    //             $user_stage = update_user_stage($user_id,"References");
+    //             if (isset($still_working[$i])) {
+    //                 $working = 1;
+    //             } else {
+    //                 $working = 0;
+    //             }
+    //             $referee = new AddReferee;
+    //             $referee->referee_no = $i + 1;
+    //             $referee->user_id = $user_id;
+    //             $referee->first_name = $first_name[$i];
+    //             $referee->last_name = $last_name[$i];
+    //             $referee->email = $email[$i];
+    //             // $referee->phone_no = $phone_no[$i];
+    //             $referee->relationship = $reference_relationship[$i];
+    //             $referee->worked_together = $worked_together[$i];
+    //             $referee->position_with_referee = json_encode($position_with_referee[$i+1]);
+    //             $referee->start_date = $start_date[$i];
+    //             $referee->end_date = $end_date[$i];
+    //             $referee->still_working = $working;
+    //             $referee->experience_id = $experience_id[$i];
+    //             $referee->is_declare = 1;
+    //             $referee->save();
+    //         }
+    //     }
+
+
+
+
+    //     $json['status'] = 1;
+
+    //     echo json_encode($json);
+    // }
     public function updateReference(Request $request)
     {
+        try {
+            $user_id = $request->user_id;
+            $experience_id = $request->experience_id;
 
-        $user_id = $request->user_id;
-        $experience_id = $request->experience_id;
+            $first_name = $request->first_name;
+            $last_name = $request->last_name;
+            $email = $request->email;
+            $referee_no = $request->referee_no;
+            $reference_relationship = $request->reference_relationship;
+            $worked_together = $request->worked_together;
+            $nurse_type = $request->nurse_type;
+            $start_date = $request->start_date;
+            $end_date = $request->end_date;
+            $still_working = $request->still_working1;
+            $reference_no = $request->reference_no;
+            
+            $getrefereedata = DB::table("referee")->where("user_id", $user_id)->get();
 
-        $first_name = $request->first_name;
-        $last_name = $request->last_name;
-        $email = $request->email;
-        $referee_no = $request->referee_no;
-        $phone_no = $request->phone_no;
-        $reference_relationship = $request->reference_relationship;
-        $worked_together = $request->worked_together;
-        $position_with_referee = $request->subpositions_heldr;
-        $start_date = $request->start_date;
-        $end_date = $request->end_date;
-        $still_working = $request->still_working1;
-        $reference_no = $request->reference_no;
-        //print_r($position_with_referee);die;
-        $getrefereedata = DB::table("referee")->where("user_id", $user_id)->get();
-
-        $referee_no_array = array();
-        
-        foreach ($getrefereedata as $r_data) {
-            $referee_no_array[] = $r_data->referee_no;
-        }
-
-        //print_r($referee_no_array);die;
-        for ($i = 0; $i < count($first_name); $i++) {
-            if (isset($referee_no[$i]) && in_array($referee_no[$i], $referee_no_array)) {
-                // if (isset($still_working[$i])) {
-                //     $working = 1;
-                // } else {
-                //     $working = 0;
-                // }
-                
-                $run = AddReferee::where('user_id', $user_id)->where('referee_no', $referee_no[$i])->update(['first_name' => $first_name[$i], 'last_name' => $last_name[$i], 'email' => $email[$i], 'phone_no' => $phone_no[$i], 'relationship' => $reference_relationship[$i], 'worked_together' => $worked_together[$i], 'position_with_referee' => json_encode($position_with_referee[$i+1]), 'start_date' => $start_date[$i], 'end_date' => $end_date[$i], 'still_working' => $still_working[$i], 'experience_id' => $experience_id[$i], 'is_declare' => 1]);
-            } else {
-                $user_stage = update_user_stage($user_id,"References");
-                if (isset($still_working[$i])) {
-                    $working = 1;
-                } else {
-                    $working = 0;
-                }
-                $referee = new AddReferee;
-                $referee->referee_no = $i + 1;
-                $referee->user_id = $user_id;
-                $referee->first_name = $first_name[$i];
-                $referee->last_name = $last_name[$i];
-                $referee->email = $email[$i];
-                $referee->phone_no = $phone_no[$i];
-                $referee->relationship = $reference_relationship[$i];
-                $referee->worked_together = $worked_together[$i];
-                $referee->position_with_referee = json_encode($position_with_referee[$i+1]);
-                $referee->start_date = $start_date[$i];
-                $referee->end_date = $end_date[$i];
-                $referee->still_working = $working;
-                $referee->experience_id = $experience_id[$i];
-                $referee->is_declare = 1;
-                $referee->save();
+            $referee_no_array = array();
+            
+            foreach ($getrefereedata as $r_data) {
+                $referee_no_array[] = $r_data->referee_no;
             }
+
+            for ($i = 0; $i < count($first_name); $i++) {
+                $expId = $experience_id[$i] ?? 0;
+                $isLinked = $expId && $expId != 0;
+                $working = isset($still_working[$i]) && $still_working[$i] == 1 ? 1 : 0;
+
+
+                // Prepare data array
+                $data = [
+                    'first_name'   => $first_name[$i] ?? null,
+                    'last_name'    => $last_name[$i] ?? null,
+                    'email'        => $email[$i] ?? null,
+                    'phone_no'     => '', // Empty string since we don't use phone anymore
+                    'relationship' => $reference_relationship[$i] ?? null,
+                    'worked_together' => $worked_together[$i] ?? null,
+                    'start_date'   => $start_date[$i] ?? null,
+                    'end_date'     => $working ? null : ($end_date[$i] ?? null),
+                    'still_working'=> $working,
+                    'experience_id'=> $expId,
+                    'position_with_referee' => null, // Set to null since we don't use this field
+                    'is_declare'   => 1,
+                    'updated_at'   => now()
+                ];
+
+                // Only set nurse_type_id for unlinked referees (experience_id = 0)
+                // Since your table doesn't have nurse_type_id field, we'll use position_with_referee
+                if (!$isLinked && isset($nurse_type[$i])) {
+                    $data['position_with_referee'] = $nurse_type[$i]; // Store nurse type ID here
+                }
+
+                // Update or create referee record
+                if (!empty($referee_no[$i])) {
+
+                    $updated = AddReferee::where('user_id', $user_id)
+                        ->where('referee_no', $referee_no[$i])
+                        ->update($data);
+
+                    // If no row updated → insert new referee
+                    if ($updated === 0) {
+                        $data['user_id'] = $user_id;
+                        $data['referee_no'] = AddReferee::where('user_id', $user_id)->max('referee_no') + 1;
+                        $data['created_at'] = now();
+                        AddReferee::create($data);
+                    }
+
+                } else {
+                    // Brand new referee
+                    $data['user_id'] = $user_id;
+                    $data['referee_no'] = AddReferee::where('user_id', $user_id)->max('referee_no') + 1;
+                    $data['created_at'] = now();
+                    AddReferee::create($data);
+                }
+
+            }
+
+            $json['status'] = 1;
+            $json['message'] = 'References updated successfully';
+
+        } catch (\Exception $e) {
+            $json['status'] = 0;
+            $json['message'] = 'Error: ' . $e->getMessage();
+            \Log::error('Update Reference Error: ' . $e->getMessage());
         }
-
-
-
-
-        $json['status'] = 1;
 
         echo json_encode($json);
     }
@@ -4066,5 +4690,21 @@ public function ResetPassword(Request $request)
         return json_encode($data);
 
 
+    }
+    
+        public function updateActiveCountry(Request $request)
+    {
+        $request->validate([
+            'country_code' => 'required|string|max:5',
+        ]);
+
+        $user = Auth::guard('nurse_middle')->user();
+
+        $user->active_country = $request->country_code;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+        ]);
     }
 }

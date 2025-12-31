@@ -1447,179 +1447,179 @@
       o++;
     });
     
-    // var a = 1;
-    // $(".nurse_type_exp").each(function() {
-    //   if ($(".nurse_type_exp_" + a).length > 0) {
-    //     if ($(".nurse_type_exp_" + a).val() == '') {
-    //       document.getElementById("reqnurseTypeexpId-" + a).innerHTML = "* Please select the type of nurse";
-    //       isValid = false;
-    //     }
-    //   }
-    //   a++;
-    // });
+    var a = 1;
+    $(".nurse_type_exp").each(function() {
+      if ($(".nurse_type_exp_" + a).length > 0) {
+        if ($(".nurse_type_exp_" + a).val() == '') {
+          document.getElementById("reqnurseTypeexpId-" + a).innerHTML = "* Please select the type of nurse";
+          isValid = false;
+        }
+      }
+      a++;
+    });
 
-    // var x = 1;
-    // $(".type_nurse_input").each(function(i,val) {
+    var x = 1;
+    $(".type_nurse_input").each(function(i,val) {
       
       
-    //   $(".type_nurse_input-"+x).each(function(i,val) {
-    //     var ntypeval = $(this).val();
-    //     var st_value = x.toString()+ntypeval.toString();
-    //     if($(".nursing_exps_"+st_value).hasClass("d-none") == false){
+      $(".type_nurse_input-"+x).each(function(i,val) {
+        var ntypeval = $(this).val();
+        var st_value = x.toString()+ntypeval.toString();
+        if($(".nursing_exps_"+st_value).hasClass("d-none") == false){
           
-    //       console.log("st_value_exp",st_value);
-    //       var label_name = $(".nursing_type_label-"+st_value).text();
+          console.log("st_value_exp",st_value);
+          var label_name = $(".nursing_type_label-"+st_value).text();
           
-    //       if ($(".subtype_nurses-" +st_value).val() == '') {
-    //         document.getElementById("reqnsubtypenurse-" +st_value).innerHTML = "* Please select the "+label_name;
-    //         isValid = false;
-    //       }
+          if ($(".subtype_nurses-" +st_value).val() == '') {
+            document.getElementById("reqnsubtypenurse-" +st_value).innerHTML = "* Please select the "+label_name;
+            isValid = false;
+          }
           
-    //     }
-    //   });
-    //   x++;
-    // });
+        }
+      });
+      x++;
+    });
 
-    // var y = 1;
-    // $(".nurse_prac_valid").each(function(i,val) {
-    //   if($(".np_submenu_experience_"+y).hasClass("d-none") == false){
-    //     if ($(".nurse_prac_valid_"+y).val() == '') {
-    //       document.getElementById("reqnp-" +y).innerHTML = "* Please select the Nurse Practitioner (NP)";
-    //       isValid = false;
-    //     }
-    //     y++;
-    //   }
+    var y = 1;
+    $(".nurse_prac_valid").each(function(i,val) {
+      if($(".np_submenu_experience_"+y).hasClass("d-none") == false){
+        if ($(".nurse_prac_valid_"+y).val() == '') {
+          document.getElementById("reqnp-" +y).innerHTML = "* Please select the Nurse Practitioner (NP)";
+          isValid = false;
+        }
+        y++;
+      }
       
-    // });
+    });
 
-    // var p = 1;
-    // $(".neonatal_exp").each(function(i,val) {
-    //   if($(".neonatal_row_exp_"+p).hasClass("d-none") == false){
+    var p = 1;
+    $(".neonatal_exp").each(function(i,val) {
+      if($(".neonatal_row_exp_"+p).hasClass("d-none") == false){
         
-    //     if ($(".neonatal_exp_"+p).val() == '') {
-    //       document.getElementById("reqneonatal-"+p).innerHTML = "* Please select the Neonatal Care";
-    //       isValid = false;
-    //     }
+        if ($(".neonatal_exp_"+p).val() == '') {
+          document.getElementById("reqneonatal-"+p).innerHTML = "* Please select the Neonatal Care";
+          isValid = false;
+        }
         
-    //   }
-    //   p++;
-    // });
+      }
+      p++;
+    });
 
-    // var q = 1;
-    // $(".surgicalobstrics").each(function(i,val) {
-    //   if($(".surgicalobs_row_experience-"+q).hasClass("d-none") == false){
+    var q = 1;
+    $(".surgicalobstrics").each(function(i,val) {
+      if($(".surgicalobs_row_experience-"+q).hasClass("d-none") == false){
         
-    //     if ($(".surgicalobstrics-"+q).val() == '') {
-    //       document.getElementById("reqsurgicalobstrics-"+q).innerHTML = "* Please select the Surgical Obstetrics and Gynecology (OB/GYN)";
-    //       isValid = false;
-    //     }
+        if ($(".surgicalobstrics-"+q).val() == '') {
+          document.getElementById("reqsurgicalobstrics-"+q).innerHTML = "* Please select the Surgical Obstetrics and Gynecology (OB/GYN)";
+          isValid = false;
+        }
         
-    //   }
-    //   q++;
-    // });
+      }
+      q++;
+    });
 
-    // var t = 1;
-    // $(".reqlevelexp").each(function(i,val) {
+    var t = 1;
+    $(".reqlevelexp").each(function(i,val) {
       
         
-    //     if ($(".reqlevelexp-"+t).val() == 'select') {
-    //       document.getElementById("reqlevelexp-"+t).innerHTML = "* Please select the Level of experience in this specialty";
-    //       isValid = false;
-    //     }
+        if ($(".reqlevelexp-"+t).val() == 'select') {
+          document.getElementById("reqlevelexp-"+t).innerHTML = "* Please select the Level of experience in this specialty";
+          isValid = false;
+        }
         
       
-    //   t++;
-    // });
+      t++;
+    });
 
-    // var z = 1;
-    // $(".type_specialities_input").each(function(i,val) {
+    var z = 1;
+    $(".type_specialities_input").each(function(i,val) {
       
       
-    //   $(".type_specialities_input-"+z).each(function(i,val) {
-    //     var stypeval = $(this).val();
-    //     var st_value = z.toString()+stypeval.toString();
-    //     if($(".speciality_exps_"+st_value).hasClass("d-none") == false){
+      $(".type_specialities_input-"+z).each(function(i,val) {
+        var stypeval = $(this).val();
+        var st_value = z.toString()+stypeval.toString();
+        if($(".speciality_exps_"+st_value).hasClass("d-none") == false){
           
-    //       console.log("x",st_value);
-    //       var label_name = $(".speciality_name_label-"+st_value).text();
+          console.log("x",st_value);
+          var label_name = $(".speciality_name_label-"+st_value).text();
           
-    //       if ($(".subspecialities-" +st_value).val() == '') {
-    //         document.getElementById("reqnsubspecialities-" +st_value).innerHTML = "* Please select the "+label_name;
-    //         isValid = false;
-    //       }
+          if ($(".subspecialities-" +st_value).val() == '') {
+            document.getElementById("reqnsubspecialities-" +st_value).innerHTML = "* Please select the "+label_name;
+            isValid = false;
+          }
           
-    //     }
-    //   });
-    //   z++;
-    // });
+        }
+      });
+      z++;
+    });
 
-    // var w = 1;
-    // $(".surgicalp_input").each(function(i,val) {
+    var w = 1;
+    $(".surgicalp_input").each(function(i,val) {
       
       
-    //   $(".surgicalp_input-"+w).each(function(i,val) {
-    //     var stypeval = $(this).val();
-    //     var st_value = w.toString()+stypeval.toString();
-    //     console.log("stypeval",stypeval);
-    //     if($(".surgicalp_experience-"+st_value).hasClass("d-none") == false){
+      $(".surgicalp_input-"+w).each(function(i,val) {
+        var stypeval = $(this).val();
+        var st_value = w.toString()+stypeval.toString();
+        console.log("stypeval",stypeval);
+        if($(".surgicalp_experience-"+st_value).hasClass("d-none") == false){
           
-    //       console.log("x",st_value);
-    //       var label_name = $(".surgicalprelabel-"+st_value).text();
+          console.log("x",st_value);
+          var label_name = $(".surgicalprelabel-"+st_value).text();
           
-    //       if ($(".surgicalspec-" +st_value).val() == '') {
-    //         document.getElementById("reqnsurgicalspecialities-" +st_value).innerHTML = "* Please select the "+label_name;
-    //         isValid = false;
-    //       }
+          if ($(".surgicalspec-" +st_value).val() == '') {
+            document.getElementById("reqnsurgicalspecialities-" +st_value).innerHTML = "* Please select the "+label_name;
+            isValid = false;
+          }
           
-    //     }
-    //   });
-    //   w++;
-    // });
+        }
+      });
+      w++;
+    });
 
-    // var u = 1;
-    // $(".surgical_specialities_input").each(function(i,val) {
+    var u = 1;
+    $(".surgical_specialities_input").each(function(i,val) {
       
       
-    //   $(".surgical_specialities_input-"+u).each(function(i,val) {
-    //     var ntypeval = $(this).val();
-    //     var st_value = u.toString()+ntypeval.toString();
-    //     if($(".surgicalspeciality_exps_"+st_value).hasClass("d-none") == false){
+      $(".surgical_specialities_input-"+u).each(function(i,val) {
+        var ntypeval = $(this).val();
+        var st_value = u.toString()+ntypeval.toString();
+        if($(".surgicalspeciality_exps_"+st_value).hasClass("d-none") == false){
           
-    //       console.log("xsurgical",st_value);
-    //       var label_name = $(".surgicalspeciality_name_label-"+st_value).text();
+          console.log("xsurgical",st_value);
+          var label_name = $(".surgicalspeciality_name_label-"+st_value).text();
           
-    //       if ($(".surgicalspecialities-" +st_value).val() == '') {
-    //         document.getElementById("reqsurgicalspecialities-" +st_value).innerHTML = "* Please select the "+label_name;
-    //         isValid = false;
-    //       }
+          if ($(".surgicalspecialities-" +st_value).val() == '') {
+            document.getElementById("reqsurgicalspecialities-" +st_value).innerHTML = "* Please select the "+label_name;
+            isValid = false;
+          }
           
-    //     }
-    //   });
-    //   u++;
-    // });
+        }
+      });
+      u++;
+    });
 
-    // var x = 1;
-    // $(".padsurgical_specialities_input").each(function(i,val) {
+    var x = 1;
+    $(".padsurgical_specialities_input").each(function(i,val) {
       
       
-    //   $(".padsurgical_specialities_input-"+x).each(function(i,val) {
-    //     var ntypeval = $(this).val();
-    //     var st_value = x.toString()+ntypeval.toString();
-    //     if($(".padsurgicalspeciality_exps_"+st_value).hasClass("d-none") == false){
+      $(".padsurgical_specialities_input-"+x).each(function(i,val) {
+        var ntypeval = $(this).val();
+        var st_value = x.toString()+ntypeval.toString();
+        if($(".padsurgicalspeciality_exps_"+st_value).hasClass("d-none") == false){
           
           
-    //       var label_name = $(".padsurgicalspeciality_name_label-"+st_value).text();
+          var label_name = $(".padsurgicalspeciality_name_label-"+st_value).text();
           
-    //       if ($(".padsurgicalspecialities-"+st_value).val() == '') {
-    //         console.log("xsurgicalpad",st_value);
-    //         document.getElementById("reqpadsurgicalspecialities-"+st_value).innerHTML = "* Please select the "+label_name;
-    //         isValid = false;
-    //       }
+          if ($(".padsurgicalspecialities-"+st_value).val() == '') {
+            console.log("xsurgicalpad",st_value);
+            document.getElementById("reqpadsurgicalspecialities-"+st_value).innerHTML = "* Please select the "+label_name;
+            isValid = false;
+          }
           
-    //     }
-    //   });
-    //   x++;
-    // });
+        }
+      });
+      x++;
+    });
 
     
 
@@ -3541,6 +3541,517 @@
     $('#get_new_plice_checkModel').modal('show');
   }
 </script>
+
+<script>
+  $(document).ready(function () {
+
+      $('#submitfrm').on('click', function (e) {
+
+          let regCountries  = $('#registerCountries').select2('data');
+          let qualCountries = $('#qualificationCountries').select2('data');
+
+          let valid = true;
+
+          // reset errors
+          $('.select2-error').remove();
+
+
+          if (regCountries.length === 0) {
+              $('#registerCountries')
+                  .after('<span class="select2-error text-danger d-block mt-1">Please select at least one registration country.</span>');
+
+              $('#registerCountries').select2('open');
+              valid = false;
+          }
+
+
+          if (qualCountries.length === 0) {
+              $('#qualificationCountries')
+                  .after('<span class="select2-error text-danger d-block mt-1">Please select at least one qualification country.</span>');
+
+              if (valid) {
+                  $('#qualificationCountries').select2('open');
+              }
+
+              valid = false;
+          }
+
+          if (!valid) {
+              e.preventDefault();
+              return false;
+          }
+
+          // ✔ allow submit
+          $('#profileForm').submit();
+      });
+
+  });
+</script>
+
+
+<script type="text/template" id="registration-card-template">
+  <div class="mb-4 registration-card registration-card-__CODE__" data-country="__CODE__">
+      <h5 class="d-flex justify-content-between align-items-center">
+          <span>
+              Registration & Licences — __COUNTRY_NAME__
+          </span>
+      </h5>
+
+      <!-- STATUS -->
+    <div class="form-group">
+        <label>Status</label>
+        <div class="d-flex gap-3">
+            <label class="me-3">
+                <input type="radio"
+                      name="registration[new][__CODE__][status]"
+                      value="2"
+                      checked
+                      class="status-radio"
+                      data-code="__CODE__"
+                      style="width:16px;height:16px;margin-right:6px">
+                Draft
+            </label>
+
+            <label>
+                <input type="radio"
+                      name="registration[new][__CODE__][status]"
+                      value="3"
+                      class="status-radio" 
+                      data-code="__CODE__"
+                      style="width:16px;height:16px;margin-right:6px">
+                Submit  (for Review)
+            </label>
+        </div>
+    </div>
+
+
+      <div class="form-group">
+          <label>Jurisdiction / Registration Authority</label>
+          <input type="text"
+                 name="registration[new][__CODE__][jurisdiction]"
+                 class="form-control">
+      </div>
+
+      <div class="form-group">
+          <label>License / Registration Number</label>
+          <input type="text"
+                 name="registration[new][__CODE__][registration_number]"
+                 class="form-control">
+      </div>
+
+      <div class="form-group">
+          <label>Expiry Date</label>
+          <input type="date" min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}"
+                 name="registration[new][__CODE__][expiry_date]"
+                 class="form-control">
+      </div>
+
+      <div class="form-group">
+          <label>Upload Evidence</label>
+          <input type="file"
+                 name="registration[new][__CODE__][upload_evidence][]"
+                 class="form-control evidence-input"
+                 data-code="__CODE__"
+                 multiple>
+
+          <div class="mt-2 registration-evidence-preview___CODE__"></div>
+      </div>
+  </div>
+</script>
+
+<script>
+
+    $(document).on('change', '.status-radio', function () {
+      let code   = $(this).data('code');
+      let value  = $(this).val();
+      let $badge = $('.status-badge-' + code);
+
+      if (value === 'submitted') {
+          $badge
+              .removeClass('badge-pending')
+              .addClass('badge-submitted')
+              .text('Submitted');
+      } else {
+          $badge
+              .removeClass('badge-submitted')
+              .addClass('badge-pending')
+              .text('Pending');
+      }
+  });
+
+    $(document).on('change', '.evidence-input', function () {
+
+        let files   = this.files;
+        let code    = $(this).data('code');
+        let $preview = $('.registration-evidence-preview_' + code);
+
+        // clear previous preview
+        $preview.html('');
+
+        Array.from(files).forEach((file, index) => {
+
+            let html = `
+                <div class="trans_img" data-index="${index}">
+                    <i class="fa fa-file"></i> ${file.name}
+                    <span class="close_btn remove-temp-file"
+                          data-code="${code}"
+                          data-index="${index}">
+                        <i class="fa fa-close"></i>
+                    </span>
+                </div>
+            `;
+
+            $preview.append(html);
+        });
+    });
+
+    $(document).on('click', '.remove-temp-file', function () {
+
+        let code  = $(this).data('code');
+        let index = $(this).data('index');
+
+        let input = document.querySelector(
+            `.evidence-input[data-code="${code}"]`
+        );
+
+        let dt = new DataTransfer();
+
+        Array.from(input.files).forEach((file, i) => {
+            if (i !== index) {
+                dt.items.add(file);
+            }
+        });
+
+        input.files = dt.files;
+
+        // remove preview item
+        $(this).closest('.trans_img').remove();
+    });
+
+
+    $(document).ready(function () {
+
+        let $regSelect  = $('#registerCountries');
+        let $qualSelect = $('#qualificationCountries');
+        let $cardsWrap  = $('#registrationCardsContainer');
+
+        let savedRegistration = $('.country_r').val()
+            ? JSON.parse($('.country_r').val())
+            : [];
+
+
+        let prevRegistration = [...savedRegistration];
+
+        $regSelect.on('select2:unselecting', function (e) {
+
+          let code = e.params.args.data.id;
+
+
+          if (!savedRegistration.includes(code)) {
+              return;
+          }
+
+          e.preventDefault(); // stop select2 auto removal
+
+          if (!confirm('This registration is already saved. Do you want to remove it?')) {
+              return;
+          }
+
+                $.ajax({
+                    url: "{{ url('/nurse/remove-registration-country') }}",
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        country_code: code
+                    },
+                    success: function (res) {
+
+                        if (res.status === true) {
+
+                            // remove from savedRegistration list
+                            savedRegistration = savedRegistration.filter(c => c !== code);
+
+                            // manually update select2 value
+                            let values = $regSelect.val() || [];
+                            values = values.filter(v => v !== code);
+                            $regSelect.val(values).trigger('change');
+
+                            // remove registration card
+                            $('.registration-card[data-country="' + code + '"]').remove();
+                        }
+                    }
+                });
+            });
+
+            $qualSelect.on('select2:unselecting', function (e) {
+                  let code = e.params.args.data.id;
+                  e.preventDefault();
+
+                  if (!confirm('Are you sure you want to delete this qualification country?')) {
+                      return;
+                  }
+
+                  $.ajax({
+                      url: "{{ url('/nurse/remove-qualification-country') }}",
+                      type: "POST",
+                      data: {
+                          _token: "{{ csrf_token() }}",
+                          country_code: code
+                      },
+                      success: function (res) {
+
+                          if (res.status === true) {
+
+                              let values = $qualSelect.val() || [];
+                              values = values.filter(v => v !== code);
+                              $qualSelect.val(values).trigger('change');
+
+                              $('#qualificationCountriesInput').val(JSON.stringify(values));
+                          }
+                      }
+                  });
+              });
+
+        /* ===============================
+          HELPERS
+        =============================== */
+        function getCountryName(code) {
+            return $('#register_record li[data-value="' + code + '"]').text().trim();
+        }
+
+        function createRegistrationCard(code) {
+
+            // prevent duplicate card
+            if ($('.registration-card[data-country="' + code + '"]').length) {
+                return;
+            }
+
+            let template = $('#registration-card-template').html();
+            let html = template
+                .replaceAll('__CODE__', code)
+                .replace('__COUNTRY_NAME__', getCountryName(code));
+
+            $cardsWrap.append(html);
+        }
+
+        function removeRegistrationCard(code) {
+            $('.registration-card[data-country="' + code + '"]').remove();
+        }
+
+        /* ===============================
+          INIT SELECT2
+        =============================== */
+        $('.js-example-basic-multiple').select2();
+
+        /* ===============================
+          AUTO SELECT DB COUNTRIES
+        =============================== */
+        if (savedRegistration.length) {
+            $regSelect.val(savedRegistration).trigger('change');
+        }
+
+        /* ===============================
+          REGISTRATION CHANGE
+        =============================== */
+        $regSelect.on('change', function () {
+
+            let current = $(this).val() || [];
+
+            // newly added
+            let added = current.filter(c => !prevRegistration.includes(c));
+
+            // removed
+            let removed = prevRegistration.filter(c => !current.includes(c));
+
+            // create cards
+            added.forEach(code => {
+                createRegistrationCard(code);
+            });
+
+            // remove cards ONLY if newly added (not DB ones)
+            removed.forEach(code => {
+                if (!savedRegistration.includes(code)) {
+                    removeRegistrationCard(code);
+                }
+            });
+
+            // auto sync qualification
+            let qualification = $qualSelect.val() || [];
+            added.forEach(code => {
+                if (!qualification.includes(code)) {
+                    qualification.push(code);
+                }
+            });
+
+            $qualSelect.val(qualification).trigger('change');
+
+            prevRegistration = [...current];
+        });
+
+    });
+</script>
+
+<script>
+  $(document).ready(function () {
+      /* ===============================
+        ELEMENTS & DB DATA
+      =============================== */
+      let $regSelect  = $('#registerCountries');
+      let $qualSelect = $('#qualificationCountries');
+
+      let savedRegistration  = [];
+      let savedQualification = [];
+
+      if ($('.country_r').val() !== '') {
+          savedRegistration = JSON.parse($('.country_r').val());
+      }
+
+      if ($('#qualificationCountriesInput').val() !== '') {
+          savedQualification = JSON.parse($('#qualificationCountriesInput').val());
+      }
+
+      let prevRegistration = [...savedRegistration];
+
+      /* ===============================
+        BUILD OPTIONS (ONCE)
+      =============================== */
+      function buildOptions(listSelector, $select) {
+          $(listSelector + ' li').each(function () {
+              let value = $(this).data('value');
+              let text  = $(this).text().trim();
+
+              if ($select.find('option[value="' + value + '"]').length === 0) {
+                  $select.append(new Option(text, value, false, false));
+              }
+          });
+      }
+
+      buildOptions('#register_record', $regSelect);
+      buildOptions('#qualification-country-list', $qualSelect);
+
+
+      $('.js-example-basic-multiple').select2();
+
+    
+      if (savedRegistration.length) {
+          $regSelect.val(savedRegistration).trigger('change');
+      }
+
+      if (savedQualification.length) {
+          $qualSelect.val(savedQualification).trigger('change');
+      }
+
+
+      $regSelect.on('change', function () {
+
+          let currentRegistration = $(this).val() || [];
+          let qualification      = $qualSelect.val() || [];
+
+          // only newly added registration countries
+          let newlyAdded = currentRegistration.filter(
+              c => !prevRegistration.includes(c)
+          );
+
+          // auto add to qualification
+          newlyAdded.forEach(code => {
+              if (!qualification.includes(code)) {
+                  qualification.push(code);
+              }
+          });
+
+          // ❌ DO NOT remove DB qualification countries
+          $qualSelect.val(qualification).trigger('change');
+
+          // update hidden inputs
+          $('#registrationCountriesInput').val(JSON.stringify(currentRegistration));
+          $('#qualificationCountriesInput').val(JSON.stringify(qualification));
+
+          prevRegistration = [...currentRegistration];
+      });
+
+      /* ===============================
+        QUALIFICATION CHANGE
+      =============================== */
+      $qualSelect.on('change', function () {
+          let qualification = $(this).val() || [];
+          $('#qualificationCountriesInput').val(JSON.stringify(qualification));
+      });
+
+  });
+</script>
+
+
+<script>
+function uploadRegistrationEvidence(registrationId) {
+
+    let input = event.target;
+    let files = input.files;
+
+    if (!files.length) return;
+
+    let formData = new FormData();
+    formData.append('registration_id', registrationId);
+
+    for (let i = 0; i < files.length; i++) {
+        formData.append('files[]', files[i]);
+    }
+
+    $.ajax({
+        url: "{{ url('/nurse/upload-registration-evidence') }}",
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        success: function (res) {
+
+            let existing = $('.registration_evidence_input-' + registrationId).val();
+            let existingArr = existing ? JSON.parse(existing) : [];
+
+            let merged = existingArr.concat(res.files);
+
+            $('.registration_evidence_input-' + registrationId)
+                .val(JSON.stringify(merged));
+
+            res.files.forEach(file => {
+                $('.registration-evidence-preview-' + registrationId).append(`
+                    <div class="trans_img">
+                        <i class="fa fa-file"></i> ${file}
+                        <span class="close_btn"
+                              onclick="removeRegistrationEvidence('${file}', ${registrationId})">
+                            <i class="fa fa-close"></i>
+                        </span>
+                    </div>
+                `);
+            });
+        }
+    });
+}
+
+  function removeRegistrationEvidence(fileName, registrationId) {
+
+      let input = $('.registration_evidence_input-' + registrationId);
+      let files = JSON.parse(input.val() || '[]');
+
+      files = files.filter(f => f !== fileName);
+      input.val(JSON.stringify(files));
+
+      $.ajax({
+          url: "{{ url('/nurse/remove-registration-evidence') }}",
+          type: "POST",
+          data: {
+              registration_id: registrationId,
+              file: fileName,
+              _token: '{{ csrf_token() }}'
+          }
+      });
+
+      event.target.closest('.trans_img').remove();
+  }
+</script>
+
 <script>
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split('T')[0];

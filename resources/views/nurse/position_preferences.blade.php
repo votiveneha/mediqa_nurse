@@ -139,13 +139,97 @@
                                 @endforeach
                                 @endif
                             </ul>
-                            <select class="js-example-basic-multiple addAll_removeAll_btn pos_held pos_held_1" data-list-id="speciality_preferences-0" name="subpositions_held[1][]" id="position_held_field-1" multiple onchange="getSecialities('main',0)"></select>
+                            <select class="js-example-basic-multiple addAll_removeAll_btn pos_held pos_held_1" data-list-id="speciality_preferences-0" name="specialties[type_0][]" id="position_held_field-1" multiple onchange="getSecialities('main',0)"></select>
                             <span id="reqpositionheld-1" class="reqError text-danger valley"></span>
                             
                         </div>
+
+                         @php
+                            // $user = Auth::guard('nurse_middle')->user();
+                            // $nurse_type = (array)json_decode($user->nurse_data);
+
+                           $specialities_type = json_decode($work_preferences_data->position_preferences, true);
+
+                           $specialities_type = (!empty($work_preferences_data))?json_decode($work_preferences_data->position_preferences, true):[];
+
+
+                        @endphp
+
+                        @php
+                          $specialities = [];
+                          $specialityStatus = $specialities_type['speciality_status'] ?? [];
+
+                          foreach ($specialities_type as $key => $value) {
+                              if (!str_starts_with($key, 'type_')) continue;
+
+                              $id = (int) str_replace('type_', '', $key);
+                              if ($id === 0) continue;
+
+                              $specialities[$id] = $value;
+                          }
+                          @endphp
                         <div class="show_specialities-0">
-                           
-                        </div>
+                            @foreach($specialities as $parentId => $childIds)
+
+                            @php
+                                $parent = DB::table('speciality')->where('id',$parentId)->first();
+                                if (!$parent) continue;
+
+                                $children = DB::table('speciality')
+                                    ->where('parent',$parentId)
+                                    ->get();
+                            @endphp
+
+                            <div class="subspecialty_main_div subspecialty_main_div-{{ $parentId }}">
+
+                                <label class="form-label">
+                                    {{ $parent->name }}
+                                </label>
+
+                                
+                                <select class="js-example-basic-multiple addAll_removeAll_btn"
+                                        name="specialties[type_{{ $parentId }}][]"
+                                        multiple
+                                        onchange="getSecialities('main',{{ $parentId }})">
+
+                                    @foreach($children as $child)
+                                        <option value="{{ $child->id }}"
+                                            @if(in_array($child->id,$childIds)) selected @endif>
+                                            {{ $child->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+
+                                {{-- STATUS --}}
+                                @foreach($childIds as $childId)
+                                    @if(isset($specialityStatus['type_'.$childId]))
+                                        <div class="mt-2">
+                                            <label class="small">Level</label>
+                                            <select class="form-control"
+                                                    name="specialties[speciality_status][type_{{ $childId }}][status]">
+                                                <option value="Principal"
+                                                    @selected($specialityStatus['type_'.$childId]['status']=='Principal')>
+                                                    Principal
+                                                </option>
+                                                <option value="Current"
+                                                    @selected($specialityStatus['type_'.$childId]['status']=='Current')>
+                                                    Current
+                                                </option>
+                                                <option value="Former"
+                                                    @selected($specialityStatus['type_'.$childId]['status']=='Former')>
+                                                    Former
+                                                </option>
+                                            </select>
+                                        </div>
+                                    @endif
+                                @endforeach
+
+                            </div>
+
+                            @endforeach
+                            </div>
+
+                   
                         <div class="declaration_box">
                           <input type="checkbox" name="professional_declare_information" class="professional_declare_information" value="1">
                           <label for="declare_information">Willing to Upskill any specialty / Seeking any Training Opportunities</label>
@@ -158,7 +242,10 @@
                           <button class="btn btn-apply-big font-md font-bold" type="submit" id="submitPositionPreferences" @if(!email_verified()) disabled  @endif>Save Changes</button>
                         </div>
                       </form>
-    
+    <script>
+    const savedSpecialties = @json($specialities_type['type_0'] ?? []);
+</script>
+
     
                     </div>
     
@@ -181,6 +268,28 @@
 @include('nurse.front_profile_js');
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js">
 </script>
+<script>
+$(document).ready(function () {
+
+    let $select = $('#position_held_field-1');
+
+    if (savedSpecialties.length > 0) {
+
+        savedSpecialties.forEach(function (id) {
+
+            let text = $('#speciality_preferences-0 li[data-value="' + id + '"]').text();
+
+            if (text) {
+                let option = new Option(text, id, true, true);
+                $select.append(option);
+            }
+        });
+
+        $select.trigger('change');
+    }
+});
+</script>
+
 <script>
     $('.addAll_removeAll_btn').on('select2:open', function() {
         var $dropdown = $(this);
@@ -359,7 +468,7 @@
                               <label class="form-label subspec_label subspec_label-'+data1.main_speciality_id+'" for="input-1">'+data1.main_speciality_name+'</label>\
                               <input type="hidden" name="subspec_list" class="subspec_list subspec_list-'+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
                               <ul id="speciality_preferences-'+data1.main_speciality_id+'" style="display:none;">'+speciality_text+'</ul>\
-                              <select class="js-example-basic-multiple'+data1.main_speciality_id+' subspec_valid-'+data1.main_speciality_id+' addAll_removeAll_btn" data-list-id="speciality_preferences-'+data1.main_speciality_id+'" name="subspec[]" onchange="getSecialities(\''+sub+'\',\''+data1.main_speciality_id+'\')" multiple="multiple"></select>\
+                              <select class="js-example-basic-multiple'+data1.main_speciality_id+' subspec_valid-'+data1.main_speciality_id+' addAll_removeAll_btn" data-list-id="speciality_preferences-'+data1.main_speciality_id+'" name="specialties[type_'+data1.main_speciality_id+'][]" onchange="getSecialities(\''+sub+'\',\''+data1.main_speciality_id+'\')" multiple="multiple"></select>\
                               <span id="reqsubspecvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
                               </div>\
                               <div class="subspec_level-'+data1.main_speciality_id+'"></div>\
@@ -371,7 +480,7 @@
                   $(".show_specialities-"+k).append('<div class="custom-select-wrapper subspecprofdiv subspecprofdiv-'+data1.main_speciality_id+' form-group level-drp" style="margin-bottom: 5px;">\
                     <label class="form-label subspeclabel-'+data1.main_speciality_id+'" for="input-1">Specialty Status ('+data1.main_speciality_name+')</label>\
                     <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_list-'+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
-                    <select class="custom-select form-input mr-10 select-active langprof_level_valid-'+data1.main_speciality_id+'" name="subspec_level['+data1.main_speciality_id+']">\
+                    <select class="custom-select form-input mr-10 select-active langprof_level_valid-'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][status]">\
                       <option value="">select</option>\
                       <option value="Current">Current</option>\
                       <option value="Principal">Principal</option>\

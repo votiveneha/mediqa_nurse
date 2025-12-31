@@ -624,12 +624,18 @@
            
           console.log("data6",data1);
         }else{
-          if(filter_type == "Benefits" && data3.benefits_preferences != null){
-            var data4 = JSON.parse(data3.benefits_preferences);
-            var data6 = Object.values(data4);
-            
-            console.log("data6",data1);
-          }else{
+          if (filter_type === "Benefits") {
+
+            var data6 = [];
+
+            if (data3 && data3.length > 0) {
+                data3.forEach(function (row) {
+                    if (row.subbenefit_id) {
+                        data6.push(String(row.subbenefit_id));
+                    }
+                });
+            }
+        }else{
             var data4 = JSON.parse(data3.emptype_preferences);
             var data6 = Object.values(data4);
             var data5 = data6[0];
