@@ -276,7 +276,30 @@ class JobsController extends Controller{
         return $json;
     }
 
-    public function getJobsSorting(Request $request){
+    public function getJobsSorting(Request $request)
+    {
+        $sort_name = $request->sort_name;
+        $query = DB::table("job_boxes");
+
+        if ($sort_name == 2) {
+            // Most Recent
+            $query->orderBy('id', 'desc');
+        } elseif ($sort_name == 5) {
+            // Urgent Hire
+            $query->orderBy('urgent_hire', 'desc');
+        } elseif ($sort_name == 7) {
+            // Application Deadline Soonest
+            $query->orderBy('application_submission_date', 'asc');
+        } else {
+            // Default Sorting (optional)
+            $query->orderBy('id', 'desc');
+        }
+
+        $data['jobs'] = $query->get();
+
+        return view("nurse.job_filter_data", $data);
+    }
+    public function getJobsSorting_old(Request $request){
         $sort_name = $request->sort_name;
 
         if($sort_name == "most_recent"){

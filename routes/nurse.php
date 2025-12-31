@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\nurse\HomeController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -19,6 +19,7 @@ Route::get('/clear-route-cache', function () {
     Artisan::call('route:clear');
     Artisan::call('config:clear');
     Artisan::call('cache:clear'); // optional, also clears application cache
+    Artisan::call('view:clear');
     return "Route cache cleared!";
 });
 Route::post('/fetch-provinces', 'App\Http\Controllers\HomeController@fetchProvinces')->name('fetch-provinces');
@@ -103,6 +104,7 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
     Route::post('/change_password', 'HomeController@change_password')->name('change_password');
     Route::post('/update-profession', 'HomeController@update_profession')->name('update-profession');
     Route::post('/update-profession-user-ahpra_numberI', 'HomeController@update_profession_ahpra_numberI')->name('update-profession-user-ahpra_numberI');
+    Route::post('/user/active-country', [HomeController::class, 'updateActiveCountry'])->name('active-country');
     
     
     

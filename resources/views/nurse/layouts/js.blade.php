@@ -2569,7 +2569,7 @@
   }
 
   function updateReference() {
-
+    event?.preventDefault();
     isValid = true;
     var i = 1;
     $(".first_name").each(function() {
@@ -2664,21 +2664,33 @@
     });
 
     var a = 1;
-    $(".end_date").each(function(i,val) {
-        
-        if($('.end_date-'+a).is(':visible')){
-          
-          //console.log("x",st_value);
-          //var label_name = $(".nursing_type_label-"+st_value).text();
-          
-          if ($(".end_date-"+a).val() == '') {
-            document.getElementById("reqrefereeedate-" +a).innerHTML = "* Please select the End Date";
-            isValid = false;
-          }
-          
+
+    $(".end_date").each(function () {
+
+        // 🔹 detect if referee is linked to experience
+        var isLinked = $('.exp-id-input-' + a).val() != 0;
+
+        // 🔹 detect if experience is current
+        var isCurrent = $('.still_working1-' + a).val() == 1;
+
+        // ✅ If linked + current → DO NOT validate end date
+        if (isLinked && isCurrent) {
+            a++;
+            return; // skip validation safely
         }
+
+        // normal validation
+        if ($('.end_date-' + a).is(':visible')) {
+            if ($(".end_date-" + a).val() == '') {
+                document.getElementById("reqrefereeedate-" + a).innerHTML =
+                    "* Please select the End Date";
+                isValid = false;
+            }
+        }
+
         a++;
-      });
+    });
+
       
     var n = 1;
     $(".worked_together").each(function() {

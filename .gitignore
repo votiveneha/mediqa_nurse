@@ -1,0 +1,30 @@
+# Laravel specific
+.env
+vendor/
+/node_modules
+/public/
+# IDE/Editor specific
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.vscode/
+.DS_Store
+
+# Logs and databases
+/storage/
+
+# Compiled files
+/bootstrap/cache/
+.htaccess
+
+
+# PHPUnit testing
+/phpunit.xml
+
+# Composer's dependencies
+/vendor/
+
+/hubit.ai
+/fairtoys.com
+/error_log
+
