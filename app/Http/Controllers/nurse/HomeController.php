@@ -1240,14 +1240,39 @@ public function ResetPassword(Request $request)
             'message' => 'Registration country removed successfully'
         ]);
     }
+    // public function remove_registration_country(Request $request)
+    // {
+    //     $user = Auth::guard('nurse_middle')->user();
+    //     $userId = $user->id;
+    //     $countryCode = $request->country_code;
+
+    //     $registrationCountries = json_decode($user->registration_countries, true) ?? [];
+
+
+    //     $registrationCountries = array_values(
+    //         array_diff($registrationCountries, [$countryCode])
+    //     );
+
+    //     $user->update([
+    //         'registration_countries' => json_encode($registrationCountries)
+    //     ]);
+
+    //     RegisteredProfile::where('user_id', $userId)
+    //         ->where('country_code', $countryCode)
+    //         ->delete();
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'Registration country removed successfully'
+    //     ]);
+    // }
+
     public function remove_registration_country(Request $request)
     {
         $user = Auth::guard('nurse_middle')->user();
         $userId = $user->id;
         $countryCode = $request->country_code;
-
         $registrationCountries = json_decode($user->registration_countries, true) ?? [];
-
 
         $registrationCountries = array_values(
             array_diff($registrationCountries, [$countryCode])
@@ -1261,12 +1286,30 @@ public function ResetPassword(Request $request)
             ->where('country_code', $countryCode)
             ->delete();
 
+        //condition for acitve coutnry
+        $registered_country =  RegisteredProfile::where('user_id', $userId)->where('status', 5)->first();
+        // print_r($registered_country);die;
+        if ($registered_country) {
+            $user->update(
+                [
+                    'active_country' => $registered_country->country_code
+                ]
+            );
+        } else {
+            $user->update(
+                [
+                    'active_country' => $user->country
+                ]
+            );
+        }
+        
         return response()->json([
             'status' => true,
             'message' => 'Registration country removed successfully'
         ]);
     }
-    
+
+
     public function uploadRegistrationEvidence(Request $request)
     {
         $request->validate([

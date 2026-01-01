@@ -631,9 +631,10 @@ p.highlight-text {
                         @php
                           $user = Auth::guard('nurse_middle')->user();
                            $registration_country = DB::table('registration_profiles_countries')->where('user_Id',$user->id)->where('country_code',$user->active_country)->first();
+                           $profile_register_country = DB::table('registration_profiles_countries')->where('user_Id',$user->id)->get();
                         @endphp
 
-                    @if (!empty($user->active_country))
+                     @if($profile_register_country->isNotEmpty() && !empty($user->active_country) && !empty($registration_country))
                     <div class="mb-4 card registration-card registration-card-{{$registration_country->country_code }}">
                           <h5 class="d-flex justify-content-between align-items-center">
                               <span>
@@ -1399,9 +1400,10 @@ p.highlight-text {
                           @endforeach
                         </ul>
 
-                        <select class="js-example-basic-multiple addAll_removeAll_btn" data-list-id="type-of-nurse-0" name="nurseType[type_0][]" id="nurse_type" multiple="multiple" onchange="getNurseType('main',0)"></select>
+                        <select class="js-example-basic-multiple addAll_removeAll_btn nurse_type_field" data-list-id="type-of-nurse-0" name="nurseType[type_0][]" id="nurse_type" multiple="multiple" onchange="getNurseType('main',0)"></select>
+                        <span id="reqnurseTypeId" class="reqError text-danger valley"></span>    
                       </div>
-                      <span id="reqnurseTypeId" class="reqError text-danger valley"></span>
+                      
                     </div>
 
                     <div class="showNurseType-0">
@@ -1540,9 +1542,10 @@ p.highlight-text {
                           @endforeach
 
                         </ul>
-                        <select class="js-example-basic-multiple addAll_removeAll_btn" data-list-id="speciality_preferences-0" name="specialties[type_0][]" multiple="multiple" onchange="getSecialities('main',0)"></select>
+                        <select class="js-example-basic-multiple addAll_removeAll_btn speciality_type_field" data-list-id="speciality_preferences-0" name="specialties[type_0][]" multiple="multiple" onchange="getSecialities('main',0)"></select>
+                        <span id="reqspecialties" class="reqError text-danger valley"></span>
                       </div>
-                      <span id="reqspecialties" class="reqError text-danger valley"></span>
+                      
                     </div>
                     <div class="show_specialities-0">
                       
@@ -5534,6 +5537,9 @@ p.highlight-text {
                       Please Add your professional References:
                   </h6>
                   <?php
+                  $isFromExperience = request()->has('experience_id') && request()->experience_id;
+                  ?>
+                  <?php
                   $expId = request()->experience_id;
 
                   $experience = null;
@@ -5555,8 +5561,14 @@ p.highlight-text {
                       <input type="hidden" name="user_id" value="{{ Auth::guard('nurse_middle')->user()->id }}">
                       <div class="reference_form">
                           <?php
-                          $get_reference_data = DB::table("referee")->where("user_id", Auth::guard('nurse_middle')->user()->id)->get();
-                          ?>
+                            if ($isFromExperience) {
+                                $get_reference_data = collect();
+                            } else {
+                                $get_reference_data = DB::table("referee")
+                                    ->where("user_id", Auth::guard('nurse_middle')->user()->id)
+                                    ->get();
+                            }
+                            ?>
                           @if(count($get_reference_data)>0)
                               <?php
                               $i = 1;
@@ -5581,23 +5593,29 @@ p.highlight-text {
                                           // Get nurse type
                                           if (!empty($linkedExperience->nurseType)) {
                                               $nurseTypeArray = json_decode($linkedExperience->nurseType, true);
-                                              if (is_array($nurseTypeArray) && count($nurseTypeArray) > 0) {
-                                                  $nurseTypeId = $nurseTypeArray[0];
-                                                  $nurseTypeName = DB::table('practitioner_type')
-                                                      ->where('id', $nurseTypeId)
-                                                      ->value('name');
-                                              }
+
+                                              $firstGroup = collect($nurseTypeArray)->first(); // ["2"]
+
+                                              $nurseTypeId = is_array($firstGroup) ? ($firstGroup[0] ?? null) : null;
+
+                                              $nurseTypeName = $nurseTypeId
+                                                  ? DB::table('practitioner_type')->where('id', $nurseTypeId)->value('name')
+                                                  : '';
+
                                           }
                                           
                                           // Get specialty
                                           if (!empty($linkedExperience->specialties)) {
                                               $specialtyArray = json_decode($linkedExperience->specialties, true);
-                                              if (is_array($specialtyArray) && count($specialtyArray) > 0) {
-                                                  $specialtyId = $specialtyArray[0];
-                                                  $specialtyName = DB::table('speciality')
-                                                      ->where('id', $specialtyId)
-                                                      ->value('name');
-                                              }
+
+                                              $firstGroup = collect($specialtyArray)->first(); // ["12"]
+
+                                              $specialtyId = is_array($firstGroup) ? ($firstGroup[0] ?? null) : null;
+
+                                              $specialtyName = $specialtyId
+                                                  ? DB::table('speciality')->where('id', $specialtyId)->value('name')
+                                                  : '';
+
                                           }
                                           
                                           // Get dates
@@ -5956,9 +5974,15 @@ p.highlight-text {
                                           $specialtyId = null;
                                           
                                           if (!empty($experience->nurseType)) {
-                                              $nurseTypeArray = json_decode($experience->nurseType, true);
-                                              if (is_array($nurseTypeArray) && count($nurseTypeArray) > 0) {
-                                                  $nurseTypeId = $nurseTypeArray[0];
+                                              $nurseTypeArray = (array) json_decode($experience->nurseType, true);
+
+                                              // Get first value safely
+                                              $decoded = json_decode($experience->nurseType, true);
+                                              $firstGroup = collect($decoded)->first(); // ["2"]
+
+                                              if (is_array($firstGroup) && count($firstGroup) > 0) {
+                                                  $nurseTypeId = is_array($firstGroup) ? ($firstGroup[0] ?? null) : null;
+
                                                   $nurseTypeName = DB::table('practitioner_type')
                                                       ->where('id', $nurseTypeId)
                                                       ->value('name');
@@ -5966,14 +5990,18 @@ p.highlight-text {
                                           }
                                           
                                           if (!empty($experience->specialties)) {
-                                              $specialtyArray = json_decode($experience->specialties, true);
-                                              if (is_array($specialtyArray) && count($specialtyArray) > 0) {
-                                                  $specialtyId = $specialtyArray[0];
-                                                  $specialtyName = DB::table('speciality')
-                                                      ->where('id', $specialtyId)
-                                                      ->value('name');
-                                              }
-                                          }
+                                                $specialtyArray = (array) json_decode($experience->specialties, true);
+
+                                                $firstGroup = collect($specialtyArray)->first(); // ["1"]
+
+                                                if (is_array($firstGroup) && count($firstGroup) > 0) {
+                                                    $specialtyId = $firstGroup[0];
+
+                                                    $specialtyName = DB::table('speciality')
+                                                        ->where('id', $specialtyId)
+                                                        ->value('name');
+                                                }
+                                            }
                                           ?>
                                           
                                           <div class="col-md-6">
@@ -6091,8 +6119,8 @@ p.highlight-text {
                       </div>
                       
                       <div class="declaration_box declaration_bottom">
-                          <input class="declare" type="checkbox" name="declare" 
-                                <?php echo count($get_reference_data) > 0 ? (isset($get_reference_data[0]->is_declare) && $get_reference_data[0]->is_declare == 1 ? 'checked' : '') : '' ?>>
+                          <input class="declare" type="checkbox" name="declare"
+                            {{ optional($get_reference_data->first())->is_declare == 1 ? 'checked' : '' }}>
                           <label for="declare_information">I declare that the information provided is true and correct</label>
                           <br>
                       </div>
@@ -6115,7 +6143,6 @@ p.highlight-text {
               ?>
 
               <script type="text/javascript">
-                    
                   function toggleEndDate(checkbox, index) {
                   const isChecked = checkbox.checked;
                   const endDateContainer = $(`.end_date_container-${index}`);
@@ -6142,7 +6169,7 @@ p.highlight-text {
                               toggleEndDate(this, match[1]);
                           }
                       });
-                  });    
+                  });
                   // Function to add another referee
                   function add_another_referee() {
                       var referee_div_count = $(".referee_no").length;

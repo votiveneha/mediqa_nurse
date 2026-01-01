@@ -659,7 +659,37 @@
 
 
 
+    if ($('.nurse_type_field').val() == '') {
+      document.getElementById("reqnurseTypeId").innerHTML = "* Please select the type of nurse";
+      isValid = false;
+    }
 
+    $(".subnurse_list").each(function() {
+      var val = $(this).val();
+      //var subpartsval = $(".subspecprofpart_list-"+val).val();
+      console.log("subnurse_list",val);
+      if ($('.subnurse_valid-'+val).val() == '') {
+        document.getElementById("reqsubnursevalid-"+val).innerHTML = "* Please select the type of nurse";
+        isValid = false;
+      }
+
+    });
+
+    if ($('.speciality_type_field').val() == '') {
+      document.getElementById("reqspecialties").innerHTML = "* Please select the Specialties";
+      isValid = false;
+    }
+
+    $(".subspec_list").each(function() {
+      var val = $(this).val();
+      //var subpartsval = $(".subspecprofpart_list-"+val).val();
+      console.log("subspec_list",val);
+      if ($('.subspec_valid-'+val).val() == '') {
+        document.getElementById("reqsubspecvalid-"+val).innerHTML = "* Please select the Specialties";
+        isValid = false;
+      }
+
+    });
 
 
     // if ($('[name="degree[]"]').val() == '') {
@@ -730,6 +760,18 @@
       document.getElementById("reqdeclare_information").innerHTML = "* Please check this checkbox";
       isValid = false;
     }
+
+    $(".subspecprof_listProfession").each(function() {
+      var val = $(this).val();
+      //var subpartsval = $(".subspecprofpart_list-"+val).val();
+      console.log("subspecprof_listProfession",val);
+      //changeSpecialityStatus($(".speciality_status_columns-" + val).val(),val,subpartsval);
+      if ($(".speciality_status_columns-" + val).val() == '') {
+        document.getElementById("reqsubspeclevelvalid-" + val).innerHTML = "* Please select the speciality status";
+        isValid = false;
+      }
+
+    });
 
     $(".subspecprof_listProfession").each(function() {
       var val = $(this).val();
@@ -2580,8 +2622,8 @@
 
   }
 
-  function updateReference() {
-
+    function updateReference() {
+    event?.preventDefault();
     isValid = true;
     var i = 1;
     $(".first_name").each(function() {
@@ -2657,16 +2699,16 @@
       }
 
       var r = 1;
-      $(".show_positionsr-" + c + " .subpos_list").each(function() {
+      $(".show_positionsr-"+c+" .subpos_list").each(function() {
         var subpos = $(this).val();
-
-        var label_text = $(".show_positionsr-" + c + " .pos_label-" + c + subpos).text();
-        console.log("subpos", c + subpos);
-        if ($(".position_validr-" + c + subpos).length > 0) {
-
-          if ($(".position_validr-" + c + subpos).val() == '') {
-
-            document.getElementById("reqsubpositionheldr-" + c + subpos).innerHTML = "* Please select the " + label_text;
+        
+        var label_text = $(".show_positionsr-"+c+" .pos_label-"+ c+subpos).text();
+        console.log("subpos",c+subpos);
+        if ($(".position_validr-" + c+subpos).length > 0) {
+          
+          if ($(".position_validr-" + c+subpos).val() == '') {
+            
+            document.getElementById("reqsubpositionheldr-" + c+subpos).innerHTML = "* Please select the "+label_text;
             isValid = false;
           }
         }
@@ -2676,22 +2718,34 @@
     });
 
     var a = 1;
-    $(".end_date").each(function(i, val) {
 
-      if ($('.end_date-' + a).is(':visible')) {
+    $(".end_date").each(function () {
 
-        //console.log("x",st_value);
-        //var label_name = $(".nursing_type_label-"+st_value).text();
+        // 🔹 detect if referee is linked to experience
+        var isLinked = $('.exp-id-input-' + a).val() != 0;
 
-        if ($(".end_date-" + a).val() == '') {
-          document.getElementById("reqrefereeedate-" + a).innerHTML = "* Please select the End Date";
-          isValid = false;
+        // 🔹 detect if experience is current
+        var isCurrent = $('.still_working1-' + a).val() == 1;
+
+        // ✅ If linked + current → DO NOT validate end date
+        if (isLinked && isCurrent) {
+            a++;
+            return; // skip validation safely
         }
 
-      }
-      a++;
+        // normal validation
+        if ($('.end_date-' + a).is(':visible')) {
+            if ($(".end_date-" + a).val() == '') {
+                document.getElementById("reqrefereeedate-" + a).innerHTML =
+                    "* Please select the End Date";
+                isValid = false;
+            }
+        }
+
+        a++;
     });
 
+      
     var n = 1;
     $(".worked_together").each(function() {
       if ($(".worked_together-" + n).length > 0) {
@@ -2706,13 +2760,13 @@
     });
     const isChecked = $('.declare').prop('checked');
     if (!isChecked) {
-
+      
       // If not checked, show an error message
       document.getElementById("reqreference").innerHTML = "* Please check this checkbox";
       //$('.declaration_bottom').find('#reqreference').text('You must declare that the information is true and correct.');
       isValid = false;
     }
-
+    
     if (isValid == true) {
       $('#reference_form').find('.text-danger').hide();
       $.ajax({
@@ -3652,6 +3706,7 @@ $(document).ready(function () {
       <div class="form-group">
           <label>Expiry Date</label>
           <input type="date"
+                 min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}"
                  name="registration[new][__CODE__][expiry_date]"
                  class="form-control">
       </div>
