@@ -173,45 +173,45 @@
 
     --------------------------------------------*/
 
-    $('#stateI').on('change', function() {
+    // $('#stateI').on('change', function() {
 
-      var idState = this.value;
+    //   var idState = this.value;
 
-      $("#cityI").html('');
+    //   $("#cityI").html('');
 
-      $.ajax({
+    //   $.ajax({
 
-        url: "{{url('fetch-ville')}}",
+    //     url: "{{url('fetch-ville')}}",
 
-        type: "POST",
+    //     type: "POST",
 
-        data: {
+    //     data: {
 
-          province_id: idState,
+    //       province_id: idState,
 
-          _token: '{{csrf_token()}}'
+    //       _token: '{{csrf_token()}}'
 
-        },
+    //     },
 
-        dataType: 'json',
+    //     dataType: 'json',
 
-        success: function(res) {
+    //     success: function(res) {
 
-          $('#cityI').html('<option value=""> Select City </option>');
+    //       $('#cityI').html('<option value=""> Select City </option>');
 
-          $.each(res.ville, function(key, value) {
+    //       $.each(res.ville, function(key, value) {
 
-            $("#cityI").append('<option value="' + value
+    //         $("#cityI").append('<option value="' + value
 
-              .id + '">' + value.name + '</option>');
+    //           .id + '">' + value.name + '</option>');
 
-          });
+    //       });
 
-        }
+    //     }
 
-      });
+    //   });
 
-    });
+    // });
     $('#categoryI').on('change', function() {
 
       var categoryI = this.value;
@@ -607,49 +607,168 @@
   }
 </script>
 <script>
-  function editedprofile() {
-    $('#EditProfile').find('.text-danger').hide();
+  // function editedprofile() {
+  //   $('#EditProfile').find('.text-danger').hide();
 
-    $.ajax({
-      url: "{{ route('nurse.updateProfile') }}",
-      type: "POST",
-      cache: false,
-      contentType: false,
-      processData: false,
-      data: new FormData($('#EditProfile')[0]),
-      dataType: 'json',
-      beforeSend: function() {
-        $('#submitfrm').prop('disabled', true);
-        $('#submitfrm').text('Process....');
-      },
-      success: function(res) {
-        $('#submitfrm').prop('disabled', false);
-        $('#submitfrm').text('Update Profile');
-        if (res.status == '2') {
-          Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: 'Profile Updated Successfully',
-          }).then(function() {
-            window.location.href = "{{ route('nurse.my-profile') }}?page=my_profile";
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: res.message,
-          })
-        }
-      },
-      error: function(errorss) {
-        $('#submitfrm').prop('disabled', false);
-        $('#submitfrm').text('Submit');
-        for (var err in errorss.responseJSON.errors) {
-          $("#EditProfile").find("[name='" + err + "']").after("<div class='text-danger'>" + errorss.responseJSON.errors[err] + "</div>");
-        }
+  //   $.ajax({
+  //     url: "{{ route('nurse.updateProfile') }}",
+  //     type: "POST",
+  //     cache: false,
+  //     contentType: false,
+  //     processData: false,
+  //     data: new FormData($('#EditProfile')[0]),
+  //     dataType: 'json',
+  //     headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+  //     beforeSend: function() {
+  //       $('#submitfrm').prop('disabled', true);
+  //       $('#submitfrm').text('Process....');
+  //     },
+  //     success: function(res) {
+  //       $('#submitfrm').prop('disabled', false);
+  //       $('#submitfrm').text('Update Profile');
+  //       if (res.status == '2') {
+  //         Swal.fire({
+  //           icon: 'success',
+  //           title: 'Success',
+  //           text: 'Profile Updated Successfully',
+  //         }).then(function() {
+  //           window.location.href = "{{ route('nurse.my-profile') }}?page=my_profile";
+  //         });
+  //       } else {
+  //         Swal.fire({
+  //           icon: 'error',
+  //           title: 'Error',
+  //           text: res.message,
+  //         })
+  //       }
+  //     },
+  //     error: function(errorss) {
+  //       $('#submitfrm').prop('disabled', false);
+  //       $('#submitfrm').text('Submit');
+  //       for (var err in errorss.responseJSON.errors) {
+  //         $("#EditProfile").find("[name='" + err + "']").after("<div class='text-danger'>" + errorss.responseJSON.errors[err] + "</div>");
+  //       }
+  //     }
+  //   });
+  //   return false;
+  // }
+      function editedprofile() {
+
+      let isValid = true;
+
+      // Clear previous errors
+      $('#EditProfile').find('.text-danger').text('');
+
+      $('.registration-card').each(function () {
+
+          const $card  = $(this);
+          const status = $card.find('.status-radio:checked').val();
+
+          // Draft → skip validation
+          if (status !== '3') {
+              return true;
+          }
+
+          // Fields
+          const jurisdiction = $card.find('.js_jurid_input');
+          const regNumber    = $card.find('.js_reg_number');
+          const expiryDate   = $card.find('.js_expiry_date');
+          const evidence     = $card.find('.js_evidence')[0];
+
+          // Error spans
+          const errJur   = $card.find('.reqTxtjurisd');
+          const errReg   = $card.find('.reqTxtReg');
+          const errExp   = $card.find('.reqTxtExpiry');
+          const errFile  = $card.find('.reqTxtEvidence');
+
+          // ---------------- Jurisdiction ----------------
+          if (!jurisdiction.val().trim()) {
+              errJur.text('* Jurisdiction is required');
+              isValid = false;
+          }
+
+          // ---------------- Registration Number ----------------
+          if (!regNumber.val().trim()) {
+              errReg.text('* License / Registration Number is required');
+              isValid = false;
+          }
+
+          // ---------------- Expiry Date ----------------
+          if (!expiryDate.val()) {
+              errExp.text('* Expiry Date is required');
+              isValid = false;
+          } else {
+              const selected = new Date(expiryDate.val());
+              const today = new Date();
+              today.setHours(0,0,0,0);
+
+              if (selected < today) {
+                  errExp.text('* Expiry Date cannot be in the past');
+                  isValid = false;
+              }
+          }
+
+          // ---------------- Upload Evidence ----------------
+          if (!evidence || evidence.files.length === 0) {
+              errFile.text('* Upload Evidence is required');
+              isValid = false;
+          }
+
+      });
+
+      // ❌ Stop AJAX if validation failed
+      if (!isValid) {
+          $('html, body').animate({
+              scrollTop: $('.text-danger:visible:first').offset().top - 120
+          }, 400);
+          return false;
       }
-    });
-    return false;
+
+      // ✅ AJAX submit
+      $.ajax({
+          url: "{{ route('nurse.updateProfile') }}",
+          type: "POST",
+          cache: false,
+          contentType: false,
+          processData: false,
+          data: new FormData($('#EditProfile')[0]),
+          dataType: 'json',
+          headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          beforeSend: function () {
+              $('#submitfrm').prop('disabled', true).text('Processing...');
+          },
+          success: function (res) {
+              $('#submitfrm').prop('disabled', false).text('Update Profile');
+
+              if (res.status == '2') {
+                  Swal.fire({
+                      icon: 'success',
+                      title: 'Success',
+                      text: 'Profile Updated Successfully',
+                  }).then(() => {
+                      window.location.href = "{{ route('nurse.my-profile') }}?page=my_profile";
+                  });
+              } else {
+                  Swal.fire({
+                      icon: 'error',
+                      title: 'Error',
+                      text: res.message,
+                  });
+              }
+          },
+          // error: function (errorss) {
+          //     $('#submitfrm').prop('disabled', false).text('Submit');
+          // }
+          error: function(errorss) {
+            $('#submitfrm').prop('disabled', false);
+            $('#submitfrm').text('Submit');
+            for (var err in errorss.responseJSON.errors) {
+              $("#EditProfile").find("[name='" + err + "']").after("<div class='text-danger'>" + errorss.responseJSON.errors[err] + "</div>");
+            }
+          }
+      });
+
+      return false;
   }
 
   function myFunction1() {
@@ -1446,7 +1565,7 @@
     return false;
   }
 
-  function updateExperience() {
+     function updateExperience() {
     var isValid = true;
 
     var s = 1;
@@ -1854,6 +1973,21 @@
         }
       }
       y++;
+    });
+
+    $(".speciality_status_column").each(function () {
+
+      if ($(this).is(":visible") && $(this).val() === "") {
+
+        var subSpecId = $(this).attr("class").match(/speciality_status_column-(\d+)/);
+
+        if (subSpecId && subSpecId[1]) {
+          $("#reqemployeetexp_status-" + subSpecId[1])
+            .html("* Please select Specialty Status");
+        }
+
+        isValid = false;
+      }
     });
 
     if (isValid == true) {
@@ -3653,6 +3787,47 @@ $(document).ready(function () {
 
 });
 </script>
+<script>
+    $(document).ready(function () {
+
+      const urlParams = new URLSearchParams(window.location.search);
+
+      if (urlParams.get('page') === 'my_profile') {
+          $('#registrationCountryModal').modal('show');
+      }
+
+  });
+
+  $('#saveCountry').on('click', function () {
+
+      const country = $('#registration_country').val();
+
+      if (!country) {
+          $('#countryError').text('Please select a country');
+          return;
+      }
+
+      $.ajax({
+          url: "{{ route('nurse.saveRegistrationCountry') }}",
+          type: "POST",
+          data: {
+              country_id: country,
+              _token: "{{ csrf_token() }}"
+          },
+          success: function () {
+              $('#registrationCountryModal').modal('hide');
+
+              // Unlock UI
+              $('.profession-tab').removeClass('disabled');
+
+              // Redirect cleanly
+              // window.location.href = "{{ route('nurse.my-profile') }}?page=my_profile";
+              window.location.href = "{{ route('nurse.dashboard') }}";
+          }
+      });
+  });
+</script>
+
 <script type="text/template" id="registration-card-template">
   <div class="mb-4 registration-card registration-card-__CODE__" data-country="__CODE__">
       <h5 class="d-flex justify-content-between align-items-center">
@@ -3665,7 +3840,7 @@ $(document).ready(function () {
     <div class="form-group">
         <label>Status</label>
         <div class="d-flex gap-3">
-            <label class="me-3">
+            <label class="me-3 d-flex align-items-center">
                 <input type="radio"
                       name="registration[new][__CODE__][status]"
                       value="2"
@@ -3676,7 +3851,7 @@ $(document).ready(function () {
                 Draft
             </label>
 
-            <label>
+            <label class="d-flex align-items-center">
                 <input type="radio"
                       name="registration[new][__CODE__][status]"
                       value="3"
@@ -3689,41 +3864,44 @@ $(document).ready(function () {
     </div>
 
 
-      <div class="form-group">
-          <label>Jurisdiction / Registration Authority</label>
-          <input type="text"
-                 name="registration[new][__CODE__][jurisdiction]"
-                 class="form-control">
-      </div>
+    <div class="form-group">
+        <label>Jurisdiction / Registration Authority</label>
+        <input type="text"
+              name="registration[new][__CODE__][jurisdiction]"
+              class="form-control js_jurid_input">
+        <span class="reqTxtjurisd text-danger"></span>
+    </div>
 
-      <div class="form-group">
-          <label>License / Registration Number</label>
-          <input type="text"
-                 name="registration[new][__CODE__][registration_number]"
-                 class="form-control">
-      </div>
+    <div class="form-group">
+        <label>License / Registration Number</label>
+        <input type="text"
+              name="registration[new][__CODE__][registration_number]"
+              class="form-control js_reg_number">
+        <span class="reqTxtReg text-danger"></span>
+    </div>
 
-      <div class="form-group">
-          <label>Expiry Date</label>
-          <input type="date"
-                 min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}"
-                 name="registration[new][__CODE__][expiry_date]"
-                 class="form-control">
-      </div>
+    <div class="form-group">
+        <label>Expiry Date</label>
+        <input type="date"
+              min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}"
+              name="registration[new][__CODE__][expiry_date]"
+              class="form-control js_expiry_date">
+        <span class="reqTxtExpiry text-danger"></span>
+    </div>
 
-      <div class="form-group">
-          <label>Upload Evidence</label>
-          <input type="file"
-                 name="registration[new][__CODE__][upload_evidence][]"
-                 class="form-control evidence-input"
-                 data-code="__CODE__"
-                 multiple>
+    <div class="form-group">
+        <label>Upload Evidence</label>
+        <input type="file"
+              name="registration[new][__CODE__][upload_evidence][]"
+              class="form-control js_evidence evidence-input"
+              data-code="__CODE__"
+              multiple>
+        <span class="reqTxtEvidence text-danger"></span>
+         <div class="mt-2 registration-evidence-preview___CODE__"></div>
+    </div>
 
-          <div class="mt-2 registration-evidence-preview___CODE__"></div>
-      </div>
   </div>
 </script>
-
 <script>
     $(document).on('change', '.status-radio', function () {
       let code   = $(this).data('code');
@@ -3755,7 +3933,8 @@ $(document).ready(function () {
         Array.from(files).forEach((file, index) => {
 
             let html = `
-                <div class="trans_img" data-index="${index}">
+              <div class="trans_img">
+                <div  data-index="${index}">
                     <i class="fa fa-file"></i> ${file.name}
                     <span class="close_btn remove-temp-file"
                           data-code="${code}"
@@ -3763,6 +3942,7 @@ $(document).ready(function () {
                         <i class="fa fa-close"></i>
                     </span>
                 </div>
+              </div> 
             `;
 
             $preview.append(html);
@@ -4080,13 +4260,15 @@ $(document).ready(function () {
 
         res.files.forEach(file => {
           $('.registration-evidence-preview-' + registrationId).append(`
-                    <div class="trans_img">
+                  <div class="trans_img">
+                    <div >
                         <i class="fa fa-file"></i> ${file}
                         <span class="close_btn"
                               onclick="removeRegistrationEvidence('${file}', ${registrationId})">
                             <i class="fa fa-close"></i>
                         </span>
                     </div>
+                  </div> 
                 `);
         });
       }

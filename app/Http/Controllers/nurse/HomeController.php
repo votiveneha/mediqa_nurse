@@ -146,7 +146,7 @@ class HomeController extends Controller
         $work_preferences_data = WorkPreferModel::get();
         return view('nurse.nurseRegister', compact('message','practitioner_data','speciality_data','work_preferences_data'));
     }
-    public function manage_profile($message = '')
+        public function manage_profile($message = '')
     {
         
         $employeement_type_preferences = DB::table("employeement_type_preferences")->where("sub_prefer_id","0")->get();
@@ -707,7 +707,7 @@ class HomeController extends Controller
             ])
         );
 
-        return redirect('/nurse/my-profile?page=profession')->with([
+        return redirect('/nurse/my-profile?page=my_profile')->with([
             'message' => '<h6 style="color:green">Your email has been verified successfully.</h6>',
             'status'  => 1
         ]);
