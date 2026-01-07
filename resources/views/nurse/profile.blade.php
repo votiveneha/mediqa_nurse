@@ -161,7 +161,7 @@
     background: white;
     padding: 8px;
     border: 1px solid #ccc;
-    z-index: 9999;
+    z-index: 9999 !important;
     border-radius: 6px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     max-height: 200px;
@@ -772,7 +772,7 @@ p.highlight-text {
                           <!--</div>-->
                           <div class="form-group position-relative">
                             <!-- <textarea type="text" class="form-control ps-5" placeholder="Address"></textarea> -->
-                            <label class="font-sm color-text-mutted mb-10">Country of residence</label>
+                            <label class="font-sm color-text-mutted mb-10">Country of Residence</label>
                             <select class="form-control form-select ps-5" name="country" id="countryI">
                               <option value="">Select Country</option>
                               @php $country_data=country_name_from_db();@endphp
@@ -837,7 +837,7 @@ p.highlight-text {
                               <div class="col-md-12 mob-adj">
                                 <input type="hidden" name="emergency_countryCode" id="emergency_countryCode">
                                 <input type="hidden" name="emergency_countryiso" id="emergency_country_iso">
-                                <input class="form-control numbers" type="text" required="" name="emergency_conact_numeber" id="contactI_emergency" value="{{ Auth::guard('nurse_middle')->user()->emergency_conact_numeber }}" maxlength="10">
+                                <input class="form-control numbers" type="text" name="emergency_conact_numeber" id="contactI_emergency" value="{{ Auth::guard('nurse_middle')->user()->emergency_conact_numeber }}" maxlength="10">
                                 <span id="reqTxtcontactI" class="reqError valley"></span>
                               </div>
 
@@ -861,6 +861,50 @@ p.highlight-text {
                         </div>
                       </form>
                     </div>
+
+                    {{-- City Selection Modal --}}
+                  @if (Auth::guard('nurse_middle')->user()->active_country == null )
+                  <div class="modal fade" id="registrationCountryModal"
+                      data-bs-backdrop="static"
+                      data-bs-keyboard="false"
+                      tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                      <div class="modal-content text-center p-4">
+
+                        <!-- Success Icon -->
+                        <div class="modal-header border-0 justify-content-center">
+                          <div class="rounded-circle bg-success-subtle p-3">
+                            <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                          </div>
+                        </div>
+
+                        <!-- Title -->
+                        <h5 class="modal-title fw-bold mt-3 mb-2">
+                          Please choose your registration country
+                        </h5>
+
+                        <!-- Dropdown -->
+                        <div class="modal-body">
+                          <select class="form-select" id="registration_country">
+                            <option value="">Select Country</option>
+                            @foreach($countries as $country)
+                              <option value="{{ $country->iso2 }}">{{ $country->name }}</option>
+                            @endforeach
+                          </select>
+                          <span class="text-danger d-block mt-2" id="countryError"></span>
+                        </div>
+
+                        <!-- Button -->
+                        <div class="modal-footer border-0">
+                          <button class="btn btn-dark w-100 fw-bold" id="saveCountry">
+                            Continue
+                          </button>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+                @endif
                     {{-- <div class="col-lg-12 col-md-12 update_profile">
                       <form class="" id="EditProfile" onsubmit="return editedprofile()" method="POST">
                         @csrf
@@ -1572,10 +1616,12 @@ p.highlight-text {
                           $parts = explode('_', $key);
                           
                           $s_data = json_encode($stypes);
+
+                          $parentId  = getParentSpecialityId($specialities_type, $parts[1]);
                           
                         @endphp
                         <input type="hidden" name="subspectype" class="subspectype-{{ $parts[1] }}" value="{{ $s_data }}">
-                        <div class="subspec_main_div subspec_main_div-{{ $parts[1] }}">
+                        <div data-id="{{ $parts[1] }}" data-parent="{{ $parentId }}" class="subspec_main_div subspec_main_div-{{ $parts[1] }}">
                           <?php
                             $sp_data_name = DB::table("speciality")->where('id', $parts[1])->first();
                             $sp_data = DB::table("speciality")->where('parent', $parts[1])->get();
@@ -1588,7 +1634,7 @@ p.highlight-text {
                             <li data-value="{{ $sd->id }}">{{ $sd->name }}</li>
                             @endforeach
                           </ul>
-                          <select class="js-example-basic-multiple subspec_valid-{{ $parts[1] }} addAll_removeAll_btn" data-list-id="speciality_preferences-{{ $parts[1] }}" name="specialties[type_{{ $parts[1] }}][]" multiple="multiple" onchange="getSecialities('main',{{ $parts[1] }})"></select>
+                          <select class="js-example-basic-multiple subspec_valid-{{ $parts[1] }} addAll_removeAll_btn" data-list-id="speciality_preferences-{{ $parts[1] }}" name="specialties[type_{{ $parts[1] }}][]" multiple="multiple" onchange="getSecialities('main',{{ $parts[1] }},'edit')"></select>
                           <span id="reqsubspecvalid-{{ $parts[1] }}" class="reqError text-danger valley"></span>
                           
                           <div class="subspec_level-{{ $parts[1] }}"></div>
@@ -3941,7 +3987,7 @@ p.highlight-text {
                   </form>
                 </div>
               </div>
-              <div class="tab-pane fade" id="tab-experience" role="tabpanel" aria-labelledby="tab-educert" style="display: none">
+                            <div class="tab-pane fade" id="tab-experience" role="tabpanel" aria-labelledby="tab-educert" style="display: none">
                 <div class="card shadow-sm border-0 p-4 mt-30">
                   <h3 class="mt-0 color-brand-1 mb-2">Experience</h3>
                   <h6>Please add your full nursing work experience to strengthen your profile and get hired faster. Please keep update as your experience grows:</h6>
@@ -5028,23 +5074,22 @@ p.highlight-text {
                               <div class="subspec_level-{{ $parts[1] }}"></div>
                             </div>
                             <div class="show_specialities-{{ $parts[1] }}">
-                              <?php
-                                $speciality_status = isset($specialities_type['speciality_status'])?(array)$specialities_type['speciality_status']:[];
-                                //print_r($specialities_type['speciality_status']);
+                              @php
+                                $speciality_status_data = DB::table("speciality_status")->get();
+                              @endphp
 
-                                
-                              ?>
+                              @foreach($stypes as $subSpecId)
+                                @php
+                                    $currentStatus = '';
 
-                              @foreach($speciality_status as $key=>$s_status)
+                                    
 
-                                  <?php
-                                    $parts1 = explode('_', $key);
-                                    $sp_data_name = DB::table("speciality")->where('id', $parts1[1])->first();
-                                    $speciality_status_data = DB::table("speciality_status")->get();
-                                  ?>
-                                  @if (in_array($parts1[1], $stypes))
-                                  <div class="custom-select-wrapper subspecprofdiv subspecprofdiv-{{ $parts1[1] }} form-group level-drp" style="margin-bottom: 5px;">
-                                    <label class="form-label subspeclabel-{{ $parts1[1] }}" for="input-1">
+                                    $sp_data_name = DB::table("speciality")
+                                        ->where('id', $subSpecId)
+                                        ->first();
+                                  @endphp
+                                  <div class="custom-select-wrapper subspecprofdiv subspecprofdiv-{{ $subSpecId }} form-group level-drp" style="margin-bottom: 5px;">
+                                    <label class="form-label subspeclabel-{{ $subSpecId }}" for="input-1">
                                       Specialty Status1 ({{ $sp_data_name->name }}) 
                                       <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>
                                         <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">
@@ -5057,28 +5102,36 @@ p.highlight-text {
                                           <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>
                                         </ul>
                                     </label>
-                                    
-                                    <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_list-{{ $parts1[1] }}" value="{{ $parts1[1] }}">
-                                    <select class="custom-select speciality_status_column speciality_status_column-{{ $parts1[1] }} form-input mr-10 select-active langprof_level_valid-{{ $parts1[1] }}" name="specialties_experience[1][speciality_status][type_{{ $parts1[1] }}][status]" onchange="changeSpecialityStatus(this.value,{{ $parts1[1] }})">
-                                      <option value="">select</option>
-                                      @foreach($speciality_status_data as $s_status_data)
-                                      <option value="{{ $s_status_data->status_name }}" @if($s_status_data->status_name == $s_status->status) selected @endif>{{ $s_status_data->status_name }}</option>
-                                      @endforeach
-                                      
-                                    </select>
-                                    <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_current_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_current]" value="0">
-                                    <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_principal_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_principal]" value="0">
-                                    <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_first_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_first]" value="0">
-                                    <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_former_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_former]" value="0">
-                                    <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_upskilling_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_upskilling]" value="0">
-                                  </div>
-                                  
-                                  <span id="reqsubspeclevelvalid-{{ $parts1[1] }}" class="reqError text-danger valley"></span>
-                                  @endif
-                                  
-                                  
 
-                              @endforeach
+                                    <input type="hidden"
+                                          name="subspecprof_list"
+                                          class="subspecprof_list subspecprof_list-{{ $subSpecId }}"
+                                          value="{{ $subSpecId }}">
+
+                                    <select
+                                      class="custom-select speciality_status_column speciality_status_column-{{ $subSpecId }}"
+                                      name="specialties_experience[1][speciality_status][type_{{ $subSpecId }}][status]"
+                                      required
+                                    >
+                                      <option value="">select</option>
+                                      @foreach($speciality_status_data as $row)
+                                        <option value="{{ $row->status_name }}">
+                                          {{ $row->status_name }}
+                                        </option>
+                                      @endforeach
+                                    </select>
+
+                                    <input type="hidden" name="specialties_experience[1][speciality_status][type_{{ $subSpecId }}][is_current]" value="0">
+                                    <input type="hidden" name="specialties_experience[1][speciality_status][type_{{ $subSpecId }}][is_principal]" value="0">
+                                    <input type="hidden" name="specialties_experience[1][speciality_status][type_{{ $subSpecId }}][is_first]" value="0">
+                                    <input type="hidden" name="specialties_experience[1][speciality_status][type_{{ $subSpecId }}][is_former]" value="0">
+                                    <input type="hidden" name="specialties_experience[1][speciality_status][type_{{ $subSpecId }}][is_upskilling]" value="0">
+                                  </div>
+
+                                  <span id="reqemployeetexp_status-{{ $subSpecId }}"
+                                        class="reqError text-danger valley"></span>
+
+                                @endforeach
                             </div>
                           
 
@@ -5528,6 +5581,22 @@ p.highlight-text {
                   var new_date = year + "-" + month1 + "-" + day1;
                   document.getElementsByClassName("employeement_end_date_exp-" + i)[0].setAttribute('min', new_date);
                   i++;
+                });
+              </script>
+              <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    $(document).on(
+                        'select2:unselect select2:clear',
+                        '.nurse_type_exp',
+                        function (e) {
+
+                            if (!e.params || !e.params.data) return;
+
+                            var removedId = e.params.data.id;
+                            $('.subnurse_main_div-' + removedId).remove();
+                            $('.show_nurse-' + removedId).remove();
+                        }
+                    );
                 });
               </script>
 
@@ -8316,127 +8385,127 @@ if (!empty($interviewReferenceData)) {
     }
   }
 
-  function getSecialities(level,k){
-      // alert();
+  // function getSecialities(level,k){
+  //     // alert();
 
-      if(level == "main"){
-        var selectedValues = $('.js-example-basic-multiple[data-list-id="speciality_preferences-'+k+'"]').val();
-      }else{
-        var selectedValues = $('.js-example-basic-multiple'+k+'[data-list-id="speciality_preferences-'+k+'"]').val();
-      }
+  //     if(level == "main"){
+  //       var selectedValues = $('.js-example-basic-multiple[data-list-id="speciality_preferences-'+k+'"]').val();
+  //     }else{
+  //       var selectedValues = $('.js-example-basic-multiple'+k+'[data-list-id="speciality_preferences-'+k+'"]').val();
+  //     }
       
-      console.log("selectedValues",selectedValues);
+  //     console.log("selectedValues",selectedValues);
 
-      $(".show_specialities-"+k+" .subspec_list").each(function(i,val){
-            var val1 = $(val).val();
-            console.log("val",val1);
-            if(selectedValues.includes(val1) == false){
-              $(".subspec_main_div-"+val1).remove();
+  //     $(".show_specialities-"+k+" .subspec_list").each(function(i,val){
+  //           var val1 = $(val).val();
+  //           console.log("val",val1);
+  //           if(selectedValues.includes(val1) == false){
+  //             $(".subspec_main_div-"+val1).remove();
                 
-            }
-        });
+  //           }
+  //       });
 
-        $(".show_specialitiesStatus-"+k+" .subspecprof_list").each(function(i,val){
-            var val2 = $(val).val();
-            console.log("val2",val2);
-            if(selectedValues.includes(val2) == false){
+  //       $(".show_specialitiesStatus-"+k+" .subspecprof_list").each(function(i,val){
+  //           var val2 = $(val).val();
+  //           console.log("val2",val2);
+  //           if(selectedValues.includes(val2) == false){
               
-              $(".subspecprofdiv-"+val2).remove();
+  //             $(".subspecprofdiv-"+val2).remove();
                 
-            }
-        });
+  //           }
+  //       });
 
-      for(var i=0;i<selectedValues.length;i++){
-        if($(".show_specialities-"+k+" .subspec_main_div-"+selectedValues[i]).length < 1){
-          $.ajax({
-            type: "GET",
-            url: "{{ url('/nurse/getSpecialityDatas1') }}",
-            data: {speciality_id:selectedValues[i]},
-            cache: false,
-            success: function(data){
-              var data1 = JSON.parse(data);
-              console.log("data1",data1);
+  //     for(var i=0;i<selectedValues.length;i++){
+  //       if($(".show_specialities-"+k+" .subspec_main_div-"+selectedValues[i]).length < 1){
+  //         $.ajax({
+  //           type: "GET",
+  //           url: "{{ url('/nurse/getSpecialityDatas1') }}",
+  //           data: {speciality_id:selectedValues[i]},
+  //           cache: false,
+  //           success: function(data){
+  //             var data1 = JSON.parse(data);
+  //             console.log("data1",data1);
 
-              var speciality_text = "";
-              for(var j=0;j<data1.sub_spciality_data.length;j++){
+  //             var speciality_text = "";
+  //             for(var j=0;j<data1.sub_spciality_data.length;j++){
                 
-                speciality_text += "<li data-value='"+data1.sub_spciality_data[j].id+"'>"+data1.sub_spciality_data[j].name+"</li>"; 
+  //               speciality_text += "<li data-value='"+data1.sub_spciality_data[j].id+"'>"+data1.sub_spciality_data[j].name+"</li>"; 
                 
-              }
-              var sub = 'sub';
+  //             }
+  //             var sub = 'sub';
 
-              if(data1.sub_spciality_data.length > 0){
-                $(".show_specialities-"+k).append('\<div class="subspec_main_div subspec_main_div-'+data1.main_speciality_id+'">\
-                              <div class="subspec_div subspec_div-'+data1.main_speciality_id+' form-group level-drp">\
-                              <label class="form-label subspec_label subspec_label-'+data1.main_speciality_id+'" for="input-1">'+data1.main_speciality_name+'</label>\
-                              <input type="hidden" name="subspec_list" class="subspec_list subspec_list-'+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
-                              <ul id="speciality_preferences-'+data1.main_speciality_id+'" style="display:none;">'+speciality_text+'</ul>\
-                              <select class="js-example-basic-multiple'+data1.main_speciality_id+' subspec_valid-'+data1.main_speciality_id+' addAll_removeAll_btn" data-list-id="speciality_preferences-'+data1.main_speciality_id+'" name="specialties[type_'+data1.main_speciality_id+'][]" onchange="getSecialities(\''+sub+'\',\''+data1.main_speciality_id+'\')" multiple="multiple"></select>\
-                              <span id="reqsubspecvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
-                              </div>\
-                              <div class="subspec_level-'+data1.main_speciality_id+'"></div>\
-                              <div class="show_specialities-'+data1.main_speciality_id+'"></div>\
-                              <div class="show_specialitiesStatus-'+data1.main_speciality_id+'"></div>\
-                              </div>');
+  //             if(data1.sub_spciality_data.length > 0){
+  //               $(".show_specialities-"+k).append('\<div class="subspec_main_div subspec_main_div-'+data1.main_speciality_id+'">\
+  //                             <div class="subspec_div subspec_div-'+data1.main_speciality_id+' form-group level-drp">\
+  //                             <label class="form-label subspec_label subspec_label-'+data1.main_speciality_id+'" for="input-1">'+data1.main_speciality_name+'</label>\
+  //                             <input type="hidden" name="subspec_list" class="subspec_list subspec_list-'+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
+  //                             <ul id="speciality_preferences-'+data1.main_speciality_id+'" style="display:none;">'+speciality_text+'</ul>\
+  //                             <select class="js-example-basic-multiple'+data1.main_speciality_id+' subspec_valid-'+data1.main_speciality_id+' addAll_removeAll_btn" data-list-id="speciality_preferences-'+data1.main_speciality_id+'" name="specialties[type_'+data1.main_speciality_id+'][]" onchange="getSecialities(\''+sub+'\',\''+data1.main_speciality_id+'\')" multiple="multiple"></select>\
+  //                             <span id="reqsubspecvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
+  //                             </div>\
+  //                             <div class="subspec_level-'+data1.main_speciality_id+'"></div>\
+  //                             <div class="show_specialities-'+data1.main_speciality_id+'"></div>\
+  //                             <div class="show_specialitiesStatus-'+data1.main_speciality_id+'"></div>\
+  //                             </div>');
 
-                              selectTwoFunction(data1.main_speciality_id);
+  //                             selectTwoFunction(data1.main_speciality_id);
               
-              }else{
+  //             }else{
                 
-                if($(".show_specialitiesStatus-"+k+" .subspecprofdiv-"+data1.main_speciality_id).length < 1){
+  //               if($(".show_specialitiesStatus-"+k+" .subspecprofdiv-"+data1.main_speciality_id).length < 1){
                   
-                  $(".show_specialitiesStatus-"+k).append('<div class="custom-select-wrapper subspecprofdiv subspecprofdiv-'+data1.main_speciality_id+' form-group level-drp" style="margin-bottom: 5px;">\
-                    <label class="form-label subspeclabel-'+data1.main_speciality_id+'" for="input-1">\
-                    Specialty Status ('+data1.main_speciality_name+')\
-                    <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>\
-                      <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">\
-                        <li><strong>Status definitions:</strong></li>\
-                        <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>\
-                        <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>\
-                        <li><strong>First:</strong> First-ever specialty after qualification.</li>\
-                        <li><strong>Former:</strong> Previously practiced.</li>\
-                        <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>\
-                        <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>\
-                      </ul>\
-                    </label>\
-                    <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_list-'+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
-                    <select data-id="'+data1.main_speciality_id+'" class="custom-select speciality_status_column subspecprof_listProfession subspecprof_listProfession-'+data1.main_speciality_id+' speciality_status_columns-'+data1.main_speciality_id+' speciality_status_column-'+k+' form-input mr-10 langprof_level_valid-'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][status]" onchange="changeSpecialityStatus(this.value,'+data1.main_speciality_id+','+k+')">\
-                      <option value="">select</option>\
-                      <option value="Current">Current</option>\
-                      <option value="Principal">Principal</option>\
-                      <option value="First">First</option>\
-                      <option value="Former">Former</option>\
-                      <option value="Upskilling / Transitioning / Training">Upskilling / Transitioning / Training</option>\
-                    </select>\
-                    <input type="hidden" class="speciality_flag-'+data1.main_speciality_id+' is_current_'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][is_current]" value="0">\
-                    <input type="hidden" class="speciality_flag-'+data1.main_speciality_id+' is_principal_'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][is_principal]" value="0">\
-                    <input type="hidden" class="speciality_flag-'+data1.main_speciality_id+' is_first_'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][is_first]" value="0">\
-                    <input type="hidden" class="speciality_flag-'+data1.main_speciality_id+' is_former_'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][is_former]" value="0">\
-                    <input type="hidden" class="speciality_flag-'+data1.main_speciality_id+' is_upskilling_'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][is_upskilling]" value="0">\
-                    </div>\
-                    <span id="reqsubspeclevelvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
-                    ');
+  //                 $(".show_specialitiesStatus-"+k).append('<div class="custom-select-wrapper subspecprofdiv subspecprofdiv-'+data1.main_speciality_id+' form-group level-drp" style="margin-bottom: 5px;">\
+  //                   <label class="form-label subspeclabel-'+data1.main_speciality_id+'" for="input-1">\
+  //                   Specialty Status ('+data1.main_speciality_name+')\
+  //                   <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>\
+  //                     <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">\
+  //                       <li><strong>Status definitions:</strong></li>\
+  //                       <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>\
+  //                       <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>\
+  //                       <li><strong>First:</strong> First-ever specialty after qualification.</li>\
+  //                       <li><strong>Former:</strong> Previously practiced.</li>\
+  //                       <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>\
+  //                       <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>\
+  //                     </ul>\
+  //                   </label>\
+  //                   <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_list-'+data1.main_speciality_id+' subspecprof_listProfession subspecprof_listProfession-'+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
+  //                   <select data-id="'+data1.main_speciality_id+'" class="custom-select speciality_status_column  speciality_status_columns-'+data1.main_speciality_id+' speciality_status_column-'+k+' form-input mr-10 langprof_level_valid-'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][status]" onchange="changeSpecialityStatus(this.value,'+data1.main_speciality_id+','+k+')">\
+  //                     <option value="">select</option>\
+  //                     <option value="Current">Current</option>\
+  //                     <option value="Principal">Principal</option>\
+  //                     <option value="First">First</option>\
+  //                     <option value="Former">Former</option>\
+  //                     <option value="Upskilling / Transitioning / Training">Upskilling / Transitioning / Training</option>\
+  //                   </select>\
+  //                   <input type="hidden" class="speciality_flag-'+data1.main_speciality_id+' is_current_'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][is_current]" value="0">\
+  //                   <input type="hidden" class="speciality_flag-'+data1.main_speciality_id+' is_principal_'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][is_principal]" value="0">\
+  //                   <input type="hidden" class="speciality_flag-'+data1.main_speciality_id+' is_first_'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][is_first]" value="0">\
+  //                   <input type="hidden" class="speciality_flag-'+data1.main_speciality_id+' is_former_'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][is_former]" value="0">\
+  //                   <input type="hidden" class="speciality_flag-'+data1.main_speciality_id+' is_upskilling_'+data1.main_speciality_id+'" name="specialties[speciality_status][type_'+data1.main_speciality_id+'][is_upskilling]" value="0">\
+  //                   </div>\
+  //                   <span id="reqsubspeclevelvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
+  //                   ');
 
-                    document.querySelectorAll('.tooltip-btn').forEach(btn => {
-                        const tooltip = btn.parentElement.querySelector('.tooltip_speciality_status');
+  //                   document.querySelectorAll('.tooltip-btn').forEach(btn => {
+  //                       const tooltip = btn.parentElement.querySelector('.tooltip_speciality_status');
 
-                        btn.addEventListener('mouseenter', () => {
-                            tooltip.style.display = 'block';
-                        });
+  //                       btn.addEventListener('mouseenter', () => {
+  //                           tooltip.style.display = 'block';
+  //                       });
 
-                        btn.addEventListener('mouseleave', () => {
-                            tooltip.style.display = 'none';
-                        });
-                    });
-                }  
-              }
-            }
-          });
-        }
-      }
-    }
+  //                       btn.addEventListener('mouseleave', () => {
+  //                           tooltip.style.display = 'none';
+  //                       });
+  //                   });
+  //               }  
+  //             }
+  //           }
+  //         });
+  //       }
+  //     }
+  //   }
 
-     function getSecialitiesExperience(level,k,x){
+function getSecialitiesExperience(level,k,x){
        
       console.log("specialties_type_experience",level);
       if(level == "main"){
@@ -8549,21 +8618,156 @@ if (!empty($interviewReferenceData)) {
         }
       }
     }
-    // $(".").each(function(){
+  //   // $(".").each(function(){
 
-    // });
+  //   // });
 
-   document.querySelectorAll('.tooltip-btn').forEach(btn => {
-      const tooltip = btn.parentElement.querySelector('.tooltip_speciality_status');
+  //  document.querySelectorAll('.tooltip-btn').forEach(btn => {
+  //     const tooltip = btn.parentElement.querySelector('.tooltip_speciality_status');
 
-      btn.addEventListener('mouseenter', () => {
-          tooltip.style.display = 'block';
+  //     btn.addEventListener('mouseenter', () => {
+  //         tooltip.style.display = 'block';
+  //     });
+
+  //     btn.addEventListener('mouseleave', () => {
+  //         tooltip.style.display = 'none';
+  //     });
+  // });
+  function getSecialities(level, k,ed) {
+
+    let selectedValues;
+
+    if (level === "main") {
+        selectedValues = $('.js-example-basic-multiple[data-list-id="speciality_preferences-' + k + '"]').val() || [];
+    } else {
+        selectedValues = $('.js-example-basic-multiple' + k + '[data-list-id="speciality_preferences-' + k + '"]').val() || [];
+    }
+
+    selectedValues = selectedValues.map(String);
+
+    console.log("selectedValues", selectedValues);
+
+    /* ===============================
+       ✅ SAFE REMOVAL (CHILD ONLY)
+    =============================== */
+
+    if(ed == "edit"){
+      $(".show_specialities-" + k + " > .subspec_main_div_edit").each(function () {
+          const childId = String($(this).data("id"));
+
+          if (!selectedValues.includes(childId)) {
+              removeSpecialityTree(childId);
+          }
+      });
+    }else{
+      $(".show_specialities-" + k + " > .subspec_main_div").each(function () {
+          const childId = String($(this).data("id"));
+
+          if (!selectedValues.includes(childId)) {
+              removeSpecialityTree(childId);
+          }
+      });
+    }
+
+    /* ===============================
+       ✅ ADD NEW SELECTIONS
+    =============================== */
+
+    selectedValues.forEach(function (specId) {
+
+        if ($(".subspec_main_div-" + specId).length > 0) return;
+
+        $.ajax({
+            type: "GET",
+            url: "{{ url('/nurse/getSpecialityDatas1') }}",
+            data: { speciality_id: specId },
+            cache: false,
+            success: function (data) {
+
+                const data1 = JSON.parse(data);
+
+                let speciality_text = "";
+                data1.sub_spciality_data.forEach(function (s) {
+                    speciality_text += "<li data-value='" + s.id + "'>" + s.name + "</li>";
+                });
+
+                /* ===== HAS SUB SPECIALTIES ===== */
+                if (data1.sub_spciality_data.length > 0) {
+
+                    $(".show_specialities-" + k).append(`
+                        <div class="subspec_main_div subspec_main_div-${data1.main_speciality_id}"
+                             data-id="${data1.main_speciality_id}"
+                             data-parent="${k}">
+
+                            <div class="subspec_div form-group level-drp">
+                                <label class="form-label">${data1.main_speciality_name}</label>
+
+                                <input type="hidden" class="subspec_list" value="${data1.main_speciality_id}">
+
+                                <ul id="speciality_preferences-${data1.main_speciality_id}" style="display:none;">
+                                    ${speciality_text}
+                                </ul>
+
+                                <select class="js-example-basic-multiple${data1.main_speciality_id} subspec_valid-${data1.main_speciality_id} addAll_removeAll_btn"
+                                        data-list-id="speciality_preferences-${data1.main_speciality_id}"
+                                        name="specialties[type_${data1.main_speciality_id}][]"
+                                        multiple
+                                        onchange="getSecialities('sub', ${data1.main_speciality_id})">
+                                </select>
+                            </div>
+                            <span id="reqsubspecvalid-${data1.main_speciality_id}" class="reqError text-danger valley"></span>
+                            <div class="show_specialities-${data1.main_speciality_id}"></div>
+                            <div class="show_specialitiesStatus-${data1.main_speciality_id}"></div>
+                            
+                        </div>
+                    `);
+
+                    selectTwoFunction(data1.main_speciality_id);
+                }
+                /* ===== LEAF NODE (STATUS) ===== */
+                else {
+
+                    if ($(".subspecprofdiv-" + data1.main_speciality_id).length === 0) {
+
+                        $(".show_specialitiesStatus-" + k).append(`
+                            <div class="custom-select-wrapper subspecprofdiv subspecprofdiv-${data1.main_speciality_id}"
+                                 data-id="${data1.main_speciality_id}"
+                                 data-parent="${k}">
+                                 
+                                <label class="form-label">
+                                    Specialty Status (${data1.main_speciality_name})
+                                </label>
+                                <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_listProfession subspecprof_listProfession-${data1.main_speciality_id} subspecprof_list-${data1.main_speciality_id}" value="${data1.main_speciality_id}">
+                                
+                                <select class="custom-select speciality_status_columns-${data1.main_speciality_id}"
+                                    name="specialties[speciality_status][type_${data1.main_speciality_id}][status]">
+                                    <option value="">select</option>
+                                    <option value="Current">Current</option>
+                                    <option value="Principal">Principal</option>
+                                    <option value="First">First</option>
+                                    <option value="Former">Former</option>
+                                    <option value="Upskilling / Transitioning / Training">
+                                        Upskilling / Transitioning / Training
+                                    </option>
+                                </select>
+                                <span id="reqsubspeclevelvalid-${data1.main_speciality_id}" class="reqError text-danger valley"></span>
+                            </div>
+                        `);
+                    }
+                }
+            }
+        });
+    });
+  }
+  function removeSpecialityTree(id) {
+
+      $(".show_specialities-" + id + " > .subspec_main_div").each(function () {
+          removeSpecialityTree($(this).data("id"));
       });
 
-      btn.addEventListener('mouseleave', () => {
-          tooltip.style.display = 'none';
-      });
-  });
+      $(".subspecprofdiv-" + id).remove();
+      $(".subspec_main_div-" + id).remove();
+  }
 
     function changeSpecialityStatus(selectedValue,data_id,k){
       $(".speciality_flag-"+data_id).val(0);

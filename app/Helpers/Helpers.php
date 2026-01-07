@@ -644,3 +644,31 @@ function vaccination_name_by_id($id)
         $vaccination_data =  VaccinationModel::where('id', $id)->first();
         return $vaccination_data->name;
 }
+function getParentSpecialityId(array $tree, int|string $childId): ?int
+{
+    $childId = (string) $childId;
+
+    foreach ($tree as $key => $values) {
+
+        // Only process hierarchy keys
+        if (!str_starts_with($key, 'type_')) {
+            continue;
+        }
+
+        // Value must be an array of children
+        if (!is_array($values)) {
+            continue;
+        }
+
+        // Skip speciality_status or associative arrays
+        if (array_keys($values) !== range(0, count($values) - 1)) {
+            continue;
+        }
+
+        if (in_array($childId, $values, true)) {
+            return (int) str_replace('type_', '', $key);
+        }
+    }
+
+    return null;
+}

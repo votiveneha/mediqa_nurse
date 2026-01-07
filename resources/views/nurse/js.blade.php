@@ -609,50 +609,194 @@ function pad(number) {
         }
 </script>
 <script>
- function editedprofile() {
-    $('#EditProfile').find('.text-danger').hide();
+//  function editedprofile() {
+//     $('#EditProfile').find('.text-danger').hide();
     
-    $.ajax({
-      url: "{{ route('nurse.updateProfile') }}",
-      type: "POST",
-      cache: false,
-      contentType: false,
-      processData: false,
-      data: new FormData($('#EditProfile')[0]),
-      dataType: 'json',
-      beforeSend: function() {
-        $('#submitfrm').prop('disabled', true);
-        $('#submitfrm').text('Process....');
-      },
-      success: function(res) {
-        $('#submitfrm').prop('disabled', false);
-        $('#submitfrm').text('Update Profile');
-        if (res.status == '2') {
-          Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: 'Profile Updated Successfully',
-          }).then(function() {
-            window.location.href = "{{ route('nurse.my-profile') }}?page=my_profile";
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: res.message,
-          })
-        }
-      },
-      error: function(errorss) {
-        $('#submitfrm').prop('disabled', false);
-        $('#submitfrm').text('Submit');
-        for (var err in errorss.responseJSON.errors) {
-          $("#EditProfile").find("[name='" + err + "']").after("<div class='text-danger'>" + errorss.responseJSON.errors[err] + "</div>");
-        }
+//     $.ajax({
+//       url: "{{ route('nurse.updateProfile') }}",
+//       type: "POST",
+//       cache: false,
+//       contentType: false,
+//       processData: false,
+//       data: new FormData($('#EditProfile')[0]),
+//       dataType: 'json',
+//       beforeSend: function() {
+//         $('#submitfrm').prop('disabled', true);
+//         $('#submitfrm').text('Process....');
+//       },
+//       success: function(res) {
+//         $('#submitfrm').prop('disabled', false);
+//         $('#submitfrm').text('Update Profile');
+//         if (res.status == '2') {
+//           Swal.fire({
+//             icon: 'success',
+//             title: 'Success',
+//             text: 'Profile Updated Successfully',
+//           }).then(function() {
+//             window.location.href = "{{ route('nurse.my-profile') }}?page=my_profile";
+//           });
+//         } else {
+//           Swal.fire({
+//             icon: 'error',
+//             title: 'Error',
+//             text: res.message,
+//           })
+//         }
+//       },
+//       error: function(errorss) {
+//         $('#submitfrm').prop('disabled', false);
+//         $('#submitfrm').text('Submit');
+//         for (var err in errorss.responseJSON.errors) {
+//           $("#EditProfile").find("[name='" + err + "']").after("<div class='text-danger'>" + errorss.responseJSON.errors[err] + "</div>");
+//         }
+//       }
+//     });
+//     return false;
+//   }
+
+    function editedprofile() {
+
+      let isValid = true;
+
+      
+
+      // Clear previous errors
+      $('#EditProfile').find('.text-danger').text('');
+
+      $('.registration-card').each(function () {
+
+          const $card  = $(this);
+          const status = $card.find('.status-radio:checked').val();
+
+          // Draft → skip validation
+          if (status !== '3') {
+              return true;
+          }
+
+          // Fields
+          const jurisdiction = $card.find('.js_jurid_input');
+          const regNumber    = $card.find('.js_reg_number');
+          const expiryDate   = $card.find('.js_expiry_date');
+          const evidence     = $card.find('.js_evidence')[0];
+
+          // Error spans
+          const errJur   = $card.find('.reqTxtjurisd');
+          const errReg   = $card.find('.reqTxtReg');
+          const errExp   = $card.find('.reqTxtExpiry');
+          const errFile  = $card.find('.reqTxtEvidence');
+
+          // ---------------- Jurisdiction ----------------
+          if (!jurisdiction.val().trim()) {
+              errJur.text('* Jurisdiction is required');
+              isValid = false;
+          }
+
+          // ---------------- Registration Number ----------------
+          if (!regNumber.val().trim()) {
+              errReg.text('* License / Registration Number is required');
+              isValid = false;
+          }
+
+          // ---------------- Expiry Date ----------------
+          if (!expiryDate.val()) {
+              errExp.text('* Expiry Date is required');
+              isValid = false;
+          } else {
+              const selected = new Date(expiryDate.val());
+              const today = new Date();
+              today.setHours(0,0,0,0);
+
+              if (selected < today) {
+                  errExp.text('* Expiry Date cannot be in the past');
+                  isValid = false;
+              }
+          }
+
+          // ---------------- Upload Evidence ----------------
+          if (!evidence || evidence.files.length === 0) {
+              errFile.text('* Upload Evidence is required');
+              isValid = false;
+          }
+
+      });
+
+      // ❌ Stop AJAX if validation failed
+      if (!isValid) {
+          $('html, body').animate({
+              scrollTop: $('.text-danger:visible:first').offset().top - 120
+          }, 400);
+          return false;
       }
-    });
-    return false;
+
+      let submitAsUpdate = false;
+
+      $('.registration-card').each(function () {
+          const status = $(this).find('.status-radio:checked').val();
+
+          if (status === '3' && $(this).data('existing') === true) {
+              submitAsUpdate = true;
+          }
+      });
+
+      let formData = new FormData($('#EditProfile')[0]); 
+
+      $.ajax({
+          url: "{{ route('nurse.updateProfile') }}",
+          type: "POST",
+          cache: false,
+          contentType: false,
+          processData: false,
+          data: formData,
+          dataType: 'json',
+          headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          beforeSend: function () {
+              $('#submitfrm').prop('disabled', true).text('Processing...');
+          },
+          success: function (res) {
+              $('#submitfrm').prop('disabled', false).text('Update Profile');
+
+              if (res.status == '2') {
+                  Swal.fire({
+                      icon: 'success',
+                      title: 'Success',
+                      text: 'Profile Updated Successfully',
+                  }).then(() => {
+                      window.location.href = "{{ route('nurse.my-profile') }}?page=my_profile";
+                  });
+              } else {
+                  Swal.fire({
+                      icon: 'error',
+                      title: 'Error',
+                      text: res.message,
+                  });
+              }
+          },
+          error: function(errorss) {
+              $('#submitfrm').prop('disabled', false).text('Submit');
+
+              // Clear old errors
+              $("#EditProfile .text-danger").remove();
+
+              for (var err in errorss.responseJSON.errors) {
+                  // If you want to handle expiry_date specifically by id:
+                  if (err.includes('expiry_date')) {
+                      $("#error_expiry_date").after(
+                          "<div class='text-danger'>" + errorss.responseJSON.errors[err][0] + "</div>"
+                      );
+                  } else {
+                      // fallback for other fields (still using name)
+                      $("#EditProfile").find("[name='" + err + "']").after(
+                          "<div class='text-danger'>" + errorss.responseJSON.errors[err][0] + "</div>"
+                      );
+                  }
+              }
+          }
+
+      });
+
+      return false;
   }
+
   function myFunction1() {
     event.preventDefault();
     var isValid = true;
