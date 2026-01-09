@@ -2474,6 +2474,7 @@ class NurseController extends Controller
         $data = DB::table('registration_profiles_countries')
             ->where('user_id', $request->user_id)
             ->where('type', 1)
+            ->whereIn('status',[3,4,5,6,7])
             ->get();
 
         // attach country_name using helper

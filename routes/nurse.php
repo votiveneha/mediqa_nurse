@@ -112,13 +112,14 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
     Route::post('/remove-registration-country', 'HomeController@remove_registration_country')->name('nurse.remove-registration-country');
     Route::post('/remove-qualification-country', 'HomeController@remove_qualification_country')->name('nurse.remove-qualification-country');
     Route::post('/nurse/save-registration-country', function (Request $request) {
-        auth('nurse_middle')->user()->update([
-          'active_country' => $request->country_id,
-          'country' => $request->country_id,
-        ]);
+      auth('nurse_middle')->user()->update([
+        'active_country' => $request->country_id,
+        'country' => $request->country_id,
+        'country_code' => $request->country_code,
+      ]);
 
-        return response()->json(['success' => true]);
-      })->name('saveRegistrationCountry');
+      return response()->json(['success' => true]);
+    })->name('saveRegistrationCountry');
     
     Route::post('/update-profession-user-emergency', 'HomeController@update_emergency')->name('update-profession-user-emergency');
     Route::post('/update-profession-profile-setting', 'HomeController@update_profession_profile_setting')->name('update-profession-profile-setting');

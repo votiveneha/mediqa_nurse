@@ -1581,7 +1581,17 @@
                           
                         @endphp
                         @if(!empty($filters))
-                          <span class="chip-new">{{ $filters[0] }}</span>
+                          @php
+                          $firstFilterValue = collect($filters)
+                              ->filter(fn($v) => !empty($v))
+                              ->first();
+                          @endphp
+
+                          @if(is_array($firstFilterValue))
+                            <span class="chip-new">{{ implode(', ', $firstFilterValue) }}</span>
+                          @elseif($firstFilterValue)
+                            <span class="chip-new">{{ $firstFilterValue }}</span>
+                          @endif
                           <a href="#" class="btn-readmore" data-id="{{ $saved_searches->searches_id }}" data-filters='{{ $saved_searches->filters }}'>Read More</a>
                         @endif
                         
@@ -1631,7 +1641,7 @@
                       <button class="btn-run" data-id="{{ $saved_searches->searches_id }}">Run</button>
                       <button class="btn-edit">Edit</button>
                       <button class="btn-duplicate">Duplicate</button>
-                      @if($i != 1)
+                      @if($i != 0)
                       <button class="btn-delete" data-name="single-delete">Delete</button>
                       @endif
                       </div>

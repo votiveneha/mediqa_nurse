@@ -1,5 +1,13 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.js"></script>
+<style>
+  .iti {
+    display: block !important;
+}
+input.form-control.numbers.js_mobile_input {
+    padding-left: 80px !important;
+}
+</style>
 <script>
   $(document).ready(function() {
     /*------------------------------------------
@@ -3787,48 +3795,104 @@ $(document).ready(function () {
 
 });
 </script>
-<script>
-    $(document).ready(function () {
-
-      const urlParams = new URLSearchParams(window.location.search);
-
-      if (urlParams.get('page') === 'my_profile') {
-          $('#registrationCountryModal').modal('show');
-      }
-
-  });
-
-  $('#saveCountry').on('click', function () {
-
-      const country = $('#registration_country').val();
-
-      if (!country) {
-          $('#countryError').text('Please select a country');
-          return;
-      }
-
-      $.ajax({
-          url: "{{ route('nurse.saveRegistrationCountry') }}",
-          type: "POST",
-          data: {
-              country_id: country,
-              _token: "{{ csrf_token() }}"
-          },
-          success: function () {
-              $('#registrationCountryModal').modal('hide');
-
-              // Unlock UI
-              $('.profession-tab').removeClass('disabled');
-
-              // Redirect cleanly
-              // window.location.href = "{{ route('nurse.my-profile') }}?page=my_profile";
-              window.location.href = "{{ route('nurse.dashboard') }}";
-          }
-      });
-  });
-</script>
 
 <script type="text/template" id="registration-card-template">
+  <div class="mb-4 registration-card registration-card-__CODE__"
+       data-country="__CODE__"
+       data-existing="0">
+
+    <h5>Registration & Licences — __COUNTRY_NAME__</h5>
+
+      <!-- STATUS -->
+    <div class="form-group">
+        <label>Status</label>
+        <div class="d-flex gap-3">
+            <label class="me-3 d-flex align-items-center">
+                <input type="radio"
+                      name="registration[new][__CODE__][status]"
+                      value="2"
+                      checked
+                      class="status-radio"
+                      data-code="__CODE__"
+                      style="width:16px;height:16px;margin-right:6px">
+                Draft
+            </label>
+
+            <label class="d-flex align-items-center">
+                <input type="radio"
+                      name="registration[new][__CODE__][status]"
+                      value="3"
+                      class="status-radio" 
+                      data-code="__CODE__"
+                      style="width:16px;height:16px;margin-right:6px">
+                Submit  (for Review)
+            </label>
+        </div>
+    </div>
+
+     <!-- MOBILE -->
+    <div class="form-group">
+        <label>Mobile No</label>
+    <div>
+        <input type="tel"
+              class="form-control numbers js_mobile_input"
+              autocomplete="off"
+              maxlength="10">
+
+        <!-- hidden fields -->
+        <input type="hidden"
+              class="mobile_country_code"
+              name="registration[new][__CODE__][mobile_country_code]">
+
+        <input type="hidden"
+              class="mobile_country_iso"
+              name="registration[new][__CODE__][mobile_country_iso]">
+
+        <input type="hidden"
+              class="mobile_number"
+              name="registration[new][__CODE__][mobile_number]">
+              </div>
+    </div>
+
+    <div class="form-group">
+        <label>Jurisdiction / Registration Authority</label>
+        <input type="text"
+              name="registration[new][__CODE__][jurisdiction]"
+              class="form-control js_jurid_input">
+        <span class="reqTxtjurisd text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>License / Registration Number</label>
+        <input type="text"
+              name="registration[new][__CODE__][registration_number]"
+              class="form-control js_reg_number">
+        <span class="reqTxtReg text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Expiry Date</label>
+        <input type="date"
+              min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}"
+              name="registration[new][__CODE__][expiry_date]"
+              class="form-control js_expiry_date">
+        <span class="reqTxtExpiry text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Upload Evidence</label>
+        <input type="file"
+              name="registration[new][__CODE__][upload_evidence][]"
+              class="form-control js_evidence evidence-input"
+              data-code="__CODE__"
+              multiple>
+        <span class="reqTxtEvidence text-danger"></span>
+         <div class="mt-2 registration-evidence-preview___CODE__"></div>
+    </div>
+
+  </div>
+</script>
+{{-- <script type="text/template" id="registration-card-template">
   <div class="mb-4 registration-card registration-card-__CODE__" data-country="__CODE__">
       <h5 class="d-flex justify-content-between align-items-center">
           <span>
@@ -3901,7 +3965,7 @@ $(document).ready(function () {
     </div>
 
   </div>
-</script>
+</script> --}}
 <script>
     $(document).on('change', '.status-radio', function () {
       let code   = $(this).data('code');
@@ -4023,6 +4087,7 @@ $(document).ready(function () {
                             // remove registration card
                             $('.registration-card[data-country="' + code + '"]').remove();
                         }
+                          window.location.reload();
                     }
                 });
             });
@@ -4076,6 +4141,8 @@ $(document).ready(function () {
                 .replace('__COUNTRY_NAME__', getCountryName(code));
 
             $cardsWrap.append(html);
+            const $newCard = $('.registration-card[data-country="' + code + '"]');
+            initMobileInput($newCard);
         }
 
         function removeRegistrationCard(code) {
@@ -4133,6 +4200,41 @@ $(document).ready(function () {
         });
 
     });
+</script>
+<script>
+  
+    function initMobileInput($card) {
+
+        if (!$card.length) return;
+
+        const iso2  = $card.data('country').toLowerCase();
+        const input = $card.find('.js_mobile_input')[0];
+
+        if (!iso2 || !input) return;
+
+        const iti = window.intlTelInput(input, {
+            initialCountry: iso2,
+            separateDialCode: true,
+
+            /* 🔒 LOCK BEHAVIOUR */
+            allowDropdown: false,
+            nationalMode: true,
+            formatOnDisplay: false,
+            autoPlaceholder: 'off'
+        });
+
+        // set country data once
+        const data = iti.getSelectedCountryData();
+        $card.find('.mobile_country_code').val(data.dialCode);
+        $card.find('.mobile_country_iso').val(data.iso2);
+
+        // only allow digits, no overwrite
+        input.addEventListener('input', function () {
+            this.value = this.value.replace(/[^\d]/g, '');
+            $card.find('.mobile_number').val(this.value);
+        });
+    }
+
 </script>
 
 <script>

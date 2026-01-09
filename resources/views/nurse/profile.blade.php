@@ -520,7 +520,7 @@ p.highlight-text {
                             <label class="font-sm color-text-mutted mb-10">Email *</label>
                             <input class="form-control" type="text" name="email" id="emailI" readonly value="{{  Auth::guard('nurse_middle')->user()->email }}">
                           </div>
-                          <div class="form-group col-md-6">
+                          {{-- <div class="form-group col-md-6">
                             <label class="form-label" for="input-3">Mobile Number *</label>
                             <div class="row">
                               <div class="col-md-12 mob-adj">
@@ -530,7 +530,7 @@ p.highlight-text {
                                 <span id="reqTxtcontactI" class="reqError text-danger valley"></span>
                               </div>
                             </div>
-                          </div>
+                          </div> --}}
                           <div class="col-lg-6">
                             <div class="form-group">
                               <label class="font-sm color-text-mutted mb-10">Date Of Birth</label>
@@ -674,6 +674,26 @@ p.highlight-text {
                                 </div>
                             </div>
                           @endif
+                          {{-- Mobile no --}}
+                          <div class="form-group">
+                              <label>Mobile Number.</label>
+
+                              <div class="iti iti--allow-dropdown iti--separate-dial-code w-100">
+                                  <div class="iti__flag-container">
+                                      <div class="iti__selected-flag" title="{{ strtoupper($registration_country->mobile_country_iso) }}">
+                                          <div class="iti__flag iti__{{ strtolower($registration_country->mobile_country_iso) }}"></div>
+                                          <div class="iti__selected-dial-code">
+                                              +{{ $registration_country->mobile_country_code }}
+                                          </div>
+                                      </div>
+                                  </div>
+
+                                  <input type="text"
+                                        class="form-control"  name="registration[{{ $registration_country->id }}][mobile_number]" 
+                                        value="{{ $registration_country->mobile_number }}"
+                                      >
+                              </div>
+                          </div>
                           {{-- Jurisdiction --}}
                           <div class="form-group">
                               <label>Jurisdiction / Registration Authority</label>
@@ -724,6 +744,7 @@ p.highlight-text {
                               @if(!empty($registration_country->upload_evidence))
                                   @foreach(json_decode($registration_country->upload_evidence, true) as $file)
                                       <div class="trans_img">
+                                        <div>
                                           <i class="fa fa-file"></i> 
                                           <a href="{{ url('/public/uploads/registration/' . $file) }}" target="_blank">
                                               {{ preg_replace('/^\d+_\d+_/', '', $file) }}
@@ -732,6 +753,7 @@ p.highlight-text {
                                                 onclick="removeRegistrationEvidence('{{ $file }}', {{ $registration_country->id }})">
                                               <i class="fa fa-close"></i>
                                           </span>
+                                        </div>
                                       </div>
                                   @endforeach
                               @endif
@@ -862,49 +884,7 @@ p.highlight-text {
                       </form>
                     </div>
 
-                    {{-- City Selection Modal --}}
-                  @if (Auth::guard('nurse_middle')->user()->active_country == null )
-                  <div class="modal fade" id="registrationCountryModal"
-                      data-bs-backdrop="static"
-                      data-bs-keyboard="false"
-                      tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                      <div class="modal-content text-center p-4">
-
-                        <!-- Success Icon -->
-                        <div class="modal-header border-0 justify-content-center">
-                          <div class="rounded-circle bg-success-subtle p-3">
-                            <i class="bi bi-check-circle-fill text-success fs-1"></i>
-                          </div>
-                        </div>
-
-                        <!-- Title -->
-                        <h5 class="modal-title fw-bold mt-3 mb-2">
-                          Please choose your registration country
-                        </h5>
-
-                        <!-- Dropdown -->
-                        <div class="modal-body">
-                          <select class="form-select" id="registration_country">
-                            <option value="">Select Country</option>
-                            @foreach($countries as $country)
-                              <option value="{{ $country->iso2 }}">{{ $country->name }}</option>
-                            @endforeach
-                          </select>
-                          <span class="text-danger d-block mt-2" id="countryError"></span>
-                        </div>
-
-                        <!-- Button -->
-                        <div class="modal-footer border-0">
-                          <button class="btn btn-dark w-100 fw-bold" id="saveCountry">
-                            Continue
-                          </button>
-                        </div>
-
-                      </div>
-                    </div>
-                  </div>
-                @endif
+       
                     {{-- <div class="col-lg-12 col-md-12 update_profile">
                       <form class="" id="EditProfile" onsubmit="return editedprofile()" method="POST">
                         @csrf
@@ -1628,7 +1608,7 @@ p.highlight-text {
                           ?>
                           <div class="subspec_div subspec_div-{{ $parts[1] }} form-group level-drp">
                           <label class="form-label subspec_label subspec_label-{{ $parts[1] }}" for="input-1">{{ $sp_data_name->name }}</label>
-                          <input type="hidden" name="subspec_list" class="subspec_list subspec_list-{{ $parts[1] }}" value="{{ $parts[1] }}">
+                          <input type="hidden" name="subspec_list" class="subspec_list subspec_listProf-{{ $parentId }} subspec_list-{{ $parts[1] }}" value="{{ $parts[1] }}">
                           <ul id="speciality_preferences-{{ $parts[1] }}" style="display:none;">
                             @foreach($sp_data as $sd)
                             <li data-value="{{ $sd->id }}">{{ $sd->name }}</li>
@@ -1673,7 +1653,7 @@ p.highlight-text {
                                         
                                       </label>
                                       <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_listProfession subspecprof_listProfession-{{ $parts1[1] }} subspecprof_list-{{ $parts1[1] }}" value="{{ $parts1[1] }}">
-                                      <input type="hidden" name="subspecprof_list" class="subspecprofpart_list subspecprofpart_list-{{ $parts1[1] }}" value="{{ $parts[1] }}">
+                                      <input type="hidden" name="subspecprof_list" class="subspecprofpart_list subspecprofpart_list-{{ $parts[1] }}" value="{{ $parts1[1] }}">
                                       <select class="custom-select speciality_status_column speciality_status_column-{{ $parts[1] }} speciality_status_columns-{{ $parts1[1] }} form-input mr-10 langprof_level_valid-{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][status]" onchange="changeSpecialityStatus(this.value,{{ $parts1[1] }},{{ $parts[1] }})">
                                         <option value="">select</option>
                                         @foreach($speciality_status_data as $s_status_data)
@@ -4323,9 +4303,11 @@ p.highlight-text {
                               $parts = explode('_', $key);
                               
                               $s_data = json_encode($stypes);
+
+                              $parentId  = getParentSpecialityId($specialities_typeExperience, $parts[1]);
                             @endphp
                             <input type="hidden" name="subspectype" class="subspectype_experience-{{ $i }} subspectype_experience-{{ $parts[1] }}-{{ $i }}" value="{{ $s_data }}">
-                            <div class="subspec_main_div subspec_main_div-{{ $parts[1] }}">
+                            <div class="subspec_main_div_experience subspec_main_div_experience-{{ $parts[1] }}">
                               <?php
                                 $sp_data_name = DB::table("speciality")->where('id', $parts[1])->first();
                                 $sp_data = DB::table("speciality")->where('parent', $parts[1])->get();
@@ -4333,7 +4315,7 @@ p.highlight-text {
                               <div class="subspec_div subspec_div-{{ $parts[1] }} form-group level-drp">
                               <label class="form-label subspec_label subspec_label-{{ $parts[1] }}" for="input-1">{{ $sp_data_name->name }}</label>
                               
-                              <input type="hidden" name="subspec_list_experience" class="subspec_list_experiences-{{ $i }} subspec_list_experience-{{ $parts[1] }}" value="{{ $parts[1] }}">
+                              <input type="hidden" name="subspec_list_experience" class="subspec_list_experiences-{{ $i }} subspec_list_experiencess-{{ $i }}-{{ $parentId }} subspec_list_experience-{{ $parts[1] }}" value="{{ $parts[1] }}">
                               <ul id="specialties_type_experience-{{ $i }}-{{ $parts[1] }}" style="display:none;">
                                 @foreach($sp_data as $sd)
                                 <li data-value="{{ $sd->id }}">{{ $sd->name }}</li>
@@ -4343,8 +4325,7 @@ p.highlight-text {
                               <span id="reqsubspecvalid-{{ $parts[1] }}" class="reqError text-danger valley"></span>
                               </div>
                               <div class="subspec_level-{{ $parts[1] }}"></div>
-                            </div>
-                            <div class="show_specialitiesExperience-{{ $i }}-{{ $parts[1] }}">
+                              <div class="show_specialitiesStatusExperience-{{ $i }}-{{ $parts[1] }}">
                               <?php
                                 $speciality_status = isset($specialities_typeExperience['speciality_status'])?(array)$specialities_typeExperience['speciality_status']:[];
                                 
@@ -4360,7 +4341,7 @@ p.highlight-text {
                                     $speciality_status_data = DB::table("speciality_status")->get();
                                   ?>
                                   @if (in_array($parts1[1], $stypes))
-                                  <div class="custom-select-wrapper subspecprofdiv subspecprofdiv-{{ $parts1[1] }} form-group level-drp" style="margin-bottom: 5px;">
+                                  <div class="custom-select-wrapper subspecprofdiv subspecdivexp-{{ $parts1[1] }} subspecprofdiv-{{ $parts1[1] }} form-group level-drp" style="margin-bottom: 5px;">
                                     <label class="form-label subspeclabel-{{ $parts1[1] }}" for="input-1">
                                       Specialty Status ({{ $sp_data_name->name }}) 
                                       <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>
@@ -4374,8 +4355,8 @@ p.highlight-text {
                                           <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>
                                         </ul>
                                     </label>
-                                    <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_list-{{ $parts1[1] }}" value="{{ $parts1[1] }}">
-                                    <select class="custom-select speciality_status_column speciality_status_column-{{ $parts1[1] }} form-input mr-10 select-active langprof_level_valid-{{ $parts1[1] }}" name="specialties_experience[speciality_status][type_{{ $parts1[1] }}][status]" onchange="changeSpecialityStatus(this.value,{{ $parts1[1] }})">
+                                    <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecstatusexp_list-{{ $i }}-{{ $parts[1] }} subspecprof_list-{{ $parts1[1] }}" value="{{ $parts1[1] }}">
+                                    <select class="custom-select speciality_status_column speciality_status_column-{{ $parts1[1] }} speciality_status_columns-{{ $parts1[1] }} form-input mr-10 select-active langprof_level_valid-{{ $parts1[1] }}" name="specialties_experience[{{ $i }}][speciality_status][type_{{ $parts1[1] }}][status]" onchange="changeSpecialityStatus(this.value,{{ $parts1[1] }})">
                                       <option value="">select</option>
                                       @foreach($speciality_status_data as $s_status_data)
                                       <option value="{{ $s_status_data->status_name }}" @if($s_status_data->status_name == $s_status->status) selected @endif>{{ $s_status_data->status_name }}</option>
@@ -4396,6 +4377,8 @@ p.highlight-text {
 
                               @endforeach
                             </div>
+                            </div>
+                            
                           
 
                           @endforeach
@@ -5052,9 +5035,12 @@ p.highlight-text {
                               $parts = explode('_', $key);
                               
                               $s_data = json_encode($stypes);
+
+                              $parentId  = getParentSpecialityId($specialities_typeExperience, $parts[1]);
                             @endphp
+                            
                             <input type="hidden" name="subspectype" class="subspectype_experience-1 subspectype_experience-{{ $parts[1] }}-1" value="{{ $s_data }}">
-                            <div class="subspec_main_div subspec_main_div-{{ $parts[1] }}">
+                            <div class="subspec_main_div_experience subspec_main_div_experience-{{ $parts[1] }}">
                               <?php
                                 $sp_data_name = DB::table("speciality")->where('id', $parts[1])->first();
                                 $sp_data = DB::table("speciality")->where('parent', $parts[1])->get();
@@ -5062,7 +5048,7 @@ p.highlight-text {
                               <div class="subspec_div subspec_div-{{ $parts[1] }} form-group level-drp">
                               <label class="form-label subspec_label subspec_label-{{ $parts[1] }}" for="input-1">{{ $sp_data_name->name }}</label>
                               
-                              <input type="hidden" name="subspec_list_experience" class="subspec_list_experiences-1 subspec_list_experience-{{ $parts[1] }}" value="{{ $parts[1] }}">
+                              <input type="hidden" name="subspec_list_experience" class="subspec_list_experiences-1 subspec_list_experiencess-1-{{ $parentId }} subspec_list_experience-{{ $parts[1] }}" value="{{ $parts[1] }}">
                               <ul id="specialties_type_experience-1-{{ $parts[1] }}" style="display:none;">
                                 @foreach($sp_data as $sd)
                                 <li data-value="{{ $sd->id }}">{{ $sd->name }}</li>
@@ -5072,68 +5058,66 @@ p.highlight-text {
                               <span id="reqsubspecvalid-{{ $parts[1] }}" class="reqError text-danger valley"></span>
                               </div>
                               <div class="subspec_level-{{ $parts[1] }}"></div>
-                            </div>
-                            <div class="show_specialities-{{ $parts[1] }}">
-                              @php
-                                $speciality_status_data = DB::table("speciality_status")->get();
-                              @endphp
-
-                              @foreach($stypes as $subSpecId)
-                                @php
-                                    $currentStatus = '';
-
+                            
+                              <div class="show_specialitiesStatusExperience-{{ $parts[1] }}">
+                                  <?php
                                     
+                                    $speciality_status = isset($specialities_typeExperience['speciality_status'])?(array)$specialities_typeExperience['speciality_status']:[];
+                                    //print_r($specialities_type['speciality_status']);
 
-                                    $sp_data_name = DB::table("speciality")
-                                        ->where('id', $subSpecId)
-                                        ->first();
-                                  @endphp
-                                  <div class="custom-select-wrapper subspecprofdiv subspecprofdiv-{{ $subSpecId }} form-group level-drp" style="margin-bottom: 5px;">
-                                    <label class="form-label subspeclabel-{{ $subSpecId }}" for="input-1">
-                                      Specialty Status1 ({{ $sp_data_name->name }}) 
-                                      <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>
-                                        <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">
-                                          <li><strong>Status definitions:</strong></li>
-                                          <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>
-                                          <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>
-                                          <li><strong>First:</strong> First-ever specialty after qualification.</li>
-                                          <li><strong>Former:</strong> Previously practiced.</li>
-                                          <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>
-                                          <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>
-                                        </ul>
-                                    </label>
+                                    //print_r($speciality_status);
+                                  ?>
 
-                                    <input type="hidden"
-                                          name="subspecprof_list"
-                                          class="subspecprof_list subspecprof_list-{{ $subSpecId }}"
-                                          value="{{ $subSpecId }}">
+                                  @foreach($speciality_status as $key=>$s_status)
 
-                                    <select
-                                      class="custom-select speciality_status_column speciality_status_column-{{ $subSpecId }}"
-                                      name="specialties_experience[1][speciality_status][type_{{ $subSpecId }}][status]"
-                                      required
-                                    >
-                                      <option value="">select</option>
-                                      @foreach($speciality_status_data as $row)
-                                        <option value="{{ $row->status_name }}">
-                                          {{ $row->status_name }}
-                                        </option>
-                                      @endforeach
-                                    </select>
+                                      <?php
+                                        $parts1 = explode('_', $key);
+                                        $sp_data_name = DB::table("speciality")->where('id', $parts1[1])->first();
+                                        $speciality_status_data = DB::table("speciality_status")->get();
+                                        
+                                      ?>
+                                      @if (in_array($parts1[1], $stypes))
+                                      <div class="custom-select-wrapper subspecprofdiv subspecprofdiv-{{ $parts1[1] }} form-group level-drp" style="margin-bottom: 5px;">
+                                        <label class="form-label subspeclabel-{{ $parts1[1] }}" for="input-1">
+                                          Specialty Status ({{ $sp_data_name->name }}) 
+                                          <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>
+                                          
+                                            <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">
+                                              <li><strong>Status definitions:</strong></li>
+                                              <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>
+                                              <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>
+                                              <li><strong>First:</strong> First-ever specialty after qualification.</li>
+                                              <li><strong>Former:</strong> Previously practiced.</li>
+                                              <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>
+                                              <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>
+                                            </ul>
+                                          
+                                        </label>
+                                        <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_listProfession subspecprof_listProfession-{{ $parts1[1] }} subspecprof_list-{{ $parts1[1] }}" value="{{ $parts1[1] }}">
+                                        <input type="hidden" name="subspecprof_list" class="subspecprofpart_list subspecprofpart_list-{{ $parts[1] }}" value="{{ $parts1[1] }}">
+                                        <select class="custom-select speciality_status_column speciality_status_column-{{ $parts[1] }} speciality_status_columns-{{ $parts1[1] }} form-input mr-10 langprof_level_valid-{{ $parts1[1] }}" name="specialties_experience[1][speciality_status][type_{{ $parts1[1] }}][status]" onchange="changeSpecialityStatus(this.value,{{ $parts1[1] }},{{ $parts[1] }})">
+                                          <option value="">select</option>
+                                          @foreach($speciality_status_data as $s_status_data)
+                                        
+                                          <option value="{{ $s_status_data->status_name }}" @if($s_status_data->status_name == $s_status->status) selected @endif>{{ $s_status_data->status_name }}</option>
+                                          @endforeach
+                                          
+                                        </select>
+                                        <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_current_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_current]" value="0">
+                                        <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_principal_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_principal]" value="0">
+                                        <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_first_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_first]" value="0">
+                                        <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_former_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_former]" value="0">
+                                        <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_upskilling_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_upskilling]" value="0">
+                                      </div>
+                                      
+                                      <span id="reqsubspeclevelvalid-{{ $parts1[1] }}" class="reqError text-danger valley"></span>
+                                      @endif
+                                      
+                                      
 
-                                    <input type="hidden" name="specialties_experience[1][speciality_status][type_{{ $subSpecId }}][is_current]" value="0">
-                                    <input type="hidden" name="specialties_experience[1][speciality_status][type_{{ $subSpecId }}][is_principal]" value="0">
-                                    <input type="hidden" name="specialties_experience[1][speciality_status][type_{{ $subSpecId }}][is_first]" value="0">
-                                    <input type="hidden" name="specialties_experience[1][speciality_status][type_{{ $subSpecId }}][is_former]" value="0">
-                                    <input type="hidden" name="specialties_experience[1][speciality_status][type_{{ $subSpecId }}][is_upskilling]" value="0">
-                                  </div>
-
-                                  <span id="reqemployeetexp_status-{{ $subSpecId }}"
-                                        class="reqError text-danger valley"></span>
-
-                                @endforeach
+                                  @endforeach
+                              </div>
                             </div>
-                          
 
                           @endforeach
                           @endif
@@ -8522,17 +8506,34 @@ function getSecialitiesExperience(level,k,x){
       
       console.log("selectedValues_spec",selectedValues);
 
-      $(".show_specialitiesExperience-"+k+" .subspec_list").each(function(i,val){
-            var val1 = $(val).val();
-            console.log("val",val1);
+      $(".subspec_list_experiencess-"+x+"-"+k).each(function () {
+
+        var val1 = $(this).val();
+        console.log("selectedValues_fun_exp", selectedValues);
+        console.log("val1_spec_exp", val1);
+        if(selectedValues.includes(val1) == false){
+
+          //alert("hell");
+          $(".subspec_main_div_experience-"+val1).remove();
+          
+        }
+      });
+
+      $(".subspecstatusexp_list-"+x+"-"+k).each(function () {
+
+            var val1 = $(this).val();
+            console.log("selectedValues_status_exp", selectedValues);
+            console.log("val1_specStatus_exp", val1);
             if(selectedValues.includes(val1) == false){
-              $(".subspec_main_div-"+val1).remove();
-                
+
+              
+              $(".subspecdivexp-"+val1).remove();
+              
             }
         });
 
       for(var i=0;i<selectedValues.length;i++){
-        if($(".show_specialitiesExperience-"+x+"-"+k+" .subspec_main_div-"+selectedValues[i]).length < 1){
+        if($(".show_specialitiesExperience-"+x+"-"+k+" .subspec_main_div_experience-"+selectedValues[i]).length < 1){
           $.ajax({
             type: "GET",
             url: "{{ url('/nurse/getSpecialityDatas1') }}",
@@ -8551,24 +8552,26 @@ function getSecialitiesExperience(level,k,x){
               var sub = 'sub';
 
               if(data1.sub_spciality_data.length > 0){
-                $(".show_specialitiesExperience-"+x+"-"+k).append('\<div class="subspec_main_div subspec_main_div-'+data1.main_speciality_id+'">\
+                $(".show_specialitiesExperience-"+x+"-"+k).append('\<div class="subspec_main_div_experience subspec_main_div_experience-'+data1.main_speciality_id+'">\
                               <div class="subspec_div subspec_div-'+data1.main_speciality_id+' form-group level-drp">\
                               <label class="form-label subspec_label subspec_label-'+data1.main_speciality_id+'" for="input-1">'+data1.main_speciality_name+'</label>\
-                              <input type="hidden" name="subspec_list" class="subspec_list subspec_list-'+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
+                              <input type="hidden" name="subspec_list" class="subspec_list subspec_list_experiencess-'+x+"-"+k+' subspec_list-'+x+"-"+data1.main_speciality_id+' subspec_list-'+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
                               <ul id="specialties_type_experience-'+x+"-"+data1.main_speciality_id+'" style="display:none;">'+speciality_text+'</ul>\
                               <select class="js-example-basic-multiple'+data1.main_speciality_id+' subspec_valid-'+data1.main_speciality_id+' addAll_removeAll_btn" data-list-id="specialties_type_experience-'+x+"-"+data1.main_speciality_id+'" name="specialties_experience['+x+'][type_'+data1.main_speciality_id+'][]" onchange="getSecialitiesExperience(\''+sub+'\',\''+data1.main_speciality_id+'\',\''+x+'\')" multiple="multiple"></select>\
                               <span id="reqsubspecvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
                               </div>\
                               <div class="subspec_level-'+data1.main_speciality_id+'"></div>\
-                              </div><div class="show_specialities-'+data1.main_speciality_id+'"></div>');
+                              <div class="show_specialitiesExperience-'+x+"-"+data1.main_speciality_id+'"></div>\
+                              <div class="show_specialitiesStatusExperience-'+x+"-"+data1.main_speciality_id+'"></div>\
+                              </div>');
 
                               selectTwoFunction(data1.main_speciality_id);
               
               }else{
                 
-                if($(".show_specialitiesExperience-"+x+"-"+k+" .subspecprofdiv-"+data1.main_speciality_id).length < 1){
+                if($(".show_specialitiesStatusExperience-"+x+"-"+k+" .subspecprofdiv-"+data1.main_speciality_id).length < 1){
                   
-                  $(".show_specialitiesExperience-"+x+"-"+k).append('<div class="custom-select-wrapper subspecprofdiv subspecprofdiv-'+data1.main_speciality_id+' form-group level-drp" style="margin-bottom: 5px;">\
+                  $(".show_specialitiesStatusExperience-"+x+"-"+k).append('<div class="custom-select-wrapper subspecprofdivexp subspecprofdivexp-'+data1.main_speciality_id+' form-group level-drp" style="margin-bottom: 5px;">\
                     <label class="form-label subspeclabel-'+data1.main_speciality_id+'" for="input-1">\
                     Specialty Status ('+data1.main_speciality_name+')\
                     <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>\
@@ -8633,17 +8636,147 @@ function getSecialitiesExperience(level,k,x){
   //         tooltip.style.display = 'none';
   //     });
   // });
+ var specialityTree = {};
+var specialityStatus = {};
+
+try {
+    specialityTree = JSON.parse(@json($user_data->specialties));
+    specialityStatus = specialityTree.speciality_status || {};
+} catch (e) {}
+
+$('.show_specialitiesStatus').remove(); // remove previously attached ones
+console.log("specialityTree",specialityTree);
+$.each(specialityTree, function (parentKey, children) {
+
+    if (parentKey === 'speciality_status') return;
+    if (!Array.isArray(children)) return;
+
+    const parentId = parentKey.replace('type_', '');
+
+    children.forEach(function (childId) {
+
+        $('.subspec_main_div-' + childId).not(':first').remove();
+
+        const $parentDiv = $('.subspec_main_div-' + parentId);
+        const $childDiv  = $('.subspec_main_div-' + childId);
+        if (!$parentDiv.length || !$childDiv.length) return;
+
+        let $wrapper = $parentDiv.children('.show_specialities-' + parentId);
+        if (!$wrapper.length) {
+            $wrapper = $('<div/>', {
+                class: 'show_specialities show_specialities-' + parentId
+            }).appendTo($parentDiv);
+        }
+
+        /* destroy select2 before move */
+        $childDiv.find('select').each(function () {
+            if ($(this).data('select2')) {
+                $(this).select2('destroy');
+            }
+        });
+
+        $wrapper.append($childDiv);
+
+        /* 🔥 GET ONE STATUS TEMPLATE */
+        let $statusTemplate = $('.status-template').first();
+        if (!$statusTemplate.length) return;
+
+        // /* clone */
+        let $statusClone = $statusTemplate.clone(true, true);
+
+        // /* make visible */
+        $statusClone.removeClass('d-none status-template');
+
+        // /* clean select2 */
+        $statusClone.find('select')
+        .removeClass('select2-hidden-accessible')
+        .removeAttr('data-select2-id')
+        .next('.select2').remove();
+
+        // /* set saved value */
+        let savedStatus = specialityStatus['type_' + childId]?.status || '';
+        $statusClone.find('select').val(savedStatus);
+
+        /* attach */
+        $childDiv.after($statusClone);
+
+        /* init select2 */
+        $statusClone.find('select').select2({ width: '100%' });
+        $childDiv.find('select').select2({ width: '100%' });
+
+        console.log("childId",childId);
+        
+    });
+
+    children.forEach(function (childId) {
+
+       
+        var j = 1;
+        $(".subspec_list_experience_count").each(function(){
+        //for experience
+        $('.subspec_main_div_experience-' + childId).not(':first').remove();
+
+        const $parentDiv_exp = $('.subspec_main_div_experience-' + parentId);
+        const $childDiv_exp  = $('.subspec_main_div_experience-' + childId);
+        if (!$parentDiv_exp.length || !$childDiv_exp.length) return;
+
+        let $wrapper_exp = $parentDiv_exp.children('.show_specialitiesExperience-'+j+'-' + parentId);
+        if (!$wrapper_exp.length) {
+            $wrapper_exp = $('<div/>', {
+                class: 'show_specialitiesExperience show_specialitiesExperience-'+j+'-' + parentId
+            }).appendTo($parentDiv_exp);
+        }
+
+        /* destroy select2 before move */
+        $childDiv_exp.find('select').each(function () {
+            if ($(this).data('select2')) {
+                $(this).select2('destroy');
+            }
+        });
+
+        $wrapper_exp.append($childDiv_exp);
+
+        /* 🔥 GET ONE STATUS TEMPLATE */
+        let $statusTemplate_exp = $('.status-template-exp').first();
+        if (!$statusTemplate_exp.length) return;
+
+        /* clone */
+        let $statusClone_exp = $statusTemplate_exp.clone(true, true);
+
+        /* make visible */
+        $statusClone_exp.removeClass('d-none status-template-exp');
+
+        /* clean select2 */
+        $statusClone_exp.find('select')
+            .removeClass('select2-hidden-accessible')
+            .removeAttr('data-select2-id')
+            .next('.select2').remove();
+
+        /* set saved value */
+        let savedStatus_exp = specialityStatus['type_' + childId]?.status || '';
+        $statusClone_exp.find('select').val(savedStatus);
+
+        /* attach */
+        $childDiv_exp.after($statusClone_exp);
+
+        /* init select2 */
+        $statusClone_exp.find('select').select2({ width: '100%' });
+        $childDiv_exp.find('select').select2({ width: '100%' });
+        j++;
+        });
+    });
+});
   function getSecialities(level, k,ed) {
 
-    let selectedValues;
+    
 
     if (level === "main") {
-        selectedValues = $('.js-example-basic-multiple[data-list-id="speciality_preferences-' + k + '"]').val() || [];
+        var selectedValues = $('.js-example-basic-multiple[data-list-id="speciality_preferences-' + k + '"]').val() || [];
     } else {
-        selectedValues = $('.js-example-basic-multiple' + k + '[data-list-id="speciality_preferences-' + k + '"]').val() || [];
+        var selectedValues = $('.js-example-basic-multiple' + k + '[data-list-id="speciality_preferences-' + k + '"]').val() || [];
     }
 
-    selectedValues = selectedValues.map(String);
+    
 
     console.log("selectedValues", selectedValues);
 
@@ -8651,23 +8784,31 @@ function getSecialitiesExperience(level,k,x){
        ✅ SAFE REMOVAL (CHILD ONLY)
     =============================== */
 
-    if(ed == "edit"){
-      $(".show_specialities-" + k + " > .subspec_main_div_edit").each(function () {
-          const childId = String($(this).data("id"));
+    $(".subspec_listProf-"+k).each(function () {
 
-          if (!selectedValues.includes(childId)) {
-              removeSpecialityTree(childId);
-          }
-      });
-    }else{
-      $(".show_specialities-" + k + " > .subspec_main_div").each(function () {
-          const childId = String($(this).data("id"));
+            var val1 = $(this).val();
+            console.log("selectedValues_fun", selectedValues);
+            console.log("val1_spec", val1);
+            if(selectedValues.includes(val1) == false){
 
-          if (!selectedValues.includes(childId)) {
-              removeSpecialityTree(childId);
-          }
-      });
-    }
+              //alert("hell");
+              $(".subspec_main_div-"+val1).remove();
+              
+            }
+        });
+
+        $(".subspecprofpart_list-"+k).each(function () {
+
+            var val1 = $(this).val();
+            console.log("selectedValues_status", selectedValues);
+            console.log("val1_specStatus", val1);
+            if(selectedValues.includes(val1) == false){
+
+              
+              $(".subspecprofdiv-"+val1).remove();
+              
+            }
+        });
 
     /* ===============================
        ✅ ADD NEW SELECTIONS
@@ -8702,7 +8843,7 @@ function getSecialitiesExperience(level,k,x){
                             <div class="subspec_div form-group level-drp">
                                 <label class="form-label">${data1.main_speciality_name}</label>
 
-                                <input type="hidden" class="subspec_list" value="${data1.main_speciality_id}">
+                                <input type="hidden" class="subspec_list subspec_listProf-${k} subspec_list-${k}" value="${data1.main_speciality_id}">
 
                                 <ul id="speciality_preferences-${data1.main_speciality_id}" style="display:none;">
                                     ${speciality_text}
@@ -8736,8 +8877,19 @@ function getSecialitiesExperience(level,k,x){
                                  
                                 <label class="form-label">
                                     Specialty Status (${data1.main_speciality_name})
+                                    
+                                    <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>
+                      <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">
+                        <li><strong>Status definitions:</strong></li>
+                        <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>
+                        <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>
+                        <li><strong>First:</strong> First-ever specialty after qualification.</li>
+                        <li><strong>Former:</strong> Previously practiced.</li>
+                        <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>
+                        <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>
+                      </ul>
                                 </label>
-                                <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_listProfession subspecprof_listProfession-${data1.main_speciality_id} subspecprof_list-${data1.main_speciality_id}" value="${data1.main_speciality_id}">
+                                <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprofpart_list-${k} subspecprof_listProfession subspecprof_listProfession-${data1.main_speciality_id} subspecprof_list-${data1.main_speciality_id}" value="${data1.main_speciality_id}">
                                 
                                 <select class="custom-select speciality_status_columns-${data1.main_speciality_id}"
                                     name="specialties[speciality_status][type_${data1.main_speciality_id}][status]">

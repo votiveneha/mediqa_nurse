@@ -11,9 +11,9 @@ class UserUpdateProfile extends FormRequest
         return [
             'fullname' => 'required', 'min:3',
             'lastname' => 'required',
-            'countryCode' => 'required',
+            // 'countryCode' => 'required',
            
-            'contact' => 'required',
+            // 'contact' => 'required',
             
             'post_code' => 'required',
             'date_of_birth' => 'required',
@@ -42,9 +42,9 @@ class UserUpdateProfile extends FormRequest
         return [
             'fullname.required' => 'The First name field is required.',
             'lastname.required' => 'The Last name field is required.',
-            'countryCode.required' => 'The Country Code field is required.',
+            // 'countryCode.required' => 'The Country Code field is required.',
             
-            'contact.required' => 'The Mobile Number  field is required.',
+            // 'contact.required' => 'The Mobile Number  field is required.',
             
             'post_code.required' => 'The Post_code field is required.',
             'date_of_birth.required' => 'The Date of Birth field is required.',

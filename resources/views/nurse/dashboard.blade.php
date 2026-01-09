@@ -643,10 +643,97 @@
       </section>
     </main>
 
+        {{-- City Selection Modal --}}
+        @if (Auth::guard('nurse_middle')->user()->active_country == null )
+        <div class="modal fade" id="registrationCountryModal"
+            data-bs-backdrop="static"
+            data-bs-keyboard="false"
+            tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-4">
 
+              <!-- Success Icon -->
+              <div class="modal-header border-0 justify-content-center">
+                <div class="rounded-circle bg-success-subtle p-3">
+                  <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                </div>
+              </div>
+
+              <!-- Title -->
+              <h5 class="modal-title fw-bold mt-3 mb-2">
+                Please choose your registration country
+              </h5>
+
+              <!-- Dropdown -->
+              <div class="modal-body">
+                <select class="form-select" id="registration_country">
+                  <option value="">Select Country</option>
+                  @foreach($countries as $country)
+                    <option value="{{ $country->iso2 }}" data-id="{{ $country->id }}">{{ $country->name }}</option>
+                  @endforeach
+                </select>
+                  <input type="hidden" name="country_id" id="country_id">
+                <span class="text-danger d-block mt-2" id="countryError"></span>
+              </div>
+
+              <!-- Button -->
+              <div class="modal-footer border-0">
+                <button class="btn btn-dark w-100 fw-bold" id="saveCountry">
+                  Continue
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      @endif
 
 
 @endsection
 @section('js')
+<script>
+  $(document).ready(function () {
+      if (window.location.pathname.includes("/nurse/dashboard")) {
+          $('#registrationCountryModal').modal('show');
+      }
 
+  });
+
+  $('#registration_country').on('change', function() { 
+    let selectedId = $(this).find(':selected').data('id'); 
+    $('#country_id').val(selectedId); 
+  });
+
+  $('#saveCountry').on('click', function () {
+
+      const country = $('#registration_country').val();
+      const country_code = $('#country_id').val();
+
+      if (!country) {
+          $('#countryError').text('Please select a country');
+          return;
+      }
+
+
+      $.ajax({
+          url: "{{ route('nurse.saveRegistrationCountry') }}",
+          type: "POST",
+          data: {
+              country_id: country,
+              country_code: country_code,
+              _token: "{{ csrf_token() }}"
+          },
+          success: function () {
+              $('#registrationCountryModal').modal('hide');
+
+              // Unlock UI
+              $('.profession-tab').removeClass('disabled');
+
+              // Redirect cleanly
+              // window.location.href = "{{ route('nurse.my-profile') }}?page=my_profile";
+              window.location.href = "{{ route('nurse.dashboard') }}";
+          }
+      });
+  });
+</script>
 @endsection

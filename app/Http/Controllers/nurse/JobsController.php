@@ -455,73 +455,163 @@ class JobsController extends Controller{
         }
     }
 
-    public function addSavedSearches(Request $request){
+    // public function addSavedSearches(Request $request){
         
-        $user_id = Auth::guard('nurse_middle')->user()->id;
-        $search_id = $request->search_id;
-        $filter_location = $request->edit_filter_location;
-        $filter_shift = $request->edit_filter_shift;
-        $filter_preview = $request->edit_filter_preview;
-        $minSalary1 = $request->minSalary1;
-        $maxSalary1 = $request->maxSalary1;
-        $year_experience = $request->year_experience;
-        $edit_alert_cap = $request->edit_alert_cap;
-        $edit_quiet_start = $request->edit_quiet_start;
-        $edit_quiet_end = $request->edit_quiet_end;
-        $edit_search_notes = $request->edit_search_notes;
-        $suggestion_search_name = $request->suggestion_search_name;
-        $search_type = $request->search_type;
-        $alert_frequency = $request->alert_frequency;
-        $delivery_method = $request->delivery_method;
-        $filters = $request->filters;
-        $date = date("Y-m-d H:i:s");
+    //     $user_id = Auth::guard('nurse_middle')->user()->id;
+    //     $search_id = $request->search_id;
+    //     $filter_location = $request->edit_filter_location;
+    //     $filter_shift = $request->edit_filter_shift;
+    //     $filter_preview = $request->edit_filter_preview;
+    //     $minSalary1 = $request->minSalary1;
+    //     $maxSalary1 = $request->maxSalary1;
+    //     $year_experience = $request->year_experience;
+    //     $edit_alert_cap = $request->edit_alert_cap;
+    //     $edit_quiet_start = $request->edit_quiet_start;
+    //     $edit_quiet_end = $request->edit_quiet_end;
+    //     $edit_search_notes = $request->edit_search_notes;
+    //     $suggestion_search_name = $request->suggestion_search_name;
+    //     $search_type = $request->search_type;
+    //     $alert_frequency = $request->alert_frequency;
+    //     $delivery_method = $request->delivery_method;
+    //     $filters = $request->filters;
+    //     $date = date("Y-m-d H:i:s");
 
-        $totalSearches = SavedSearches::where('user_id', $user_id)->count();
+    //     $totalSearches = SavedSearches::where('user_id', $user_id)->count();
 
 
-        if($search_id){
-            $oldSearch = SavedSearches::find($search_id);
-            //$oldSearch->name = $search_name;
-            $oldSearch->alert = $alert_frequency;
-            $oldSearch->delivery = $delivery_method;
-            $oldSearch->filters = $filters;
-            $oldSearch->salary_min = $minSalary1;
-            $oldSearch->salary_max = $maxSalary1;
-            $oldSearch->experience = $year_experience;
-            // $oldSearch->location = $filter_location;
-            // $oldSearch->shift = $filter_shift;
-            // $oldSearch->preview_count = $filter_preview;
-            // $oldSearch->daily_cap = $edit_alert_cap;
-            $oldSearch->quite_hours_start = $edit_quiet_start;
-            $oldSearch->quite_hours_end = $edit_quiet_end;
-            $oldSearch->notes = $edit_search_notes;
-            $oldSearch->updated_at = $date;
-            $run = $oldSearch->save();
-            $lastInsertedId = $oldSearch->searches_id;
-        }else{
-            $saved_searches = new SavedSearches();
-            $saved_searches->user_id = $user_id;
-            //$saved_searches->name = $search_name;
-            $saved_searches->type = $search_type;
-            $saved_searches->alert = $alert_frequency;
-            $saved_searches->delivery = $delivery_method;
-            $saved_searches->filters = $suggestion_search_name;
-            $saved_searches->created_at = $date;
-            $run = $saved_searches->save();
+    //     if($search_id){
+    //         $oldSearch = SavedSearches::find($search_id);
+    //         //$oldSearch->name = $search_name;
+    //         $oldSearch->alert = $alert_frequency;
+    //         $oldSearch->delivery = $delivery_method;
+    //         $oldSearch->filters = $filters;
+    //         $oldSearch->salary_min = $minSalary1;
+    //         $oldSearch->salary_max = $maxSalary1;
+    //         $oldSearch->experience = $year_experience;
+    //         // $oldSearch->location = $filter_location;
+    //         // $oldSearch->shift = $filter_shift;
+    //         // $oldSearch->preview_count = $filter_preview;
+    //         // $oldSearch->daily_cap = $edit_alert_cap;
+    //         $oldSearch->quite_hours_start = $edit_quiet_start;
+    //         $oldSearch->quite_hours_end = $edit_quiet_end;
+    //         $oldSearch->notes = $edit_search_notes;
+    //         $oldSearch->updated_at = $date;
+    //         $run = $oldSearch->save();
+    //         $lastInsertedId = $oldSearch->searches_id;
+    //     }else{
+    //         $saved_searches = new SavedSearches();
+    //         $saved_searches->user_id = $user_id;
+    //         //$saved_searches->name = $search_name;
+    //         $saved_searches->type = $search_type;
+    //         $saved_searches->alert = $alert_frequency;
+    //         $saved_searches->delivery = $delivery_method;
+    //         $saved_searches->filters = $suggestion_search_name;
+    //         $saved_searches->created_at = $date;
+    //         $run = $saved_searches->save();
 
-            $lastInsertedId = $saved_searches->id;
-        }
+    //         $lastInsertedId = $saved_searches->id;
+    //     }
         
 
-        if ($run) {
-            $json['status'] = 1;
-            $json['id'] = $lastInsertedId;
-        } else {
-            $json['status'] = 0;
+    //     if ($run) {
+    //         $json['status'] = 1;
+    //         $json['id'] = $lastInsertedId;
+    //     } else {
+    //         $json['status'] = 0;
             
+    //     }
+
+    //     echo json_encode($json);
+    // }
+
+        public function addSavedSearches(Request $request)
+    {
+        $user_id = Auth::guard('nurse_middle')->user()->id;
+
+        // 1️⃣ Build filters JSON from form
+        $filters = [
+            'sector' => $request->edit_sector,
+
+            'employment_type' => $request->employment_type ?? [],
+            'work_shift' => $request->work_shift ?? [],
+            'work_environment' => $request->work_environment ?? [],
+            'employee_positions' => $request->employee_positions ?? [],
+            'benefits_preferences' => $request->benefits_preferences ?? [],
+            'nurse_type' => $request->nurse_type ?? [],
+            'speciality' => $request->speciality ?? [],
+
+            'location_preference' => $request->edit_location,
+
+            'experience_years' => $request->year_experience,
+
+            'salary' => [
+                'min' => $request->minSalary1,
+                'max' => $request->maxSalary1,
+            ],
+        ];
+
+        // 2️⃣ Update existing search
+        if ($request->search_id) {
+
+            $savedSearch = SavedSearches::where('searches_id', $request->search_id)
+                ->where('user_id', $user_id)
+                ->firstOrFail();
+
+            $existingFilters = $savedSearch->filters ?? [];
+
+            $newFilters = [
+                'sector' => $request->edit_sector,
+                'employment_type' => $request->employment_type,
+                'work_shift' => $request->work_shift,
+                'work_environment' => $request->work_environment,
+                'employee_positions' => $request->employee_positions,
+                'benefits_preferences' => $request->benefits_preferences,
+                'nurse_type' => $request->nurse_type,
+                'speciality' => $request->speciality,
+                'location_preference' => $request->edit_location,
+                'experience_years' => $request->year_experience,
+                'salary' => [
+                    'min' => $request->minSalary1,
+                    'max' => $request->maxSalary1,
+                ],
+            ];
+
+            // Merge only non-null values
+            $savedSearch->filters = array_merge(
+                $existingFilters,
+                array_filter($newFilters, fn($v) => $v !== null)
+            );
+
+            $savedSearch->alert = $request->alert_frequency;
+            $savedSearch->delivery = $request->delivery_method;
+            $savedSearch->name = $request->search_name;
+            $savedSearch->notes = $request->edit_search_notes;
+            $savedSearch->quite_hours_start = $request->edit_quiet_start;
+            $savedSearch->quite_hours_end = $request->edit_quiet_end;
+
+            $savedSearch->save();
+
+            $id = $savedSearch->searches_id;
         }
 
-        echo json_encode($json);
+        // 3️⃣ Create new search
+        else {
+
+            $savedSearch = SavedSearches::create([
+                'user_id' => $user_id,
+                'type' => $request->search_type,
+                'alert' => $request->alert_frequency,
+                'delivery' => $request->delivery_method,
+                'filters' => $filters, // ✅ ARRAY
+            ]);
+
+            $id = $savedSearch->searches_id;
+        }
+
+        return response()->json([
+            'status' => 1,
+            'id' => $id
+        ]);
     }
 
     public function deleteSearchJobsData(Request $request){

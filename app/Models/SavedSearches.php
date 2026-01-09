@@ -11,4 +11,8 @@ class SavedSearches extends Model
     protected $table = 'saved_searches';
     protected $primaryKey = 'searches_id';
     protected $guarded =[];
+    
+    protected $casts = [
+        'filters' => 'array',
+    ];
 }
