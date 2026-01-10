@@ -114,9 +114,9 @@
                         <span class="icon">&#8250;</span>
                     </div>
                     <div class="filter-options">
-                        <label><input type="radio" class="edit_sector_radio" name="edit_sector" value="Public & Government"> Public & Government </label>
-                        <label><input type="radio" class="edit_sector_radio" name="edit_sector" value="Private"> Private </label>
-                        <label><input type="radio" class="edit_sector_radio" name="edit_sector" value="Public Government & Private"> Public Government & Private</label>
+                        <label><input type="radio" class="edit_sector_radio" name="edit_sector" value="Public & Government" {{ ($filters['sector'] ?? '') === 'Public & Government' ? 'checked' : '' }}> Public & Government </label>
+                        <label><input type="radio" class="edit_sector_radio" name="edit_sector" value="Private" {{ ($filters['sector'] ?? '') === 'Private' ? 'checked' : '' }}> Private </label>
+                        <label><input type="radio" class="edit_sector_radio" name="edit_sector" value="Public Government & Private" {{ ($filters['sector'] ?? '') === 'Public Government & Private' ? 'checked' : '' }}> Public Government & Private</label>
                     </div>
                 </div>
                 <div class="filter-section">
@@ -129,7 +129,9 @@
                         $employeement_type_data = DB::table("employeement_type_preferences")->where("sub_prefer_id","!=","0")->get();
                         @endphp
                         @foreach($employeement_type_data as $emp_data)
-                        <label class="sub-heading emp-type-{{ $emp_data->emp_prefer_id }}" data-name="Employment Type" data-filter="employment_type" data-value="{{ $emp_data->emp_prefer_id }}"><input type="checkbox" name="employment_type[]" value="{{ $emp_data->emp_type }}"> {{ $emp_data->emp_type }}</label>
+                        <label class="sub-heading emp-type-{{ $emp_data->emp_prefer_id }}" data-name="Employment Type" data-filter="employment_type" data-value="{{ $emp_data->emp_prefer_id }}">
+                        <input type="checkbox" name="employment_type[]"  value="{{ $emp_data->emp_prefer_id }}"
+                            {{ in_array($emp_data->emp_prefer_id, $filters['employment_type'] ?? []) ? 'checked' : '' }}> {{ $emp_data->emp_type }}</label>
                         
                         @endforeach
                         
@@ -151,7 +153,8 @@
                         <label class="sub-heading shift-type-{{ $work_shift->work_shift_id }}" data-filter="work_shift"
                             data-value="{{ $work_shift->work_shift_id }}"
                             data-name="Shift Type">
-                            <input type="checkbox" name="work_shift[]" value="{{ $work_shift->shift_name }}"> {{ $work_shift->shift_name }}</label>
+                            <input type="checkbox" name="work_shift[]" value="{{ $work_shift->work_shift_id }}"
+                                {{ in_array($work_shift->work_shift_id, $filters['work_shift'] ?? []) ? 'checked' : '' }}> {{ $work_shift->shift_name }}</label>
                         
                         @endforeach
                         
@@ -174,7 +177,7 @@
                             data-name="Work Environment" 
                             data-filter="work_environment" 
                             data-value="{{ $work_environment->prefer_id }}">
-                            <input type="checkbox" name="work_environment[]" value="{{ $work_environment->env_name }}"> {{ $work_environment->env_name }}
+                            <input type="checkbox" name="work_environment[]" value="{{ $work_environment->prefer_id }}" {{ in_array($work_environment->prefer_id, $filters['work_environment'] ?? []) ? 'checked' : '' }}> {{ $work_environment->env_name }}
                         </label>
                         @endforeach
 
@@ -198,7 +201,7 @@
                             data-name="Employee Positions" 
                             data-filter="employee_positions" 
                             data-value="{{ $emp_pos->position_id }}">
-                            <input type="checkbox" name="employee_positions[]" value="{{ $emp_pos->position_name }}"> {{ $emp_pos->position_name }}
+                            <input type="checkbox" name="employee_positions[]" value="{{ $emp_pos->position_id }}"> {{ $emp_pos->position_name }}
                         </label>
                         @endforeach
 
@@ -223,7 +226,7 @@
                             data-name="Benefit Preferences" 
                             data-filter="benefits_preferences" 
                             data-value="{{ $benprefer->benefits_id }}">
-                            <input type="checkbox" name="benefits_preferences[]" value="{{ $benprefer->benefits_name }}"> {{ $benprefer->benefits_name }}
+                            <input type="checkbox" name="benefits_preferences[]" value="{{ $benprefer->benefits_id }}" {{ in_array($benprefer->benefits_id, $filters['benefits_preferences'] ?? []) ? 'checked' : '' }}> {{ $benprefer->benefits_name }}
                         </label>
                         @endforeach
 
@@ -239,9 +242,9 @@
                         <span class="icon">&#8250;</span>
                     </div>
                     <div class="filter-options">
-                        <label><input type="radio" class="edit_location_radio" name="edit_location" value="Current Location (Auto-detect optional)"> Current Location (Auto-detect optional) </label>
-                        <label><input type="radio" class="edit_location_radio" name="edit_location" value="Multiple Locations"> Multiple Locations </label>
-                        <label><input type="radio" class="edit_location_radio" name="edit_location" value="International"> International</label>
+                        <label><input type="radio" class="edit_location_radio" name="edit_location" value="Current Location (Auto-detect optional)" {{ ($filters['location_type'] ?? '') === 'Current Location (Auto-detect optional)' ? 'checked' : '' }}> Current Location (Auto-detect optional) </label>
+                        <label><input type="radio" class="edit_location_radio" name="edit_location" value="Multiple Locations" {{ ($filters['location_type'] ?? '') === 'Multiple Locations' ? 'checked' : '' }}> Multiple Locations </label>
+                        <label><input type="radio" class="edit_location_radio" name="edit_location" value="International" {{ ($filters['location_type'] ?? '') === 'International' ? 'checked' : '' }}> International</label>
                     </div>
                     <div class="subpagedata">
                         <div class="subpage subpage-current">
@@ -316,7 +319,8 @@
                         $type_of_nurse = DB::table("practitioner_type")->where("parent","!=","0")->get();
                         @endphp
                         @foreach($type_of_nurse as $nurse_type)
-                        <label class="sub-heading nurse-type-{{ $nurse_type->id }}" data-name="Nurse Type" data-filter="nurse_type" data-value="{{ $nurse_type->id }}"><input type="checkbox" name="nurse_type[]" value="{{ $nurse_type->name }}"> {{ $nurse_type->name }}</label>
+                        <label class="sub-heading nurse-type-{{ $nurse_type->id }}" data-name="Nurse Type" data-filter="nurse_type" data-value="{{ $nurse_type->id }}">
+                            <input type="checkbox" name="nurse_type[]" value="{{ $nurse_type->id }}" {{ in_array($nurse_type->id, $filters['nurse_type'] ?? []) ? 'checked' : '' }}> {{ $nurse_type->name }}</label>
                         
                         @endforeach
                         
@@ -336,7 +340,8 @@
                         $speciality = DB::table("speciality")->where("parent","!=","0")->get();
                         @endphp
                         @foreach($speciality as $spec)
-                        <label class="sub-heading nurse-type-{{ $spec->id }}" data-name="Speciality" data-filter="speciality" data-value="{{ $spec->id }}"><input type="checkbox" name="speciality[]" value="{{ $spec->name }}"> {{ $spec->name }}</label>
+                        <label class="sub-heading nurse-type-{{ $spec->id }}" data-name="Speciality" data-filter="speciality" data-value="{{ $spec->id }}">
+                            <input type="checkbox" name="speciality[]" value="{{ $spec->id }}" {{ in_array($spec->id, $filters['speciality'] ?? []) ? 'checked' : '' }}> {{ $spec->name }}</label>
                         
                         @endforeach
                         
@@ -353,7 +358,7 @@
                     <div class="filter-options">
                         <div class="form-group level-drp">
                             <label>Experience(In Year)</label>
-                            <input type="number" id="year_experience" class="form-control" name="year_experience">
+                            <input type="number" id="year_experience" class="form-control" name="year_experience"value="{{ $filters['experience_years'] ?? '' }}">
                         </div>
                         
                     </div>
@@ -368,8 +373,8 @@
                             <label class="filter-label">Salary Range</label>
                             <div class="range-container">
                                 <div class="slider-track"></div>
-                                <input type="range" name="minSalary1" id="minSalary1" min="0" max="200000" step="1000" value="30000">
-                                <input type="range" name="maxSalary1" id="maxSalary1" min="0" max="200000" step="1000" value="120000">
+                                <input type="range" name="minSalary1" id="minSalary1" min="0" max="200000" step="1000" value="{{ $filters['salary']['min'] ?? 0 }}">
+                                <input type="range" name="maxSalary1" id="maxSalary1" min="0" max="200000" step="1000"  value="{{ $filters['salary']['max'] ?? 0 }}">
                             </div>
                             <div class="salary-values">
                                 <span id="minSalaryValue1">₹30,000</span> - 

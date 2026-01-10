@@ -457,7 +457,8 @@ class HomeController extends Controller
             $message = "";
             $r = User::where("id", $user_id)->first();
             Auth::guard('nurse_middle')->attempt(['email' => $r->email, 'password' => $r->ps]);
-            return redirect('/nurse/my-profile?page=my_profile');
+            // return redirect('/nurse/my-profile?page=my_profile');
+            return redirect('/nurse/dashboard');
             return view('auth.email-verification-pending', compact('title', 'message'));
         } else {
             $title = "s";
@@ -707,7 +708,7 @@ class HomeController extends Controller
             ])
         );
 
-        return redirect('/nurse/my-profile?page=my_profile')->with([
+        return redirect('/nurse/dashboard')->with([
             'message' => '<h6 style="color:green">Your email has been verified successfully.</h6>',
             'status'  => 1
         ]);
@@ -1213,10 +1214,9 @@ public function ResetPassword(Request $request)
 }
 
     public function dashboard()
-
     {
-        
-        return view('nurse.dashboard');
+        $countries = DB::table('country')->where('status', 1)->get();
+        return view('nurse.dashboard', compact('countries'));
     }
 
     public function remove_qualification_country(Request $request)
@@ -1240,32 +1240,7 @@ public function ResetPassword(Request $request)
             'message' => 'Registration country removed successfully'
         ]);
     }
-    // public function remove_registration_country(Request $request)
-    // {
-    //     $user = Auth::guard('nurse_middle')->user();
-    //     $userId = $user->id;
-    //     $countryCode = $request->country_code;
 
-    //     $registrationCountries = json_decode($user->registration_countries, true) ?? [];
-
-
-    //     $registrationCountries = array_values(
-    //         array_diff($registrationCountries, [$countryCode])
-    //     );
-
-    //     $user->update([
-    //         'registration_countries' => json_encode($registrationCountries)
-    //     ]);
-
-    //     RegisteredProfile::where('user_id', $userId)
-    //         ->where('country_code', $countryCode)
-    //         ->delete();
-
-    //     return response()->json([
-    //         'status' => true,
-    //         'message' => 'Registration country removed successfully'
-    //     ]);
-    // }
 
     public function remove_registration_country(Request $request)
     {
@@ -1287,7 +1262,7 @@ public function ResetPassword(Request $request)
             ->delete();
 
         //condition for acitve coutnry
-        $registered_country =  RegisteredProfile::where('user_id', $userId)->where('status', 5)->first();
+        $registered_country =  RegisteredProfile::where('user_id', $userId)->first();
         // print_r($registered_country);die;
         if ($registered_country) {
             $user->update(
@@ -1447,6 +1422,9 @@ public function ResetPassword(Request $request)
                                 'registration_authority_name' => $data['jurisdiction'] ?? null,
                                 'registration_number'         => $data['registration_number'] ?? null,
                                 'expiry_date'                 => $data['expiry_date'] ?? null,
+                                'mobile_country_code'         => $data['mobile_country_code'] ?? null,
+                                'mobile_country_iso'          => $data['mobile_country_iso'] ?? null,
+                                'mobile_number'               => $data['mobile_number'] ?? null,
                                 'upload_evidence'             => json_encode($uploadedFiles),
                             ]);
                         }
@@ -1469,6 +1447,7 @@ public function ResetPassword(Request $request)
                         'registration_authority_name' => $registrations['jurisdiction'] ?? null,
                         'registration_number'         => $registrations['registration_number'] ?? null,
                         'expiry_date'                 => $registrations['expiry_date'] ?? null,
+                        'mobile_number'               => $registrations['mobile_number'] ?? null,
                         'status'                      => $registrations['status'] ?? null,
 
                     ]);
