@@ -660,6 +660,154 @@ input.form-control.numbers.js_mobile_input {
   //   });
   //   return false;
   // }
+
+  //   function editedprofile() {
+
+  //     let isValid = true;
+
+  //     // Clear previous errors
+  //     $('#EditProfile').find('.text-danger').text('');
+
+  //     $('.registration-card').each(function () {
+
+  //         const $card  = $(this);
+  //         const status = $card.find('.status-radio:checked').val();
+
+  //         // Draft → skip validation
+  //         if (status !== '3') {
+  //             return true;
+  //         }
+
+  //         // Fields
+  //         const jurisdiction = $card.find('.js_jurid_input');
+  //         const regNumber    = $card.find('.js_reg_number');
+  //         const expiryDate   = $card.find('.js_expiry_date');
+  //         const evidence     = $card.find('.js_evidence')[0];
+
+  //         // Error spans
+  //         const errJur   = $card.find('.reqTxtjurisd');
+  //         const errReg   = $card.find('.reqTxtReg');
+  //         const errExp   = $card.find('.reqTxtExpiry');
+  //         const errFile  = $card.find('.reqTxtEvidence');
+
+  //         // ---------------- Jurisdiction ----------------
+  //         if (!jurisdiction.val().trim()) {
+  //             errJur.text('* Jurisdiction is required');
+  //             isValid = false;
+  //         }
+
+  //         // ---------------- Registration Number ----------------
+  //         if (!regNumber.val().trim()) {
+  //             errReg.text('* License / Registration Number is required');
+  //             isValid = false;
+  //         }
+
+  //         // ---------------- Expiry Date ----------------
+  //         if (!expiryDate.val()) {
+  //             errExp.text('* Expiry Date is required');
+  //             isValid = false;
+  //         } else {
+  //             const selected = new Date(expiryDate.val());
+  //             const today = new Date();
+  //             today.setHours(0,0,0,0);
+
+  //             if (selected < today) {
+  //                 errExp.text('* Expiry Date cannot be in the past');
+  //                 isValid = false;
+  //             }
+  //         }
+
+  //         // ---------------- Upload Evidence ----------------
+  //         if (!evidence || evidence.files.length === 0) {
+  //             errFile.text('* Upload Evidence is required');
+  //             isValid = false;
+  //         }
+
+  //     });
+
+  //     // ❌ Stop AJAX if validation failed
+  //     if (!isValid) {
+  //         $('html, body').animate({
+  //             scrollTop: $('.text-danger:visible:first').offset().top - 120
+  //         }, 400);
+  //         return false;
+  //     }
+
+  //     // ✅ AJAX submit
+  //     $.ajax({
+  //         url: "{{ route('nurse.updateProfile') }}",
+  //         type: "POST",
+  //         cache: false,
+  //         contentType: false,
+  //         processData: false,
+  //         data: new FormData($('#EditProfile')[0]),
+  //         dataType: 'json',
+  //         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+  //         beforeSend: function () {
+  //             $('#submitfrm').prop('disabled', true).text('Processing...');
+  //         },
+  //         success: function (res) {
+  //             $('#submitfrm').prop('disabled', false).text('Update Profile');
+
+  //             if (res.status == '2') {
+  //                 Swal.fire({
+  //                     icon: 'success',
+  //                     title: 'Success',
+  //                     text: 'Profile Updated Successfully',
+  //                 }).then(() => {
+  //                     window.location.href = "{{ route('nurse.my-profile') }}?page=my_profile";
+  //                 });
+  //             } else {
+  //                 Swal.fire({
+  //                     icon: 'error',
+  //                     title: 'Error',
+  //                     text: res.message,
+  //                 });
+  //             }
+  //         },
+  //         // error: function (errorss) {
+  //         //     $('#submitfrm').prop('disabled', false).text('Submit');
+  //         // }
+  //         // error: function(errorss) {
+  //         //   $('#submitfrm').prop('disabled', false);
+  //         //   $('#submitfrm').text('Submit');
+  //         //   for (var err in errorss.responseJSON.errors) {
+  //         //     $("#EditProfile").find("[name='" + err + "']").after("<div class='text-danger'>" + errorss.responseJSON.errors[err] + "</div>");
+  //         //   }
+  //         // }
+  //         error: function(errorss) {
+  //             $('#submitfrm').prop('disabled', false).text('Submit');
+
+  //             // Clear old errors
+  //             $("#EditProfile .text-danger").remove();
+
+  //             $.each(errorss.responseJSON.errors, function (field, messages) {
+  //                 // Convert dot notation to bracket notation
+  //                 // Example: registration.68.jurisdiction → registration[68][jurisdiction]
+  //                 let parts = field.split('.');
+  //                 let inputName = parts.shift(); // "registration"
+  //                 while (parts.length) {
+  //                     inputName += '[' + parts.shift() + ']';
+  //                 }
+
+  //                 // Find the input
+  //                 let input = $("#EditProfile").find("[name='" + inputName + "']");
+
+  //                 if (input.length) {
+  //                     $.each(messages, function (i, msg) {
+  //                         input.after("<div class='text-danger'>" + msg + "</div>");
+  //                     });
+  //                 } else {
+  //                     // fallback: show at top if input not found
+  //                     $("#countryError").append("<div class='text-danger'>" + messages[0] + "</div>");
+  //                 }
+  //             });
+  //         }
+  //     });
+
+  //     return false;
+  // }
+
       function editedprofile() {
 
       let isValid = true;
@@ -667,41 +815,39 @@ input.form-control.numbers.js_mobile_input {
       // Clear previous errors
       $('#EditProfile').find('.text-danger').text('');
 
-      $('.registration-card').each(function () {
+  
+        $('.registration-card').each(function () {
 
-          const $card  = $(this);
+          const $card = $(this);
           const status = $card.find('.status-radio:checked').val();
+          const isExisting = $card.data('existing') == 1;
 
-          // Draft → skip validation
-          if (status !== '3') {
-              return true;
-          }
+          // Draft → skip
+          if (status !== '3') return true;
 
-          // Fields
+          // Existing record → skip validation
+          if (isExisting) return true;
+
           const jurisdiction = $card.find('.js_jurid_input');
           const regNumber    = $card.find('.js_reg_number');
           const expiryDate   = $card.find('.js_expiry_date');
           const evidence     = $card.find('.js_evidence')[0];
 
-          // Error spans
-          const errJur   = $card.find('.reqTxtjurisd');
-          const errReg   = $card.find('.reqTxtReg');
-          const errExp   = $card.find('.reqTxtExpiry');
-          const errFile  = $card.find('.reqTxtEvidence');
+          const errJur  = $card.find('.reqTxtjurisd');
+          const errReg  = $card.find('.reqTxtReg');
+          const errExp  = $card.find('.reqTxtExpiry');
+          const errFile = $card.find('.reqTxtEvidence');
 
-          // ---------------- Jurisdiction ----------------
           if (!jurisdiction.val().trim()) {
               errJur.text('* Jurisdiction is required');
               isValid = false;
           }
 
-          // ---------------- Registration Number ----------------
           if (!regNumber.val().trim()) {
-              errReg.text('* License / Registration Number is required');
+              errReg.text('* Registration Number is required');
               isValid = false;
           }
 
-          // ---------------- Expiry Date ----------------
           if (!expiryDate.val()) {
               errExp.text('* Expiry Date is required');
               isValid = false;
@@ -716,13 +862,12 @@ input.form-control.numbers.js_mobile_input {
               }
           }
 
-          // ---------------- Upload Evidence ----------------
           if (!evidence || evidence.files.length === 0) {
               errFile.text('* Upload Evidence is required');
               isValid = false;
           }
-
       });
+
 
       // ❌ Stop AJAX if validation failed
       if (!isValid) {
@@ -734,7 +879,7 @@ input.form-control.numbers.js_mobile_input {
 
       // ✅ AJAX submit
       $.ajax({
-          url: "{{ route('nurse.updateProfile') }}",
+          url: "{{ url('/nurse/updateProfile') }}",
           type: "POST",
           cache: false,
           contentType: false,
@@ -747,7 +892,6 @@ input.form-control.numbers.js_mobile_input {
           },
           success: function (res) {
               $('#submitfrm').prop('disabled', false).text('Update Profile');
-
               if (res.status == '2') {
                   Swal.fire({
                       icon: 'success',
@@ -764,21 +908,38 @@ input.form-control.numbers.js_mobile_input {
                   });
               }
           },
-          // error: function (errorss) {
-          //     $('#submitfrm').prop('disabled', false).text('Submit');
-          // }
           error: function(errorss) {
-            $('#submitfrm').prop('disabled', false);
-            $('#submitfrm').text('Submit');
-            for (var err in errorss.responseJSON.errors) {
-              $("#EditProfile").find("[name='" + err + "']").after("<div class='text-danger'>" + errorss.responseJSON.errors[err] + "</div>");
-            }
+              $('#submitfrm').prop('disabled', false).text('Submit');
+
+              // Clear old errors
+              $("#EditProfile .text-danger").remove();
+
+              $.each(errorss.responseJSON.errors, function (field, messages) {
+                  // Convert dot notation to bracket notation
+                  // Example: registration.68.jurisdiction → registration[68][jurisdiction]
+                  let parts = field.split('.');
+                  let inputName = parts.shift(); // "registration"
+                  while (parts.length) {
+                      inputName += '[' + parts.shift() + ']';
+                  }
+
+                  // Find the input
+                  let input = $("#EditProfile").find("[name='" + inputName + "']");
+
+                  if (input.length) {
+                      $.each(messages, function (i, msg) {
+                          input.after("<div class='text-danger'>" + msg + "</div>");
+                      });
+                  } else {
+                      // fallback: show at top if input not found
+                      $("#countryError").append("<div class='text-danger'>" + messages[0] + "</div>");
+                  }
+              });
           }
       });
 
       return false;
   }
-
   function myFunction1() {
     event.preventDefault();
     var isValid = true;
@@ -3892,80 +4053,6 @@ $(document).ready(function () {
 
   </div>
 </script>
-{{-- <script type="text/template" id="registration-card-template">
-  <div class="mb-4 registration-card registration-card-__CODE__" data-country="__CODE__">
-      <h5 class="d-flex justify-content-between align-items-center">
-          <span>
-              Registration & Licences — __COUNTRY_NAME__
-          </span>
-      </h5>
-
-      <!-- STATUS -->
-    <div class="form-group">
-        <label>Status</label>
-        <div class="d-flex gap-3">
-            <label class="me-3 d-flex align-items-center">
-                <input type="radio"
-                      name="registration[new][__CODE__][status]"
-                      value="2"
-                      checked
-                      class="status-radio"
-                      data-code="__CODE__"
-                      style="width:16px;height:16px;margin-right:6px">
-                Draft
-            </label>
-
-            <label class="d-flex align-items-center">
-                <input type="radio"
-                      name="registration[new][__CODE__][status]"
-                      value="3"
-                      class="status-radio" 
-                      data-code="__CODE__"
-                      style="width:16px;height:16px;margin-right:6px">
-                Submit  (for Review)
-            </label>
-        </div>
-    </div>
-
-
-    <div class="form-group">
-        <label>Jurisdiction / Registration Authority</label>
-        <input type="text"
-              name="registration[new][__CODE__][jurisdiction]"
-              class="form-control js_jurid_input">
-        <span class="reqTxtjurisd text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label>License / Registration Number</label>
-        <input type="text"
-              name="registration[new][__CODE__][registration_number]"
-              class="form-control js_reg_number">
-        <span class="reqTxtReg text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label>Expiry Date</label>
-        <input type="date"
-              min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}"
-              name="registration[new][__CODE__][expiry_date]"
-              class="form-control js_expiry_date">
-        <span class="reqTxtExpiry text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label>Upload Evidence</label>
-        <input type="file"
-              name="registration[new][__CODE__][upload_evidence][]"
-              class="form-control js_evidence evidence-input"
-              data-code="__CODE__"
-              multiple>
-        <span class="reqTxtEvidence text-danger"></span>
-         <div class="mt-2 registration-evidence-preview___CODE__"></div>
-    </div>
-
-  </div>
-</script> --}}
 <script>
     $(document).on('change', '.status-radio', function () {
       let code   = $(this).data('code');
@@ -4061,64 +4148,71 @@ $(document).ready(function () {
 
           e.preventDefault(); // stop select2 auto removal
 
-          if (!confirm('This registration is already saved. Do you want to remove it?')) {
-              return;
-          }
+              Swal.fire({
+                  title: 'Are you sure?',
+                  text: 'This registration is already saved. Do you want to remove it?',
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonText: 'Yes, remove it',
+                  cancelButtonText: 'No, keep it'
+              }).then((result) => {
+                  if (result.isConfirmed) {
+                      // ✅ run your AJAX removal here
+                      $.ajax({
+                          url: "{{ url('/nurse/remove-registration-country') }}",
+                          type: "POST",
+                          data: {
+                              _token: "{{ csrf_token() }}",
+                              country_code: code
+                          },
+                          success: function (res) {
+                              if (res.status === true) {
+                                  savedRegistration = savedRegistration.filter(c => c !== code);
+                                  let values = $regSelect.val() || [];
+                                  values = values.filter(v => v !== code);
+                                  $regSelect.val(values).trigger('change');
+                                  $('.registration-card[data-country="' + code + '"]').remove();
+                              }
+                              window.location.reload();
+                          }
+                      });
+                  }
+              });
 
-                $.ajax({
-                    url: "{{ url('/nurse/remove-registration-country') }}",
-                    type: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        country_code: code
-                    },
-                    success: function (res) {
-
-                        if (res.status === true) {
-
-                            // remove from savedRegistration list
-                            savedRegistration = savedRegistration.filter(c => c !== code);
-
-                            // manually update select2 value
-                            let values = $regSelect.val() || [];
-                            values = values.filter(v => v !== code);
-                            $regSelect.val(values).trigger('change');
-
-                            // remove registration card
-                            $('.registration-card[data-country="' + code + '"]').remove();
-                        }
-                          window.location.reload();
-                    }
-                });
             });
 
             $qualSelect.on('select2:unselecting', function (e) {
                   let code = e.params.args.data.id;
                   e.preventDefault();
 
-                  if (!confirm('Are you sure you want to delete this qualification country?')) {
-                      return;
-                  }
-
-                  $.ajax({
-                      url: "{{ url('/nurse/remove-qualification-country') }}",
-                      type: "POST",
-                      data: {
-                          _token: "{{ csrf_token() }}",
-                          country_code: code
-                      },
-                      success: function (res) {
-
-                          if (res.status === true) {
-
-                              let values = $qualSelect.val() || [];
-                              values = values.filter(v => v !== code);
-                              $qualSelect.val(values).trigger('change');
-
-                              $('#qualificationCountriesInput').val(JSON.stringify(values));
-                          }
+                  Swal.fire({
+                      title: 'Remove qualification?',
+                      text: 'Are you sure you want to remove this qualification country?',
+                      icon: 'warning',
+                      showCancelButton: true,
+                      confirmButtonText: 'Yes, remove it',
+                      cancelButtonText: 'Cancel'
+                  }).then((result) => {
+                      if (result.isConfirmed) {
+                          $.ajax({
+                              url: "{{ url('/nurse/remove-qualification-country') }}",
+                              type: "POST",
+                              data: {
+                                  _token: "{{ csrf_token() }}",
+                                  country_code: code
+                              },
+                              success: function (res) {
+                                  if (res.status === true) {
+                                      let values = $qualSelect.val() || [];
+                                      values = values.filter(v => v !== code);
+                                      $qualSelect.val(values).trigger('change');
+                                      $('#qualificationCountriesInput').val(JSON.stringify(values));
+                                  }
+                              }
+                          });
                       }
                   });
+
               });
 
         /* ===============================

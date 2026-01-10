@@ -101,7 +101,7 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
     Route::get('/my-profile', 'HomeController@manage_profile')->name('my-profile');
     Route::get('/dashboard', 'HomeController@dashboard')->name('dashboard');
     Route::post('/changepassword', 'HomeController@changepassword')->name('changepassword');
-    Route::post('/updateProfile', 'HomeController@updateProfile')->name('updateProfile');
+    Route::any('/updateProfile', 'HomeController@updateProfile')->name('updateProfile');
     Route::post('/user-upload-image', 'HomeController@upload_profile_image')->name('user-upload-image');
     Route::post('/change_password', 'HomeController@change_password')->name('change_password');
     Route::post('/update-profession', 'HomeController@update_profession')->name('update-profession');

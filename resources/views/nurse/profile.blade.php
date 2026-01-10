@@ -253,6 +253,9 @@ p.highlight-text {
         background: none;
     box-shadow: none;
 }
+.iti input, .iti input[type=text], .iti input[type=tel] {
+    padding-left: 80px !important;
+}
 
 </style>
 @endsection
@@ -635,7 +638,7 @@ p.highlight-text {
                         @endphp
 
                      @if($profile_register_country->isNotEmpty() && !empty($user->active_country) && !empty($registration_country))
-                    <div class="mb-4 card registration-card registration-card-{{$registration_country->country_code }}">
+                    <div class="mb-4 card registration-card registration-card-{{$registration_country->country_code }}" data-existing="1">
                           <h5 class="d-flex justify-content-between align-items-center">
                               <span>
                                   Registration & Licences — {{ country_name($registration_country->country_code) }}
@@ -646,7 +649,7 @@ p.highlight-text {
                               </span>
                           </h5>
 
-                           @if ($registration_country->status == 2 || $registration_country->status == 3)
+                           @if ($registration_country->status == 2 )
                             <div class="form-group">
                                 <label>Status</label>
                                 <div class="d-flex gap-3">
@@ -676,7 +679,7 @@ p.highlight-text {
                           @endif
                           {{-- Mobile no --}}
                           <div class="form-group">
-                              <label>Mobile Number.</label>
+                              <label>Mobile Number</label>
 
                               <div class="iti iti--allow-dropdown iti--separate-dial-code w-100">
                                   <div class="iti__flag-container">
@@ -718,7 +721,7 @@ p.highlight-text {
                             <input type="date"
                               name="registration[{{ $registration_country->id }}][expiry_date]"
                               value="{{ \Carbon\Carbon::parse($registration_country->expiry_date)->format('Y-m-d') }}"
-                              min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}"
+                              {{-- min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" --}}
                               class="form-control">
                         </div>
 
@@ -852,7 +855,7 @@ p.highlight-text {
                           {{-- <h6 class="emergency_text">
                             Emergency Contact Information
                           </h6> --}}
-                          <div class="col-lg-6 row" style="display: none;">
+                          {{-- <div class="col-lg-6 row" style="display: none;">
                             <div class="form-group">
                               <label class="font-sm color-text-mutted mb-10">Mobile No</label>
 
@@ -864,7 +867,7 @@ p.highlight-text {
                               </div>
 
                             </div>
-                          </div>
+                          </div> --}}
                           {{-- <div class="col-lg-6 row">
                             <div class="form-group">
                               <label class="font-sm color-text-mutted mb-10">Email*</label>

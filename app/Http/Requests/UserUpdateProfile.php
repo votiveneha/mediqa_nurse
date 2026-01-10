@@ -10,11 +10,7 @@ class UserUpdateProfile extends FormRequest
     {
         return [
             'fullname' => 'required', 'min:3',
-            'lastname' => 'required',
-            // 'countryCode' => 'required',
-           
-            // 'contact' => 'required',
-            
+            'lastname' => 'required',            
             'post_code' => 'required',
             'date_of_birth' => 'required',
             'country' => 'required',
@@ -27,12 +23,12 @@ class UserUpdateProfile extends FormRequest
             //     }
             // }],
 
-            // 'qualification_countries' => ['required', function ($attr, $value, $fail) {
-            //     $data = json_decode($value, true);
-            //     if (!is_array($data) || count($data) < 1) {
-            //         $fail('Please select at least one qualification country.');
-            //     }
-            // }],   
+            // Conditional: required only if status == 3 
+            'registration.*.mobile_number' => ['required_if:registration.*.status,3'],
+            'registration.*.jurisdiction' => ['required_if:registration.*.status,3'],
+            'registration.*.registration_number' => ['required_if:registration.*.status,3'],
+            'registration.*.expiry_date' => ['after:today'],
+            'registration.*.upload_evidence' => ['required_if:registration.*.status,3', 'min:1'],
             'gender' => 'required'
         ];
     }
@@ -42,17 +38,17 @@ class UserUpdateProfile extends FormRequest
         return [
             'fullname.required' => 'The First name field is required.',
             'lastname.required' => 'The Last name field is required.',
-            // 'countryCode.required' => 'The Country Code field is required.',
-            
-            // 'contact.required' => 'The Mobile Number  field is required.',
-            
             'post_code.required' => 'The Post_code field is required.',
             'date_of_birth.required' => 'The Date of Birth field is required.',
             'country.required' => 'Please Select Country.',
             'state.required' => 'Please Select State.',
             'city.required' => 'The City field is required.',
             // 'registration_countries.required' => 'Please select at least one registration country.',
-            // 'qualification_countries.required' => 'Please select at least one qualification country.',
+            'registration.*.mobile_number.required_if' => 'Mobile number is required when submit for review.',
+            'registration.*.jurisdiction.required_if' => 'Jurisdiction is required when submit for review.',
+            'registration.*.registration_number.required_if' => 'Registration number is required when submit for review.',
+            'registration.*.expiry_date.after' => 'Expiry date must be a future date.',
+            'registration.*.upload_evidence.required_if' => 'Evidence upload is required when submit for review.',
             'gender.required' => 'The Gender is required',
            
             // 'email.required' => 'The email field is required.',

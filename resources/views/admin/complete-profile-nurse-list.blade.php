@@ -43,9 +43,9 @@
                                     <h6 class="fs-4 fw-semibold mb-0">Practitioner Type</h6>
                                 </th>
                             
-                                <th>
+                                {{-- <th>
                                     <h6 class="fs-4 fw-semibold mb-0">Phone</h6>
-                                </th>
+                                </th> --}}
                                 <th>
                                     <h6 class="fs-4 fw-semibold mb-0">Email</h6>
                                 </th>
@@ -80,13 +80,13 @@
                                                 <span class="mb-0 fw-normal fs-3"> - - - </span>
                                             </div>
                                         </td>
-                                        <td>
+                                        {{-- <td>
                                             <div class="">
                                                 @if($item->phone)
                                                 <span class="mb-0 fw-normal fs-3">+{{ isset($item->country_code) ? $item->country_code : ''}} {{ $item->phone }}</span>
                                                 @endif
                                             </div>
-                                        </td>
+                                        </td> --}}
                                         <td>
                                             <div class="">
                                                 <span class="mb-0 fw-normal fs-3">{{ $item->email }}</span>
@@ -147,6 +147,7 @@
                             <thead>
                                 <tr>
                                     <th>Country of Registration</th>
+                                    <th>Mobile Number</th>
                                     <th>Jurisdiction / Registration Authority</th>
                                     <th>License / Registration Number</th>
                                     <th>Expiry Date</th>
@@ -156,7 +157,7 @@
                             </thead>
                             <tbody id="registeredCountryBody">
                                 <tr>
-                                    <td colspan="5" class="text-center">Loading...</td>
+                                    <td colspan="6" class="text-center">Loading...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -245,7 +246,7 @@
         
                 function viewRegisteredCountries(userId) {
             $('#registeredCountryBody').html(
-                '<tr><td colspan="5" class="text-center">Loading...</td></tr>'
+                '<tr><td colspan="6" class="text-center">Loading...</td></tr>'
             );
 
             $.ajax({
@@ -260,7 +261,7 @@
                     let html = '';
 
                     if (res.data.length === 0) {
-                        html = '<tr><td colspan="5" class="text-center">No Data Found</td></tr>';
+                        html = '<tr><td colspan="6" class="text-center">No Data Found</td></tr>';
                     } else {
                         res.data.forEach(item => {
                             let disableDropdown = [1, 2, 7].includes(item.status);
@@ -268,6 +269,7 @@
                             html += `
                             <tr>
                                 <td>${item.country_name ?? '-'}</td>
+                                <td>${item.mobile_number ?? '-'}</td>
                                 <td>${item.registration_authority_name ?? '-'}</td>
                                 <td>${item.registration_number ?? '-'}</td>
                                 <td>${item.expiry_date ?? '-'}</td>
@@ -277,7 +279,7 @@
                                         ? JSON.parse(item.upload_evidence).map((file, index) => {
                                             return `
                                                 <a 
-                                                    href="{{ asset('nurse/assets/imgs') }}/${file}" 
+                                                    href="{{ asset('/uploads/registration') }}/${file}" 
                                                     target="_blank" 
                                                     class="d-block fw-semibold">
                                                     View File ${index + 1}
@@ -291,13 +293,11 @@
                                     <select class="form-select"
                                         ${disableDropdown ? 'disabled' : ''}
                                         onchange="updateCountryStatus(${item.id}, this.value)">
-                                        <option value="1" ${item.status == 1 ? 'selected' : ''} disabled>Not Started</option>
-                                        <option value="4" ${item.status == 2 ? 'selected' : ''} disabled>Pending</option>
                                         <option value="4" ${item.status == 3 ? 'selected' : ''} disabled>Submitted</option>
                                         <option value="4" ${item.status == 4 ? 'selected' : ''}>Review</option>
                                         <option value="5" ${item.status == 5 ? 'selected' : ''}>Approve</option>
                                         <option value="6" ${item.status == 6 ? 'selected' : ''}>Reject</option>
-                                        <option value="7" ${item.status == 7 ? 'selected' : ''}>Expired</option>
+                                        <option value="7" ${item.status == 7 ? 'selected' : ''} disabled>Expired</option>
                                     </select>
                                 </td>
                             </tr>
