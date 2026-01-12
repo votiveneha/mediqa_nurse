@@ -28,6 +28,7 @@ use App\Services\Admins\SpecialityServices;
 use Illuminate\Support\Facades\Storage;
 use App\Models\SavedSearches;
 use App\Models\JobsModel;
+use App\Models\RegisteredProfile;
 
 class JobsController extends Controller{
     
@@ -52,7 +53,8 @@ class JobsController extends Controller{
         $data['speciality'] = DB::table("speciality")
             ->where("parent", 0)
             ->get();     
-        $user_id = Auth::guard('nurse_middle')->user()->id;    
+        $user_detail = Auth::guard('nurse_middle')->user();  
+        $user_id = $user_detail->id;
         $data['work_preferences_data'] = DB::table("work_preferences")
             ->where("user_id", $user_id)
             ->first();    
@@ -103,64 +105,22 @@ class JobsController extends Controller{
             // Count matching jobs
             $data['query_count'] = $query->count();
         }
-    
-            
-        $data['location_status'] = "";    
-        if(!empty($data['work_preferences_data']) && $data['work_preferences_data']->location_status == "International relocation"){    
-            $international_location = json_decode($data['work_preferences_data']->countries);
-            $country_name_arr = [];
-            if(!empty($international_location)){
-                foreach($international_location as $inter_loc){
-                    if($inter_loc != "Other"){
-                        $countdata = DB::table("countries")->where("id",$inter_loc)->first();
-                        $country_name_arr[] = $countdata->name; 
-                    }
-                }
-            }    
-            $other_countries = [];
-            if (in_array("Other", $international_location)) {
-                $other_location = json_decode($data['work_preferences_data']->other_countries);
-                foreach($other_location as $other_loc){
-                    $countdata = DB::table("countries")->where("id",$other_loc)->first();
-                    $other_countries[] = ucwords(strtolower($countdata->name)); 
-                    
-                }
-                
-            }
-            
-            $data['location_status'] = "international_location";
-            $country_merge = array_merge($country_name_arr, $other_countries);
-        }
 
-        if(!empty($data['work_preferences_data']) && $data['work_preferences_data']->location_status == "Current Location area (not willing to relocate)"){
-            $address = $data['work_preferences_data']->prefered_location_current;
-            $parts = explode(",", $address);
-            $country_merge = trim(end($parts));
-            $data['location_status'] = "current_location";
-        }
+        // Nurse job search location
+        $residanceCountry = $user_detail->country;
+        $registeredCountries = RegisteredProfile::where('user_id', $user_id)
+            ->pluck('country_code') // just get codes
+            ->toArray();
+   
+        // merge residence + registered
+        $allCountries = collect($registeredCountries)
+            ->push($residanceCountry)
+            ->unique() // remove duplicates
+            ->values();
+        $data['registered_countries'] = $allCountries;
 
-        
-
-        if(!empty($data['work_preferences_data']) && $data['work_preferences_data']->location_status == "Multiple locations area (relocation within your country)"){
-            $address = json_decode($data['work_preferences_data']->prefered_location);
-            $country_merge = [];
-            if(!empty($address)){
-                foreach($address as $add){
-                    
-                    $parts = explode(",", $add->location);
-                    $country_merge[] = trim(end($parts));
-                }
-            }
-            
-            $data['location_status'] = "multiple_location";
-        }
-        $country_merge = '';
-        if(!empty($data['work_preferences_data']) && $data['work_preferences_data']->location_status == NULL){
-            $country_merge = '';
-            $data['location_status'] = "";
-        }
-        
-        $data['country_name'] = $country_merge;
+        $data['agencies_list'] = DB::table('agencies')->where('status',1)->get();
+        // $data['country_name'] = $country_merge;
         $data['user_data'] = DB::table("users")->where("id",$user_id)->first();
                    
         $data['jobs'] = DB::table("job_boxes")->get();                
