@@ -85,7 +85,7 @@
    border: 1px solid #E5E7EB;
    border-radius: 10px;
    padding: 16px;
-   margin-bottom: 16px;
+   margin-bottom: 24px;
    background: #FFFFFF;
    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
    }
@@ -468,7 +468,7 @@
    color: #333;
    border: 1px solid #ccc;
    }
-  .urgent-tag {
+ .urgent-tag {
       background: #000000ff;
       color: #fff;
       font-size: 12px;
@@ -480,6 +480,10 @@
       margin-top: -68px;
       width: 14%;
       margin-left: -30px;
+  }
+    .urgent-tag-new {
+      width: auto;
+      margin-left: -62px;
   }
    .custom-multiselect {
    position: relative;
@@ -901,6 +905,23 @@
       font-size: 0.9rem;
       font-weight: 500;
     }
+
+    .pagination-wrapper .page-item.active .page-link {
+    background-color: #000000ff;
+    border-color: #000000ff;
+    border-radius: 10px;
+}
+ .pagination-wrapper .page-link {
+    color: #000000ff;
+}
+ .pagination-wrapper .page-item .page-link{
+    border-radius: 10px;
+ }
+ .pagination-wrapper .pagination .active {
+    background: #000000ff;
+    border-radius: 10px;
+  
+}
     
 
 </style>
@@ -966,26 +987,22 @@
               <div class="search-bar">
                 <div class="top_filter keywords_filter">
                     <label for="keywords">Keywords</label>
-                    <input type="text" id="keywords" placeholder="e.g. ICU, aged care, night shift">
+                    <input type="text" id="keywords"  placeholder="e.g. ICU, aged care, night shift">
                 </div>
+           
                 <div class="form-group top_filter location_filter">
                     <label for="agency">Location</label>
-                    <div class="custom-multiselect">
-                      <div class="select-box">Select Location</div>
-                      <div class="checkbox-options location_boxes">
-                          @if($location_status == 'international_location' || $location_status == 'multiple_location')
-                          @if(!empty($country_name))
-                          @foreach($country_name as $cname)
-                          <label><input type="checkbox" class="location-checkbox" value="{{ $cname }}" checked> {{ $cname }}</label>
-                          @endforeach
-                          @endif
-                          @else
-                          @if($location_status == 'current_location')
-                          <label><input type="checkbox" class="location-checkbox" value="{{ $country_name }}" checked> {{ $country_name }}</label>
-                          @endif
-                          @endif
+                      <div class="custom-multiselect">
+                          <div class="select-box">Select Location</div>
+                          <div class="checkbox-options">
+                              @foreach ($registered_countries as $code)
+                                  <label>
+                                    <input type="checkbox" class="location-checkbox" value="{{ $code }}">{{ country_name($code) }}        
+                                   </label>                   
+                               
+                              @endforeach
+                          </div>
                       </div>
-                    </div>
                 </div>
                 <!-- Hidden input to store selected values -->
                 <input type="hidden" id="selectedLocations" name="locations">
@@ -993,6 +1010,9 @@
                     <label for="agency">Facility/Agency</label>
                     <select id="agency">
                       <option value="">Select Agency</option>
+                      @foreach ($agencies_list as $agencies_list )
+                        <option value="{{$agencies_list->id}}">{{$agencies_list->name}}</option>
+                      @endforeach
                     </select>
                 </div>
                 <?php 
@@ -1001,11 +1021,9 @@
                 <div class="top_filter sort_by_filter">
                     <label for="sort">Sort By</label>
                     <select onchange="sortBy(this.value)">
-                      @foreach ($find_job_sort as $sort_job )
-                                              <option value="{{$sort_job->id}}">{{$sort_job->name}}</option>
-
-                      @endforeach
-
+                        @foreach ($find_job_sort as $sort_job )
+                          <option value="{{$sort_job->id}}">{{$sort_job->name}}</option>
+                        @endforeach
                     </select>
                 </div>
               </div>
@@ -1093,11 +1111,13 @@
                 </div>
                 <!-- Job Listings -->
                 <div class="job-listings col-md-8">
-                    <div id="no-jobs" class="no-jobs-box" style="display:none;">
+                    {{-- <div id="no-jobs" class="no-jobs-box" style="display:none;">
                       <h3>🚫 No Jobs Found</h3>
                       <p>Sorry, no jobs match your search.</p>
-                    </div>
+                    </div> --}}
                     <div class="job-container">
+                     <div class="job-listings normal-pagination">
+                      @if (count($jobs)>0)
                       @foreach($jobs as $job)
                       <div class="job-card item" data-location="{{ $job->location_name }}">
                           <!-- Top Row: Company Logo & Position -->
@@ -1120,15 +1140,15 @@
                                       
                                       $emplyeement_positions = json_decode($job->emplyeement_positions);
                                       
-                                      $emp_pos_arr = array();  
-                                      if(!empty($emplyeement_positions)){
-                                        foreach($emplyeement_positions as $emppos){
-                                          $emp_position = DB::table("employee_positions")->where("position_id",$emppos)->first();
-                                          $emp_pos_arr[] = $emp_position->position_name;
-                                        }
-                                      }
+                                      // $emp_pos_arr = array();  
+                                      // if(!empty($emplyeement_positions)){
+                                      //   foreach($emplyeement_positions as $emppos){
+                                      //     $emp_position = DB::table("employee_positions")->where("position_id",$emppos)->first();
+                                      //     $emp_pos_arr[] = $emp_position->position_name;
+                                      //   }
+                                      // }
                                       
-                                      $emp_pos_arr_string = implode(",",$emp_pos_arr);
+                                      // $emp_pos_arr_string = implode(",",$emp_pos_arr);
                                       
                                       $emplyeement_type = json_decode($job->emplyeement_type);
                                       
@@ -1201,7 +1221,8 @@
                                       $speciality_arr_string = implode(",",$speciality_arr);
                                       ?>
                                   <div>
-                                    <strong class="fs-5">{{ $nurse_arr_string }}</strong>
+                                    {{-- <strong class="fs-5">{{ $nurse_arr_string }}</strong> --}}
+                                    <strong class="fs-5">{{ implode(', ', (array) json_decode($job->nurse_type, true)) }}</strong>
                                   </div>
                                   <div>
                                     <div class="heart-toggle" data-active="0">
@@ -1211,7 +1232,7 @@
                                       <div class="urgent-tag">Urgent Hiring</div>
                                     @endif
                                   </div>
-                                  <script>
+                                  {{-- <script>
                                   document.addEventListener("DOMContentLoaded", () => {
                                       lucide.createIcons();
 
@@ -1221,7 +1242,7 @@
                                           });
                                       });
                                   });
-                                  </script>
+                                  </script> --}}
                                 </div>
                             </div>
                           </div>
@@ -1230,19 +1251,19 @@
                           <!-- <div class="job-role">{{ $job->agency_name }}</div> -->
                           <!-- Main Job Info -->
                           <!-- <div class="job-meta">
-                            <span><strong>Position:</strong> {{ $emp_pos_arr_string }}</span>
+                            <span><strong>Position:</strong> </span>
                             <span class="salary"><strong>Salary:</strong> ${{ $job->salary }}/hr</span>
                           </div> -->
                           <!-- Expanded Job Details -->
                           <div class="job-info-details col-12 d-flex">
                             <div class="col-4">
-                              <div class="job-role">{{ $job->agency_name }}</div>
-                              <div class="location d-flex align-items-center"><i data-lucide="map-pin" width="18" height="18"></i>{{ $job->location_name }}</div>
+                              {{-- <div class="job-role">{{ $job->agency_name }}</div> --}}
+                              <div class="location d-flex align-items-center"><i data-lucide="map-pin" width="18" height="18"></i> {{ country_name($job->location_name) }}</div>
                             </div>
                             <div class="col-4">
-                                  <div class="job-meta">
+                                  {{-- <div class="job-meta">
                                       <span><strong>Position:</strong> {{ $emp_pos_arr_string }}</span>
-                                    </div>
+                                    </div> --}}
                             </div>
                             <div class="col-4">
                                 <div class="priority-tags" 
@@ -1345,12 +1366,12 @@
                               <div class="last-date"><strong>Last Date:</strong></div>
                             </div>
                             <div class="col-4">
-                              <div>{{ $emplyeement_type_arr_string }}</div>
-                              <div>{{ $shift_type_arr_string }}</div>
-                              <div> {{ $job->sector }}</div>
-                              <div>{{ $work_environment_arr_string }}</div>
+                              <div>{{ $emplyeement_type_arr_string ?? "N/A"}}</div>
+                              <div>{{ $shift_type_arr_string ?? "N/A" }}</div>
+                              <div> {{ $job->sector ?? "N/A" }}</div>
+                              <div>{{ $work_environment_arr_string ?? "N/A"}}</div>
                               <!--<div>{{ $benefits_arr_string }}</div>-->
-                              <div>{{ $speciality_arr_string }}</div>
+                              <div>{{ $speciality_arr_string ?? "N/A" }} </div>
                               <div>{{ $job->experience_level }}{{ $job->experience_level == 1 ? 'st' : ($job->experience_level == 2 ? 'nd' : ($job->experience_level == 3 ? 'rd' : 'th')) }} Year</div>
                               <div>${{ $job->salary }}/hr</div>
                               <div><?php
@@ -1532,8 +1553,20 @@
                             </div>
                       </div>
                       @endforeach
-                    </div>
-                    <div class="pagination"></div>
+                      <div class="pagination-wrapper front-pagination">
+                          {{ $jobs->links('pagination::bootstrap-4') }}
+                      </div>
+                      @else
+                        <div id="no-jobs" class="no-jobs-box" >
+                            <h3>🚫 No Jobs Found</h3>
+                            <p>Sorry, no jobs match your search.</p>
+                        </div>
+                      @endif
+                     </div>
+                     <div class="job-listings ajax-pagination d-none"></div>
+                   </div>  
+                    {{-- <div class="pagination"></div> --}}
+                
                 </div>
               </div>
           </div>
@@ -2341,224 +2374,347 @@ $('#renameCancel').click(function() {
    //     // Re-append in sorted order
    //     $container.append($cards);
    // });
-   $(document).on("click", ".pagination a", function(e) {
-        e.preventDefault();
+  //  $(document).on("click", ".pagination a", function(e) {
+  //       e.preventDefault();
 
+  //       $.ajax({
+  //           url: $(this).attr('href'),
+  //           type: "GET",
+  //           success: function(data) {
+  //               $(".job-listings").html(data);
+  //           }
+  //       });
+  //   });
+
+
+
+    //  function sortBy(value){
+    //    if(value != null){
+    //      $.ajax({
+    //        type: "POST",
+    //        url: "{{ url('/nurse/getJobsSorting') }}",
+    //        data: {sort_name:value,_token:'{{ csrf_token() }}'},
+    //       //  cache: false,
+    //        success: function(data){
+    //          console.log("data",data);
+    //          $(".job-listings").html(data);
+    //        }  
+    //      });
+    //    }
+   
+    // function sortBy(value) {
+    //   currentSort = value;
+
+    //   $.ajax({
+    //       type: "POST",
+    //       url: "{{ url('/nurse/getJobsSorting') }}",
+    //       data: {
+    //           sort_name: value,
+    //           _token: "{{ csrf_token() }}"
+    //       },
+    //       success: function (html) {
+    //           $(".job-listings").html(html);
+    //       }
+    //   });
+
+      let filters = {
+          keywords: '',
+          locations: [],
+          agency: '',
+          sort_by: ''
+      };
+
+    function fetchJobs(page = 1) {
+          $(".normal-pagination").addClass("d-none");
+          $(".ajax-pagination").removeClass("d-none");
         $.ajax({
-            url: $(this).attr('href'),
-            type: "GET",
-            success: function(data) {
-                $(".job-listings").html(data);
+            type: "POST",
+            url: "{{ url('/nurse/getJobsSorting') }}",
+            data: {
+                keywords: filters.keywords,
+                locations: filters.locations,
+                agency: filters.agency,
+                sort_name: filters.sort_by,
+                page: page,
+                _token: "{{ csrf_token() }}"
+            },
+            success: function (html) {
+
+                $(".ajax-pagination").html(html);
             }
         });
-    });
-
-   function sortBy(value){
-     if(value != null){
-       $.ajax({
-         type: "POST",
-         url: "{{ url('/nurse/getJobsSorting') }}",
-         data: {sort_name:value,_token:'{{ csrf_token() }}'},
-         cache: false,
-         success: function(data){
-           console.log("data",data);
-           $(".job-listings").html(data);
-         }  
-       });
-     }
-   
-     if(value == 'match_percent'){
-        // Container holding all job cards
-       var $container = $('.job-listings'); // replace with your actual wrapper id/class
-   
-       // Get all job cards
-       var $cards = $container.children('.job-card');
-   
-       // Sort by match percentage
-       $cards.sort(function (a, b) {
-           var aVal = parseInt($(a).find('.match-score').text()); // "20% Match" → 20
-           var bVal = parseInt($(b).find('.match-score').text());
-   
-           return bVal - aVal; // High to Low (swap if you want Low → High)
-       });
-   
-       // Re-append in sorted order
-       $container.html($cards);
-     }
-   
-     if(value == 'highest_salary'){
-       var $container = $('.job-listings');   // wrapper div of all job cards
-       var $cards = $container.children('.job-card');
-   
-       $cards.sort(function (a, b) {
-           // Extract numeric salary
-           var aSalary = parseInt($(a).find('.salary').text().replace(/[^0-9]/g, ''));
-           var bSalary = parseInt($(b).find('.salary').text().replace(/[^0-9]/g, ''));
-   
-           return bSalary - aSalary; // High → Low
-       });
-   
-       $container.html($cards); // re-render sorted order
-     }
-   
-     if(value == 'nearest_location'){
-       ensureLatLng(function () {
-         getCurrentLocation(function (coords) {
-           sortJobsByProximity(coords);
-         });
-       });
-     }
-   }
-   
-  $(document).ready(function () {
+    }
     $("#keywords").on("keyup", function () {
-        var value = $(this).val().toLowerCase().trim();
-        var $jobs = $(".job-listings .job-card");
-        var hasResults = false;
+        filters.keywords = $(this).val();
+        fetchJobs(1);
+    });
+    $(document).on("change", ".location-checkbox", function () {
+        filters.locations = [];
 
-        // If empty → reset
-        if (value === "") {
-            $jobs.show();
-            $("#no-jobs").hide();      // FIXED
-            $(".pagination").show();
-            return;
-        }
-
-        // Check matches
-        $jobs.each(function () {
-            let match = $(this).text().toLowerCase().includes(value);
-            $(this).toggle(match);
-            if (match) hasResults = true;
+        $(".location-checkbox:checked").each(function () {
+            filters.locations.push($(this).val());
         });
 
-        // Show/Hide no-jobs-box
-        if (!hasResults) {
-            $("#no-jobs").show();      // FIXED
-            $(".pagination").hide();
-        } else {
-            $("#no-jobs").hide();      // FIXED
-            $(".pagination").show();
-        }
+        fetchJobs(1);
+    });
+    $("#agency").on("change", function () {
+        filters.agency = $(this).val();
+        fetchJobs(1);
     });
 
-   });
+    // $(document).on("click", ".pagination a", function (e) {
+    //     e.preventDefault();
+
+    //     let page = $(this).attr("href").split("page=")[1];
+    //     fetchJobs(page);
+    // });
+    $(document).on("click", ".ajax-pagination .pagination a", function (e) {
+        e.preventDefault();
+        let page = $(this).attr("href").split("page=")[1];
+        fetchJobs(page);
+    });
+
+    function sortBy(value) {
+        filters.sort_by = value;
+    
+        if(value == 'match_percent'){
+            // Container holding all job cards
+          var $container = $('.job-listings'); // replace with your actual wrapper id/class
+      
+          // Get all job cards
+          var $cards = $container.children('.job-card');
+      
+          // Sort by match percentage
+          $cards.sort(function (a, b) {
+              var aVal = parseInt($(a).find('.match-score').text()); // "20% Match" → 20
+              var bVal = parseInt($(b).find('.match-score').text());
+      
+              return bVal - aVal; // High to Low (swap if you want Low → High)
+          });
+      
+          // Re-append in sorted order
+          $container.html($cards);
+        }
+      
+        if(value == 'highest_salary'){
+          var $container = $('.job-listings');   // wrapper div of all job cards
+          var $cards = $container.children('.job-card');
+      
+          $cards.sort(function (a, b) {
+              // Extract numeric salary
+              var aSalary = parseInt($(a).find('.salary').text().replace(/[^0-9]/g, ''));
+              var bSalary = parseInt($(b).find('.salary').text().replace(/[^0-9]/g, ''));
+      
+              return bSalary - aSalary; // High → Low
+          });
+      
+          $container.html($cards); // re-render sorted order
+        }
+      
+          fetchJobs(1);
+        if(value == 'nearest_location'){
+          ensureLatLng(function () {
+            getCurrentLocation(function (coords) {
+              sortJobsByProximity(coords);
+            });
+          });
+        }
+    }
+   
+    //  $(document).on('click', '.pagination a', function (e) {
+    //   e.preventDefault();
+
+    //   let url = $(this).attr('href');
+
+    //   $.ajax({
+    //           type: "POST",
+    //           url: url,
+    //           data: {
+    //               sort_name: currentSort,
+    //               _token: "{{ csrf_token() }}"
+    //           },
+    //           success: function (html) {
+    //               $(".job-listings").html(html);
+    //           }
+    //       });
+    //   });
+
+
+  //  $(document).ready(function () {
+  //       $("#keywords, #location, #agency, #sortBy").on("change keyup", function () {
+  //       let keywords = $("#keywords").val().trim();
+  //       let location = $("#location").val();
+  //       let agency   = $("#agency").val();
+  //       let sortBy   = $("#sortBy").val();
+
+
+
+  //       $.ajax({
+  //           url: "/jobs/filter",
+  //           type: "GET",
+  //           data: {
+  //               keywords: keywords,
+  //               location: location,
+  //               agency: agency,
+  //               sort_by: sortBy,
+  //               page: 1
+  //           },
+  //           success: function (res) {
+  //               $(".job-listings").html(res.html);
+  //               $(".pagination").html(res.pagination);
+  //               $("#no-jobs").toggle(res.count === 0);
+  //           }
+  //       });
+  //   });
+
+    // $("#keywords").on("keyup", function () {
+    //     var value = $(this).val().toLowerCase().trim();
+    //     var $jobs = $(".job-listings .job-card");
+    //     var hasResults = false;
+
+    //     // If empty → reset
+    //     if (value === "") {
+    //         $jobs.show();
+    //         $("#no-jobs").hide();      // FIXED
+    //         $(".pagination").show();
+    //         return;
+    //     }
+
+    //     // Check matches
+    //     $jobs.each(function () {
+    //         let match = $(this).text().toLowerCase().includes(value);
+    //         $(this).toggle(match);
+    //         if (match) hasResults = true;
+    //     });
+
+    //     // Show/Hide no-jobs-box
+    //     if (!hasResults) {
+    //         $("#no-jobs").show();      // FIXED
+    //         $(".pagination").hide();
+    //     } else {
+    //         $("#no-jobs").hide();      // FIXED
+    //         $(".pagination").show();
+    //     }
+    // });
+
+  //  });
    
    
-   let allLocations = [...new Set($('.location').map(function () {
-     return $(this).text().trim();
-   }).get())];
+  //  let allLocations = [...new Set($('.location').map(function () {
+  //    return $(this).text().trim();
+  //  }).get())];
    
    // 2. Get all values from existing checkboxes
-   let checkboxLocations = $('.location-checkbox').map(function () {
-     return $(this).val().trim();
-   }).get();
+  //  let checkboxLocations = $('.location-checkbox').map(function () {
+  //    return $(this).val().trim();
+  //  }).get();
    
    // 3. Filter out locations that are already in checkboxes
-   let remainingLocations = allLocations.filter(loc => !checkboxLocations.includes(loc));
+  //  let remainingLocations = allLocations.filter(loc => !checkboxLocations.includes(loc));
    
-   console.log("Remaining Locations:", remainingLocations);
+  //  console.log("Remaining Locations:", remainingLocations);
    
    // Append options to dropdown
-   let $dropdown = $('.location_boxes');
-   remainingLocations.forEach(function(loc) {
-       $dropdown.append('<label><input type="checkbox" class="location-checkbox" value="'+loc+'"> '+loc+'</label>');
-   });
+  //  let $dropdown = $('.location_boxes');
+  //  remainingLocations.forEach(function(loc) {
+  //      $dropdown.append('<label><input type="checkbox" class="location-checkbox" value="'+loc+'"> '+loc+'</label>');
+  //  });
    
-   function filterJobs() {
-     // Get all checked locations
-     let selectedLocations = $('.location-checkbox:checked').map(function () {
-         return $(this).val().trim();
-     }).get();
+  //  function filterJobs() {
+  //    // Get all checked locations
+  //    let selectedLocations = $('.location-checkbox:checked').map(function () {
+  //        return $(this).val().trim();
+  //    }).get();
    
-     if (selectedLocations.length === 0) {
-         // If nothing is checked → show all jobs
-         $('.job-card').show();
-         return;
-     }
+  //    if (selectedLocations.length === 0) {
+  //        // If nothing is checked → show all jobs
+  //        $('.job-card').show();
+  //        return;
+  //    }
    
-     // Loop through job cards
-     $('.job-card').each(function () {
-         let jobLocation = $(this).find('.location').text().trim();
+  //    // Loop through job cards
+  //    $('.job-card').each(function () {
+  //        let jobLocation = $(this).find('.location').text().trim();
    
-         if (selectedLocations.includes(jobLocation)) {
-             $(this).show(); // match → show
-         } else {
-             $(this).hide(); // not match → hide
-         }
-     });
+  //        if (selectedLocations.includes(jobLocation)) {
+  //            $(this).show(); // match → show
+  //        } else {
+  //            $(this).hide(); // not match → hide
+  //        }
+  //    });
    
-     // Update dropdown display text
-     updateSelectedLocationsBox();
-     checkIfNoJobs(); // ✅ check if all are hidden
-   }
+  //    // Update dropdown display text
+  //    updateSelectedLocationsBox();
+  //    checkIfNoJobs(); // ✅ check if all are hidden
+  //  }
    
-   function checkIfNoJobs() {
-     if ($('.job-card:visible').length === 0) {
-         $('#no-jobs').show();
-     } else {
-         $('#no-jobs').hide();
-     }
-   }
+  //  function checkIfNoJobs() {
+  //    if ($('.job-card:visible').length === 0) {
+  //        $('#no-jobs').show();
+  //    } else {
+  //        $('#no-jobs').hide();
+  //    }
+  //  }
    
    // Run when checkboxes change
-   $(document).on('change', '.location-checkbox', filterJobs);
+  //  $(document).on('change', '.location-checkbox', filterJobs);
    
-   // Run once on page load (for auto-checked locations)
-   $(document).ready(filterJobs);
+  //  // Run once on page load (for auto-checked locations)
+  //  $(document).ready(filterJobs);
    
-   function updateSelectedLocationsBox() {
-     let selected = $('.location-checkbox:checked').map(function () {
-         return $(this).val().trim();
-     }).get();
+  //  function updateSelectedLocationsBox() {
+  //    let selected = $('.location-checkbox:checked').map(function () {
+  //        return $(this).val().trim();
+  //    }).get();
    
-     if (selected.length > 0) {
-         $('.select-box').text(selected.join(', '));
-     } else {
-         $('.select-box').text('Select Location');
-     }
-   }
+  //    if (selected.length > 0) {
+  //        $('.select-box').text(selected.join(', '));
+  //    } else {
+  //        $('.select-box').text('Select Location');
+  //    }
+  //  }
    
    
    //For Agency
-   let uniqueAgency = [...new Set($('.job-role').map(function() {
-     return $(this).text().trim();
-   }).get())];
+  //  let uniqueAgency = [...new Set($('.job-role').map(function() {
+  //    return $(this).text().trim();
+  //  }).get())];
    
-   console.log("uniqueAgency",uniqueAgency);
+  //  console.log("uniqueAgency",uniqueAgency);
    
    // Append options to dropdown
-   let $dropdown_agency = $('#agency');
-   uniqueAgency.forEach(function(agency) {
-     $dropdown_agency.append('<option value="'+ agency +'">'+ agency +'</option>');
-   });
+  //  let $dropdown_agency = $('#agency');
+  //  uniqueAgency.forEach(function(agency) {
+  //    $dropdown_agency.append('<option value="'+ agency +'">'+ agency +'</option>');
+  //  });
    
-   $('#agency').on('change', function() {
-     let selectedAgency = $(this).val().trim();
+  //  $('#agency').on('change', function() {
+  //    let selectedAgency = $(this).val().trim();
    
-     // Show all jobs if no location selected
-     if (selectedAgency === "") {
-         $('.job-card').show();
-         return;
-     }
+  //    // Show all jobs if no location selected
+  //    if (selectedAgency === "") {
+  //        $('.job-card').show();
+  //        return;
+  //    }
    
-     // Loop through each job card
-     $('.job-card').each(function() {
-         let jobAgency = $(this).find('.job-role').text().trim();
+  //    // Loop through each job card
+  //    $('.job-card').each(function() {
+  //        let jobAgency = $(this).find('.job-role').text().trim();
    
-         if (jobAgency === selectedAgency) {
-             $(this).show();
-         } else {
-             $(this).hide();
-         }
-     });
-   });
+  //        if (jobAgency === selectedAgency) {
+  //            $(this).show();
+  //        } else {
+  //            $(this).hide();
+  //        }
+  //    });
+  //  });
    
-   var selected = [];
-   $(".location-checkbox:checked").each(function () {
-       selected.push($(this).val());
-   });
+  //  var selected = [];
+  //  $(".location-checkbox:checked").each(function () {
+  //      selected.push($(this).val());
+  //  });
    
-   console.log(selected); 
+  //  console.log(selected); 
    
    
    $("#toggleRegisteredPreferences").click(function(){
@@ -2673,131 +2829,131 @@ $('#renameCancel').click(function() {
        });
      }
    
-   $(document).ready(function () {
-   var itemsPerPage = 2;
-   var currentPage = 1;
+  //  $(document).ready(function () {
+  //  var itemsPerPage = 2;
+  //  var currentPage = 1;
    
-   // Get filtered jobs based on location + keyword
-     function getFilteredItems() {
-       var selectedLocations = $(".location-checkbox:checked")
-         .map(function () {
-           return $(this).val();
-         })
-         .get();
+  //  // Get filtered jobs based on location + keyword
+  //    function getFilteredItems() {
+  //      var selectedLocations = $(".location-checkbox:checked")
+  //        .map(function () {
+  //          return $(this).val();
+  //        })
+  //        .get();
    
-       var selectedAgency = $("#agency").val().trim();
-       var keyword = $("#keywords").val().toLowerCase().trim();
+  //      var selectedAgency = $("#agency").val().trim();
+  //      var keyword = $("#keywords").val().toLowerCase().trim();
    
-       return $(".job-card.item").filter(function () {
-         var matchesLocation =
-           selectedLocations.length === 0 ||
-           selectedLocations.includes($(this).data("location"));
+  //      return $(".job-card.item").filter(function () {
+  //        var matchesLocation =
+  //          selectedLocations.length === 0 ||
+  //          selectedLocations.includes($(this).data("location"));
    
-         var jobAgency = $(this).find(".job-role").text().trim();
-         var matchesAgency =
-           selectedAgency === "" || jobAgency === selectedAgency;
+  //        var jobAgency = $(this).find(".job-role").text().trim();
+  //        var matchesAgency =
+  //          selectedAgency === "" || jobAgency === selectedAgency;
    
-         var matchesKeyword =
-           keyword === "" || $(this).text().toLowerCase().indexOf(keyword) > -1;
+  //        var matchesKeyword =
+  //          keyword === "" || $(this).text().toLowerCase().indexOf(keyword) > -1;
    
-         return matchesLocation && matchesAgency && matchesKeyword;
-       });
-     }
+  //        return matchesLocation && matchesAgency && matchesKeyword;
+  //      });
+  //    }
    
-   function showPage(page) {
-     var items = getFilteredItems();
-     var totalPages = Math.ceil(items.length / itemsPerPage);
-     if (page < 1) page = 1;
-     if (page > totalPages) page = totalPages;
+  //  function showPage(page) {
+  //    var items = getFilteredItems();
+  //    var totalPages = Math.ceil(items.length / itemsPerPage);
+  //    if (page < 1) page = 1;
+  //    if (page > totalPages) page = totalPages;
    
-     currentPage = page;
-     $(".job-card.item").hide();
+  //    currentPage = page;
+  //    $(".job-card.item").hide();
    
-     var start = (page - 1) * itemsPerPage;
-     var end = start + itemsPerPage;
-     items.slice(start, end).show();
+  //    var start = (page - 1) * itemsPerPage;
+  //    var end = start + itemsPerPage;
+  //    items.slice(start, end).show();
    
-     $(".pagination button.page").removeClass("active");
-     $(".pagination button.page[data-page='" + page + "']").addClass("active");
+  //    $(".pagination button.page").removeClass("active");
+  //    $(".pagination button.page[data-page='" + page + "']").addClass("active");
    
-     $(".pagination button.prev").prop("disabled", page === 1);
-     $(".pagination button.next").prop("disabled", page === totalPages);
-   }
+  //    $(".pagination button.prev").prop("disabled", page === 1);
+  //    $(".pagination button.next").prop("disabled", page === totalPages);
+  //  }
    
-   function buildPagination() {
-     var items = getFilteredItems();
-     var totalPages = Math.ceil(items.length / itemsPerPage);
-     $(".pagination").empty();
+  //  function buildPagination() {
+  //    var items = getFilteredItems();
+  //    var totalPages = Math.ceil(items.length / itemsPerPage);
+  //    $(".pagination").empty();
    
-     if (items.length === 0) {
-       $(".pagination").html("<p>No jobs found</p>");
-       return;
-     }
+  //    if (items.length === 0) {
+  //      $(".pagination").html("<p>No jobs fou</p>");
+  //      return;
+  //    }
    
-     if (totalPages > 1) {
-       $(".pagination").append("<button class='prev'>&laquo;</button>");
-       for (var i = 1; i <= totalPages; i++) {
-         $(".pagination").append(
-           "<button class='page' data-page='" + i + "'>" + i + "</button>"
-         );
-       }
-       $(".pagination").append("<button class='next'>&raquo;</button>");
-     }
-     showPage(1);
-   }
+  //    if (totalPages > 1) {
+  //      $(".pagination").append("<button class='prev'>&laquo;</button>");
+  //      for (var i = 1; i <= totalPages; i++) {
+  //        $(".pagination").append(
+  //          "<button class='page' data-page='" + i + "'>" + i + "</button>"
+  //        );
+  //      }
+  //      $(".pagination").append("<button class='next'>&raquo;</button>");
+  //    }
+  //    showPage(1);
+  //  }
    
    
    
-   // Pagination click events
-   $(".pagination").on("click", "button.page", function () {
-     showPage($(this).data("page"));
-   });
+  //  // Pagination click events
+  //  $(".pagination").on("click", "button.page", function () {
+  //    showPage($(this).data("page"));
+  //  });
    
-   $(".pagination").on("click", "button.prev", function () {
-     showPage(currentPage - 1);
-   });
+  //  $(".pagination").on("click", "button.prev", function () {
+  //    showPage(currentPage - 1);
+  //  });
    
-   $(".pagination").on("click", "button.next", function () {
-     showPage(currentPage + 1);
-   });
+  //  $(".pagination").on("click", "button.next", function () {
+  //    showPage(currentPage + 1);
+  //  });
    
-   // Checkbox filter change
-   $(document).on("change", ".location-checkbox", function () {
-     buildPagination();
-   });
+  //  // Checkbox filter change
+  //  $(document).on("change", ".location-checkbox", function () {
+  //    buildPagination();
+  //  });
    
-   $("#keywords").on("keyup", function () {
-     buildPagination();
-   });
+  //  $("#keywords").on("keyup", function () {
+  //    buildPagination();
+  //  });
    
-   $("#agency").on("change", function () {
-     buildPagination();
-   });
+  //  $("#agency").on("change", function () {
+  //    buildPagination();
+  //  });
    
-   // Initial load
-   buildPagination();
+  //  // Initial load
+  //  buildPagination();
    
-   // Accordion toggle (only when clicking the header text, not buttons)
-   $(document).on("click", ".accordion-header", function(e) {
-   if ($(e.target).is("button")) return; // ignore if button clicked
-   $(this).next(".accordion-content").slideToggle();
-   });
+  //  // Accordion toggle (only when clicking the header text, not buttons)
+  //  $(document).on("click", ".accordion-header", function(e) {
+  //  if ($(e.target).is("button")) return; // ignore if button clicked
+  //  $(this).next(".accordion-content").slideToggle();
+  //  });
    
-   // Select All
-   // $(document).on("click", ".select-all", function(e) {
-   //   e.stopPropagation(); // prevent toggle
-   //   var target = $(this).data("target");
-   //   $("#" + target + " .sector_checkbox").prop("checked", true);
-   // });
+  //  // Select All
+  //  // $(document).on("click", ".select-all", function(e) {
+  //  //   e.stopPropagation(); // prevent toggle
+  //  //   var target = $(this).data("target");
+  //  //   $("#" + target + " .sector_checkbox").prop("checked", true);
+  //  // });
    
-   // Clear All
-   // $(document).on("click", ".clear-all", function(e) {
-   //   e.stopPropagation(); // prevent toggle
-   //   var target = $(this).data("target");
-   //   $("#" + target + " .sector_checkbox").prop("checked", false);
-   // });
+  //  // Clear All
+  //  // $(document).on("click", ".clear-all", function(e) {
+  //  //   e.stopPropagation(); // prevent toggle
+  //  //   var target = $(this).data("target");
+  //  //   $("#" + target + " .sector_checkbox").prop("checked", false);
+  //  // });
    
-   });
+  //  });
    // 📌 Haversine formula (distance in km)
    function getDistance(lat1, lon1, lat2, lon2) {
    var R = 6371; // Earth radius in km

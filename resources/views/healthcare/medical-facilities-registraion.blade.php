@@ -209,7 +209,7 @@
               title: 'Success',
               text: 'Congratulations! Your registration was successful. Please check your email; we have sent you a verification email to your registered address!',
             }).then(function() {
-              window.location.href = "{{ route('medical-facilities.medical_facilities_home_main') }}";
+              window.location.href = "{{ route('medical-facilities.email-verification-pending') }}";
             });
           } else {
             Swal.fire({

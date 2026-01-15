@@ -42,9 +42,14 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
   Route::get('/', 'HomeController@index_main')->name('medical_facilities_home_main');
   Route::get('/medical-facilities-registraion', 'HomeController@registraion')->name('medical-facilities-registraion');
   Route::post('/healthcareRegistration', 'HomeController@healthcareRegistration')->name('healthcareRegistration');
+  Route::get('/email-verification-pending', 'HomeController@emailVerificationPending')->name('email-verification-pending');
+  Route::get('/profile-under-reviewed', 'HomeController@profileUnderReviewed')->name('profile-under-reviewed');
   Route::get('/login', 'HomeController@login')->name('login');
   Route::post('/userloginAction', 'HomeController@userloginAction')->name('userloginAction');
-  Route::middleware('nurse_middle')->group(function () {});
+  Route::get('/logout', 'HomeController@logout')->name('logout');
+  Route::middleware('healthcare')->group(function () {
+    Route::get('/my-profile', 'HomeController@manage_profile')->name('my-profile');
+  });
 });
 
 Route::prefix('agencies')->name('agencies.')->namespace('App\Http\Controllers\agencies')->group(function () {
@@ -52,7 +57,14 @@ Route::prefix('agencies')->name('agencies.')->namespace('App\Http\Controllers\ag
   Route::get('/agencies-registraion', 'HomeController@registraion')->name('agencies-registraion');
   Route::get('/login', 'HomeController@login')->name('login');
 
-  Route::middleware('nurse_middle')->group(function () {});
+  Route::post('/agenciesRegistration', 'HomeController@agenciesRegistration')->name('agenciesRegistration');
+  Route::get('/email-verification-pending', 'HomeController@emailVerificationPending')->name('email-verification-pending');
+  Route::get('/profile-under-reviewed', 'HomeController@profileUnderReviewed')->name('profile-under-reviewed');
+  Route::post('/userloginAction', 'HomeController@userloginAction')->name('userloginAction');
+  Route::get('/logout', 'HomeController@logout')->name('logout');
+  Route::middleware('agencies')->group(function () {
+    Route::get('/my-profile', 'HomeController@manage_profile')->name('my-profile');
+  });
 });
 
 Route::prefix('individuals')->name('individuals.')->namespace('App\Http\Controllers\individuals')->group(function () {
@@ -111,16 +123,16 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
     Route::post('/remove-registration-evidence', 'HomeController@removeRegistrationEvidence')->name('nurse.removeRegistrationEvidence');
     Route::post('/remove-registration-country', 'HomeController@remove_registration_country')->name('nurse.remove-registration-country');
     Route::post('/remove-qualification-country', 'HomeController@remove_qualification_country')->name('nurse.remove-qualification-country');
-    Route::post('/nurse/save-registration-country', function (Request $request) {
-      auth('nurse_middle')->user()->update([
-        'active_country' => $request->country_id,
-        'country' => $request->country_id,
-        'country_code' => $request->country_code,
-      ]);
+    // Route::post('/nurse/save-registration-country', function (Request $request) {
+    //   auth('nurse_middle')->user()->update([
+    //     'active_country' => $request->country_id,
+    //     'country' => $request->country_id,
+    //     'country_code' => $request->country_code,
+    //   ]);
 
-      return response()->json(['success' => true]);
-    })->name('saveRegistrationCountry');
-    
+    //   return response()->json(['success' => true]);
+    // })->name('saveRegistrationCountry');
+    Route::post('/save-registration-country', 'HomeController@save_registration_country')->name('saveRegistrationCountry');
     Route::post('/update-profession-user-emergency', 'HomeController@update_emergency')->name('update-profession-user-emergency');
     Route::post('/update-profession-profile-setting', 'HomeController@update_profession_profile_setting')->name('update-profession-profile-setting');
     Route::post('/updateProfession', 'HomeController@updateProfession')->name('updateProfession');

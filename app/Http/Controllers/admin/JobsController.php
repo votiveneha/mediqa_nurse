@@ -40,6 +40,8 @@ class JobsController extends Controller
 
     public function edit_jobs(Request $request)
     {
+        $data['country'] = DB::table('country')->where('status', 1)->get();
+        $data['agencies_list'] = DB::table('agencies')->where('status',1)->get();
         $data['job_list'] = DB::table("job_boxes")->where("id",$request->id)->first();
         return view("admin.edit_jobs")->with($data);
     }

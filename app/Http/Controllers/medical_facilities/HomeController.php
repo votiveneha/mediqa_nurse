@@ -101,14 +101,16 @@ class HomeController extends Controller
             $user->name = $hospital_name;
             $user->email = $emailaddress;
             $user->role = "healthcare-facilities";
-            $user->phone = $mobile_no;
-            $user->post_code = $post_code;
-            $user->home_address = $address;
             $user->password = Hash::make($password);
             $run = $user->save();
+            Auth::guard('healthcare_facilities')->login($user);
+            Auth::login($user);
+        }else{
+            $run = 0;
         }
 
         if ($run) {
+            Session::put('user_id', $user->id);
             $json['status'] = 1;
             $json['message'] = 'Congratulations! Your registration was successful. Please check your email; we have sent you a verification email to your registered address!';
         }else{
@@ -131,7 +133,7 @@ class HomeController extends Controller
     public function userloginAction(Request $request)
     {
         
-        if (Auth::guard('nurse_middle')->attempt(['email' => $request->email, 'password' => $request->password, 'role' => 'healthcare-facilities'])) {
+        if (Auth::guard('healthcare_facilities')->attempt(['email' => $request->email, 'password' => $request->password, 'role' => 'healthcare-facilities'])) {
             if (isset($request->remember_me) && !empty($request->remember_me)) {
                 setcookie("email", $request->email, time() + 3600);
                 setcookie("password", $request->password, time() + 3600);
@@ -139,9 +141,72 @@ class HomeController extends Controller
                 setcookie("email", "");
                 setcookie("password", "");
             }
-            return redirect('/healthcare-facilities')->with('success', 'You are Logged in sucessfully.');
+            return redirect('/healthcare-facilities/my-profile')->with('success', 'You are Logged in sucessfully.');
         } else {
             return back()->with('error', 'Invalid login details.');
+        }
+    }
+
+     public function logout(Request $request)
+    {
+        Auth::guard('healthcare_facilities')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('healthcare-facilities');
+    }
+
+    public function emailVerificationPending()
+    {
+
+        if (Auth::guard('healthcare_facilities')->user()) {
+
+            if (Auth::guard('healthcare_facilities')->user()->emailVerified == 1 &&  Auth::guard('healthcare_facilities')->user()->user_stage == 1 && Auth::guard('healthcare_facilities')->user()->type == 1) {
+
+                return redirect()->route('medical-facilities.profile-under-reviewed');
+            } elseif (Auth::guard('healthcare_facilities')->user()->emailVerified == 1 &&  Auth::guard('healthcare_facilities')->user()->type == 0) {
+                return redirect()->route('medical-facilities.dashboard');
+            } else {
+                $title = "";
+                $message = "";
+
+                return view('auth.email-verification-pending', compact('title', 'message'));
+            }
+        } else if (Session::get('user_id')) {
+            $user_id = Session::get('user_id');
+
+            $title = 'sa';
+            $message = "";
+            $r = User::where("id", $user_id)->first();
+            Auth::guard('healthcare_facilities')->attempt(['email' => $r->email, 'password' => $r->ps]);
+            // return redirect('/nurse/my-profile?page=my_profile');
+            return redirect('/nurse/dashboard');
+            return view('auth.email-verification-pending', compact('title', 'message'));
+        } else {
+            $title = "s";
+            return redirect()->route('healthcare-facilities.login');
+        }
+    }
+
+    public function manage_profile(){
+        return view('healthcare.profile');
+    }
+
+    public function profileUnderReviewed()
+    {
+        // die();
+
+        if (Auth::guard('healthcare_facilities')->user()) {
+            if (Auth::guard('healthcare_facilities')->user()->user_stage == 2) {
+
+                return redirect()->route('nurse.dashboard');
+            } else {
+                $title = "";
+                $message = "";
+                return view('auth.profile-under-reviewed', compact('title', 'message'));
+            }
+        } else {
+
+            return redirect()->route('medical-facilities.login');
         }
     }
     

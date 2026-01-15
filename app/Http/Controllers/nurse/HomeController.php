@@ -53,6 +53,7 @@ use App\Repository\Eloquent\SpecialityRepository;
 use App\Models\OtherVaccineModel;
 use Illuminate\Support\Facades\Storage;
 use App\Models\EvidanceFileModel;
+use App\Models\Profession;
 
 class HomeController extends Controller
 {
@@ -176,6 +177,10 @@ class HomeController extends Controller
 
         //registration profile
         $registration_profile = DB::table("registration_profiles_countries")->where("user_id", $user_id)->get();
+
+        $profession_id = isset($_GET['profession_id'])?$_GET['profession_id']:0;
+        $profession_data = Profession::where("user_id",$user_id)->get();
+        $profession_single_data = Profession::where("profession_id",$profession_id)->first();
         
         //print_r($specialities_data);
         $experience_data = DB::table("user_experience")->where("user_id",$user_id)->get();
@@ -187,7 +192,7 @@ class HomeController extends Controller
             ->update([
                 'status' => 7
             ]);
-        return view('nurse.profile', compact('message','employeement_type_preferences','nurse_data','specialities_data','specialities_type','user_data','experience_data', 'registration_profile'));
+        return view('nurse.profile', compact('message','employeement_type_preferences','nurse_data','specialities_data','specialities_type','user_data','experience_data', 'registration_profile', 'profession_data', 'profession_single_data'));
     }
     public function upload_profile_image(Request $request)
     {
@@ -897,7 +902,7 @@ class HomeController extends Controller
                                                 </p>
 
                                                 <p style="margin:0 0 25px;">
-                                                    If you made this request, click the button below to reset your password.
+                                                    If you made this request, click the button below to reset your password. This password reset link will expire in 15 minutes.
                                                 </p>
 
                                                 <!-- Button -->
@@ -917,7 +922,7 @@ class HomeController extends Controller
                                                 </p>
 
                                                 <p style="margin:0 0 10px; font-size:14px; color:#555;">
-                                                    If the button doesn’t work, copy and paste this link into your browser:
+                                                    If the button doesn’t work, copy and paste this link into your browser (valid for 15 minutes):
                                                 </p>
 
                                                 <p style="word-break:break-all; font-size:14px; color:#0066cc;">
@@ -1009,30 +1014,38 @@ public function ResetPassword(Request $request)
         }
 
         $updatePassword = DB::table('password_reset_tokens')
-            ->where([
-                'token' => $request->token
-            ])->first();
-        // if (!$updatePassword) {echo "data";print_r($updatePassword);}
-
-
-
+            ->where('token', $request->token)
+            ->first();
+        
         if (!$updatePassword) {
-
-            $hide_form = true;
-
-
-            session()->flash('message', '<div class="alert alert-danger">Link has been expired.!</div>');
-
-
-            return redirect('nurse/login')->with(['hide_form' => $hide_form, 'title' => $title]);
-            if (Auth::guard('user')->user()) {
-                return view('auth.verification-screen', compact('message', 'hide_form', 'title', 'status','practitioner_data','speciality_data','work_preferences_data'))->with('do', '1');
-            } else {
-                return redirect('nurse/login')->with(['hide_form' => $hide_form, 'title' => $title]);
-            }
-            // return view('creator.reset-password', ['request' => $request, 'hide_form' => $hide_form]);
-
+            return $this->expiredRedirect();
         }
+        
+        // Check if token is older than 15 minutes
+        if (Carbon::parse($updatePassword->created_at)->addMinutes(15)->isPast()) {
+        
+            DB::table('password_reset_tokens')->where('email', $updatePassword->email)->delete();
+        
+            return $this->expiredRedirect();
+        }
+
+        // if (!$updatePassword) {
+
+        //     $hide_form = true;
+
+
+        //     session()->flash('message', '<div class="alert alert-danger">Link has been expired.!</div>');
+
+
+        //     return redirect('nurse/login')->with(['hide_form' => $hide_form, 'title' => $title]);
+        //     if (Auth::guard('user')->user()) {
+        //         return view('auth.verification-screen', compact('message', 'hide_form', 'title', 'status','practitioner_data','speciality_data','work_preferences_data'))->with('do', '1');
+        //     } else {
+        //         return redirect('nurse/login')->with(['hide_form' => $hide_form, 'title' => $title]);
+        //     }
+        //     // return view('creator.reset-password', ['request' => $request, 'hide_form' => $hide_form]);
+
+        // }
 
 
         // DB::table('password_resets')
@@ -1040,6 +1053,12 @@ public function ResetPassword(Request $request)
         //             ->update(['status'=>'0']);
         return view('nurse.reset-password', ['request' => $request, 'title' => $title]);
     }
+
+    private function expiredRedirect() {
+    session()->flash('message', '<div class="alert alert-danger">Link has expired!</div>');
+    return redirect('nurse/login')->with(['hide_form' => true, 'title' => 'reset-pass']);
+}
+
 
     public function UpdatePassword(Request $request)
     {
@@ -1219,6 +1238,35 @@ public function ResetPassword(Request $request)
         return view('nurse.dashboard', compact('countries'));
     }
 
+    public function save_registration_country(Request $request)
+    {
+        $user = auth('nurse_middle')->user();
+
+        $country_detail =  DB::table('country')->where('id', $request->country_code)->first();
+        $cleanCode = ltrim($country_detail->phonecode, '+');
+        $cleanCode = explode('-', $cleanCode)[0];
+        // Update user active country
+        $user->update([
+            'active_country' => $request->country_id,
+            'country'        => $request->country_id,
+            'country_code'   => $request->country_code,
+            'registration_countries'   => [$request->country_id],
+        ]);
+
+        // Create registered profile entry
+        RegisteredProfile::create([
+            'user_id'      => $user->id,
+            'status'       => 2,
+            'mobile_country_iso' => Str::lower($country_detail->iso2),
+            'mobile_country_code' => $cleanCode,
+            'country_code' => $request->country_id, // fixed
+        ]);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Registration country saved successfully'
+        ]);
+    }
     public function remove_qualification_country(Request $request)
     {
         // print_r($request->all());die;
@@ -1515,9 +1563,109 @@ public function ResetPassword(Request $request)
     //     }
     // }
 
+    // public function updateProfession(Request $request)
+    // {
+    //     $nurse_type = json_encode($request->nurseType);
+    //     $nursing_type_1 = json_encode($request->nursing_type_1);
+    //     $nursing_type_2 = json_encode($request->nursing_type_2);
+    //     $nursing_type_3 = json_encode($request->nursing_type_3);
+    //     $nurse_practitioner_menu = json_encode($request->nurse_practitioner_menu);
+    //     $specialties = json_encode($request->specialties);
+    //     $speciality_entry_1 = json_encode($request->speciality_entry_1);
+    //     $speciality_entry_2 = json_encode($request->speciality_entry_2);
+    //     $speciality_entry_3 = json_encode($request->speciality_entry_3);
+    //     $speciality_entry_4 = json_encode($request->speciality_entry_4);
+    //     $surgical_row_box = json_encode($request->surgical_row_box);
+    //     $surgical_obs_care = json_encode($request->surgical_obs_care);
+    //     $surgical_operative_care_1 = json_encode($request->surgical_operative_care1);
+    //     $surgical_operative_care_2 = json_encode($request->surgical_operative_care2);
+    //     $surgical_operative_care_3 = json_encode($request->surgical_operative_care3);
+    //     $neonatal_care = json_encode($request->neonatal_care);
+    //     $surgical_rowpad_box = json_encode($request->surgical_rowpad_box);
+    //     $surgical_operative_carep_1 = json_encode($request->surgical_operative_carep_1);
+    //     $surgical_operative_carep_2 = json_encode($request->surgical_operative_carep_2);
+    //     $surgical_operative_carep_3 = json_encode($request->surgical_operative_carep_3);
+
+    //     $assistent_level = $request->assistent_level;
+    //     $declare_information = $request->declare_information;
+    //     $bio = $request->bio;
+        
+    //     $employee_status = $request->employee_status;
+    //     $permanent_status = $request->permanent_status;
+    //     $temporary_status = $request->temporary_status;
+    //     $unemployeed_status = $request->unemployeement_reason;
+    //     $unemployeed_reason = $request->specify_reason;
+    //     $long_unemplyeed = $request->long_unemployeed;
+    //     $career_advancement_goals = $request->career_advancement_goals;
+
+    //     if ($employee_status == "Permanent") {
+    //         $permanent_status1 = $permanent_status;
+    //     } else {
+    //         $permanent_status1 = "";
+    //     }
+
+    //     if ($employee_status == "Temporary") {
+    //         $temporary_status1 = $temporary_status;
+    //     } else {
+    //         $temporary_status1 = "";
+    //     }
+
+    //     $user_stage = update_user_stage($request->user_id,"Profession");
+
+    //     $post = User::find($request->user_id);
+    //     $post->nurse_data = $nurse_type;
+    //     $post->entry_level_nursing = $nursing_type_1;
+    //     $post->registered_nurses = $nursing_type_2;
+    //     $post->advanced_practioner = $nursing_type_3;
+    //     $post->nurse_prac = $nurse_practitioner_menu;
+    //     $post->specialties = $specialties;
+    //     $post->adults = $speciality_entry_1;
+    //     $post->maternity = $speciality_entry_2;
+    //     $post->paediatrics_neonatal = $speciality_entry_3;
+    //     $post->community = $speciality_entry_4;
+    //     $post->surgical_preoperative = $surgical_row_box;
+    //     $post->surgical_obstrics_gynacology = $surgical_obs_care;
+    //     $post->operating_room = $surgical_operative_care_1;
+    //     $post->operating_room_scout = $surgical_operative_care_2;
+    //     $post->operating_room_scrub = $surgical_operative_care_3;
+    //     $post->neonatal_care = $neonatal_care;
+    //     $post->paedia_surgical_preoperative = $surgical_rowpad_box;
+    //     $post->pad_op_room = $surgical_operative_carep_1;
+    //     $post->pad_qr_scout = $surgical_operative_carep_2;
+    //     $post->pad_qr_scrub = $surgical_operative_carep_3;
+
+    //     $post->assistent_level = $assistent_level;
+    //     $post->declaration_status = $declare_information;
+    //     $post->bio = $bio;
+        
+    //     $post->current_employee_status = $employee_status;
+    //     $post->permanent_status = $permanent_status1;
+    //     $post->temporary_status = $temporary_status1;
+    //     $post->unemployeed_status = $unemployeed_status;
+    //     $post->unemployeed_reason = $unemployeed_reason;
+    //     $post->long_unemplyeed = $long_unemplyeed;
+    //     $post->professional_info_status = "1";
+    //     $post->career_advancement_goals = $career_advancement_goals;
+    //     $post->profession_banner_status = 0;
+    //     $run = $post->save();
+
+    //     if ($run) {
+    //         $json['status'] = 1;
+    //         $json['url'] = url('nurse/my-profile');
+    //         $json['message'] = 'Professional Information Updated Successfully';
+    //     } else {
+    //         $json['status'] = 0;
+    //         $json['message'] = 'Please Try Again';
+    //     }
+
+    //     echo json_encode($json);
+    // }
+
     public function updateProfession(Request $request)
     {
+        $nurse_type_arr = $request->nurseType;
         $nurse_type = json_encode($request->nurseType);
+        //print_r($request->nurseType);die;
         $nursing_type_1 = json_encode($request->nursing_type_1);
         $nursing_type_2 = json_encode($request->nursing_type_2);
         $nursing_type_3 = json_encode($request->nursing_type_3);
@@ -1549,6 +1697,8 @@ public function ResetPassword(Request $request)
         $unemployeed_reason = $request->specify_reason;
         $long_unemplyeed = $request->long_unemployeed;
         $career_advancement_goals = $request->career_advancement_goals;
+        $btn_name = $request->btn_name;
+        $user_id = $request->user_id;
 
         if ($employee_status == "Permanent") {
             $permanent_status1 = $permanent_status;
@@ -1562,44 +1712,75 @@ public function ResetPassword(Request $request)
             $temporary_status1 = "";
         }
 
-        $user_stage = update_user_stage($request->user_id,"Profession");
+        $professionData = Profession::where("user_id",$user_id)->get();
 
-        $post = User::find($request->user_id);
-        $post->nurse_data = $nurse_type;
-        $post->entry_level_nursing = $nursing_type_1;
-        $post->registered_nurses = $nursing_type_2;
-        $post->advanced_practioner = $nursing_type_3;
-        $post->nurse_prac = $nurse_practitioner_menu;
-        $post->specialties = $specialties;
-        $post->adults = $speciality_entry_1;
-        $post->maternity = $speciality_entry_2;
-        $post->paediatrics_neonatal = $speciality_entry_3;
-        $post->community = $speciality_entry_4;
-        $post->surgical_preoperative = $surgical_row_box;
-        $post->surgical_obstrics_gynacology = $surgical_obs_care;
-        $post->operating_room = $surgical_operative_care_1;
-        $post->operating_room_scout = $surgical_operative_care_2;
-        $post->operating_room_scrub = $surgical_operative_care_3;
-        $post->neonatal_care = $neonatal_care;
-        $post->paedia_surgical_preoperative = $surgical_rowpad_box;
-        $post->pad_op_room = $surgical_operative_carep_1;
-        $post->pad_qr_scout = $surgical_operative_carep_2;
-        $post->pad_qr_scrub = $surgical_operative_carep_3;
+        if($btn_name != 'edit' || !empty($professionData)){
 
-        $post->assistent_level = $assistent_level;
-        $post->declaration_status = $declare_information;
-        $post->bio = $bio;
-        
-        $post->current_employee_status = $employee_status;
-        $post->permanent_status = $permanent_status1;
-        $post->temporary_status = $temporary_status1;
-        $post->unemployeed_status = $unemployeed_status;
-        $post->unemployeed_reason = $unemployeed_reason;
-        $post->long_unemplyeed = $long_unemplyeed;
-        $post->professional_info_status = "1";
-        $post->career_advancement_goals = $career_advancement_goals;
-        $post->profession_banner_status = 0;
-        $run = $post->save();
+            //$user_stage = update_user_stage($request->user_id,"Profession");
+
+            //print_r($nurse_type_arr);
+            foreach($nurse_type_arr as $key=>$nurse_type){
+                
+                if (str_contains($key, 'type') && $key !== 'type_0') {
+                    // contains 'word'
+                    //print_r($nurse_type);
+                    foreach($nurse_type as $ntype){
+                        //echo $ntype;
+                        $specialities = $nurse_type_arr[$ntype];
+                        //print_r($specialities);
+                        foreach($specialities as $key1=>$spec){
+                            //print_r($spec);
+                            if (str_contains($key1, 'type') && $key1 !== 'type_0') {
+                                foreach($spec as $spe){
+                                    $spec_arr_id = "type_".$spe;
+                                    $post = new Profession;
+                                    
+                                    $post->user_id = $user_id;
+                                    $post->nurse_data = $ntype;
+                                    $post->specialties = $spe;
+                                    $post->speciality_status = $specialities['speciality_status'][$spec_arr_id]['status'];
+                                    $post->assistent_level = $specialities['speciality_status'][$spec_arr_id]['assistent_level'];
+                                    $post->declaration_status = $declare_information;
+                                    $post->bio = $bio;
+                                    $post->current_employee_status = $specialities['speciality_status'][$spec_arr_id]['employee_status'];
+                                    $post->permanent_status = $specialities['speciality_status'][$spec_arr_id]['permanent_status'];
+                                    $post->temporary_status = $specialities['speciality_status'][$spec_arr_id]['temporary_status'];
+                                    $post->unemployeed_status = '';
+                                    $post->unemployeed_reason = $specialities['speciality_status'][$spec_arr_id]['unemployeement_reason'];
+                                    $post->long_unemplyeed = $specialities['speciality_status'][$spec_arr_id]['long_unemployeed'];
+                                    $post->professional_info_status = "1";
+                                    $post->career_advancement_goals = $career_advancement_goals;
+                                    $post->profession_banner_status = 0;
+                                    $run = $post->save();
+                                }
+                            }
+                        }
+                        
+                    }
+                }
+            }
+
+           
+        }else{
+            
+
+            $post = Profession::find($request->profession_id);
+            $post->nurse_data = $nurse_type;
+            $post->specialties = $specialties;
+            $post->assistent_level = $assistent_level;
+            $post->declaration_status = $declare_information;
+            $post->bio = $bio;
+            $post->current_employee_status = $employee_status;
+            $post->permanent_status = $permanent_status1;
+            $post->temporary_status = $temporary_status1;
+            $post->unemployeed_status = $unemployeed_status;
+            $post->unemployeed_reason = $unemployeed_reason;
+            $post->long_unemplyeed = $long_unemplyeed;
+            $post->professional_info_status = "1";
+            $post->career_advancement_goals = $career_advancement_goals;
+            $post->profession_banner_status = 0;
+            $run = $post->save();
+        }
 
         if ($run) {
             $json['status'] = 1;
@@ -4635,6 +4816,21 @@ public function ResetPassword(Request $request)
         return json_encode($data);
     }
 
+    // public function getNurseType(Request $request)
+    // {
+    //     $nurse_id = $request->nurse_id;
+
+    //     $main_nurse_data = SpecialityModel::where("id",$nurse_id)->first();
+        
+    //     $sub_nurse_data = SpecialityModel::where("parent",$nurse_id)->get();
+        
+    //     $data['main_nurse_id'] = $nurse_id;
+    //     $data['main_nurse_name'] = $main_nurse_data->name;
+    //     $data['sub_nurse_data'] = $sub_nurse_data;
+
+    //     return json_encode($data);
+    // }
+
     public function getNurseType(Request $request)
     {
         $nurse_id = $request->nurse_id;
@@ -4646,6 +4842,13 @@ public function ResetPassword(Request $request)
         $data['main_nurse_id'] = $nurse_id;
         $data['main_nurse_name'] = $main_nurse_data->name;
         $data['sub_nurse_data'] = $sub_nurse_data;
+
+        $specialities_data = PractitionerTypeModel::where("parent","0")->get();
+        
+        if(!empty($specialities_data)){
+            $data['specialities_data'] = $specialities_data;
+            
+        }
 
         return json_encode($data);
     }

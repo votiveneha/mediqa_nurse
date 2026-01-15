@@ -16,6 +16,12 @@ class UserUpdateProfile extends FormRequest
             'country' => 'required',
             'state' => 'required',
             'city' => 'required',
+            'date_of_birth' => [
+                'required',
+                'date',
+                'before_or_equal:today', // not in the future 
+                'before_or_equal:' . now()->subYears(10)->toDateString(), // at least 10 years old 
+            ],
             // 'registration_countries' => ['required', function ($attr, $value, $fail) {
             //     $data = json_decode($value, true);
             //     if (!is_array($data) || count($data) < 1) {
@@ -40,6 +46,7 @@ class UserUpdateProfile extends FormRequest
             'lastname.required' => 'The Last name field is required.',
             'post_code.required' => 'The Post_code field is required.',
             'date_of_birth.required' => 'The Date of Birth field is required.',
+            'date_of_birth.before_or_equal' => 'Date of Birth cannot be in the future and must be at least 10 years old.',
             'country.required' => 'Please Select Country.',
             'state.required' => 'Please Select State.',
             'city.required' => 'The City field is required.',

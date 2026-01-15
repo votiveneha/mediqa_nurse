@@ -947,131 +947,131 @@ input.form-control.numbers.js_mobile_input {
 
 
 
-    if ($('.nurse_type_field').val() == '') {
-      document.getElementById("reqnurseTypeId").innerHTML = "* Please select the type of nurse";
-      isValid = false;
-    }
-
-    $(".subnurse_list").each(function() {
-      var val = $(this).val();
-      //var subpartsval = $(".subspecprofpart_list-"+val).val();
-      console.log("subnurse_list",val);
-      if ($('.subnurse_valid-'+val).val() == '') {
-        document.getElementById("reqsubnursevalid-"+val).innerHTML = "* Please select the type of nurse";
-        isValid = false;
-      }
-
-    });
-
-    if ($('.speciality_type_field').val() == '') {
-      document.getElementById("reqspecialties").innerHTML = "* Please select the Specialties";
-      isValid = false;
-    }
-
-    $(".subspec_list").each(function() {
-      var val = $(this).val();
-      //var subpartsval = $(".subspecprofpart_list-"+val).val();
-      console.log("subspec_list",val);
-      if ($('.subspec_valid-'+val).val() == '') {
-        document.getElementById("reqsubspecvalid-"+val).innerHTML = "* Please select the Specialties";
-        isValid = false;
-      }
-
-    });
-
-
-    // if ($('[name="degree[]"]').val() == '') {
-    //   document.getElementById("reqdegree").innerHTML = "* Please select degree.";
+    // if ($('.nurse_type_field').val() == '') {
+    //   document.getElementById("reqnurseTypeId").innerHTML = "* Please select the type of nurse";
     //   isValid = false;
     // }
 
-    if ($('[name="bio"]').val() == '') {
-      document.getElementById("reqprofessional_bio").innerHTML = "* Please enter the bio.";
-      isValid = false;
-    }
+    // $(".subnurse_list").each(function() {
+    //   var val = $(this).val();
+    //   //var subpartsval = $(".subspecprofpart_list-"+val).val();
+    //   console.log("subnurse_list",val);
+    //   if ($('.subnurse_valid-'+val).val() == '') {
+    //     document.getElementById("reqsubnursevalid-"+val).innerHTML = "* Please select the type of nurse";
+    //     isValid = false;
+    //   }
 
-    if ($('[name="employee_status"]').val() == '') {
-      document.getElementById("reqemployee_status").innerHTML = "* Please select the employee status.";
-      isValid = false;
-    }
+    // });
 
-    if ($('.long_unemplyeed').is(':visible') == true) {
-      if ($('[name="long_unemployeed"]').val() == '') {
-        document.getElementById("reqlong_unemp").innerHTML = "* Please select how long have you been unemployed?";
-        isValid = false;
-      }
-    }
+    // if ($('.speciality_type_field').val() == '') {
+    //   document.getElementById("reqspecialties").innerHTML = "* Please select the Specialties";
+    //   isValid = false;
+    // }
 
-    if ($('.professional_unemplyeed').is(':visible') == true) {
-      if ($('[name="unemployeement_reason"]').val() == '') {
-        document.getElementById("requnempreason").innerHTML = "* Please select Reason for Unemployment";
-        isValid = false;
-      }
-    }
+    // $(".subspec_list").each(function() {
+    //   var val = $(this).val();
+    //   //var subpartsval = $(".subspecprofpart_list-"+val).val();
+    //   console.log("subspec_list",val);
+    //   if ($('.subspec_valid-'+val).val() == '') {
+    //     document.getElementById("reqsubspecvalid-"+val).innerHTML = "* Please select the Specialties";
+    //     isValid = false;
+    //   }
 
+    // });
 
 
-    if ($('.specify_reason_div').hasClass('d-none') == false) {
-      if ($('[name="specify_reason"]').val() == '') {
-        document.getElementById("otherspecify_reason").innerHTML = "* Please select Other (Please specify)";
-        isValid = false;
-      }
-    }
+    // // if ($('[name="degree[]"]').val() == '') {
+    // //   document.getElementById("reqdegree").innerHTML = "* Please select degree.";
+    // //   isValid = false;
+    // // }
 
-    if ($('.professional_permanent').is(':visible') == true) {
-      if ($('[name="permanent_status"]').val() == 'select') {
+    // if ($('[name="bio"]').val() == '') {
+    //   document.getElementById("reqprofessional_bio").innerHTML = "* Please enter the bio.";
+    //   isValid = false;
+    // }
 
-        document.getElementById("reqemployeep_status").innerHTML = "* Please select Permanent Status";
-        isValid = false;
-      }
-    }
+    // if ($('[name="employee_status"]').val() == '') {
+    //   document.getElementById("reqemployee_status").innerHTML = "* Please select the employee status.";
+    //   isValid = false;
+    // }
 
-    if ($('.professional_temporary').is(':visible') == true) {
-      if ($('[name="temporary_status"]').val() == 'select') {
+    // if ($('.long_unemplyeed').is(':visible') == true) {
+    //   if ($('[name="long_unemployeed"]').val() == '') {
+    //     document.getElementById("reqlong_unemp").innerHTML = "* Please select how long have you been unemployed?";
+    //     isValid = false;
+    //   }
+    // }
 
-        document.getElementById("reqemployeet_status").innerHTML = "* Please select Temporary Status";
-        isValid = false;
-      }
-    }
+    // if ($('.professional_unemplyeed').is(':visible') == true) {
+    //   if ($('[name="unemployeement_reason"]').val() == '') {
+    //     document.getElementById("requnempreason").innerHTML = "* Please select Reason for Unemployment";
+    //     isValid = false;
+    //   }
+    // }
 
-    if ($('[name="career_advancement_goals"]').val() == '') {
-      document.getElementById("reqcareergoals").innerHTML = "* Please enter the Career Advancement Goals";
-      isValid = false;
-    }
 
-    if ($('[name="assistent_level"]').val() == '') {
-      document.getElementById("reqassistentlevel").innerHTML = "* Please enter the overall level of experience in nursing/midwifery";
-      isValid = false;
-    }
 
-    if ($(".declare_information").prop('checked') == false) {
-      document.getElementById("reqdeclare_information").innerHTML = "* Please check this checkbox";
-      isValid = false;
-    }
+    // if ($('.specify_reason_div').hasClass('d-none') == false) {
+    //   if ($('[name="specify_reason"]').val() == '') {
+    //     document.getElementById("otherspecify_reason").innerHTML = "* Please select Other (Please specify)";
+    //     isValid = false;
+    //   }
+    // }
 
-    $(".subspecprof_listProfession").each(function() {
-      var val = $(this).val();
-      //var subpartsval = $(".subspecprofpart_list-"+val).val();
-      console.log("subspecprof_listProfession",val);
-      //changeSpecialityStatus($(".speciality_status_columns-" + val).val(),val,subpartsval);
-      if ($(".speciality_status_columns-" + val).val() == '') {
-        document.getElementById("reqsubspeclevelvalid-" + val).innerHTML = "* Please select the speciality status";
-        isValid = false;
-      }
+    // if ($('.professional_permanent').is(':visible') == true) {
+    //   if ($('[name="permanent_status"]').val() == 'select') {
 
-    });
+    //     document.getElementById("reqemployeep_status").innerHTML = "* Please select Permanent Status";
+    //     isValid = false;
+    //   }
+    // }
 
-    $(".subspecprof_listProfession").each(function() {
-      var val = $(this).val();
-      //var subpartsval = $(".subspecprofpart_list-"+val).val();
-      console.log("subspecprof_listProfession",val);
-      //changeSpecialityStatus($(".speciality_status_columns-" + val).val(),val,subpartsval);
-      if ($(".speciality_status_columns-" + val).val() == '') {
-        document.getElementById("reqsubspeclevelvalid-" + val).innerHTML = "* Please select the speciality status";
-        isValid = false;
-      }
+    // if ($('.professional_temporary').is(':visible') == true) {
+    //   if ($('[name="temporary_status"]').val() == 'select') {
 
-    });
+    //     document.getElementById("reqemployeet_status").innerHTML = "* Please select Temporary Status";
+    //     isValid = false;
+    //   }
+    // }
+
+    // if ($('[name="career_advancement_goals"]').val() == '') {
+    //   document.getElementById("reqcareergoals").innerHTML = "* Please enter the Career Advancement Goals";
+    //   isValid = false;
+    // }
+
+    // if ($('[name="assistent_level"]').val() == '') {
+    //   document.getElementById("reqassistentlevel").innerHTML = "* Please enter the overall level of experience in nursing/midwifery";
+    //   isValid = false;
+    // }
+
+    // if ($(".declare_information").prop('checked') == false) {
+    //   document.getElementById("reqdeclare_information").innerHTML = "* Please check this checkbox";
+    //   isValid = false;
+    // }
+
+    // $(".subspecprof_listProfession").each(function() {
+    //   var val = $(this).val();
+    //   //var subpartsval = $(".subspecprofpart_list-"+val).val();
+    //   console.log("subspecprof_listProfession",val);
+    //   //changeSpecialityStatus($(".speciality_status_columns-" + val).val(),val,subpartsval);
+    //   if ($(".speciality_status_columns-" + val).val() == '') {
+    //     document.getElementById("reqsubspeclevelvalid-" + val).innerHTML = "* Please select the speciality status";
+    //     isValid = false;
+    //   }
+
+    // });
+
+    // $(".subspecprof_listProfession").each(function() {
+    //   var val = $(this).val();
+    //   //var subpartsval = $(".subspecprofpart_list-"+val).val();
+    //   console.log("subspecprof_listProfession",val);
+    //   //changeSpecialityStatus($(".speciality_status_columns-" + val).val(),val,subpartsval);
+    //   if ($(".speciality_status_columns-" + val).val() == '') {
+    //     document.getElementById("reqsubspeclevelvalid-" + val).innerHTML = "* Please select the speciality status";
+    //     isValid = false;
+    //   }
+
+    // });
 
     if (isValid == true) {
       $.ajax({
