@@ -186,7 +186,6 @@
        <div class="condition_set">   
    <div class="form-group drp--clr">
         <label class="form-label" for="input-1">Type of Nurse?</label>
-            <input type="hidden" name="speciality_count" class="speciality_count" value="">
             <ul id="type-of-nurse-0" style="display:none;">
                 @php $specialty = specialty();$spcl=$specialty[0]->id;@endphp
                 <?php
@@ -200,12 +199,34 @@
                 @endforeach
                 
             </ul>
-        <select class="js-example-basic-multiple type_of_nurse addAll_removeAll_btn" data-list-id="type-of-nurse-0" name="nurseType[type_0][]" multiple="multiple" onchange="getNurseType('main',0)"></select>
+        <select class="js-example-basic-multiple addAll_removeAll_btn" data-list-id="type-of-nurse-0" name="nurseType[type_0][]" multiple="multiple" onchange="getNurseType('main',0)"></select>
         <span id="reqnurseTypeId" class="reqError valley"></span>
    </div>
 </div>
 <div class="showNurseType-0"></div>
 
+<div class="condition_set">   
+   <div class="form-group drp--clr">
+        <input type="hidden" name="sub_speciality_value" class="sub_speciality_value" value="">
+        <label class="form-label" for="input-1">Specialties</label>
+            <ul id="speciality_preferences-0" style="display:none;">
+                @php $JobSpecialties = JobSpecialties(); @endphp
+                <?php
+                    $k = 1;
+                ?>
+                @foreach($JobSpecialties as $ptl)
+                    <li id="nursing_menus-{{ $k }}" data-value="{{ $ptl->id }}">{{ $ptl->name }}</li>
+                    <?php
+                        $k++;
+                    ?>
+                @endforeach
+                
+            </ul>
+        <select class="js-example-basic-multiple addAll_removeAll_btn" data-list-id="speciality_preferences-0" name="specialties[type_0][]" multiple="multiple" onchange="getSecialities('main',0)"></select>
+        <span id="reqspecialties" class="reqError valley"></span>
+   </div>
+</div>
+<div class="show_specialities-0"></div>
 <div class="form-group level-drp assistent_level_field">
                     <label class="form-label" for="input-1">What is your overall level of experience in nursing/midwifery?</label>
                     <!-- <input class="form-control" type="text" required="" name="fullname" placeholder="Steven Job"> -->
@@ -867,24 +888,8 @@ $(document).ready(function() {
         var val1 = $(val).val();
         console.log("val",val1);
         if(selectedValues.includes(val1) == false){
-          $(".showNurseType-" + k).find(".subnurse_main_div-" + val1).remove();
+          $(".subnurse_main_div-"+val1).remove();
             
-        }
-    });
-
-    $(".subspecnurse_list").each(function () {
-
-        var val1 = $(this).val();
-        console.log("selectedValues_status", selectedValues);
-        console.log("val1_specStatus", val1);
-        if(selectedValues.includes(val1) == false){
-
-          
-          $(".showNurseSpeciality-" + k)
-   .find(".nurse_specialities-" + val1)
-   .remove();
-
-          
         }
     });
 
@@ -917,36 +922,9 @@ $(document).ready(function() {
                             <span id="reqsubnursevalid-'+data1.main_nurse_id+'" class="reqError text-danger valley"></span>\
                             </div>\
                             <div class="subnurse_level-'+data1.main_nurse_id+'"></div>\
-                            <div class="showNurseType-'+data1.main_nurse_id+'"></div>\
-                            <div class="showNurseSpeciality-'+data1.main_nurse_id+'"></div>\
-                            </div>');
+                            </div><div class="show_nurse-'+data1.main_nurse_id+'"></div>');
 
                             selectTwoFunction("-nurse"+data1.main_nurse_id);
-            }else{
-
-              
-                  var speciality_text = "";
-                  for(var j=0;j<data1.specialities_data.length;j++){
-                    
-                    speciality_text += "<li data-value='"+data1.specialities_data[j].id+"'>"+data1.specialities_data[j].name+"</li>"; 
-                    
-                  }
-                  var sub = 'sub';  
-                  if ($(".nurse_specialities-" + data1.main_nurse_id).length === 0) {
-                    $(".showNurseSpeciality-"+k).append('\<div class="condition_set nurse_specialities nurse_specialities-'+data1.main_nurse_id+'">\
-                                <div class="form-group drp--clr">\
-                                  <label class="form-label" for="input-1">Specialties</label>\
-                                  <input type="hidden" name="subspecnurse_list" class="subspecnurse_list subspecnurse_list-'+data1.main_nurse_id+'" value="'+data1.main_nurse_id+'">\
-                                  <ul id="speciality_preferences-'+data1.main_nurse_id+'-0" style="display:none;">'+speciality_text+'</ul>\
-                                  <select class="js-example-basic-multiple'+data1.main_nurse_id+'-0 addAll_removeAll_btn speciality_type_field" data-list-id="speciality_preferences-'+data1.main_nurse_id+'-0" name="nurseType['+data1.main_nurse_id+'][type_0][]" multiple="multiple" onchange="getSecialities(\''+sub+'\',\''+data1.main_nurse_id+'\',0)"></select>\
-                                  <span id="reqspecialties-'+data1.main_nurse_id+'-0" class="reqError text-danger valley"></span>\
-                                </div>\
-                                <div class="show_specialities-'+data1.main_nurse_id+'-0"></div>\
-                              </div>');
-                  }            
-                  selectTwoFunction(data1.main_nurse_id+"-"+0);
-               
-                
             }
             
           }
@@ -955,30 +933,28 @@ $(document).ready(function() {
     }
   }
 
-  function getSecialities(level,nurse_id,k){
+  function getSecialities(level,k){
       // alert();
 
       if(level == "main"){
         var selectedValues = $('.js-example-basic-multiple[data-list-id="speciality_preferences-'+k+'"]').val();
       }else{
-        var selectedValues = $('.js-example-basic-multiple' + nurse_id+"-"+k+'[data-list-id="speciality_preferences-' + nurse_id+"-"+k+'"]').val();
+        var selectedValues = $('.js-example-basic-multiple'+k+'[data-list-id="speciality_preferences-'+k+'"]').val();
       }
       
       console.log("selectedValues",selectedValues);
 
-      $(".show_specialities-"+nurse_id+"-"+k+" .subspec_list").each(function(i,val){
+      $(".show_specialities-"+k+" .subspec_list").each(function(i,val){
             var val1 = $(val).val();
-            console.log("subspec_listval",val1);
+            console.log("val",val1);
             if(selectedValues.includes(val1) == false){
-              $(".subspec_main_div-"+nurse_id+"-"+val1).remove();
+              $(".subspec_main_div-"+val1).remove();
                 
             }
         });
 
       for(var i=0;i<selectedValues.length;i++){
-        
-        if($(".show_specialities-"+nurse_id+"-"+k+" .subspec_main_div-"+nurse_id+"-"+selectedValues[i]).length < 1){
-          
+        if($(".show_specialities-"+k+" .subspec_main_div-"+selectedValues[i]).length < 1){
           $.ajax({
             type: "GET",
             url: "{{ url('/nurse/getSpecialityDatas1') }}",
@@ -994,140 +970,141 @@ $(document).ready(function() {
                 speciality_text += "<li data-value='"+data1.sub_spciality_data[j].id+"'>"+data1.sub_spciality_data[j].name+"</li>"; 
                 
               }
-
-              
-              
               var sub = 'sub';
 
-              if(data1.sub_spciality_data.length < 0){
-                
-                var name = 'nurseType[last]['+nurse_id+'][type_'+data1.main_speciality_id+'][]';
-              }else{
-                var name = 'nurseType['+nurse_id+'][type_'+data1.main_speciality_id+'][]';
-              }
-
               if(data1.sub_spciality_data.length > 0){
-                $(".show_specialities-"+nurse_id+"-"+k).append('\<div class="subspec_main_div subspec_main_div-'+nurse_id+"-"+data1.main_speciality_id+'">\
+                $(".show_specialities-"+k).append('\<div class="subspec_main_div subspec_main_div-'+data1.main_speciality_id+'">\
                               <div class="subspec_div subspec_div-'+data1.main_speciality_id+' form-group level-drp">\
                               <label class="form-label subspec_label subspec_label-'+data1.main_speciality_id+'" for="input-1">'+data1.main_speciality_name+'</label>\
-                              <input type="hidden" name="subspec_list" class="subspec_list subspec_list-'+nurse_id+' subspec_list-'+nurse_id+"-"+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
-                              <ul id="speciality_preferences-'+nurse_id+"-"+data1.main_speciality_id+'" style="display:none;">'+speciality_text+'</ul>\
-                              <select class="js-example-basic-multiple'+nurse_id+"-"+data1.main_speciality_id+' subspec_valid-'+nurse_id+"-"+data1.main_speciality_id+' addAll_removeAll_btn" data-list-id="speciality_preferences-'+nurse_id+"-"+data1.main_speciality_id+'" name="'+name+'" onchange="getSecialities(\''+sub+'\',\''+nurse_id+'\',\''+data1.main_speciality_id+'\')" multiple="multiple"></select>\
-                              <span id="reqsubspecvalid-'+nurse_id+"-"+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
+                              <input type="hidden" name="subspec_list" class="subspec_list subspec_list-'+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
+                              <ul id="speciality_preferences-'+data1.main_speciality_id+'" style="display:none;">'+speciality_text+'</ul>\
+                              <select class="js-example-basic-multiple'+data1.main_speciality_id+' subspec_valid-'+data1.main_speciality_id+' addAll_removeAll_btn" data-list-id="speciality_preferences-'+data1.main_speciality_id+'" name="specialties[type_'+data1.main_speciality_id+'][]" onchange="getSecialities(\''+sub+'\',\''+data1.main_speciality_id+'\')" multiple="multiple"></select>\
+                              <span id="reqsubspecvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
                               </div>\
                               <div class="subspec_level-'+data1.main_speciality_id+'"></div>\
-                              </div><div class="show_specialities-'+nurse_id+"-"+data1.main_speciality_id+'"></div>');
+                              </div><div class="show_specialities-'+data1.main_speciality_id+'"></div>');
 
-                              selectTwoFunction(nurse_id+"-"+data1.main_speciality_id);
+                              selectTwoFunction(data1.main_speciality_id);
               
               }
-
-              
             }
           });
         }
       }
     }
 
-  function selectTwoFunction(select_id) {
+  function selectTwoFunction(select_id){
+    
+      $('.addAll_removeAll_btn').on('select2:open', function() {
+          var $dropdown = $(this);
+          var searchBoxHtml = `
+              
+              <div class="extra-buttons">
+                  <button class="select-all-button" type="button">Select All</button>
+                  <button class="remove-all-button" type="button">Remove All</button>
+              </div>`;
 
-    let $select = $('.js-example-basic-multiple' + select_id);
+          // Remove any existing extra buttons before adding new ones
+          $('.select2-results .extra-search-container').remove();
+          $('.select2-results .extra-buttons').remove();
 
-    // === 1️⃣ Initialize ONLY if not already initialized ===
-    if ($select.data('select2')) {
-        return; // VERY IMPORTANT: stops re-init
-    }
+          // Append the new extra buttons and search box
+          $('.select2-results').prepend(searchBoxHtml);
 
-    // === 2️⃣ Load options from UL (clone per dropdown) ===
-    let listId = $select.data('list-id');
-    let items = [];
+          // Handle Select All button for the current dropdown
+          $('.select-all-button').on('click', function() {
+              var $currentDropdown = $dropdown;
+              var allValues = $currentDropdown.find('option').map(function() {
+                  return $(this).val();
+              }).get();
+              $currentDropdown.val(allValues).trigger('change');
+          });
 
-    $('#' + listId + ' li').each(function() {
-        items.push({
-            id: $(this).data('value'),
-            text: $(this).text()
-        });
-    });
+          // Handle Remove All button for the current dropdown
+          $('.remove-all-button').on('click', function() {
+              var $currentDropdown = $dropdown;
+              $currentDropdown.val(null).trigger('change');
+          });
+      });
+      $('.addAll_removeAll_btn').on('select2:open', function() {
+          var searchBoxHtml = `
+              <div class="extra-search-container">
+                  <input type="text" class="extra-search-box" placeholder="Search...">
+                  <button class="clear-button" type="button">&times;</button>
+              </div>`;
+          
+          if ($('.select2-results').find('.extra-search-container').length === 0) {
+              $('.select2-results').prepend(searchBoxHtml);
+          }
 
-    // === 3️⃣ Initialize Select2 (ONLY ON THIS DROPDOWN) ===
-    $select.select2({
-        data: items,
-        width: '100%',
-        closeOnSelect: true
-    });
+          var $searchBox = $('.extra-search-box');
+          var $clearButton = $('.clear-button');
 
-    // === 4️⃣ Add Select All / Remove All buttons (SCOPED) ===
-    $select.on('select2:open', function() {
-        let $dropdown = $(this);
+          $searchBox.on('input', function() {
 
-        let buttons = `
-        <div class="extra-buttons">
-            <button class="select-all-button" type="button">Select All</button>
-            <button class="remove-all-button" type="button">Remove All</button>
-        </div>
-        `;
+              var searchTerm = $(this).val().toLowerCase();
+              $('.select2-results__option').each(function() {
+                  var text = $(this).text().toLowerCase();
+                  if (text.includes(searchTerm)) {
+                      $(this).show();
+                  } else {
+                      $(this).hide();
+                  }
+              });
 
-        $('.select2-results .extra-buttons').remove();
-        $('.select2-results').prepend(buttons);
+              $clearButton.toggle($searchBox.val().length > 0);
+          });
 
-        $('.select-all-button').off('click').on('click', function() {
-            let allValues = $dropdown.find('option').map(function() {
-                return $(this).val();
-            }).get();
-            $dropdown.val(allValues).trigger('change');
-        });
+          $clearButton.on('click', function() {
+              $searchBox.val('');
+              $searchBox.trigger('input');
+          });
+      });
 
-        $('.remove-all-button').off('click').on('click', function() {
-            $dropdown.val(null).trigger('change');
-        });
-    });
+      $('.js-example-basic-multiple'+select_id).select2();
 
-    // === 5️⃣ Add search box (SCOPED) ===
-    $select.on('select2:open', function() {
+      // Dynamically add the clear button
+      const clearButton = $('<span class="clear-btn">✖</span>');
+      $('.select2-container').append(clearButton);
 
-        let searchBoxHtml = `
-        <div class="extra-search-container">
-            <input type="text" class="extra-search-box" placeholder="Search...">
-            <button class="clear-button" type="button">&times;</button>
-        </div>
-        `;
+      // Handle the visibility of the clear button
+      function toggleClearButton() {
 
-        if ($('.select2-results').find('.extra-search-container').length === 0) {
-            $('.select2-results').prepend(searchBoxHtml);
-        }
+          const selectedOptions = $('.js-example-basic-multiple'+select_id).val();
+          if (selectedOptions && selectedOptions.length > 0) {
+              clearButton.show();
+          } else {
+              clearButton.hide();
+          }
+      }
 
-        $('.extra-search-box').off('input').on('input', function() {
-            let searchTerm = $(this).val().toLowerCase();
+      // Attach change event to select2
+      $('.js-example-basic-multiple'+select_id).on('change', toggleClearButton);
 
-            $('.select2-results__option').each(function() {
-                let text = $(this).text().toLowerCase();
-                $(this).toggle(text.includes(searchTerm));
-            });
-        });
+      // Clear button click event
+      clearButton.click(function() {
 
-        $('.clear-button').off('click').on('click', function() {
-            $('.extra-search-box').val('').trigger('input');
-        });
-    });
+          $('.js-example-basic-multiple'+select_id).val(null).trigger('change');
+          toggleClearButton();
+      });
 
-    // === 6️⃣ Clear button PER DROPDOWN (not global) ===
-    let clearButton = $('<span class="clear-btn">✖</span>');
-    $select.next('.select2').append(clearButton);
+      // Initial check
+      toggleClearButton();
+      $('.js-example-basic-multiple'+select_id).each(function() {
+          let listId = $(this).data('list-id');
 
-    function toggleClearButton() {
-        let val = $select.val();
-        clearButton.toggle(!!(val && val.length));
-    }
-
-    $select.on('change', toggleClearButton);
-    clearButton.on('click', function() {
-        $select.val(null).trigger('change');
-        toggleClearButton();
-    });
-
-    toggleClearButton();
+          let items = [];
+          console.log("listId",listId);
+          $('#' + listId + ' li').each(function() {
+              console.log("value",$(this).data('value'));
+              items.push({ id: $(this).data('value'), text: $(this).text() });
+          });
+          console.log("items",items);
+          $(this).select2({
+              data: items
+          });
+      });
   }
-
 </script>  
 <script type="text/javascript">
   $(document).ready(function() {
@@ -1257,42 +1234,12 @@ $(document).ready(function() {
     $('[name="specialties[]"]').next('.text-danger').remove();
     $('[name="subSpecialties[]"]').next('.text-danger').remove();
 
-    
+
     // Validate nurseType select
-    if ($(".type_of_nurse").val() == '') {
-      
+    if ($('[name="nurseType[]"]').val() == '') {
       document.getElementById("reqnurseTypeId").innerHTML = "* Please select one or more Type of nurse";
       isValid = false;
     }
-
-    $(".subnurse_list").each(function(){
-      var val = $(this).val();
-      if ($(".subnurse_valid-"+val).val() == '') {
-        
-        document.getElementById("reqsubnursevalid-"+val).innerHTML = "* Please select one or more Type of nurse";
-        isValid = false;
-      }
-
-      
-    });
-
-    $(".subspecnurse_list").each(function(){
-      var val = $(this).val();
-      if ($(".js-example-basic-multiple"+val+"-0").val() == '') {
-        document.getElementById("reqspecialties-"+val+"-0").innerHTML = "* Please select one or more Specialities";
-        isValid = false;
-      }
-
-      $(".subspec_list-"+val).each(function(){
-        var val1 = $(this).val();
-        if ($(".subspec_valid-"+val+"-"+val1).val() == '') {
-          document.getElementById("reqsubspecvalid-"+val+"-"+val1).innerHTML = "* Please select one or more Specialities";
-          isValid = false;
-        }
-      });
-    });
-
-    
     if ($('#nurse_select').css('display') !== 'none') {
       // Validate nurseTypeJob select nurseTypeJob
       if ($('[name="nurseTypeJob[]"]').val() == '') {
@@ -1408,9 +1355,6 @@ $(document).ready(function() {
 
 
     returnValue = true;
-
-    
-
     if (emailI.trim() == "") {
 
       document.getElementById("reqTxtemailI").innerHTML = "* Please enter the Email address.";

@@ -160,18 +160,18 @@ class HomeController extends Controller
             foreach (json_decode($user_data->nurse_data) as $key => $values) {
                 if ($key !== 'type_0') {
                     
-                    $nurse_data = array_merge($nurse_data, $values);
+                    //$nurse_data = array_merge($nurse_data, $values);
                 }
             }
         }
-        if($user_data->specialties != NULL){
-            foreach (json_decode($user_data->specialties) as $key => $values) {
-                if ($key !== 'type_0' && $key !== 'speciality_status') {
+        // if($user_data->specialties != NULL){
+        //     foreach (json_decode($user_data->specialties) as $key => $values) {
+        //         if ($key !== 'type_0' && $key !== 'speciality_status') {
                     
-                    $specialities_data = array_merge($specialities_data, $values);
-                }
-            }
-        }
+        //             $specialities_data = array_merge($specialities_data, $values);
+        //         }
+        //     }
+        // }
         
         $specialities_type = (array)json_decode($user_data->specialties);
 
@@ -234,6 +234,7 @@ class HomeController extends Controller
         $lot        = '#' . str_pad($orderform + 1, 4, "0", STR_PAD_LEFT);
         $randnum    = rand(1111111111, 9999999999);
 
+        $nurse_type_arr = $request->nurseType;
         $companyinsert['name']        = $request->fullname;
         $companyinsert['lastname']    = $request->lastname;
         $companyinsert['email']       = $request->email;
@@ -280,6 +281,38 @@ class HomeController extends Controller
 
         $run = User::insert($companyinsert);
         $r   = User::where('email', $request->email)->first();
+
+        $levelKeys = array_filter(array_keys($nurse_type_arr), function($key) {
+            return str_contains($key, 'type') && $key !== 'type_0';
+        });
+
+        $lastLevelKey = end($levelKeys);   // Example: "type_30"
+
+        $lastLevelId = str_replace('type_', '', $lastLevelKey); // 30
+
+        $lastLevelValues = $nurse_type_arr[$lastLevelKey] ?? [];
+
+        foreach($nurse_type_arr as $key=>$nurse_type){
+            if (str_contains($key, 'type') && $key !== 'type_0') {
+                foreach($nurse_type as $ntype){
+                    $specialities = $nurse_type_arr[$ntype];
+                    $lastKey = array_key_last($specialities); // type_98
+                    $specialities_data = $specialities[$lastKey];
+                    //print_r($specialities[$lastKey]);
+                    foreach($specialities_data as $spec){
+                        
+                            
+                                $post = new Profession;
+                                $post->user_id = $r->id;
+                                $post->nurse_data = $ntype;
+                                $post->specialties = $spec;
+                                $run = $post->save();
+                            
+                        
+                    }
+                }
+            }
+        }
 
         // --- removed: event(new Registered($r)); (Laravel default verification)
         Auth::guard('nurse_middle')->login($r);
