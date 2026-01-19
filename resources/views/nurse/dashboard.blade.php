@@ -659,17 +659,22 @@
                 </div>
               </div>
 
+              
+              <div class="modal-header border-0"> 
+                <h5 class="modal-title fw-bold w-100"> Please choose your registration country </h5> 
+              </div>
               <!-- Title -->
-              <h5 class="modal-title fw-bold mt-3 mb-2">
-                Please choose your registration country
-              </h5>
+
 
               <!-- Dropdown -->
               <div class="modal-body">
+                <p class="mb-3"> 
+                  This sets your search country and loads the right jurisdictions and checks. You can add more countries later and switch anytime. 
+                </p>
                 <select class="form-select" id="registration_country">
                   <option value="">Select Country</option>
                   @foreach($countries as $country)
-                    <option value="{{ $country->iso2 }}" data-id="{{ $country->id }}">{{ $country->name }}</option>
+                    <option value="{{ $country->iso2 }}" @if($country->iso2 === 'AU') selected @endif data-id="{{ $country->id }}">{{ $country->name }}</option>
                   @endforeach
                 </select>
                   <input type="hidden" name="country_id" id="country_id">

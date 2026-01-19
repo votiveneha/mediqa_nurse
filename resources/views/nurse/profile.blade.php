@@ -569,7 +569,7 @@ p.highlight-text {
                                 @endphp                    
                                 <div class="form-group mb-4 drp--clr">
                                     <label class="font-sm mb-2">
-                                        Countries of Registration <span class="text-danger">*</span>
+                                        Countries of Registration<span class="text-danger">*</span>  (You must have at least one registration country.)
                                     </label>
 
                                     <input type="hidden"
@@ -649,7 +649,7 @@ p.highlight-text {
                               </span>
                           </h5>
 
-                           @if ($registration_country->status == 2 )
+                          @if (in_array($registration_country->status, [1, 2, null], true))
                             <div class="form-group">
                                 <label>Status</label>
                                 <div class="d-flex gap-3">
@@ -676,27 +676,10 @@ p.highlight-text {
                                     </label>
                                 </div>
                             </div>
+                          @else
+                            <input type="hidden" name="registration[{{ $registration_country->id }}][status]" value="{{ $registration_country->status }}">
                           @endif
-                          {{-- Mobile no --}}
-                          <div class="form-group">
-                              <label>Mobile Number</label>
 
-                              <div class="iti iti--allow-dropdown iti--separate-dial-code w-100">
-                                  <div class="iti__flag-container">
-                                      <div class="iti__selected-flag" title="{{ strtoupper($registration_country->mobile_country_iso) }}">
-                                          <div class="iti__flag iti__{{ strtolower($registration_country->mobile_country_iso) }}"></div>
-                                          <div class="iti__selected-dial-code">
-                                              +{{ $registration_country->mobile_country_code }}
-                                          </div>
-                                      </div>
-                                  </div>
-
-                                  <input type="text"
-                                        class="form-control"  name="registration[{{ $registration_country->id }}][mobile_number]" 
-                                        value="{{ $registration_country->mobile_number }}"
-                                      >
-                              </div>
-                          </div>
                           {{-- Jurisdiction --}}
                           <div class="form-group">
                               <label>Jurisdiction / Registration Authority</label>
@@ -724,9 +707,26 @@ p.highlight-text {
                               {{-- min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" --}}
                               class="form-control">
                         </div>
+                          {{-- Mobile no --}}
+                        <div class="form-group">
+                            <label>Mobile Number</label>
 
+                            <div class="iti iti--allow-dropdown iti--separate-dial-code w-100">
+                                <div class="iti__flag-container">
+                                    <div class="iti__selected-flag" title="{{ strtoupper($registration_country->mobile_country_iso) }}">
+                                        <div class="iti__flag iti__{{ strtolower($registration_country->mobile_country_iso) }}"></div>
+                                        <div class="iti__selected-dial-code">
+                                            +{{ $registration_country->mobile_country_code }}
+                                        </div>
+                                    </div>
+                                </div>
 
-            
+                                <input type="text"
+                                      class="form-control"  name="registration[{{ $registration_country->id }}][mobile_number]" 
+                                      value="{{ $registration_country->mobile_number }}"
+                                    >
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label>Upload Evidence</label>
 
