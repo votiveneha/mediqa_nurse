@@ -44,6 +44,14 @@ return [
             'driver' => 'session',
             'provider' => 'nurses',
         ],
+        'healthcare_facilities' => [
+            'driver' => 'session',
+            'provider' => 'healthcare',
+        ],
+        'agencies' => [
+            'driver' => 'session',
+            'provider' => 'agency',
+        ],
          'admin' => [
             'driver' => 'session',
             'provider' => 'admins',
@@ -78,6 +86,14 @@ return [
         //     'table' => 'users',
         // ],
         'nurses' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\User::class,
+        ],
+        'healthcare' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\User::class,
+        ],
+        'agency' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],

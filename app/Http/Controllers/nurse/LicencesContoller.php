@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use App\Services\User\AuthServices;
 use App\Http\Requests\UserUpdateProfile;
 use App\Http\Requests\UserChangePasswordRequest;
+use App\Http\Requests\ReviewRegisteredCountry;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Crypt;
@@ -46,7 +47,7 @@ class LicencesContoller extends Controller{
         return view ("nurse.registration_licences")->with($data);
     }
 
-    public function editedCountryReg(Request $request)
+    public function editedCountryReg(ReviewRegisteredCountry $request)
     {
 
         // print_r($request->all());die;
