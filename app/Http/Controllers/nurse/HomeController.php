@@ -147,7 +147,7 @@ class HomeController extends Controller
         $work_preferences_data = WorkPreferModel::get();
         return view('nurse.nurseRegister', compact('message','practitioner_data','speciality_data','work_preferences_data'));
     }
-        public function manage_profile($message = '')
+          public function manage_profile($message = '')
     {
         
         $employeement_type_preferences = DB::table("employeement_type_preferences")->where("sub_prefer_id","0")->get();
@@ -164,14 +164,14 @@ class HomeController extends Controller
                 }
             }
         }
-        // if($user_data->specialties != NULL){
-        //     foreach (json_decode($user_data->specialties) as $key => $values) {
-        //         if ($key !== 'type_0' && $key !== 'speciality_status') {
+        if($user_data->specialties != NULL){
+            // foreach (json_decode($user_data->specialties) as $key => $values) {
+            //     if ($key !== 'type_0' && $key !== 'speciality_status') {
                     
-        //             $specialities_data = array_merge($specialities_data, $values);
-        //         }
-        //     }
-        // }
+            //         $specialities_data = array_merge($specialities_data, $values);
+            //     }
+            // }
+        }
         
         $specialities_type = (array)json_decode($user_data->specialties);
 
@@ -181,7 +181,7 @@ class HomeController extends Controller
         $profession_id = isset($_GET['profession_id'])?$_GET['profession_id']:0;
         $profession_data = Profession::where("user_id",$user_id)->get();
         $profession_single_data = Profession::where("profession_id",$profession_id)->first();
-        
+        //print_r($profession_single_data);die;
         //print_r($specialities_data);
         $experience_data = DB::table("user_experience")->where("user_id",$user_id)->get();
 
@@ -1747,74 +1747,133 @@ public function ResetPassword(Request $request)
             $temporary_status1 = "";
         }
 
+        
+
         $professionData = Profession::where("user_id",$user_id)->get();
 
-        if($btn_name != 'edit' || !empty($professionData)){
+        if($btn_name != 'edit'){
 
             //$user_stage = update_user_stage($request->user_id,"Profession");
+            
+            
+
+            //print_r($levelKeys);die;
+
+            
 
             //print_r($nurse_type_arr);
-            foreach($nurse_type_arr as $key=>$nurse_type){
+            foreach($nurse_type_arr as $key1=>$nurse_type){
                 
-                if (str_contains($key, 'type') && $key !== 'type_0') {
+                    if(str_contains($key1, 'type') && $key1 !== 'type_0'){
                     // contains 'word'
                     //print_r($nurse_type);
-                    foreach($nurse_type as $ntype){
-                        //echo $ntype;
-                        $specialities = $nurse_type_arr[$ntype];
-                        //print_r($specialities);
-                        foreach($specialities as $key1=>$spec){
-                            //print_r($spec);
-                            if (str_contains($key1, 'type') && $key1 !== 'type_0') {
-                                foreach($spec as $spe){
-                                    $spec_arr_id = "type_".$spe;
-                                    $post = new Profession;
-                                    
-                                    $post->user_id = $user_id;
-                                    $post->nurse_data = $ntype;
-                                    $post->specialties = $spe;
-                                    $post->speciality_status = $specialities['speciality_status'][$spec_arr_id]['status'];
-                                    $post->assistent_level = $specialities['speciality_status'][$spec_arr_id]['assistent_level'];
-                                    $post->declaration_status = $declare_information;
-                                    $post->bio = $bio;
-                                    $post->current_employee_status = $specialities['speciality_status'][$spec_arr_id]['employee_status'];
-                                    $post->permanent_status = $specialities['speciality_status'][$spec_arr_id]['permanent_status'];
-                                    $post->temporary_status = $specialities['speciality_status'][$spec_arr_id]['temporary_status'];
-                                    $post->unemployeed_status = '';
-                                    $post->unemployeed_reason = $specialities['speciality_status'][$spec_arr_id]['unemployeement_reason'];
-                                    $post->long_unemplyeed = $specialities['speciality_status'][$spec_arr_id]['long_unemployeed'];
-                                    $post->professional_info_status = "1";
-                                    $post->career_advancement_goals = $career_advancement_goals;
-                                    $post->profession_banner_status = 0;
-                                    $run = $post->save();
-                                }
+                        foreach($nurse_type as $ntype){
+                            //echo $ntype;
+                            $specialities = $nurse_type_arr[$ntype];
+
+                            $new_specialities = $specialities;   // make a copy
+                            unset($new_specialities["speciality_status"]);
+
+                            $levelKeys = array_filter(array_keys($new_specialities), function($key) {
+                                return str_contains($key, 'type') && $key !== 'type_0';
+                            });
+
+                            $lastLevelKey = end($levelKeys);   // Example: "type_30"
+
+                            $lastLevelId = str_replace('type_', '', $lastLevelKey); // 30
+
+                            $lastLevelValues = $new_specialities[$lastLevelKey] ?? [];
+
+                            //print_r($lastLevelValues);die;
+                            //print_r($levelKeys);die;
+                            //print_r($specialities);
+                            
+                            foreach($lastLevelValues as $spe){
+                                $spec_arr_id = "type_".$spe;
+                                $post = new Profession;
+                                
+                                $post->user_id = $user_id;
+                                $post->nurse_data = $ntype;
+                                $post->specialties = $spe;
+                                $post->speciality_status = $specialities['speciality_status'][$spec_arr_id]['status'];
+                                $post->assistent_level = $specialities['speciality_status'][$spec_arr_id]['assistent_level'];
+                                $post->declaration_status = $declare_information;
+                                $post->bio = $bio;
+                                $post->current_employee_status = $specialities['speciality_status'][$spec_arr_id]['employee_status'];
+                                $post->permanent_status = $specialities['speciality_status'][$spec_arr_id]['permanent_status'];
+                                $post->temporary_status = $specialities['speciality_status'][$spec_arr_id]['temporary_status'];
+                                $post->unemployeed_status = '';
+                                $post->unemployeed_reason = $specialities['speciality_status'][$spec_arr_id]['unemployeement_reason'];
+                                $post->long_unemplyeed = $specialities['speciality_status'][$spec_arr_id]['long_unemployeed'];
+                                $post->professional_info_status = "1";
+                                $post->career_advancement_goals = $career_advancement_goals;
+                                $post->profession_banner_status = 0;
+                                $run = $post->save();
                             }
+                               
+                            
                         }
-                        
                     }
-                }
             }
 
            
         }else{
-            
-
+            //print_r($nurse_type_arr);
             $post = Profession::find($request->profession_id);
-            $post->nurse_data = $nurse_type;
-            $post->specialties = $specialties;
-            $post->assistent_level = $assistent_level;
-            $post->declaration_status = $declare_information;
-            $post->bio = $bio;
-            $post->current_employee_status = $employee_status;
-            $post->permanent_status = $permanent_status1;
-            $post->temporary_status = $temporary_status1;
-            $post->unemployeed_status = $unemployeed_status;
-            $post->unemployeed_reason = $unemployeed_reason;
-            $post->long_unemplyeed = $long_unemplyeed;
-            $post->professional_info_status = "1";
-            $post->career_advancement_goals = $career_advancement_goals;
-            $post->profession_banner_status = 0;
-            $run = $post->save();
+            foreach($nurse_type_arr as $key1=>$nurse_type){
+                
+                    if(str_contains($key1, 'type') && $key1 !== 'type_0'){
+                    // contains 'word'
+                    //print_r($nurse_type);
+                        foreach($nurse_type as $ntype){
+                            //echo $ntype;
+                            $specialities = $nurse_type_arr[$ntype];
+
+                            $new_specialities = $specialities;   // make a copy
+                            unset($new_specialities["speciality_status"]);
+
+                            $levelKeys = array_filter(array_keys($new_specialities), function($key) {
+                                return str_contains($key, 'type') && $key !== 'type_0';
+                            });
+
+                            $lastLevelKey = end($levelKeys);   // Example: "type_30"
+
+                            $lastLevelId = str_replace('type_', '', $lastLevelKey); // 30
+
+                            $lastLevelValues = $new_specialities[$lastLevelKey] ?? [];
+
+                            //print_r($lastLevelValues);die;
+                            //print_r($levelKeys);die;
+                            //print_r($specialities);
+                            
+                            foreach($lastLevelValues as $spe){
+                                $spec_arr_id = "type_".$spe;
+                                
+                                
+                                $post->user_id = $user_id;
+                                $post->nurse_data = $ntype;
+                                $post->specialties = $spe;
+                                $post->speciality_status = $specialities['speciality_status'][$spec_arr_id]['status'];
+                                $post->assistent_level = $specialities['speciality_status'][$spec_arr_id]['assistent_level'];
+                                $post->declaration_status = $declare_information;
+                                $post->bio = $bio;
+                                $post->current_employee_status = $specialities['speciality_status'][$spec_arr_id]['employee_status'];
+                                $post->permanent_status = $specialities['speciality_status'][$spec_arr_id]['permanent_status'];
+                                $post->temporary_status = $specialities['speciality_status'][$spec_arr_id]['temporary_status'];
+                                $post->unemployeed_status = '';
+                                $post->unemployeed_reason = $specialities['speciality_status'][$spec_arr_id]['unemployeement_reason'];
+                                $post->long_unemplyeed = $specialities['speciality_status'][$spec_arr_id]['long_unemployeed'];
+                                $post->professional_info_status = "1";
+                                $post->career_advancement_goals = $career_advancement_goals;
+                                $post->profession_banner_status = 0;
+                                $run = $post->save();
+                            }
+                               
+                            
+                        }
+                    }
+            }
+            
         }
 
         if ($run) {
@@ -4875,8 +4934,8 @@ public function ResetPassword(Request $request)
         $sub_nurse_data = SpecialityModel::where("parent",$nurse_id)->get();
         
         $data['main_nurse_id'] = $nurse_id;
-        $data['main_nurse_name'] = $main_nurse_data->name;
-        $data['sub_nurse_data'] = $sub_nurse_data;
+        $data['main_nurse_name'] = (!empty($main_nurse_data))?$main_nurse_data->name:'';
+        $data['sub_nurse_data'] = (!empty($sub_nurse_data))?$sub_nurse_data:'';
 
         $specialities_data = PractitionerTypeModel::where("parent","0")->get();
         
