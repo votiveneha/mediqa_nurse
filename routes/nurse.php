@@ -188,8 +188,10 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::post('/uploadLicensesEvidenceImgs', 'LicencesContoller@uploadLicensesEvidenceImgs')->name('uploadLicensesEvidenceImgs');
   Route::post('/deleteLicensesEvidenceImg', 'LicencesContoller@deleteLicensesEvidenceImg')->name('deleteLicensesEvidenceImg');
 	Route::get('/ahpra-lookup/{number}', 'AhpraLookupsController@lookup1')->name('lookup1');
-  
-	/**************[Work Clearance]**************/
+  Route::post('/editedCountryReg', 'LicencesContoller@editedCountryReg')->name('editedCountryReg');
+
+
+    /**************[Work Clearance]**************/
   Route::any('/workClearances','ProfessionalController@workClearances')->name('workClearances');
   Route::post('/update-profession-user-eligibility', 'ProfessionalController@update_eligibility_to_work')->name('update-profession-user-eligibility');
   Route::post('/update-ndis', 'ProfessionalController@updateNdis')->name('update-ndis');

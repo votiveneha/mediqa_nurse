@@ -13,6 +13,9 @@
     display: none !important;
   }
 
+  .iti input, .iti input[type=text], .iti input[type=tel] {
+    padding-left: 80px !important;
+  }
   span.select2.select2-container {
     padding: 5px !important;
     width: 100% !important;
@@ -233,7 +236,225 @@ input:checked + .slider:before {
                     <div class="card shadow-sm border-0 p-4 mt-30">
                       <h3 class="mt-0 color-brand-1 mb-2">Registrations and Licences</h3>
 
-    
+                        {{-- Registration Countries Block --}}
+                    <form class="" id="EditProfile" onsubmit="return editedCountryReg()" method="POST">
+                       @csrf
+                        <div class="col-12 mt-1">
+                                <h5 class="mb-3">Registration & Qualification</h5>
+                                @php
+                                    $user = Auth::guard('nurse_middle')->user();
+
+                                    $registrationCountries = (array) json_decode($user->registration_countries ?? '[]');
+                                    $qualificationCountries = (array) json_decode(
+                                        $user->qualification_countries ?? '[]'
+                                    );
+                                 
+                                    $countries = country_name_from_db();
+                                @endphp                    
+                                <div class="form-group mb-4 drp--clr">
+                                    <label class="font-sm mb-2">
+                                        Countries of Registration<span class="text-danger">*</span>  (You must have at least one registration country.)
+                                    </label>
+
+                                    <input type="hidden"
+                                        name="country_r"
+                                        class="country_r"
+                                        value='{{ json_encode($registrationCountries ?? []) }}'>
+
+                                  <ul id="register_record" style="display:none;">
+                                      @foreach($countries as $r_record)
+                                          <li data-value="{{ $r_record->iso2 }}">
+                                              {{ $r_record->name }}
+                                          </li>
+                                      @endforeach
+                                  </ul>
+                                  <select
+                                      class="js-example-basic-multiple addAll_removeAll_btn"
+                                      data-list-id="register_record"
+                                      name="register_record[]"
+                                      id="registerCountries"
+                                      multiple>
+                                  </select>
+                                    <span id="reqempsdate" class="reqError text-danger valley"></span>
+                                    <small class="text-muted">
+                                        Select the countries where you are registered to practice.
+                                    </small> 
+                                </div>          
+                                <div class="form-group drp--clr">
+                                    <label class="font-sm mb-2">
+                                        Countries of Qualification <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="hidden"
+                                          name="qualification_countries"
+                                          id="qualificationCountriesInput"
+                                          value="{{ json_encode($qualificationCountries) }}">
+
+                                    <ul id="qualification-country-list" style="display:none;">
+                                        @foreach ($countries as $country)
+                                            <li
+                                                data-value="{{ $country->iso2 }}"
+                                                class="{{ in_array($country->iso2, $qualificationCountries) ? 'selected' : '' }}"
+                                            >
+                                                {{ $country->name }}
+                                            </li>
+                                        @endforeach
+                                    </ul>
+
+                                    <select
+                                        class="js-example-basic-multiple addAll_removeAll_btn"
+                                        data-list-id="qualification-country-list"
+                                        id="qualificationCountries"
+                                        multiple
+                                    ></select>
+
+                                    <small class="text-muted">
+                                        We’ve prefilled this based on your registration countries.
+                                        Update if your qualification was in a different country.
+                                    </small>                           
+                                </div>
+                        </div>
+                      <div id="registrationCardsContainer"></div>
+
+                                      @php
+                          $user = Auth::guard('nurse_middle')->user();
+                           $registration_country = DB::table('registration_profiles_countries')->where('user_Id',$user->id)->where('country_code',$user->active_country)->first();
+                           $profile_register_country = DB::table('registration_profiles_countries')->where('user_Id',$user->id)->get();
+                        @endphp
+
+                     @if($profile_register_country->isNotEmpty() && !empty($user->active_country) && !empty($registration_country))
+                     <div class="mb-4 card registration-card registration-card-{{$registration_country->country_code }}" data-existing="1">
+                          <h5 class="d-flex justify-content-between align-items-center">
+                              <span>
+                                  Registration & Licences — {{ country_name($registration_country->country_code) }}
+                              </span>
+
+                              <span class="badge badge-status badge-{{ $registration_country->status }}">
+                                  {{ ucwords(str_replace('_',' ',$registration_country->status)) }}
+                              </span>
+                          </h5>
+                          @if (in_array($registration_country->status, [1, 2, null], true))
+                            <div class="form-group">
+                                <label>Status</label>
+                                <div class="d-flex gap-3">
+                                    <label class="me-3">
+                                        <input type="radio"
+                                              name="registration[{{ $registration_country->id }}][status]"
+                                              value="2"
+                                              {{ $registration_country->status == 2 ? 'checked' : '' }}
+                                              class="status-radio"
+                                              data-code="{{ $registration_country->country_code }}"
+                                              style="width:16px;height:16px;margin-right:6px">
+                                        Draft
+                                    </label>
+
+                                    <label>
+                                        <input type="radio"
+                                              name="registration[{{ $registration_country->id }}][status]"
+                                              value="3"
+                                              {{ $registration_country->status == 3 ? 'checked' : '' }}
+                                              class="status-radio"
+                                              data-code="{{ $registration_country->country_code }}"
+                                              style="width:16px;height:16px;margin-right:6px">
+                                        Submitted (for Review)
+                                    </label>
+                                </div>
+                            </div>
+                          @else
+                            <input type="hidden" name="registration[{{ $registration_country->id }}][status]" value="{{ $registration_country->status }}">
+                          @endif
+                          {{-- Mobile no --}}
+                          <div class="form-group">
+                              <label>Mobile Number</label>
+
+                              <div class="iti iti--allow-dropdown iti--separate-dial-code w-100">
+                                  <div class="iti__flag-container">
+                                      <div class="iti__selected-flag" title="{{ strtoupper($registration_country->mobile_country_iso) }}">
+                                          <div class="iti__flag iti__{{ strtolower($registration_country->mobile_country_iso) }}"></div>
+                                          <div class="iti__selected-dial-code">
+                                              +{{ $registration_country->mobile_country_code }}
+                                          </div>
+                                      </div>
+                                  </div>
+
+                                  <input type="text"
+                                        class="form-control"  name="registration[{{ $registration_country->id }}][mobile_number]" 
+                                        value="{{ $registration_country->mobile_number }}"
+                                      >
+                              </div>
+                          </div>
+                          {{-- Jurisdiction --}}
+                          <div class="form-group">
+                              <label>Jurisdiction / Registration Authority</label>
+                              <input type="text"
+                                    name="registration[{{ $registration_country->id }}][jurisdiction]"
+                                    value="{{ $registration_country->registration_authority_name }}"
+                                    class="form-control">
+                          </div>
+
+                          {{-- License Number --}}
+                          <div class="form-group">
+                              <label>License / Registration Number</label>
+                              <input type="text"
+                                    name="registration[{{ $registration_country->id }}][registration_number]"
+                                    value="{{ $registration_country->registration_number }}"
+                                    class="form-control">
+                          </div>
+
+                          {{-- Expiry Date --}}
+                        <div class="form-group">
+                            <label>Expiry Date</label>
+                            <input type="date"
+                              name="registration[{{ $registration_country->id }}][expiry_date]"
+                              value="{{ \Carbon\Carbon::parse($registration_country->expiry_date)->format('Y-m-d') }}"
+                              {{-- min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" --}}
+                              class="form-control">
+                        </div>
+
+
+            
+                        <div class="form-group">
+                            <label>Upload Evidence</label>
+
+               
+                            <input type="hidden"
+                                  name="registration[{{ $registration_country->id }}][upload_evidence]"
+                                  class="registration_evidence_input-{{ $registration_country->id }}"
+                                  value='{{ $registration_country->upload_evidence }}'>
+
+                            <input type="file"
+                                  class="form-control"
+                                  multiple
+                                  onchange="uploadRegistrationEvidence({{ $registration_country->id }})">
+
+                            <span class="text-danger error-upload-{{ $registration_country->id }}"></span>
+
+                          <div class="mt-2 registration-evidence-preview-{{ $registration_country->id }}">
+                              @if(!empty($registration_country->upload_evidence))
+                                  @foreach(json_decode($registration_country->upload_evidence, true) as $file)
+                                      <div class="trans_img">
+                                        <div>
+                                          <i class="fa fa-file"></i> 
+                                          <a href="{{ url('/public/uploads/registration/' . $file) }}" target="_blank">
+                                              {{ preg_replace('/^\d+_\d+_/', '', $file) }}
+                                          </a>
+                                          <span class="close_btn"
+                                                onclick="removeRegistrationEvidence('{{ $file }}', {{ $registration_country->id }})">
+                                              <i class="fa fa-close"></i>
+                                          </span>
+                                        </div>
+                                      </div>
+                                  @endforeach
+                              @endif
+                          </div>
+
+                        </div>
+
+                      </div>
+                     @endif
+                    <button class="btn btn-apply-big font-md font-bold" @if(!email_verified()) disabled @endif type="submit" id="submitfrm">Save Changes</button>
+                  </form>
+
+
                       <form id="register_licenses_form" method="POST" onsubmit="return update_register_licenses()">
                         @csrf
                         <input type="hidden" name="user_id" value="{{ Auth::guard('nurse_middle')->user()->id }}">
@@ -1700,6 +1921,721 @@ input:checked + .slider:before {
 <script src="{{ url('/public') }}/nurse/assets/js/jquery.ui.datepicker.monthyearpicker.js"></script>
 @include('nurse.front_profile_js');
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js">
+</script>
+<script>
+      function editedCountryReg() {
+
+      let isValid = true;
+
+      // Clear previous errors
+      $('#EditProfile').find('.text-danger').text('');
+
+  
+        $('.registration-card').each(function () {
+
+          const $card = $(this);
+          const status = $card.find('.status-radio:checked').val();
+          const isExisting = $card.data('existing') == 1;
+
+          // Draft → skip
+          if (status !== '3') return true;
+
+          // Existing record → skip validation
+          if (isExisting) return true;
+
+          const jurisdiction = $card.find('.js_jurid_input');
+          const regNumber    = $card.find('.js_reg_number');
+          const expiryDate   = $card.find('.js_expiry_date');
+          const evidence     = $card.find('.js_evidence')[0];
+
+          const errJur  = $card.find('.reqTxtjurisd');
+          const errReg  = $card.find('.reqTxtReg');
+          const errExp  = $card.find('.reqTxtExpiry');
+          const errFile = $card.find('.reqTxtEvidence');
+
+          if (!jurisdiction.val().trim()) {
+              errJur.text('* Jurisdiction is required');
+              isValid = false;
+          }
+
+          if (!regNumber.val().trim()) {
+              errReg.text('* Registration Number is required');
+              isValid = false;
+          }
+
+          if (!expiryDate.val()) {
+              errExp.text('* Expiry Date is required');
+              isValid = false;
+          } else {
+              const selected = new Date(expiryDate.val());
+              const today = new Date();
+              today.setHours(0,0,0,0);
+
+              if (selected < today) {
+                  errExp.text('* Expiry Date cannot be in the past');
+                  isValid = false;
+              }
+          }
+
+          if (!evidence || evidence.files.length === 0) {
+              errFile.text('* Upload Evidence is required');
+              isValid = false;
+          }
+      });
+
+
+      // ❌ Stop AJAX if validation failed
+      if (!isValid) {
+          $('html, body').animate({
+              scrollTop: $('.text-danger:visible:first').offset().top - 120
+          }, 400);
+          return false;
+      }
+
+      // ✅ AJAX submit
+      $.ajax({
+          url: "{{ url('/nurse/editedCountryReg') }}",
+          type: "POST",
+          cache: false,
+          contentType: false,
+          processData: false,
+          data: new FormData($('#EditProfile')[0]),
+          dataType: 'json',
+          headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          beforeSend: function () {
+              $('#submitfrm').prop('disabled', true).text('Processing...');
+          },
+          success: function (res) {
+              $('#submitfrm').prop('disabled', false).text('Update Profile');
+              if (res.status == '2') {
+                  Swal.fire({
+                      icon: 'success',
+                      title: 'Success',
+                      text: 'Country Updated Successfully',
+                  }).then(() => {
+                      window.location.href = "{{ route('nurse.registration_licences') }}?page=registration_licences";
+                  });
+              } else {
+                  Swal.fire({
+                      icon: 'error',
+                      title: 'Error',
+                      text: res.message,
+                  });
+              }
+          },
+          error: function(errorss) {
+              $('#submitfrm').prop('disabled', false).text('Submit');
+
+              // Clear old errors
+              $("#EditProfile .text-danger").remove();
+
+              $.each(errorss.responseJSON.errors, function (field, messages) {
+                  // Convert dot notation to bracket notation
+                  // Example: registration.68.jurisdiction → registration[68][jurisdiction]
+                  let parts = field.split('.');
+                  let inputName = parts.shift(); // "registration"
+                  while (parts.length) {
+                      inputName += '[' + parts.shift() + ']';
+                  }
+
+                  // Find the input
+                  let input = $("#EditProfile").find("[name='" + inputName + "']");
+
+                  if (input.length) {
+                      $.each(messages, function (i, msg) {
+                          input.after("<div class='text-danger'>" + msg + "</div>");
+                      });
+                  } else {
+                      // fallback: show at top if input not found
+                      $("#countryError").append("<div class='text-danger'>" + messages[0] + "</div>");
+                  }
+              });
+          }
+      });
+
+      return false;
+   }
+</script>
+<script>
+$(document).ready(function () {
+
+    $('#submitfrm').on('click', function (e) {
+
+        let regCountries  = $('#registerCountries').select2('data');
+        let qualCountries = $('#qualificationCountries').select2('data');
+
+        let valid = true;
+
+        // reset errors
+        $('.select2-error').remove();
+
+
+        if (regCountries.length === 0) {
+            $('#registerCountries')
+                .after('<span class="select2-error text-danger d-block mt-1">Please select at least one registration country.</span>');
+
+            $('#registerCountries').select2('open');
+            valid = false;
+        }
+
+
+        if (qualCountries.length === 0) {
+            $('#qualificationCountries')
+                .after('<span class="select2-error text-danger d-block mt-1">Please select at least one qualification country.</span>');
+
+            if (valid) {
+                $('#qualificationCountries').select2('open');
+            }
+
+            valid = false;
+        }
+
+        if (!valid) {
+            e.preventDefault();
+            return false;
+        }
+
+        // ✔ allow submit
+        $('#profileForm').submit();
+    });
+
+});
+</script>
+
+<script type="text/template" id="registration-card-template">
+  <div class="mb-4 registration-card registration-card-__CODE__"
+       data-country="__CODE__"
+       data-existing="0">
+
+    <h5>Registration & Licences — __COUNTRY_NAME__</h5>
+
+      <!-- STATUS -->
+    <div class="form-group">
+        <label>Status</label>
+        <div class="d-flex gap-3">
+            <label class="me-3 d-flex align-items-center">
+                <input type="radio"
+                      name="registration[new][__CODE__][status]"
+                      value="2"
+                      checked
+                      class="status-radio"
+                      data-code="__CODE__"
+                      style="width:16px;height:16px;margin-right:6px">
+                Draft
+            </label>
+
+            <label class="d-flex align-items-center">
+                <input type="radio"
+                      name="registration[new][__CODE__][status]"
+                      value="3"
+                      class="status-radio" 
+                      data-code="__CODE__"
+                      style="width:16px;height:16px;margin-right:6px">
+                Submit  (for Review)
+            </label>
+        </div>
+    </div>
+
+     <!-- MOBILE -->
+    <div class="form-group">
+        <label>Mobile No</label>
+    <div>
+        <input type="tel"
+              class="form-control numbers js_mobile_input"
+              autocomplete="off"
+              maxlength="10">
+
+        <!-- hidden fields -->
+        <input type="hidden"
+              class="mobile_country_code"
+              name="registration[new][__CODE__][mobile_country_code]">
+
+        <input type="hidden"
+              class="mobile_country_iso"
+              name="registration[new][__CODE__][mobile_country_iso]">
+
+        <input type="hidden"
+              class="mobile_number"
+              name="registration[new][__CODE__][mobile_number]">
+              </div>
+    </div>
+
+    <div class="form-group">
+        <label>Jurisdiction / Registration Authority</label>
+        <input type="text"
+              name="registration[new][__CODE__][jurisdiction]"
+              class="form-control js_jurid_input">
+        <span class="reqTxtjurisd text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>License / Registration Number</label>
+        <input type="text"
+              name="registration[new][__CODE__][registration_number]"
+              class="form-control js_reg_number">
+        <span class="reqTxtReg text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Expiry Date</label>
+        <input type="date"
+              min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}"
+              name="registration[new][__CODE__][expiry_date]"
+              class="form-control js_expiry_date">
+        <span class="reqTxtExpiry text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Upload Evidence</label>
+        <input type="file"
+              name="registration[new][__CODE__][upload_evidence][]"
+              class="form-control js_evidence evidence-input"
+              data-code="__CODE__"
+              multiple>
+        <span class="reqTxtEvidence text-danger"></span>
+         <div class="mt-2 registration-evidence-preview___CODE__"></div>
+    </div>
+
+  </div>
+</script>
+<script>
+    $(document).on('change', '.status-radio', function () {
+      let code   = $(this).data('code');
+      let value  = $(this).val();
+      let $badge = $('.status-badge-' + code);
+
+      if (value === 'submitted') {
+          $badge
+              .removeClass('badge-pending')
+              .addClass('badge-submitted')
+              .text('Submitted');
+      } else {
+          $badge
+              .removeClass('badge-submitted')
+              .addClass('badge-pending')
+              .text('Pending');
+      }
+  });
+
+    $(document).on('change', '.evidence-input', function () {
+
+        let files   = this.files;
+        let code    = $(this).data('code');
+        let $preview = $('.registration-evidence-preview_' + code);
+
+        // clear previous preview
+        $preview.html('');
+
+        Array.from(files).forEach((file, index) => {
+
+            let html = `
+              <div class="trans_img">
+                <div  data-index="${index}">
+                    <i class="fa fa-file"></i> ${file.name}
+                    <span class="close_btn remove-temp-file"
+                          data-code="${code}"
+                          data-index="${index}">
+                        <i class="fa fa-close"></i>
+                    </span>
+                </div>
+              </div> 
+            `;
+
+            $preview.append(html);
+        });
+    });
+
+    $(document).on('click', '.remove-temp-file', function () {
+
+        let code  = $(this).data('code');
+        let index = $(this).data('index');
+
+        let input = document.querySelector(
+            `.evidence-input[data-code="${code}"]`
+        );
+
+        let dt = new DataTransfer();
+
+        Array.from(input.files).forEach((file, i) => {
+            if (i !== index) {
+                dt.items.add(file);
+            }
+        });
+
+        input.files = dt.files;
+
+        // remove preview item
+        $(this).closest('.trans_img').remove();
+    });
+
+
+    $(document).ready(function () {
+
+        let $regSelect  = $('#registerCountries');
+        let $qualSelect = $('#qualificationCountries');
+        let $cardsWrap  = $('#registrationCardsContainer');
+
+        let savedRegistration = $('.country_r').val()
+            ? JSON.parse($('.country_r').val())
+            : [];
+
+
+        let prevRegistration = [...savedRegistration];
+
+        $regSelect.on('select2:unselecting', function (e) {
+
+          let code = e.params.args.data.id;
+
+
+          if (!savedRegistration.includes(code)) {
+              return;
+          }
+
+          e.preventDefault(); // stop select2 auto removal
+
+              Swal.fire({
+                  title: 'Are you sure?',
+                  text: 'This registration is already saved. Do you want to remove it?',
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonText: 'Yes, remove it',
+                  cancelButtonText: 'No, keep it'
+              }).then((result) => {
+                  if (result.isConfirmed) {
+                      // ✅ run your AJAX removal here
+                      $.ajax({
+                          url: "{{ url('/nurse/remove-registration-country') }}",
+                          type: "POST",
+                          data: {
+                              _token: "{{ csrf_token() }}",
+                              country_code: code
+                          },
+                          success: function (res) {
+                              if (res.status === true) {
+                                  savedRegistration = savedRegistration.filter(c => c !== code);
+                                  let values = $regSelect.val() || [];
+                                  values = values.filter(v => v !== code);
+                                  $regSelect.val(values).trigger('change');
+                                  $('.registration-card[data-country="' + code + '"]').remove();
+                              }
+                              window.location.reload();
+                          }
+                      });
+                  }
+              });
+
+            });
+
+            $qualSelect.on('select2:unselecting', function (e) {
+                  let code = e.params.args.data.id;
+                  e.preventDefault();
+
+                  Swal.fire({
+                      title: 'Remove qualification?',
+                      text: 'Are you sure you want to remove this qualification country?',
+                      icon: 'warning',
+                      showCancelButton: true,
+                      confirmButtonText: 'Yes, remove it',
+                      cancelButtonText: 'Cancel'
+                  }).then((result) => {
+                      if (result.isConfirmed) {
+                          $.ajax({
+                              url: "{{ url('/nurse/remove-qualification-country') }}",
+                              type: "POST",
+                              data: {
+                                  _token: "{{ csrf_token() }}",
+                                  country_code: code
+                              },
+                              success: function (res) {
+                                  if (res.status === true) {
+                                      let values = $qualSelect.val() || [];
+                                      values = values.filter(v => v !== code);
+                                      $qualSelect.val(values).trigger('change');
+                                      $('#qualificationCountriesInput').val(JSON.stringify(values));
+                                  }
+                              }
+                          });
+                      }
+                  });
+
+              });
+
+        /* ===============================
+          HELPERS
+        =============================== */
+        function getCountryName(code) {
+            return $('#register_record li[data-value="' + code + '"]').text().trim();
+        }
+
+        function createRegistrationCard(code) {
+
+            // prevent duplicate card
+            if ($('.registration-card[data-country="' + code + '"]').length) {
+                return;
+            }
+
+            let template = $('#registration-card-template').html();
+            let html = template
+                .replaceAll('__CODE__', code)
+                .replace('__COUNTRY_NAME__', getCountryName(code));
+
+            $cardsWrap.append(html);
+            const $newCard = $('.registration-card[data-country="' + code + '"]');
+            initMobileInput($newCard);
+        }
+
+        function removeRegistrationCard(code) {
+            $('.registration-card[data-country="' + code + '"]').remove();
+        }
+
+        /* ===============================
+          INIT SELECT2
+        =============================== */
+        $('.js-example-basic-multiple').select2();
+
+        /* ===============================
+          AUTO SELECT DB COUNTRIES
+        =============================== */
+        if (savedRegistration.length) {
+            $regSelect.val(savedRegistration).trigger('change');
+        }
+
+        /* ===============================
+          REGISTRATION CHANGE
+        =============================== */
+        $regSelect.on('change', function () {
+
+            let current = $(this).val() || [];
+
+            // newly added
+            let added = current.filter(c => !prevRegistration.includes(c));
+
+            // removed
+            let removed = prevRegistration.filter(c => !current.includes(c));
+
+            // create cards
+            added.forEach(code => {
+                createRegistrationCard(code);
+            });
+
+            // remove cards ONLY if newly added (not DB ones)
+            removed.forEach(code => {
+                if (!savedRegistration.includes(code)) {
+                    removeRegistrationCard(code);
+                }
+            });
+
+            // auto sync qualification
+            let qualification = $qualSelect.val() || [];
+            added.forEach(code => {
+                if (!qualification.includes(code)) {
+                    qualification.push(code);
+                }
+            });
+
+            $qualSelect.val(qualification).trigger('change');
+
+            prevRegistration = [...current];
+        });
+
+    });
+</script>
+<script>
+  
+    function initMobileInput($card) {
+
+        if (!$card.length) return;
+
+        const iso2  = $card.data('country').toLowerCase();
+        const input = $card.find('.js_mobile_input')[0];
+
+        if (!iso2 || !input) return;
+
+        const iti = window.intlTelInput(input, {
+            initialCountry: iso2,
+            separateDialCode: true,
+
+            /* 🔒 LOCK BEHAVIOUR */
+            allowDropdown: false,
+            nationalMode: true,
+            formatOnDisplay: false,
+            autoPlaceholder: 'off'
+        });
+
+        // set country data once
+        const data = iti.getSelectedCountryData();
+        $card.find('.mobile_country_code').val(data.dialCode);
+        $card.find('.mobile_country_iso').val(data.iso2);
+
+        // only allow digits, no overwrite
+        input.addEventListener('input', function () {
+            this.value = this.value.replace(/[^\d]/g, '');
+            $card.find('.mobile_number').val(this.value);
+        });
+    }
+
+</script>
+
+<script>
+  $(document).ready(function() {
+    /* ===============================
+      ELEMENTS & DB DATA
+    =============================== */
+    let $regSelect = $('#registerCountries');
+    let $qualSelect = $('#qualificationCountries');
+
+    let savedRegistration = [];
+    let savedQualification = [];
+
+    if ($('.country_r').val() !== '') {
+      savedRegistration = JSON.parse($('.country_r').val());
+    }
+
+    if ($('#qualificationCountriesInput').val() !== '') {
+      savedQualification = JSON.parse($('#qualificationCountriesInput').val());
+    }
+
+    let prevRegistration = [...savedRegistration];
+
+    /* ===============================
+      BUILD OPTIONS (ONCE)
+    =============================== */
+    function buildOptions(listSelector, $select) {
+      $(listSelector + ' li').each(function() {
+        let value = $(this).data('value');
+        let text = $(this).text().trim();
+
+        if ($select.find('option[value="' + value + '"]').length === 0) {
+          $select.append(new Option(text, value, false, false));
+        }
+      });
+    }
+
+    buildOptions('#register_record', $regSelect);
+    buildOptions('#qualification-country-list', $qualSelect);
+
+
+    $('.js-example-basic-multiple').select2();
+
+
+    if (savedRegistration.length) {
+      $regSelect.val(savedRegistration).trigger('change');
+    }
+
+    if (savedQualification.length) {
+      $qualSelect.val(savedQualification).trigger('change');
+    }
+
+
+    $regSelect.on('change', function() {
+
+      let currentRegistration = $(this).val() || [];
+      let qualification = $qualSelect.val() || [];
+
+      // only newly added registration countries
+      let newlyAdded = currentRegistration.filter(
+        c => !prevRegistration.includes(c)
+      );
+
+      // auto add to qualification
+      newlyAdded.forEach(code => {
+        if (!qualification.includes(code)) {
+          qualification.push(code);
+        }
+      });
+
+      // ❌ DO NOT remove DB qualification countries
+      $qualSelect.val(qualification).trigger('change');
+
+      // update hidden inputs
+      $('#registrationCountriesInput').val(JSON.stringify(currentRegistration));
+      $('#qualificationCountriesInput').val(JSON.stringify(qualification));
+
+      prevRegistration = [...currentRegistration];
+    });
+
+    /* ===============================
+      QUALIFICATION CHANGE
+    =============================== */
+    $qualSelect.on('change', function() {
+      let qualification = $(this).val() || [];
+      $('#qualificationCountriesInput').val(JSON.stringify(qualification));
+    });
+
+  });
+</script>
+
+<script>
+  function uploadRegistrationEvidence(registrationId) {
+
+    let input = event.target;
+    let files = input.files;
+
+    if (!files.length) return;
+
+    let formData = new FormData();
+    formData.append('registration_id', registrationId);
+
+    for (let i = 0; i < files.length; i++) {
+      formData.append('files[]', files[i]);
+    }
+
+    $.ajax({
+      url: "{{ url('/nurse/upload-registration-evidence') }}",
+      type: "POST",
+      data: formData,
+      contentType: false,
+      processData: false,
+      headers: {
+        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+      },
+      success: function(res) {
+
+        let existing = $('.registration_evidence_input-' + registrationId).val();
+        let existingArr = existing ? JSON.parse(existing) : [];
+
+        let merged = existingArr.concat(res.files);
+
+        $('.registration_evidence_input-' + registrationId)
+          .val(JSON.stringify(merged));
+
+        res.files.forEach(file => {
+          $('.registration-evidence-preview-' + registrationId).append(`
+                  <div class="trans_img">
+                    <div >
+                        <i class="fa fa-file"></i> ${file}
+                        <span class="close_btn"
+                              onclick="removeRegistrationEvidence('${file}', ${registrationId})">
+                            <i class="fa fa-close"></i>
+                        </span>
+                    </div>
+                  </div> 
+                `);
+        });
+      }
+    });
+  }
+
+  function removeRegistrationEvidence(fileName, registrationId) {
+
+    let input = $('.registration_evidence_input-' + registrationId);
+    let files = JSON.parse(input.val() || '[]');
+
+    files = files.filter(f => f !== fileName);
+    input.val(JSON.stringify(files));
+
+    $.ajax({
+      url: "{{ url('/nurse/remove-registration-evidence') }}",
+      type: "POST",
+      data: {
+        registration_id: registrationId,
+        file: fileName,
+        _token: '{{ csrf_token() }}'
+      }
+    });
+
+    event.target.closest('.trans_img').remove();
+  }
 </script>
 <script>
     $('.addAll_removeAll_btn').on('select2:open', function() {

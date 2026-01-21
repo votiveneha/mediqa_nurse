@@ -1473,89 +1473,107 @@ public function ResetPassword(Request $request)
 
     public function updateProfile(UserUpdateProfile $request)
     {
-
-        // print_r($request->all());die;
         try {
-
-            $run    = $this->authServices->updateAdminProfile($request);
-            $userId = Auth::guard('nurse_middle')->user()->id;
-
-            if (!empty($request->registration)) {
-
-                foreach ($request->registration as $key => $registrations) {
-
-                    /* ===============================
-                   1️⃣ NEW REGISTRATIONS
-                =============================== */
-                    if ($key === 'new') {
-
-                        foreach ($registrations as $countryCode => $data) {
-
-                            // upload files
-                            $uploadedFiles = $this->uploadRegistrationFiles(
-                                $data['upload_evidence'] ?? []
-                            );
-
-                            RegisteredProfile::create([
-                                'user_id'       => $userId,
-                                'country_code'  => $countryCode,
-                                'status'         => $data['status'],
-                                'registration_authority_name' => $data['jurisdiction'] ?? null,
-                                'registration_number'         => $data['registration_number'] ?? null,
-                                'expiry_date'                 => $data['expiry_date'] ?? null,
-                                'mobile_country_code'         => $data['mobile_country_code'] ?? null,
-                                'mobile_country_iso'          => $data['mobile_country_iso'] ?? null,
-                                'mobile_number'               => $data['mobile_number'] ?? null,
-                                'upload_evidence'             => json_encode($uploadedFiles),
-                            ]);
-                        }
-
-                        continue;
-                    }
-
-                    /* ===============================
-                   2️⃣ EXISTING REGISTRATIONS
-                =============================== */
-                    $profile = RegisteredProfile::where('id', $key)
-                        ->where('user_id', $userId)
-                        ->first();
-
-                    if (!$profile) {
-                        continue;
-                    }
-
-                    $profile->update([
-                        'registration_authority_name' => $registrations['jurisdiction'] ?? null,
-                        'registration_number'         => $registrations['registration_number'] ?? null,
-                        'expiry_date'                 => $registrations['expiry_date'] ?? null,
-                        'mobile_number'               => $registrations['mobile_number'] ?? null,
-                        'status'                      => $registrations['status'] ?? null,
-
-                    ]);
-                }
+            $run = $this->authServices->updateAdminProfile($request);
+            $id = Auth::guard('nurse_middle')->user()->id;
+            $user_stage = update_user_stage($id,"My Profile");
+            if ($run) {
+                return response()->json(['status' => '2', 'message' => __('message.statusTwo', ['parameter' => 'Profile'])]);
+            } else {
+                return response()->json(['status' => '0', 'message' => __('message.statusZero')]);
             }
 
-            update_user_stage($userId, "My Profile");
-
-            return response()->json([
-                'status'  => '2',
-                'message' => __('message.statusTwo', ['parameter' => 'Profile'])
-            ]);
         } catch (\Exception $e) {
-
-            Log::error(
-                'Error in SettingController/updateProfile : ' .
-                    $e->getMessage() .
-                    ' in line ' .
-                    $e->getLine()
-            );
-
-            return response()->json([
-                'status'  => '0',
-                'message' => __('message.statusZero')
-            ]);
+            log::error('Error in SettingController/updateProfile :' . $e->getMessage() . 'in line' . $e->getLine());
+            return response()->json(['status' => '0', 'message' => __('message.statusZero')]);
         }
     }
+
+    // public function updateProfile(UserUpdateProfile $request)
+    // {
+
+    //     // print_r($request->all());die;
+    //     try {
+
+    //         $run    = $this->authServices->updateAdminProfile($request);
+    //         $userId = Auth::guard('nurse_middle')->user()->id;
+
+    //         if (!empty($request->registration)) {
+
+    //             foreach ($request->registration as $key => $registrations) {
+
+    //                 /* ===============================
+    //                1️⃣ NEW REGISTRATIONS
+    //             =============================== */
+    //                 if ($key === 'new') {
+
+    //                     foreach ($registrations as $countryCode => $data) {
+
+    //                         // upload files
+    //                         $uploadedFiles = $this->uploadRegistrationFiles(
+    //                             $data['upload_evidence'] ?? []
+    //                         );
+
+    //                         RegisteredProfile::create([
+    //                             'user_id'       => $userId,
+    //                             'country_code'  => $countryCode,
+    //                             'status'         => $data['status'],
+    //                             'registration_authority_name' => $data['jurisdiction'] ?? null,
+    //                             'registration_number'         => $data['registration_number'] ?? null,
+    //                             'expiry_date'                 => $data['expiry_date'] ?? null,
+    //                             'mobile_country_code'         => $data['mobile_country_code'] ?? null,
+    //                             'mobile_country_iso'          => $data['mobile_country_iso'] ?? null,
+    //                             'mobile_number'               => $data['mobile_number'] ?? null,
+    //                             'upload_evidence'             => json_encode($uploadedFiles),
+    //                         ]);
+    //                     }
+
+    //                     continue;
+    //                 }
+
+    //                 /* ===============================
+    //                2️⃣ EXISTING REGISTRATIONS
+    //             =============================== */
+    //                 $profile = RegisteredProfile::where('id', $key)
+    //                     ->where('user_id', $userId)
+    //                     ->first();
+
+    //                 if (!$profile) {
+    //                     continue;
+    //                 }
+
+    //                 $profile->update([
+    //                     'registration_authority_name' => $registrations['jurisdiction'] ?? null,
+    //                     'registration_number'         => $registrations['registration_number'] ?? null,
+    //                     'expiry_date'                 => $registrations['expiry_date'] ?? null,
+    //                     'mobile_number'               => $registrations['mobile_number'] ?? null,
+    //                     'status'                      => $registrations['status'] ?? null,
+
+    //                 ]);
+    //             }
+    //         }
+
+    //         update_user_stage($userId, "My Profile");
+
+    //         return response()->json([
+    //             'status'  => '2',
+    //             'message' => __('message.statusTwo', ['parameter' => 'Profile'])
+    //         ]);
+    //     } catch (\Exception $e) {
+
+    //         Log::error(
+    //             'Error in SettingController/updateProfile : ' .
+    //                 $e->getMessage() .
+    //                 ' in line ' .
+    //                 $e->getLine()
+    //         );
+
+    //         return response()->json([
+    //             'status'  => '0',
+    //             'message' => __('message.statusZero')
+    //         ]);
+    //     }
+    // }
     private function uploadRegistrationFiles($files)
     {
         $uploadedFiles = [];
@@ -1578,23 +1596,7 @@ public function ResetPassword(Request $request)
 
         return $uploadedFiles;
     }
-    // public function updateProfile(UserUpdateProfile $request)
-    // {
-    //     try {
-    //         $run = $this->authServices->updateAdminProfile($request);
-    //         $id = Auth::guard('nurse_middle')->user()->id;
-    //         $user_stage = update_user_stage($id,"My Profile");
-    //         if ($run) {
-    //             return response()->json(['status' => '2', 'message' => __('message.statusTwo', ['parameter' => 'Profile'])]);
-    //         } else {
-    //             return response()->json(['status' => '0', 'message' => __('message.statusZero')]);
-    //         }
-            
-    //     } catch (\Exception $e) {
-    //         log::error('Error in SettingController/updateProfile :' . $e->getMessage() . 'in line' . $e->getLine());
-    //         return response()->json(['status' => '0', 'message' => __('message.statusZero')]);
-    //     }
-    // }
+
 
     // public function updateProfession(Request $request)
     // {

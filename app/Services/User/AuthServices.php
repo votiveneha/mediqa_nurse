@@ -49,8 +49,8 @@ class AuthServices
             $companyinsert['emegency_country_code'] = $request->emergency_countryCode;
             $companyinsert['emergency_country_iso'] = $request->emergency_countryiso;
             //$companyinsert['user_stage'] = "5";
-            $companyinsert['registration_countries'] = array_values($request->register_record);
-            $companyinsert['qualification_countries'] = $request->qualification_countries;
+            // $companyinsert['registration_countries'] = array_values($request->register_record);
+            // $companyinsert['qualification_countries'] = $request->qualification_countries;
             $companyinsert['basic_info_status'] = "1";
             $companyinsert['nationality'] = $request->nationality;
  

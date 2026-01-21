@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\LicensesModel;
+use App\Models\User;
+use App\Models\RegisteredProfile;
 use Illuminate\Support\Facades\Log;
 use App\Services\User\AuthServices;
 use App\Http\Requests\UserUpdateProfile;
@@ -32,9 +34,132 @@ class LicencesContoller extends Controller{
     {
         $user_id = Auth::guard('nurse_middle')->user()->id;
         $data['licenses_data'] = LicensesModel::where("user_id",$user_id)->first();
+        //registration profile
+        $data['registration_profile'] = DB::table("registration_profiles_countries")->where("user_id", $user_id)->get();
+        //Auto status update when date is expired 
+        RegisteredProfile::whereNotNull('expiry_date')
+            ->whereDate('expiry_date', '<', Carbon::today())
+            ->where('status', '!=', 'expired')
+            ->update([
+                'status' => 7
+            ]);
         return view ("nurse.registration_licences")->with($data);
     }
 
+    public function editedCountryReg(Request $request)
+    {
+
+        // print_r($request->all());die;
+        try {
+
+            // $run    = $this->authServices->updateAdminProfile($request);
+            $userId = Auth::guard('nurse_middle')->user()->id;
+
+            User::where('id', $userId)->update([
+                'registration_countries'  => array_values($request->register_record),
+                'qualification_countries' => $request->qualification_countries
+            ]);
+
+
+            if (!empty($request->registration)) {
+
+                foreach ($request->registration as $key => $registrations) {
+
+                    /* ===============================
+                   1️⃣ NEW REGISTRATIONS
+                =============================== */
+                    if ($key === 'new') {
+
+                        foreach ($registrations as $countryCode => $data) {
+
+                            // upload files
+                            $uploadedFiles = $this->uploadRegistrationFiles(
+                                $data['upload_evidence'] ?? []
+                            );
+
+                            RegisteredProfile::create([
+                                'user_id'       => $userId,
+                                'country_code'  => $countryCode,
+                                'status'         => $data['status'],
+                                'registration_authority_name' => $data['jurisdiction'] ?? null,
+                                'registration_number'         => $data['registration_number'] ?? null,
+                                'expiry_date'                 => $data['expiry_date'] ?? null,
+                                'mobile_country_code'         => $data['mobile_country_code'] ?? null,
+                                'mobile_country_iso'          => $data['mobile_country_iso'] ?? null,
+                                'mobile_number'               => $data['mobile_number'] ?? null,
+                                'upload_evidence'             => json_encode($uploadedFiles),
+                            ]);
+                        }
+
+                        continue;
+                    }
+
+                    /* ===============================
+                   2️⃣ EXISTING REGISTRATIONS
+                =============================== */
+                    $profile = RegisteredProfile::where('id', $key)
+                        ->where('user_id', $userId)
+                        ->first();
+
+                    if (!$profile) {
+                        continue;
+                    }
+
+                    $profile->update([
+                        'registration_authority_name' => $registrations['jurisdiction'] ?? null,
+                        'registration_number'         => $registrations['registration_number'] ?? null,
+                        'expiry_date'                 => $registrations['expiry_date'] ?? null,
+                        'mobile_number'               => $registrations['mobile_number'] ?? null,
+                        'status'                      => $registrations['status'] ?? null,
+
+                    ]);
+                }
+            }
+
+            // update_user_stage($userId, "My Profile");
+
+            return response()->json([
+                'status'  => '2',
+                'message' => __('message.statusTwo', ['parameter' => 'Profile'])
+            ]);
+        } catch (\Exception $e) {
+
+            Log::error(
+                'Error in SettingController/updateProfile : ' .
+                    $e->getMessage() .
+                    ' in line ' .
+                    $e->getLine()
+            );
+
+            return response()->json([
+                'status'  => '0',
+                'message' => __('message.statusZero')
+            ]);
+        }
+    }
+
+    private function uploadRegistrationFiles($files)
+    {
+        $uploadedFiles = [];
+
+        if (!is_array($files)) {
+            return [];
+        }
+
+        foreach ($files as $file) {
+
+            if ($file instanceof \Illuminate\Http\UploadedFile && $file->isValid()) {
+
+                $name = time() . '_' . rand(10000, 99999) . '_' . $file->getClientOriginalName();
+
+                $file->move(public_path('uploads/registration'), $name);
+
+                $uploadedFiles[] = $name;
+            }
+        }
+
+        return $uploadedFiles;
+    }
     public function ahepra_lookup(Request $request, AhpraLookupService11 $ahpra)
     {
         $ahpraNumber = $request->input('ahpraNumber');

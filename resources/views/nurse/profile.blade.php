@@ -523,17 +523,17 @@ p.highlight-text {
                             <label class="font-sm color-text-mutted mb-10">Email *</label>
                             <input class="form-control" type="text" name="email" id="emailI" readonly value="{{  Auth::guard('nurse_middle')->user()->email }}">
                           </div>
-                          {{-- <div class="form-group col-md-6">
+                          <div class="form-group col-md-6">
                             <label class="form-label" for="input-3">Mobile Number *</label>
                             <div class="row">
                               <div class="col-md-12 mob-adj">
                                 <input type="hidden" name="countryCode" id="countryCode">
                                 <input type="hidden" name="countryiso" id="country_iso" value="{{  Auth::guard('nurse_middle')->user()->country_iso }}">
-                                <input class="form-control numbers" type="tel" required="" name="contact" id="contactI" value="{{  Auth::guard('nurse_middle')->user()->phone }}" maxlength="10">
+                                <input class="form-control numbers" type="tel" name="contact" id="contactI" value="{{  Auth::guard('nurse_middle')->user()->phone }}" maxlength="14">
                                 <span id="reqTxtcontactI" class="reqError text-danger valley"></span>
                               </div>
                             </div>
-                          </div> --}}
+                          </div>
                           <div class="col-lg-6">
                             <div class="form-group">
                               <label class="font-sm color-text-mutted mb-10">Date Of Birth</label>
@@ -553,219 +553,6 @@ p.highlight-text {
                                 </select>
                             </div>
                         </div>
-
-                        {{-- Countries Block --}}
-                   <div class="col-12 mt-1">
-                                <h5 class="mb-3">Registration & Qualification</h5>
-                                @php
-                                    $user = Auth::guard('nurse_middle')->user();
-
-                                    $registrationCountries = (array) json_decode($user->registration_countries ?? '[]');
-                                    $qualificationCountries = (array) json_decode(
-                                        $user->qualification_countries ?? '[]'
-                                    );
-                                 
-                                    $countries = country_name_from_db();
-                                @endphp                    
-                                <div class="form-group mb-4 drp--clr">
-                                    <label class="font-sm mb-2">
-                                        Countries of Registration<span class="text-danger">*</span>  (You must have at least one registration country.)
-                                    </label>
-
-                                    <input type="hidden"
-                                        name="country_r"
-                                        class="country_r"
-                                        value='{{ json_encode($registrationCountries ?? []) }}'>
-
-                                  <ul id="register_record" style="display:none;">
-                                      @foreach($countries as $r_record)
-                                          <li data-value="{{ $r_record->iso2 }}">
-                                              {{ $r_record->name }}
-                                          </li>
-                                      @endforeach
-                                  </ul>
-                                  <select
-                                      class="js-example-basic-multiple addAll_removeAll_btn"
-                                      data-list-id="register_record"
-                                      name="register_record[]"
-                                      id="registerCountries"
-                                      multiple>
-                                  </select>
-                                    <span id="reqempsdate" class="reqError text-danger valley"></span>
-                                    <small class="text-muted">
-                                        Select the countries where you are registered to practice.
-                                    </small> 
-                                </div>          
-                                <div class="form-group drp--clr">
-                                    <label class="font-sm mb-2">
-                                        Countries of Qualification <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="hidden"
-                                          name="qualification_countries"
-                                          id="qualificationCountriesInput"
-                                          value="{{ json_encode($qualificationCountries) }}">
-
-                                    <ul id="qualification-country-list" style="display:none;">
-                                        @foreach ($countries as $country)
-                                            <li
-                                                data-value="{{ $country->iso2 }}"
-                                                class="{{ in_array($country->iso2, $qualificationCountries) ? 'selected' : '' }}"
-                                            >
-                                                {{ $country->name }}
-                                            </li>
-                                        @endforeach
-                                    </ul>
-
-                                    <select
-                                        class="js-example-basic-multiple addAll_removeAll_btn"
-                                        data-list-id="qualification-country-list"
-                                        id="qualificationCountries"
-                                        multiple
-                                    ></select>
-
-                                    <small class="text-muted">
-                                        We’ve prefilled this based on your registration countries.
-                                        Update if your qualification was in a different country.
-                                    </small>                           
-                                </div>
-                        </div>
-                      <div id="registrationCardsContainer"></div>
-
-                        @php
-                          $user = Auth::guard('nurse_middle')->user();
-                           $registration_country = DB::table('registration_profiles_countries')->where('user_Id',$user->id)->where('country_code',$user->active_country)->first();
-                           $profile_register_country = DB::table('registration_profiles_countries')->where('user_Id',$user->id)->get();
-                        @endphp
-
-                     @if($profile_register_country->isNotEmpty() && !empty($user->active_country) && !empty($registration_country))
-                    <div class="mb-4 card registration-card registration-card-{{$registration_country->country_code }}" data-existing="1">
-                          <h5 class="d-flex justify-content-between align-items-center">
-                              <span>
-                                  Registration & Licences — {{ country_name($registration_country->country_code) }}
-                              </span>
-
-                              <span class="badge badge-status badge-{{ $registration_country->status }}">
-                                  {{ ucwords(str_replace('_',' ',$registration_country->status)) }}
-                              </span>
-                          </h5>
-
-                          @if (in_array($registration_country->status, [1, 2, null], true))
-                            <div class="form-group">
-                                <label>Status</label>
-                                <div class="d-flex gap-3">
-                                    <label class="me-3">
-                                        <input type="radio"
-                                              name="registration[{{ $registration_country->id }}][status]"
-                                              value="2"
-                                              {{ $registration_country->status == 2 ? 'checked' : '' }}
-                                              class="status-radio"
-                                              data-code="{{ $registration_country->country_code }}"
-                                              style="width:16px;height:16px;margin-right:6px">
-                                        Draft
-                                    </label>
-
-                                    <label>
-                                        <input type="radio"
-                                              name="registration[{{ $registration_country->id }}][status]"
-                                              value="3"
-                                              {{ $registration_country->status == 3 ? 'checked' : '' }}
-                                              class="status-radio"
-                                              data-code="{{ $registration_country->country_code }}"
-                                              style="width:16px;height:16px;margin-right:6px">
-                                        Submitted (for Review)
-                                    </label>
-                                </div>
-                            </div>
-                          @else
-                            <input type="hidden" name="registration[{{ $registration_country->id }}][status]" value="{{ $registration_country->status }}">
-                          @endif
-
-                          {{-- Jurisdiction --}}
-                          <div class="form-group">
-                              <label>Jurisdiction / Registration Authority</label>
-                              <input type="text"
-                                    name="registration[{{ $registration_country->id }}][jurisdiction]"
-                                    value="{{ $registration_country->registration_authority_name }}"
-                                    class="form-control">
-                          </div>
-
-                          {{-- License Number --}}
-                          <div class="form-group">
-                              <label>License / Registration Number</label>
-                              <input type="text"
-                                    name="registration[{{ $registration_country->id }}][registration_number]"
-                                    value="{{ $registration_country->registration_number }}"
-                                    class="form-control">
-                          </div>
-
-                          {{-- Expiry Date --}}
-                        <div class="form-group">
-                            <label>Expiry Date</label>
-                            <input type="date"
-                              name="registration[{{ $registration_country->id }}][expiry_date]"
-                              value="{{ \Carbon\Carbon::parse($registration_country->expiry_date)->format('Y-m-d') }}"
-                              {{-- min="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" --}}
-                              class="form-control">
-                        </div>
-                          {{-- Mobile no --}}
-                        <div class="form-group">
-                            <label>Mobile Number</label>
-
-                            <div class="iti iti--allow-dropdown iti--separate-dial-code w-100">
-                                <div class="iti__flag-container">
-                                    <div class="iti__selected-flag" title="{{ strtoupper($registration_country->mobile_country_iso) }}">
-                                        <div class="iti__flag iti__{{ strtolower($registration_country->mobile_country_iso) }}"></div>
-                                        <div class="iti__selected-dial-code">
-                                            +{{ $registration_country->mobile_country_code }}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <input type="text"
-                                      class="form-control"  name="registration[{{ $registration_country->id }}][mobile_number]" 
-                                      value="{{ $registration_country->mobile_number }}"
-                                    >
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Upload Evidence</label>
-
-               
-                            <input type="hidden"
-                                  name="registration[{{ $registration_country->id }}][upload_evidence]"
-                                  class="registration_evidence_input-{{ $registration_country->id }}"
-                                  value='{{ $registration_country->upload_evidence }}'>
-
-                            <input type="file"
-                                  class="form-control"
-                                  multiple
-                                  onchange="uploadRegistrationEvidence({{ $registration_country->id }})">
-
-                            <span class="text-danger error-upload-{{ $registration_country->id }}"></span>
-
-                          <div class="mt-2 registration-evidence-preview-{{ $registration_country->id }}">
-                              @if(!empty($registration_country->upload_evidence))
-                                  @foreach(json_decode($registration_country->upload_evidence, true) as $file)
-                                      <div class="trans_img">
-                                        <div>
-                                          <i class="fa fa-file"></i> 
-                                          <a href="{{ url('/public/uploads/registration/' . $file) }}" target="_blank">
-                                              {{ preg_replace('/^\d+_\d+_/', '', $file) }}
-                                          </a>
-                                          <span class="close_btn"
-                                                onclick="removeRegistrationEvidence('{{ $file }}', {{ $registration_country->id }})">
-                                              <i class="fa fa-close"></i>
-                                          </span>
-                                        </div>
-                                      </div>
-                                  @endforeach
-                              @endif
-                          </div>
-
-                        </div>
-
-                      </div>
-                    @endif
                           <!-- <div class="form-group col-md-12">
                           <label class="font-sm color-text-mutted mb-10">Bio</label>
                           <textarea class="form-control" rows="4" name="bio">{{ Auth::guard('nurse_middle')->user()->bio }}</textarea>
@@ -855,7 +642,7 @@ p.highlight-text {
                           {{-- <h6 class="emergency_text">
                             Emergency Contact Information
                           </h6> --}}
-                          {{-- <div class="col-lg-6 row" style="display: none;">
+                          <div class="col-lg-6 row" style="display: none;">
                             <div class="form-group">
                               <label class="font-sm color-text-mutted mb-10">Mobile No</label>
 
@@ -867,7 +654,7 @@ p.highlight-text {
                               </div>
 
                             </div>
-                          </div> --}}
+                          </div>
                           {{-- <div class="col-lg-6 row">
                             <div class="form-group">
                               <label class="font-sm color-text-mutted mb-10">Email*</label>
