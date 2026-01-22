@@ -4977,4 +4977,14 @@ public function ResetPassword(Request $request)
             'success' => true,
         ]);
     }
+
+    public function deleteSpecialityRows(Request $request){
+        $profession_id = $request->profession_id;
+
+        $delete_profession_data = DB::table("profession_data")->where("profession_id",$profession_id)->delete();
+
+        if($delete_profession_data){
+            return $delete_profession_data;
+        }
+    }
 }

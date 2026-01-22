@@ -152,12 +152,16 @@
     height: 50px;
   }
 
+  .form-label {
+    position: relative;
+  }
+
 .info { display:inline-block; width:22px; height:22px; text-align:center; line-height:16px; cursor:help; font-size:12px; margin-left:5px; }
-  .tooltip_speciality_status {
+  /* .tooltip_speciality_status {
     display: none;
     position: absolute;
-    top: 22px; /* adjust */
-    left: 0;   /* show exactly below icon/label */
+    top: 22px;
+    left: 0; 
     background: white;
     padding: 8px;
     border: 1px solid #ccc;
@@ -168,7 +172,23 @@
     overflow-y: hidden !important;
     width: 516px !important;
     overflow-x: hidden !important;
-  }
+  } */
+    .tooltip_speciality_status {
+      display: none;
+      position: absolute;
+      top: 26px;
+      left: 0;
+      background: #fff;
+      padding: 10px;
+      border: 1px solid #ccc;
+      z-index: 9999;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      width: 516px !important;
+      max-height: 200px !important;
+      overflow-y: hidden !important;
+      overflow-x: hidden !important;
+    }
   .profession-row {
         display: none;
     }
@@ -255,6 +275,10 @@ p.highlight-text {
 }
 .iti input, .iti input[type=text], .iti input[type=tel] {
     padding-left: 80px !important;
+}
+
+.profession_active{
+  background-color: #dcdcdc;
 }
 
 </style>
@@ -950,17 +974,20 @@ p.highlight-text {
                       </thead>
                       <tbody>
                         @if(count($profession_data) > 0)
+                        @php
+                           $i = 1;     
+                        @endphp
                         @foreach ($profession_data as $exp_data)
                         @php
                          $nurse_data = DB::table("practitioner_type")->where("id",$exp_data->nurse_data)->first();
                          $speciality_data = DB::table("speciality")->where("id",$exp_data->specialties)->first();
                           
-                          
+                         $profession_id = isset($_GET['profession_id'])?$_GET['profession_id']:0;  
                           
                           
                         @endphp
                         
-                        <tr class="profession-row">
+                        <tr class="profession-row h-100 profession-row{{ $exp_data->profession_id }} @if($exp_data->profession_id == $profession_id) profession_active @endif">
                           <td class="sno"></td>
                           <td>
                             {{ $nurse_data->name ?? '' }}
@@ -980,9 +1007,16 @@ p.highlight-text {
                           <td>
                             {{ $exp_data->current_employee_status }}
                           </td>  
-                          <td><a href="{{ url('/nurse/my-profile') }}?page=profession&&btn=edit&&profession_id={{ $exp_data->profession_id }}" class="btn btn-dark px-4 py-2">Edit</a></td>
+                          <td>
+                            <div class="d-flex gap-2">
+                            <a href="{{ url('/nurse/my-profile') }}?page=profession&&btn=edit&&profession_id={{ $exp_data->profession_id }}" class="btn btn-dark px-3 py-2"><i class="fa fa-pencil"></i></a>
+                            <a style="cursor:pointer" data-item="{{ $exp_data->profession_id }}" data-id="{{ $exp_data->specialties }}" data-count="{{ $i }}" class="btn btn-danger px-4 py-2 @if($exp_data->row_status == 'complete') delete-specialty-btn @else delete-draft-btn @endif"><i class="fa fa-trash"></i></a>
+                            </div>
+                          </td>
                         </tr>       
-                         
+                          @php
+                            $i++;    
+                         @endphp
                         @endforeach
                         @else
                         @foreach ($specialities_data as $spec)
@@ -1082,6 +1116,21 @@ p.highlight-text {
                         toggleBtn.addEventListener("click", function () {
                             expanded ? showLimited() : showAll();
                         });
+                    });
+                    $(".delete-draft-btn").click(function(){
+                      var profession_id = $(this).data('item');
+                      //alert(profession_id);
+                      $.ajax({
+                        type: "GET",
+                        url: "{{ url('/nurse/deleteSpecialityRows') }}",
+                        data: {profession_id:profession_id},
+                        cache: false,
+                        success: function(data){
+                          if(data == 1){
+                            $(".profession-row"+profession_id).remove();
+                          }
+                        }
+                      });
                     });
                     </script>
                   </div>
@@ -7362,27 +7411,27 @@ if (!empty($interviewReferenceData)) {
     }
   });
 
-  if ($(".speciality_value").val() != "") {
-    var speciality_value = JSON.parse($(".speciality_value").val());
-    var subspecialitynurse_list = $(".subspecnurse_list").val();
-    console.log("speciality_value",speciality_value);
-    $('.js-example-basic-multiple[data-list-id="speciality_preferences-'+subspecialitynurse_list+'-0"]').select2().val(speciality_value).trigger('change');
-  }
+  // if ($(".speciality_value").val() != "") {
+  //   var speciality_value = JSON.parse($(".speciality_value").val());
+  //   var subspecialitynurse_list = $(".subspecnurse_list").val();
+  //   console.log("speciality_value",speciality_value);
+  //   $('.js-example-basic-multiple[data-list-id="speciality_preferences-'+subspecialitynurse_list+'-0"]').select2().val(speciality_value).trigger('change');
+  // }
 
-  $(".subspec_list").each(function(){
-    var subspec_val = $(this).val();
-    if ($(".subspectype-"+subspec_val).val() != "") {
-      var spec_type = JSON.parse($(".subspectype-"+subspec_val).val());
-      console.log("spec_types",subspec_val);
-      var subspecialitynurse_list = $(".subspecnurse_list").val();
-      //$('.js-example-basic-multiple[data-list-id="speciality_preferences-'+subspec_val+'"]').select2().val(spec_type).trigger('change');
-      $('.js-example-basic-multiple[data-list-id="speciality_preferences-'
-        + subspecialitynurse_list + '-'+subspec_val+'"]')
-        .select2()
-        .val(spec_type)
-        .trigger('change');
-    }
-  });
+  // $(".subspec_list").each(function(){
+  //   var subspec_val = $(this).val();
+  //   if ($(".subspectype-"+subspec_val).val() != "") {
+  //     var spec_type = JSON.parse($(".subspectype-"+subspec_val).val());
+  //     console.log("spec_types",subspec_val);
+  //     var subspecialitynurse_list = $(".subspecnurse_list").val();
+  //     //$('.js-example-basic-multiple[data-list-id="speciality_preferences-'+subspec_val+'"]').select2().val(spec_type).trigger('change');
+  //     $('.js-example-basic-multiple[data-list-id="speciality_preferences-'
+  //       + subspecialitynurse_list + '-'+subspec_val+'"]')
+  //       .select2()
+  //       .val(spec_type)
+  //       .trigger('change');
+  //   }
+  // });
 
   
 
@@ -8032,13 +8081,25 @@ if (!empty($interviewReferenceData)) {
                                   <input type="hidden" name="subspecnurse_list" class="subspecnurse_list subspecnurse_list-'+data1.main_nurse_id+'" value="'+data1.main_nurse_id+'">\
                                   <ul id="speciality_preferences-'+data1.main_nurse_id+'-0" style="display:none;">'+speciality_text+'</ul>\
                                   <select class="js-example-basic-multiple'+data1.main_nurse_id+'-0 addAll_removeAll_btn speciality_type_field" data-list-id="speciality_preferences-'+data1.main_nurse_id+'-0" name="nurseType['+data1.main_nurse_id+'][type_0][]" '+multiple+' onchange="getSecialities(\''+sub+'\',\''+data1.main_nurse_id+'\',0)"></select>\
-                                  <span id="reqspecialties" class="reqError text-danger valley"></span>\
+                                  <span id="reqspecialties'+data1.main_nurse_id+'-0" class="reqError text-danger valley"></span>\
                                 </div>\
                                 <div class="show_specialities-'+data1.main_nurse_id+'-0"></div>\
                               </div>');
                   }            
                   selectTwoFunction(data1.main_nurse_id+"-"+0);
                
+                  document.querySelectorAll('.tooltip-btn').forEach(btn => {
+                    const container = btn.closest('.form-label');
+                    const tooltip = container.querySelector('.tooltip_speciality_status');
+
+                    btn.addEventListener('mouseenter', () => {
+                      tooltip.style.display = 'block';
+                    });
+
+                    container.addEventListener('mouseleave', () => {
+                      tooltip.style.display = 'none';
+                    });
+                  });
                 
             }
 
@@ -8617,7 +8678,7 @@ $.each(specialityTree, function (parentKey, children) {
                                         onchange="getSecialities('sub', ${nurse_id}, ${data1.main_speciality_id})">
                                 </select>
                             </div>
-                            <span id="reqsubspecvalid-${data1.main_speciality_id}" class="reqError text-danger valley"></span>
+                            <span id="reqsubspecvalid${nurse_id}-${data1.main_speciality_id}" class="reqError text-danger valley"></span>
                             <div class="show_specialities-${nurse_id}-${data1.main_speciality_id}"></div>
                             <div class="show_specialitiesStatus-${nurse_id}-${data1.main_speciality_id}"></div>
                             
@@ -8657,8 +8718,8 @@ $.each(specialityTree, function (parentKey, children) {
                                 </label>
                                 <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprofpart_list-${k} subspecprof_listProfession subspecprof_listProfession-${data1.main_speciality_id} subspecprof_list-${data1.main_speciality_id}" value="${data1.main_speciality_id}">
                                 
-                                <select class="custom-select speciality_status_columns-${data1.main_speciality_id}"
-                                    name="nurseType[${nurse_id}][speciality_status][type_${data1.main_speciality_id}][status]">
+                                <select class="custom-select speciality_status_valid-${nurse_id}-${data1.main_speciality_id} speciality_status_column speciality_status_columns-${nurse_id}-${data1.main_speciality_id}"
+                                    name="nurseType[${nurse_id}][speciality_status][type_${data1.main_speciality_id}][status]" onchange="changeSpecialityStatus(this.value,${data1.main_speciality_id},${nurse_id})">
                                     <option value="">select</option>
                                     <option value="Current">Current</option>
                                     <option value="Principal">Principal</option>
@@ -8668,21 +8729,21 @@ $.each(specialityTree, function (parentKey, children) {
                                         Upskilling / Transitioning / Training
                                     </option>
                                 </select>
-                                <span id="reqsubspeclevelvalid-${data1.main_speciality_id}" class="reqError text-danger valley"></span>
+                                <span id="reqsubspecstatusvalid${nurse_id}-${data1.main_speciality_id}" class="reqError text-danger valley"></span>
                             </div>
                             <div class="custom-select-wrapper form-group level-drp">
                               <label class="form-label" for="input-1">What is your overall level of experience in nursing/midwifery?
                               </label>
-                              <select class="custom-select" name="nurseType[${nurse_id}][speciality_status][type_${data1.main_speciality_id}][assistent_level]">
+                              <select class="custom-select experience_level-${nurse_id}-${data1.main_speciality_id}" name="nurseType[${nurse_id}][speciality_status][type_${data1.main_speciality_id}][assistent_level]">
                                 <option value="">Please Select</option>
                                 ${experience_text}
                               </select>
-                              <span id="reqassistentlevel" class="reqError text-danger valley"></span>
+                              <span id="reqassistentlevel${nurse_id}-${data1.main_speciality_id}" class="reqError text-danger valley"></span>
                             </div>
                             <div class="professional_bio professional_employee_status">
                             <div class="custom-select-wrapper form-group level-drp col-md-12">
                               <label class="form-label" for="input-1">Current Employment Status</label>
-                              <select class="custom-select" name="nurseType[${nurse_id}][speciality_status][type_${data1.main_speciality_id}][employee_status]" onchange="employeeStatus(this.value,${nurse_id},${data1.main_speciality_id})">
+                              <select class="custom-select employee_status-${nurse_id}-${data1.main_speciality_id}" name="nurseType[${nurse_id}][speciality_status][type_${data1.main_speciality_id}][employee_status]" onchange="employeeStatus(this.value,${nurse_id},${data1.main_speciality_id})">
                                 <option value="">select</option>
                                 <option value="Permanent">Permanent</option>
                                 <option value="Fixed-term">Fixed-term</option>
@@ -8690,14 +8751,14 @@ $.each(specialityTree, function (parentKey, children) {
                                 <option value="Unemployed">Unemployed</option>
                               </select>
                             </div>
-                            <span id="reqemployee_status" class="reqError text-danger valley"></span>
+                            <span id="reqemployee_status${nurse_id}-${data1.main_speciality_id}" class="reqError text-danger valley"></span>
                           </div>
                           <div class="professional_permanent-${nurse_id}-${data1.main_speciality_id}" style="display:none;">
                             <div class="form-group level-drp col-md-12">
                               <label class="form-label" for="input-1">Permanent</label>
                               <input type="hidden" name="perhfield" class="perhfield" value="">
                               <ul id="permanent_status_profession-${nurse_id}-${data1.main_speciality_id}" style="display:none;">
-                                <li data-value="">select</li>
+                                <li data-value="select">select</li>
                                 <li data-value="Full-time (Permanent)">Full-time (Permanent)</li>
                                 <li data-value="Part-time (Permanent)">Part-time (Permanent)</li>
                                 <li data-value="Agency Nurse / Midwife (Permanent)">Agency Nurse / Midwife (Permanent)</li>
@@ -8710,7 +8771,7 @@ $.each(specialityTree, function (parentKey, children) {
                                 
                               </ul>
                               <select class="js-example-basic-multipleper${nurse_id}-${data1.main_speciality_id}" data-list-id="permanent_status_profession-${nurse_id}-${data1.main_speciality_id}" name="nurseType[${nurse_id}][speciality_status][type_${data1.main_speciality_id}][permanent_status]"></select>
-                              <span id="reqemployeep_status" class="reqError text-danger valley"></span>
+                              <span id="reqemployeep_status${nurse_id}-${data1.main_speciality_id}" class="reqError text-danger valley"></span>
                             </div>
                           </div>
                           <div class="professional_temporary-${nurse_id}-${data1.main_speciality_id}" style="display: none;">
@@ -8742,7 +8803,7 @@ $.each(specialityTree, function (parentKey, children) {
                                 <li data-value="Volunteer (Temporary)">Volunteer (Temporary)</li>
                               </ul>
                               <select class="js-example-basic-multiple${nurse_id}-${data1.main_speciality_id}" data-list-id="temporary_status_profession1-${nurse_id}-${data1.main_speciality_id}" name="nurseType[${nurse_id}][speciality_status][type_${data1.main_speciality_id}][temporary_status]"></select>
-                              <span id="reqemployeet_status" class="reqError text-danger valley"></span>
+                              <span id="reqemployeet_status${nurse_id}-${data1.main_speciality_id}" class="reqError text-danger valley"></span>
                             </div>
                             
                           </div>
@@ -8750,7 +8811,7 @@ $.each(specialityTree, function (parentKey, children) {
                             <div class="form-group level-drp col-md-12">
                               <label class="form-label" for="input-1">Reason for Unemployment</label>
                               <!-- <input class="form-control" type="text" required="" name="fullname" placeholder="Steven Job"> -->
-                              <select class="custom-select mr-10 select-active unemployeement_reason" name="nurseType[${nurse_id}][speciality_status][type_${data1.main_speciality_id}][unemployeement_reason]" id="unemployeement_reason" onchange="reasonUnemployeement(this.value,${nurse_id},${data1.main_speciality_id})">
+                              <select class="custom-select mr-10 select-active unemployeement_reason unemployeement_reason-${nurse_id}-${data1.main_speciality_id}" name="nurseType[${nurse_id}][speciality_status][type_${data1.main_speciality_id}][unemployeement_reason]" id="unemployeement_reason" onchange="reasonUnemployeement(this.value,${nurse_id},${data1.main_speciality_id})">
                                 <option value="">select</option>
                                 <option value="Recently graduated">Recently graduated</option>
                                 <option value="Career break (maternity leave, family reasons, etc.)">Career break (maternity leave, family reasons, etc.)</option>
@@ -8760,19 +8821,19 @@ $.each(specialityTree, function (parentKey, children) {
                                 <option value="Other (Please specify)">Other (Please specify)</option>
                               </select>
                             </div>
-                            <span id="requnempreason" class="reqError text-danger valley"></span>
+                            <span id="requnempreason-${nurse_id}-${data1.main_speciality_id}" class="reqError text-danger valley"></span>
                           </div>
                           <div class="form-group d-none specify_reason_div-${nurse_id}-${data1.main_speciality_id}">
                             <label class="form-label" for="input-1">Other (Please specify)</label>
                             
                             <input class="form-control" type="text" name="specify_reason" value="">
-                            <span id="otherspecify_reason" class="reqError text-danger valley"></span>
+                            <span id="otherspecify_reason${nurse_id}-${data1.main_speciality_id}" class="reqError text-danger valley"></span>
                           </div>
                           <div class="custom-select-wrapper long_unemplyeed-${nurse_id}-${data1.main_speciality_id} d-none">
                             <div class="form-group level-drp col-md-12">
                               <label class="form-label" for="input-1">How long have you been unemployed?</label>
                               <!-- <input class="form-control" type="text" required="" name="fullname" placeholder="Steven Job"> -->
-                              <select class="custom-select long_unemployeed" name="nurseType[${nurse_id}][speciality_status][type_${data1.main_speciality_id}][long_unemployeed]" id="long_unemployeed">
+                              <select class="custom-select long_unemployeed long_unemployeed-${nurse_id}-${data1.main_speciality_id}" name="nurseType[${nurse_id}][speciality_status][type_${data1.main_speciality_id}][long_unemployeed]" id="long_unemployeed">
                                 <option value="">select</option>
                                 <option value="Less than 1 month">Less than 1 month</option>
                                 <option value="1 to 3 months">1 to 3 months</option>
@@ -8781,7 +8842,7 @@ $.each(specialityTree, function (parentKey, children) {
                                 <option value="More than 1 year">More than 1 year</option>
                                 
                               </select>
-                              <span id="reqlong_unemp" class="reqError text-danger valley"></span>
+                              <span id="reqlong_unemp${nurse_id}-${data1.main_speciality_id}" class="reqError text-danger valley"></span>
                             </div>
                             
                           </div>
@@ -8789,6 +8850,20 @@ $.each(specialityTree, function (parentKey, children) {
                         `);
                         selectTwoFunction(nurse_id+"-"+data1.main_speciality_id);
                         selectTwoFunction("per"+nurse_id+"-"+data1.main_speciality_id);
+
+                        document.querySelectorAll('.tooltip-btn').forEach(btn => {
+                          const container = btn.closest('.form-label');
+                          const tooltip = container.querySelector('.tooltip_speciality_status');
+
+                          btn.addEventListener('mouseenter', () => {
+                            tooltip.style.display = 'block';
+                          });
+
+                          container.addEventListener('mouseleave', () => {
+                            tooltip.style.display = 'none';
+                          });
+                        });
+
                     }
                 }
             }
@@ -8845,7 +8920,7 @@ $.each(specialityTree, function (parentKey, children) {
       $(".subspec_main_div-" + id).remove();
   }
 
-    function changeSpecialityStatus(selectedValue,data_id,k){
+    function changeSpecialityStatus(selectedValue,data_id,nurse_id){
       $(".speciality_flag-"+data_id).val(0);
       
       // Reset all hidden inputs first
@@ -8872,7 +8947,7 @@ $.each(specialityTree, function (parentKey, children) {
 
           let countPrincipal = 0;
 
-          $(".speciality_status_column-"+k).each(function () {
+          $(".speciality_status_column").each(function () {
               if ($(this).val() === "Principal") {
                   countPrincipal++;
               }
@@ -8881,10 +8956,10 @@ $.each(specialityTree, function (parentKey, children) {
           if (countPrincipal > 1) {
               // Show message
               //alert("You can mark only one specialty as Principal, please select your main one.");
-              $("#reqsubspeclevelvalid-"+data_id).text("You can mark only one specialty as Principal, please select your main one.");
+              $("#reqsubspecstatusvalid"+nurse_id+"-"+data_id).text("You can mark only one specialty as Principal, please select your main one.");
               // Reset the current dropdown to previous value
               //alert(".speciality_status_columns-"+data_id);
-              $(".speciality_status_columns-"+data_id).val("");
+              $(".speciality_status_columns-"+nurse_id+"-"+data_id).val("");
               
 
           }

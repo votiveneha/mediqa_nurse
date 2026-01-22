@@ -9,6 +9,7 @@ class Profession extends Model
 {
     use HasFactory;
     protected $table = 'profession_data';
+    protected $primaryKey = 'profession_id'; // <-- actual column
     protected $guarded =[];
 
    

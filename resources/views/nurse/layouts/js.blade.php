@@ -802,131 +802,117 @@ input.form-control.numbers.js_mobile_input {
 
 
 
-    // if ($('.nurse_type_field').val() == '') {
-    //   document.getElementById("reqnurseTypeId").innerHTML = "* Please select the type of nurse";
-    //   isValid = false;
-    // }
+    if ($('.nurse_type_field').val() == '') {
+      document.getElementById("reqnurseTypeId").innerHTML = "* Please select the type of nurse";
+      isValid = false;
+    }
 
-    // $(".subnurse_list").each(function() {
-    //   var val = $(this).val();
-    //   //var subpartsval = $(".subspecprofpart_list-"+val).val();
-    //   console.log("subnurse_list",val);
-    //   if ($('.subnurse_valid-'+val).val() == '') {
-    //     document.getElementById("reqsubnursevalid-"+val).innerHTML = "* Please select the type of nurse";
-    //     isValid = false;
-    //   }
+    $(".subnurse_list").each(function() {
+      var val = $(this).val();
+      //var subpartsval = $(".subspecprofpart_list-"+val).val();
+      console.log("subnurse_list",val);
+      if ($('.subnurse_valid-'+val).val() == '') {
+        document.getElementById("reqsubnursevalid-"+val).innerHTML = "* Please select the type of nurse";
+        isValid = false;
+      }
 
-    // });
+      
 
-    // if ($('.speciality_type_field').val() == '') {
-    //   document.getElementById("reqspecialties").innerHTML = "* Please select the Specialties";
-    //   isValid = false;
-    // }
+    });
 
-    // $(".subspec_list").each(function() {
-    //   var val = $(this).val();
-    //   //var subpartsval = $(".subspecprofpart_list-"+val).val();
-    //   console.log("subspec_list",val);
-    //   if ($('.subspec_valid-'+val).val() == '') {
-    //     document.getElementById("reqsubspecvalid-"+val).innerHTML = "* Please select the Specialties";
-    //     isValid = false;
-    //   }
+    $(".subspecnurse_list").each(function() {
+        var val_spec = $(this).val();
+        //var subpartsval = $(".subspecprofpart_list-"+val).val();
+        console.log("subspec_list",val_spec);
+        if ($('.js-example-basic-multiple'+val_spec+"-0").val() == '') {
+          document.getElementById("reqspecialties"+val_spec+"-0").innerHTML = "* Please select the Specialties";
+          isValid = false;
+        }
 
-    // });
+        $(".subspec_list").each(function() {
+          var val_subspec = $(this).val();
+          //var subpartsval = $(".subspecprofpart_list-"+val).val();
+          console.log("subspec_list",val_subspec);
+          if ($('.js-example-basic-multiple'+val_spec+"-"+val_subspec).val() == '') {
+            document.getElementById("reqsubspecvalid"+val_spec+"-"+val_subspec).innerHTML = "* Please select the Specialties";
+            isValid = false;
+          }
 
+        });
 
-    // // if ($('[name="degree[]"]').val() == '') {
-    // //   document.getElementById("reqdegree").innerHTML = "* Please select degree.";
-    // //   isValid = false;
-    // // }
+        $(".subspecprof_list").each(function() {
+          var val_subspec_status = $(this).val();
+          //var subpartsval = $(".subspecprofpart_list-"+val).val();
+          console.log("val_subspec_status",val_subspec_status);
+          if ($('.speciality_status_valid-'+val_spec+"-"+val_subspec_status).val() == '') {
+            document.getElementById("reqsubspecstatusvalid"+val_spec+"-"+val_subspec_status).innerHTML = "* Please select the Specialty Status";
+            isValid = false;
+          }
 
-    // if ($('[name="bio"]').val() == '') {
-    //   document.getElementById("reqprofessional_bio").innerHTML = "* Please enter the bio.";
-    //   isValid = false;
-    // }
+          if ($('.experience_level-'+val_spec+"-"+val_subspec_status).val() == '') {
+            document.getElementById("reqassistentlevel"+val_spec+"-"+val_subspec_status).innerHTML = "* Please select the overall experience";
+            isValid = false;
+          }
 
-    // if ($('[name="employee_status"]').val() == '') {
-    //   document.getElementById("reqemployee_status").innerHTML = "* Please select the employee status.";
-    //   isValid = false;
-    // }
+          if ($('.employee_status-'+val_spec+"-"+val_subspec_status).val() == '') {
+            document.getElementById("reqemployee_status"+val_spec+"-"+val_subspec_status).innerHTML = "* Please select the Current Employment Status";
+            isValid = false;
+          }  
 
-    // if ($('.long_unemplyeed').is(':visible') == true) {
-    //   if ($('[name="long_unemployeed"]').val() == '') {
-    //     document.getElementById("reqlong_unemp").innerHTML = "* Please select how long have you been unemployed?";
-    //     isValid = false;
-    //   }
-    // }
+          if ($('.professional_permanent-'+val_spec+"-"+val_subspec_status).is(':hidden') == false) {
+            //alert('.js-example-basic-multipleper'+val_spec+"-"+val_subspec_status);
+            if ($('.js-example-basic-multipleper'+val_spec+"-"+val_subspec_status).val() == 'select') {
+              
+              document.getElementById("reqemployeep_status"+val_spec+"-"+val_subspec_status).innerHTML = "* Please select the Permanent Employment Status";
+              isValid = false;
+            }  
+          }
 
-    // if ($('.professional_unemplyeed').is(':visible') == true) {
-    //   if ($('[name="unemployeement_reason"]').val() == '') {
-    //     document.getElementById("requnempreason").innerHTML = "* Please select Reason for Unemployment";
-    //     isValid = false;
-    //   }
-    // }
+          if ($('.professional_temporary-'+val_spec+"-"+val_subspec_status).is(':hidden') == false) {
+            if ($('.js-example-basic-multiple'+val_spec+"-"+val_subspec_status).val() == 'select') {
+              document.getElementById("reqemployeet_status"+val_spec+"-"+val_subspec_status).innerHTML = "* Please select the Temporary Employment Status";
+              isValid = false;
+            }  
+          }
 
+          if ($('.professional_unemplyeed-'+val_spec+"-"+val_subspec_status).is(':hidden') == false) {
+            if ($('.unemployeement_reason-'+val_spec+"-"+val_subspec_status).val() == '') {
+              document.getElementById("requnempreason-"+val_spec+"-"+val_subspec_status).innerHTML = "* Please select the Reason for Unemployment";
+              isValid = false;
+            }  
+          }
 
+          if ($('.long_unemplyeed-'+val_spec+"-"+val_subspec_status).is(':hidden') == false) {
+            if ($('.long_unemployeed-'+val_spec+"-"+val_subspec_status).val() == '') {
+              document.getElementById("reqlong_unemp"+val_spec+"-"+val_subspec_status).innerHTML = "* Please select the Reason for Unemployment Period";
+              isValid = false;
+            }  
+          }
 
-    // if ($('.specify_reason_div').hasClass('d-none') == false) {
-    //   if ($('[name="specify_reason"]').val() == '') {
-    //     document.getElementById("otherspecify_reason").innerHTML = "* Please select Other (Please specify)";
-    //     isValid = false;
-    //   }
-    // }
+          if ($('.specify_reason_div-'+val_spec+"-"+val_subspec_status).is(':hidden') == false) {
+            if ($('.specify_reason_div-'+val_spec+"-"+val_subspec_status+' input').val() == '') {
+              document.getElementById("otherspecify_reason"+val_spec+"-"+val_subspec_status).innerHTML = "* Please enter the Other (Please specify)";
+              isValid = false;
+            }  
+          }
+        });
 
-    // if ($('.professional_permanent').is(':visible') == true) {
-    //   if ($('[name="permanent_status"]').val() == 'select') {
+      });
 
-    //     document.getElementById("reqemployeep_status").innerHTML = "* Please select Permanent Status";
-    //     isValid = false;
-    //   }
-    // }
+      if ($('[name="bio"]').val() == '') {
+        document.getElementById("reqprofessional_bio").innerHTML = "* Please enter the bio.";
+        isValid = false;
+      }
 
-    // if ($('.professional_temporary').is(':visible') == true) {
-    //   if ($('[name="temporary_status"]').val() == 'select') {
+      if ($('[name="career_advancement_goals"]').val() == '') {
+        document.getElementById("reqcareergoals").innerHTML = "* Please enter the Career Advancement Goals";
+        isValid = false;
+      }
 
-    //     document.getElementById("reqemployeet_status").innerHTML = "* Please select Temporary Status";
-    //     isValid = false;
-    //   }
-    // }
-
-    // if ($('[name="career_advancement_goals"]').val() == '') {
-    //   document.getElementById("reqcareergoals").innerHTML = "* Please enter the Career Advancement Goals";
-    //   isValid = false;
-    // }
-
-    // if ($('[name="assistent_level"]').val() == '') {
-    //   document.getElementById("reqassistentlevel").innerHTML = "* Please enter the overall level of experience in nursing/midwifery";
-    //   isValid = false;
-    // }
-
-    // if ($(".declare_information").prop('checked') == false) {
-    //   document.getElementById("reqdeclare_information").innerHTML = "* Please check this checkbox";
-    //   isValid = false;
-    // }
-
-    // $(".subspecprof_listProfession").each(function() {
-    //   var val = $(this).val();
-    //   //var subpartsval = $(".subspecprofpart_list-"+val).val();
-    //   console.log("subspecprof_listProfession",val);
-    //   //changeSpecialityStatus($(".speciality_status_columns-" + val).val(),val,subpartsval);
-    //   if ($(".speciality_status_columns-" + val).val() == '') {
-    //     document.getElementById("reqsubspeclevelvalid-" + val).innerHTML = "* Please select the speciality status";
-    //     isValid = false;
-    //   }
-
-    // });
-
-    // $(".subspecprof_listProfession").each(function() {
-    //   var val = $(this).val();
-    //   //var subpartsval = $(".subspecprofpart_list-"+val).val();
-    //   console.log("subspecprof_listProfession",val);
-    //   //changeSpecialityStatus($(".speciality_status_columns-" + val).val(),val,subpartsval);
-    //   if ($(".speciality_status_columns-" + val).val() == '') {
-    //     document.getElementById("reqsubspeclevelvalid-" + val).innerHTML = "* Please select the speciality status";
-    //     isValid = false;
-    //   }
-
-    // });
+      if ($(".declare_information").prop('checked') == false) {
+        document.getElementById("reqdeclare_information").innerHTML = "* Please check this checkbox";
+        isValid = false;
+      }
 
     if (isValid == true) {
       $.ajax({
