@@ -949,16 +949,18 @@
             </div> -->
          <div class="saved-searches-row" id="search-tabs">
             <div class="searchtabs">
-              @if($saved_searches_data->isNotEmpty())
+              @if($saved_searches_data->isNotEmpty()) 
               @php
                 $i = 1;
               @endphp
               
               @foreach($saved_searches_data as $saved_searches)
-              <div class="saved-search-tab" data-id="{{ $i }}">
-                <!-- {{ $saved_searches->name }} -->
-                  Saved search {{ $i }} 
-                <!-- <div class="unsaved-dot"></div> -->
+              <div class="saved-search-tab" data-id="{{ $saved_searches->searches_id }}">
+                @if ($saved_searches->name === null || $saved_searches->name === "" ) 
+                  Saved search {{ $i }}
+                @else
+                  {{ $saved_searches->name }} 
+                @endif
               </div>
               @php
                 $i++;
@@ -1558,7 +1560,7 @@
                       </div>
                       @else
                         <div id="no-jobs" class="no-jobs-box" >
-                            <h3>🚫 No Jobs Found</h3>
+                            <h3>🚫 No Jobs Foun</h3>
                             <p>Sorry, no jobs match your search.</p>
                         </div>
                       @endif
@@ -1672,7 +1674,7 @@
                         </div>
                       
                       <button class="btn-run" data-id="{{ $saved_searches->searches_id }}">Run</button>
-                      <button class="btn-edit">Edit</button>
+                      <button class="btn-edit" data-id="{{ $saved_searches->searches_id }}">Edit</button>
                       <button class="btn-duplicate">Duplicate</button>
                       @if($i != 0)
                       <button class="btn-delete" data-name="single-delete">Delete</button>
@@ -2421,10 +2423,19 @@ $('#renameCancel').click(function() {
           keywords: '',
           locations: [],
           agency: '',
-          sort_by: ''
+          sort_by: '',
+          searchId:''
       };
 
+      function removePageParam() {
+          let url = window.location.protocol + "//" + window.location.host + window.location.pathname;
+          window.history.replaceState({}, document.title, url);
+      }
+
+      let isAjaxMode = false;
     function fetchJobs(page = 1) {
+          removePageParam();
+          isAjaxMode = true;
           $(".normal-pagination").addClass("d-none");
           $(".ajax-pagination").removeClass("d-none");
         $.ajax({
@@ -2435,13 +2446,22 @@ $('#renameCancel').click(function() {
                 locations: filters.locations,
                 agency: filters.agency,
                 sort_name: filters.sort_by,
+                search_id: filters.searchId,
                 page: page,
                 _token: "{{ csrf_token() }}"
             },
-            success: function (html) {
-
-                $(".ajax-pagination").html(html);
-            }
+          success: function (res) {
+              if (!res.status) {
+                  $(".ajax-pagination").html(`
+                      <div class="no-jobs-box">
+                          <h3>No Jobs Found</h3>
+                          <p>Try changing your filters.</p>
+                      </div>
+                  `);
+              } else {
+                  $(".ajax-pagination").html(res.html);
+              }
+          }
         });
     }
     $("#keywords").on("keyup", function () {
@@ -2462,12 +2482,11 @@ $('#renameCancel').click(function() {
         fetchJobs(1);
     });
 
-    // $(document).on("click", ".pagination a", function (e) {
-    //     e.preventDefault();
+    $(document).on('click', '.saved-search-tab', function () {
+      filters.searchId = $(this).data('id');
+      fetchJobs(1);
+    })
 
-    //     let page = $(this).attr("href").split("page=")[1];
-    //     fetchJobs(page);
-    // });
     $(document).on("click", ".ajax-pagination .pagination a", function (e) {
         e.preventDefault();
         let page = $(this).attr("href").split("page=")[1];

@@ -330,7 +330,165 @@ class JobsController extends Controller{
         return $json;
     }
 
+
     public function getJobsSorting(Request $request)
+    {
+        $query = DB::table('job_boxes');
+        // APPLY SAVED SEARCH (if exists)      
+        if ($request->search_id) {
+
+            $saved = DB::table('saved_searches')
+                ->where('searches_id', $request->search_id)
+                ->first();
+            // print_r($saved);die;
+            if ($saved) {
+                // Nurse Type
+                if (!empty($saved->filter_nurse_type)) {
+
+                    $nurseTypeIds = json_decode($saved->filter_nurse_type, true);
+
+                    $query->where(function ($q) use ($nurseTypeIds) {
+                        foreach ($nurseTypeIds as $id) {
+                            $q->orWhereJsonContains('nurse_type_id', $id);
+                        }
+                    });
+                }
+
+                if (!empty($saved->filter_employment_type)) {
+
+                    $nurseTypeIds = json_decode($saved->filter_employment_type, true);
+
+                    $query->where(function ($q) use ($nurseTypeIds) {
+                        foreach ($nurseTypeIds as $id) {
+                            $q->orWhereJsonContains('emplyeement_type', $id);
+                        }
+                    });
+                }
+
+                //Benefit
+                if (!empty($saved->filter_benefits_preferences)) {
+
+                    $nurseTypeIds = json_decode($saved->filter_benefits_preferences, true);
+
+                    $query->where(function ($q) use ($nurseTypeIds) {
+                        foreach ($nurseTypeIds as $id) {
+                            $q->orWhereJsonContains('benefits', $id);
+                        }
+                    });
+                }
+
+                //speciality
+                if (!empty($saved->filter_speciality)) {
+
+                    $nurseTypeIds = json_decode($saved->filter_speciality, true);
+
+                    $query->where(function ($q) use ($nurseTypeIds) {
+                        foreach ($nurseTypeIds as $id) {
+                            $q->orWhereJsonContains('typeofspeciality', $id);
+                        }
+                    });
+                }
+
+                if (!empty($saved->filter_work_shift)) {
+
+                    $nurseTypeIds = json_decode($saved->filter_work_shift, true);
+
+                    $query->where(function ($q) use ($nurseTypeIds) {
+                        foreach ($nurseTypeIds as $id) {
+                            $q->orWhereJsonContains('shift_type', $id);
+                        }
+                    });
+                }
+                // Work Environment
+                if (!empty($saved->filter_work_environment)) {
+
+                    $nurseTypeIds = json_decode($saved->filter_work_environment, true);
+
+                    $query->where(function ($q) use ($nurseTypeIds) {
+                        foreach ($nurseTypeIds as $id) {
+                            $q->orWhereJsonContains('work_environment', $id);
+                        }
+                    });
+                }
+                // Employee Positions
+                if (!empty($saved->filter_employee_positions)) {
+
+                    $nurseTypeIds = json_decode($saved->filter_employee_positions, true);
+
+                    $query->where(function ($q) use ($nurseTypeIds) {
+                        foreach ($nurseTypeIds as $id) {
+                            $q->orWhereJsonContains('emplyeement_positions', $id);
+                        }
+                    });
+                }
+
+                // // Location
+                // if (!empty($saved->filter_location_preference)) {
+                //     $locations = json_decode($saved->filter_location_preference, true);
+                //     $query->whereIn('location_name', $locations);
+                // }
+
+                // Sector
+                if (!empty($saved->filter_sector)) {
+                    $query->where('sector', $saved->filter_sector);
+                }
+
+                // Salary Range
+                if (!empty($saved->filter_salary_min)) {
+                    $query->where('salary', '>=', $saved->filter_salary_min);
+                }
+
+                if (!empty($saved->filter_salary_max)) {
+                    $query->where('salary', '<=', $saved->filter_salary_max);
+                }
+
+
+                if (!empty($saved->filter_experience_years)) {
+                    $query->where('experience_level', '>=', $saved->filter_experience_years);
+                }
+            }
+        }
+        // Keyword
+        if ($request->keywords) {
+            $query->where('nurse_type', 'LIKE', '%' . $request->keywords . '%');
+        }
+
+        // Location
+        if (!empty($request->locations)) {
+            $query->whereIn('location_name', $request->locations);
+        }
+
+        // Agency
+        if ($request->agency) {
+            $query->where('agency_name', $request->agency);
+        }
+
+        // SORTING
+        if ($request->sort_name == 2) {
+            $query->orderBy('id', 'desc');
+        } elseif ($request->sort_name == 5) {
+            $query->orderBy('urgent_hire', 'desc');
+        } elseif ($request->sort_name == 7) {
+            $query->orderBy('application_submission_date', 'asc');
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $jobs = $query->paginate(2);
+        // $jobs = $query->get();
+        // print_r($jobs);die;
+        if ($jobs->count() == 0) {
+            return response()->json([
+                'status' => false,
+                'html' => ''
+            ]);
+        }
+        return response()->json([
+            'status' => true,
+            'html' => view('nurse.job_filter_data', compact('jobs'))->render()
+        ]);
+    }
+    public function getJobsSorting_old(Request $request)
     {
         $query = DB::table("job_boxes");
 
@@ -366,25 +524,6 @@ class JobsController extends Controller{
         $jobs = $query->orderBy('created_at', 'asc')->paginate(2);
 
         return view('nurse.job_filter_data', compact('jobs'))->render();
-    }
-    public function getJobsSorting_old(Request $request){
-        $sort_name = $request->sort_name;
-
-        if($sort_name == "most_recent"){
-            $data['jobs'] = DB::table("job_boxes")->orderBy('id','desc')->get();
-        }
-
-        if($sort_name == "urgent_hire"){
-            $data['jobs'] = DB::table("job_boxes")->orderBy('urgent_hire','desc')->get();
-            //print_r($data['jobs']);die;
-        }
-
-        if($sort_name == "application_deadline"){
-            $data['jobs'] = DB::table("job_boxes")->orderBy('application_submission_date','asc')->get();
-            //print_r($data['jobs']);die;
-        }
-        
-        return view("nurse.job_filter_data")->with($data);
     }
 
     public function getNurseData(Request $request)

@@ -147,7 +147,7 @@ class HomeController extends Controller
         $work_preferences_data = WorkPreferModel::get();
         return view('nurse.nurseRegister', compact('message','practitioner_data','speciality_data','work_preferences_data'));
     }
-          public function manage_profile($message = '')
+    public function manage_profile($message = '')
     {
         
         $employeement_type_preferences = DB::table("employeement_type_preferences")->where("sub_prefer_id","0")->get();
@@ -185,6 +185,11 @@ class HomeController extends Controller
         //print_r($specialities_data);
         $experience_data = DB::table("user_experience")->where("user_id",$user_id)->get();
 
+        $emp_prefer_data = DB::table("employeement_type_preferences")->where("sub_prefer_id",1)->get();
+        $emp_preferfixterm_data = DB::table("employeement_type_preferences")->where("sub_prefer_id",2)->get();
+        $emp_prefertemp_data = DB::table("employeement_type_preferences")->where("sub_prefer_id",3)->get();
+        $speciality_status_data = DB::table("speciality_status")->where("status",1)->get();
+
         //Auto status update when date is expired 
         RegisteredProfile::whereNotNull('expiry_date')
             ->whereDate('expiry_date', '<', Carbon::today())
@@ -192,7 +197,7 @@ class HomeController extends Controller
             ->update([
                 'status' => 7
             ]);
-        return view('nurse.profile', compact('message','employeement_type_preferences','nurse_data','specialities_data','specialities_type','user_data','experience_data', 'registration_profile', 'profession_data', 'profession_single_data'));
+        return view('nurse.profile', compact('message','employeement_type_preferences','nurse_data','specialities_data','specialities_type','user_data','experience_data', 'registration_profile', 'profession_data', 'profession_single_data', 'emp_prefer_data', 'emp_preferfixterm_data', 'emp_prefertemp_data', 'speciality_status_data'));
     }
     public function upload_profile_image(Request $request)
     {
@@ -1802,6 +1807,7 @@ public function ResetPassword(Request $request)
                                 $post->current_employee_status = $specialities['speciality_status'][$spec_arr_id]['employee_status'];
                                 $post->permanent_status = $specialities['speciality_status'][$spec_arr_id]['permanent_status'];
                                 $post->temporary_status = $specialities['speciality_status'][$spec_arr_id]['temporary_status'];
+                                $post->fixed_term_status = $specialities['speciality_status'][$spec_arr_id]['fixterm_status'];
                                 $post->unemployeed_status = '';
                                 $post->unemployeed_reason = $specialities['speciality_status'][$spec_arr_id]['unemployeement_reason'];
                                 $post->long_unemplyeed = $specialities['speciality_status'][$spec_arr_id]['long_unemployeed'];
@@ -1860,6 +1866,7 @@ public function ResetPassword(Request $request)
                                 $post->current_employee_status = $specialities['speciality_status'][$spec_arr_id]['employee_status'];
                                 $post->permanent_status = $specialities['speciality_status'][$spec_arr_id]['permanent_status'];
                                 $post->temporary_status = $specialities['speciality_status'][$spec_arr_id]['temporary_status'];
+                                $post->fixed_term_status = $specialities['speciality_status'][$spec_arr_id]['fixterm_status'];
                                 $post->unemployeed_status = '';
                                 $post->unemployeed_reason = $specialities['speciality_status'][$spec_arr_id]['unemployeement_reason'];
                                 $post->long_unemplyeed = $specialities['speciality_status'][$spec_arr_id]['long_unemployeed'];
@@ -4952,10 +4959,18 @@ public function ResetPassword(Request $request)
         $speciality_id = $request->speciality_id;
         $main_specialty_data = DB::table("speciality")->where("id",$speciality_id)->first();
         $sub_specialty_data = DB::table("speciality")->where("parent",$speciality_id)->get();
+        $emp_prefer_data = DB::table("employeement_type_preferences")->where("sub_prefer_id",1)->get();
+        $emp_preferfixterm_data = DB::table("employeement_type_preferences")->where("sub_prefer_id",2)->get();
+        $emp_prefertemp_data = DB::table("employeement_type_preferences")->where("sub_prefer_id",3)->get();
+        $speciality_status_data = DB::table("speciality_status")->where("status",1)->get();
 
         $data['main_speciality_id'] = $speciality_id;
         $data['main_speciality_name'] = $main_specialty_data->name;
         $data['sub_spciality_data'] = $sub_specialty_data;
+        $data['emp_prefer_data'] = $emp_prefer_data;
+        $data['emp_preferfixterm_data'] = $emp_preferfixterm_data;
+        $data['emp_prefertemp_data'] = $emp_prefertemp_data;
+        $data['speciality_status_data'] = $speciality_status_data;
 
         return json_encode($data);
 

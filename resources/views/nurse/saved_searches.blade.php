@@ -110,13 +110,34 @@
                 @endphp
                 <div class="filter-section">
                     <div class="filter-title">
+                        <span>Type of nurse</span>
+                        <span class="icon">&#8250;</span>
+                    </div>
+                    <div class="filter-options">
+                        @php
+                        $type_of_nurse = DB::table("practitioner_type")->where("parent","!=","0")->get();
+                        @endphp
+                        @foreach($type_of_nurse as $nurse_type)
+                        <label class="sub-heading nurse-type-{{ $nurse_type->id }}" data-name="Nurse Type" data-filter="nurse_type" data-value="{{ $nurse_type->id }}">
+                            <input type="checkbox" name="nurse_type[]" value="{{ $nurse_type->id }}" {{ in_array($nurse_type->id, $filters['nurse_type'] ?? []) ? 'checked' : '' }}> {{ $nurse_type->name }}</label>
+                        
+                        @endforeach
+                        
+                    </div>
+                    <div class="subpagedata-nurse_type">
+                        
+                    </div>
+                    
+                </div>
+                <div class="filter-section">
+                    <div class="filter-title">
                         <span>Sector</span>
                         <span class="icon">&#8250;</span>
                     </div>
                     <div class="filter-options">
-                        <label><input type="radio" class="edit_sector_radio" name="edit_sector" value="Public & Government" {{ ($filters['sector'] ?? '') === 'Public & Government' ? 'checked' : '' }}> Public & Government </label>
-                        <label><input type="radio" class="edit_sector_radio" name="edit_sector" value="Private" {{ ($filters['sector'] ?? '') === 'Private' ? 'checked' : '' }}> Private </label>
-                        <label><input type="radio" class="edit_sector_radio" name="edit_sector" value="Public Government & Private" {{ ($filters['sector'] ?? '') === 'Public Government & Private' ? 'checked' : '' }}> Public Government & Private</label>
+                        <label><input type="radio" class="edit_sector_radio" name="edit_sector" value="1" {{ ($filters['sector'] ?? '') === 'Public & Government' ? 'checked' : '' }}> Public & Government </label>
+                        <label><input type="radio" class="edit_sector_radio" name="edit_sector" value="2" {{ ($filters['sector'] ?? '') === 'Private' ? 'checked' : '' }}> Private </label>
+                        <label><input type="radio" class="edit_sector_radio" name="edit_sector" value="3" {{ ($filters['sector'] ?? '') === 'Public Government & Private' ? 'checked' : '' }}> Public Government & Private</label>
                     </div>
                 </div>
                 <div class="filter-section">
@@ -308,27 +329,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="filter-section">
-                    <div class="filter-title">
-                        <span>Type of nurse</span>
-                        <span class="icon">&#8250;</span>
-                    </div>
-                    <div class="filter-options">
-                        @php
-                        $type_of_nurse = DB::table("practitioner_type")->where("parent","!=","0")->get();
-                        @endphp
-                        @foreach($type_of_nurse as $nurse_type)
-                        <label class="sub-heading nurse-type-{{ $nurse_type->id }}" data-name="Nurse Type" data-filter="nurse_type" data-value="{{ $nurse_type->id }}">
-                            <input type="checkbox" name="nurse_type[]" value="{{ $nurse_type->id }}" {{ in_array($nurse_type->id, $filters['nurse_type'] ?? []) ? 'checked' : '' }}> {{ $nurse_type->name }}</label>
-                        
-                        @endforeach
-                        
-                    </div>
-                    <div class="subpagedata-nurse_type">
-                        
-                    </div>
-                    
                 </div>
                 <div class="filter-section">
                     <div class="filter-title">
@@ -753,7 +753,7 @@
                 data-name="${sub.name}" 
                 data-filter="${filterType}" 
                 data-value="${sub.id}">
-                <input type="checkbox" value="${sub.name}" name="${filterType}[]" ${isChecked}> 
+                <input type="checkbox" value="${sub.id}" name="${filterType}[]" ${isChecked}> 
                 ${sub.name}
             </label>`;
     });

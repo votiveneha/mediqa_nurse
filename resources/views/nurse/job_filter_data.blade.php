@@ -1,5 +1,4 @@
 
-@if(count($jobs) > 0)
 @foreach($jobs as $job)
 <div class="job-card">
     <?php
@@ -439,9 +438,3 @@
 <div class="pagination-wrapper">
     {{ $jobs->links('pagination::bootstrap-4') }}
 </div>
-@else
-<div id="no-jobs" class="no-jobs-box" >
-    <h3>🚫 No Jobs Found</h3>
-    <p>Sorry, no jobs match your search.</p>
-</div>
-@endif
