@@ -796,6 +796,19 @@ class JobsController extends Controller{
             $savedSearch->quite_hours_start = $request->edit_quiet_start;
             $savedSearch->quite_hours_end = $request->edit_quiet_end;
 
+            $savedSearch->filter_sector = $request->edit_sector;
+            $savedSearch->filter_employment_type = $request->employment_type;
+            $savedSearch->filter_work_shift = $request->work_shift;
+            $savedSearch->filter_work_environment = $request->work_environment;
+            $savedSearch->filter_employee_positions = $request->employee_positions;
+            $savedSearch->filter_benefits_preferences = $request->benefits_preferences;
+            $savedSearch->filter_nurse_type = $request->nurse_type;
+            $savedSearch->filter_speciality = $request->speciality;
+            $savedSearch->filter_location_preference = $request->edit_location;
+            $savedSearch->filter_experience_years = $request->year_experience;
+            $savedSearch->filter_salary_min = $request->minSalary1;
+            $savedSearch->filter_salary_max = $request->maxSalary1;
+
             $savedSearch->save();
 
             $id = $savedSearch->searches_id;

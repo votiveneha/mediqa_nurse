@@ -169,11 +169,11 @@
       <li><a class="{{ request()->is('nurse/setting_availablity') ?'active':'' }} btn btn-border recruitment-icon mb-20" href="{{ route('nurse.setting_availablity', ['page' => 'setting_availablity']) }}"><i class="fi fi-rr-settings"></i> Setting</a></li>
       <li><a class="{{ request()->is('nurse/registration_licences') ?'active':'' }} btn btn-border recruitment-icon mb-20" href="{{ route('nurse.registration_licences', ['page' => 'registration_licences']) }}"><i class="fi fi-rr-settings"></i> Registrations and Licences</a></li>
       <li><a href="{{ route('nurse.my-profile', ['page' => 'profession']) }}"  class="btn btn-border recruitment-icon mb-20 profile_tabs" aria-controls="tab-my-jobs" aria-selected="false"><i class="fi fi-rr-employee-man"></i> Profession</a></li>
-
-      <li><a href="{{ route('nurse.my-profile', ['page' => 'educert']) }}" class="btn btn-border people-icon mb-20" aria-controls="tab-saved-jobs" aria-selected="false"><i class="fi fi-rr-graduation-cap"></i> Education and Certifications</a></li>
-      <li><a href="{{ route('nurse.mandatory_training', ['page' => 'mandatory_training']) }}" class="btn btn-border aboutus-icon mb-20" aria-controls="tab-my-menu4" aria-selected="true"><i class="fi fi-rr-chart-user"></i>Mandatory Training and Continuing Education</a></li>
       <li><a href="{{ route('nurse.my-profile', ['page' => 'experience_info']) }}" class="btn btn-border aboutus-icon mb-20" aria-controls="tab-my-menu4" aria-selected="true"><i class="fi fi-rr-suitcase-alt"></i> Experience</a></li>
       <li><a href="{{ route('nurse.my-profile', ['page' => 'reference_info']) }}" class="btn btn-border aboutus-icon mb-20" aria-controls="tab-my-menu4" aria-selected="true"><i class="fi fi-rr-suitcase-alt"></i> References</a></li>
+      <li><a href="{{ route('nurse.my-profile', ['page' => 'educert']) }}" class="btn btn-border people-icon mb-20" aria-controls="tab-saved-jobs" aria-selected="false"><i class="fi fi-rr-graduation-cap"></i> Education and Certifications</a></li>
+      <li><a href="{{ route('nurse.mandatory_training', ['page' => 'mandatory_training']) }}" class="btn btn-border aboutus-icon mb-20" aria-controls="tab-my-menu4" aria-selected="true"><i class="fi fi-rr-chart-user"></i>Mandatory Training and Continuing Education</a></li>
+      
 
 
       <li><a href="{{ route('nurse.profileVaccination', ['page' => 'vaccinations']) }}" class="{{ request()->is('nurse/profileVaccination') ?'active':'' }} btn btn-border aboutus-icon mb-20 " aria-controls="tab-my-menu4" aria-selected="true"><i class="fi fi-rr-chart-user"></i> Vaccinations</a></li>

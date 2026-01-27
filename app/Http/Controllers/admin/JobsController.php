@@ -54,6 +54,7 @@ class JobsController extends Controller
 
     public function addJobs(Request $request)
     {
+        $nurse_type_name = DB::table('practitioner_type')->where('id', $request->nurse_type)->pluck('name');
         $nurse_type = $request->nurse_type;
         //print_r($nurse_type);die;
         $typeofspeciality = $request->typeofspeciality;
@@ -81,7 +82,9 @@ class JobsController extends Controller
 
         if($job_id){
             $jobs = JobsModel::find($job_id);
-            $jobs->nurse_type = json_encode($nurse_type);
+            // $jobs->nurse_type = json_encode($nurse_type);
+            $jobs->nurse_type = json_encode($nurse_type_name);
+            $jobs->nurse_type_id = json_encode($nurse_type);
             $jobs->typeofspeciality = json_encode($typeofspeciality);
             $jobs->degree = json_encode($degree);
             $jobs->sector = $sector;
