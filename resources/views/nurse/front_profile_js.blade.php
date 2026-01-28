@@ -2797,17 +2797,90 @@
     // exp tab changes
     $(document).ready(function() {
 
-        var l = 1;
-        $(".nurse_exp_type").each(function() {
+        var l = 0;
+
+        $(".nurse_exp_type").each(function(index) {
+            var l = index + 1; // 1-based index
+            console.log("nurse_type34",".nurse_exp_type-" + l);
             if ($(".nurse_exp_type-" + l).length > 0) {
+                
                 if ($(".type_nurse_ep-" + l).val() != "") {
-                    // Initialize select2
+                    console.log("nurse_type2","type-of-nurse-experience-"+l+"-0");
                     var nurse_type1 = JSON.parse($(".type_nurse_ep-" + l).val());
-                    console.log("nurse_type1",nurse_type1);
-                    $('#nurse_type_exp-' + l+"-0").select2().val(nurse_type1).trigger('change');
+                    var nurse_type_arr = [nurse_type1];
+                    
+                    console.log("nurse_type1",nurse_type_arr);
+                    //console.log('options:', $select.find('option').map(function(){ return this.value }).get());
+                    //$('#nurse_type_exp-' + l+"-0").select2().val(nurse_type_arr).trigger('change');
+                    $('.js-example-basic-multiple[data-list-id="type-of-nurse-experience-'+l+'-0"]').select2().val(nurse_type_arr).trigger('change');
                 }
             }
-            l++;
+
+            
+            
+
+            var k = 1;
+            $(".subspecnurse_list_experience").each(function(){
+                var speciality_value = $(this).val();
+                if ($(".speciality_value_experience-"+k+'-'+speciality_value).val() != "") {
+                    var speciality_type = JSON.parse($(".speciality_value_experience-"+k+'-'+speciality_value).val());
+                    var speciality_type_arr = [speciality_type];
+                    console.log("speciality_type",speciality_type_arr);
+                    $('.js-example-basic-multiple[data-list-id="speciality_preferences_experience-'+k+'-'+speciality_value+'-0"]').select2().val(speciality_type_arr).trigger('change');
+                }
+
+                var o = 1;
+                $(".subspec_list_experience").each(function(){
+                    var subspeciality_value = $(this).val();
+                    console.log("subspeciality_value",$(".subspectype_experience-"+o+'-'+subspeciality_value).val());
+                    if ($(".subspectype_experience-"+o+'-'+subspeciality_value).val() != "") {
+                        var speciality_type = JSON.parse($(".subspectype_experience-"+o+'-'+subspeciality_value).val());
+                        var speciality_type_arr = [speciality_type];
+                        console.log("subspeciality_type",speciality_type_arr);
+                        $('.js-example-basic-multiple[data-list-id="subspeciality_preferences_experience-'+o+'-'+speciality_value+'-'+subspeciality_value+'"]').select2().val(speciality_type_arr).trigger('change');
+                    }
+                    console.log("temphfield",".temphfield_experience-"+o+'-'+speciality_type);
+                    if ($(".temphfield_experience-"+o+'-'+speciality_type).val() != "") {
+                        var temphfield = JSON.parse($(".temphfield_experience-"+o+'-'+speciality_type).val());
+                        
+                        console.log("temphfield_experience",temphfield);
+                        var temphfield_arr = [temphfield];
+                        $('.js-example-basic-multiple[data-list-id="temporary_status_profession_experience1-'+speciality_value+"-"+speciality_type+'"]').select2().val(temphfield).trigger('change');
+                    
+                    }
+
+                    if ($(".fixtermfield_experience-"+o+'-'+speciality_type).val() != "") {
+      
+                        var fixtermfield = JSON.parse($(".fixtermfield_experience-"+o+'-'+speciality_type).val());
+                        
+                        console.log("fixtermfield",fixtermfield);
+                        var fixtermfield_arr = [fixtermfield];
+                        $('.js-example-basic-multiple[data-list-id="fixed_term_status_experience1-'+speciality_value+"-"+speciality_type+'"]').select2().val(fixtermfield_arr).trigger('change');
+                    
+                    }
+                    o++;
+                });
+
+                
+                k++;
+            });
+            
+            // example usage
+            // $(this) refers to the current .nurse_exp_type
+        });
+
+         var j = 1;
+        $(".subnurse_list_experience").each(function(){
+            var value = $(this).val();
+            console.log("subnursetypeexperience",value);
+            if($(".subnursetypeexperience-" + j+"-"+value).val() != ""){
+                var subnurse_type1 = JSON.parse($(".subnursetypeexperience-" + j+"-"+value).val());
+                var subnurse_type_arr = [subnurse_type1];
+                console.log("subnurse_type1","type-of-nurse-experience-"+j+'-'+value);
+
+                $('.js-example-basic-multiple[data-list-id="subtype-of-nurse-experience-'+j+'-'+value+'"]').select2().val(subnurse_type_arr).trigger('change');
+            }
+            j++;
         });
 
         $(".subspec_list_experience_count").each(function() {

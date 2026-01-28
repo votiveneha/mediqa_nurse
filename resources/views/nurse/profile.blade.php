@@ -4543,10 +4543,15 @@ p.highlight-text {
 
                       @endforeach
                       @else
-                      <div class="work_exp exp_tab-1">
+                      @php
+                        $x = 1;      
+                      @endphp
+                      @foreach($profession_data as $profession)
+                      
+                      <div class="work_exp exp_tab-{{ $x }}">
                         <div class="condition_set">
                           <h6 class="emergency_text previous_employeers_head">
-                            Work Experience 1
+                            Work Experience {{ $x }}
                           </h6>
                           <div class="form-group level-drp">
                           
@@ -4558,7 +4563,7 @@ p.highlight-text {
                               
                             ?>
                             
-                            <ul id="wp_data-1" style="display:none;">
+                            <ul id="wp_data-{{ $x }}" style="display:none;">
                              
                               @if(!empty($workplace_data))
                               @foreach($workplace_data as $wp_data)
@@ -4566,27 +4571,58 @@ p.highlight-text {
                               @endforeach
                               @endif
                             </ul>
-                            <select class="js-example-basic-multiple addAll_removeAll_btn facworktype facworktype-1" data-list-id="wp_data-1" name="positions_held[1]" multiple onchange="getWpData('',1)"></select>
-                            <span id="reqfacworktype-1" class="reqError text-danger valley"></span>
+                            <select class="js-example-basic-multiple addAll_removeAll_btn facworktype facworktype-{{ $x }}" data-list-id="wp_data-{{ $x }}" name="positions_held[{{ $x }}]" multiple onchange="getWpData('',{{ $x }})"></select>
+                            <span id="reqfacworktype-{{ $x }}" class="reqError text-danger valley"></span>
                           
                           </div>
-                          <div class="wp_data-1"></div>
+                          <div class="wp_data-{{ $x }}"></div>
                           <div class="form-group level-drp">
                             <label class="form-label" for="input-1">Facility / Workplace Name</label>
                             <input type="text" name="facility_workplace_name[1]" class="form-control facworkname facworkname-1" value="{{ $data->facility_workplace_name }}">
                             <span id="reqfaceworkname-1" class="reqError text-danger valley"></span>
                           </div>  
-                          <div class="form-group drp--clr nurse_exp_type nurse_exp_type-1">
+                          <div class="form-group drp--clr nurse_exp_type nurse_exp_type-{{ $x }}">
                             <label class="form-label" for="input-1">Type of Nurse?</label>
                             @php
-                              $user_data = Auth::guard('nurse_middle')->user();
-                              $nurse_data = (array)json_decode($user_data->nurse_data);
-                              $ndata = json_encode($nurse_data['type_0']);
-                              //print_r($ndata);
+                              $nurse_type = $profession->nurse_data;
+                              $profession_specility_id = $profession->specialties;
+                              $practitioner_data = DB::table("practitioner_type")->where("id",$nurse_type)->first();
+                              $mainnurse_json = (!empty($practitioner_data))?json_encode($practitioner_data->parent):'';
+                              $subnurse_json = (!empty($profession))?json_encode($profession->nurse_data):'';
+
+                              $specility_data = DB::table("speciality")->where("id",$profession_specility_id)->first();
+                            
+                              $mainspecility_json = (!empty($specility_data))?json_encode((string)$specility_data->parent):'';
+                              $subspecility_json = (!empty($profession))?json_encode($profession->specialties):'';
+
+                              $parentIds = [];
+
+                              while ($profession_specility_id != 0) {
+
+                                  $row = DB::table('speciality')
+                                      ->where('id', $profession_specility_id)
+                                      ->first();
+
+                                  if (!$row) break; // safety check
+
+                                  $parentIds[] = $row->parent; // store parent id
+
+                                  $profession_specility_id = $row->parent; // move to next parent
+                              }
+
+                              $parents = array_reverse($parentIds);
+
+                              $parents1 = array_values(
+                                              array_reverse(
+                                                  array_filter($parentIds, fn($v) => $v != 0)
+                                              )
+                                          ); 
+
+                              //print_r($parents1);
                             @endphp
                             <input type="hidden" name="user_id" class="user_id" value="{{ Auth::guard('nurse_middle')->user()->id }}">
-                            <input type="hidden" name="type_nurse" class="type_nurse_ep-1" value="{{ $ndata }}">
-                            <ul id="type-of-nurse-experience-1-0" style="display:none;">
+                            <input type="hidden" name="type_nurse" class="type_nurse_ep-{{ $x }}" value="{{ $mainnurse_json }}">
+                            <ul id="type-of-nurse-experience-{{ $x }}-0" style="display:none;">
                               @php $specialty = specialty();$spcl=$specialty[0]->id;@endphp
                               <?php
                               $j = 1;
@@ -4598,62 +4634,252 @@ p.highlight-text {
                               ?>
                               @endforeach
                             </ul>
-                            <select class="js-example-basic-multiple addAll_removeAll_btn nurse_type_exp nurse_type_exp_1" data-list-id="type-of-nurse-experience-1-0" name="nurseType[1][type_0][]" id="nurse_type_exp-1-0" onchange="getNurseTypeExperience('main',0,1)" multiple="multiple"></select>
+                            <select class="js-example-basic-multiple addAll_removeAll_btn nurse_type_exp nurse_type_exp_1" data-list-id="type-of-nurse-experience-{{ $x }}-0" name="nurseType[{{ $x }}][type_0][]" id="nurse_type_exp-{{ $x }}-0"></select>
                             <span id="reqnurseTypeexpId-1" class="reqError text-danger valley"></span>
                           </div>
-                          <div class="showNurseTypeExperience-1-0">
-                              <input type="hidden" name="nursetype_list_experience_count" class="nursetype_list_experience_count" value="1">
-                              @php
-                                $nurse_typeExperience = json_decode($user_data->nurse_data);
-                                $nurseTypesExperience = [];
-                                if(!empty($nurse_typeExperience)){        
-                                  foreach ($nurse_typeExperience as $key => $value) {
-                                      $parts = explode('_', $key); // ["type", "0"]
-                                      
-                                      if (isset($parts[1]) && (int)$parts[1] !== 0) {
-                                          $nurseTypesExperience[$key] = $value;
-                                      }
-                                  }
-                                }
-                              @endphp
-
-                              @if(!empty($nurseTypesExperience))
-                              @foreach($nurseTypesExperience as $key => $ntypes)
-                                @php
-                                  $parts = explode('_', $key);
-                                  
-                                  $n_data = json_encode($ntypes);
-                                @endphp
-                                
-                                <div class="subnurse_main_div subnurse_main_div-{{ $parts[1] }}">
-                                    <?php
-                                      $np_data_name = DB::table("practitioner_type")->where('id', $parts[1])->first();
-                                      $np_data = DB::table("practitioner_type")->where('parent', $parts[1])->get();
-                                    ?>
-                                    <input type="hidden" name="subnursetype" class="subnursetype_experiences-{{ $parts[1] }}-1" value="{{ $n_data }}">
-                                    <div class="subnurse_div subnurse_div-{{ $parts[1] }} form-group level-drp">
-                                    <label class="form-label subnurse_label subnurse_label-{{ $parts[1] }}" for="input-1">{{ $np_data_name->name }}</label>
-                                    <input type="hidden" name="subnurse_list" class="subnurse_list_experiences-1 subnurse_list_experience-{{ $parts[1] }}" value="{{ $parts[1] }}">
-                                    <ul id="type-of-nurse-{{ $parts[1] }}-1" style="display:none;">
-                                      @foreach($np_data as $nd)
-                                      <li data-value="{{ $nd->id }}">{{ $nd->name }}</li>
-                                      @endforeach
+                          <div class="showNurseType-{{ $x }}-0">
+                              <div class="subnurse_main_div subnurse_main_div-{{ $x }}-{{ $practitioner_data->parent }}">
+                                <?php
+                                  $np_data_name = DB::table("practitioner_type")->where('id', $practitioner_data->parent)->first();
+                                  $np_data = DB::table("practitioner_type")->where('parent', $practitioner_data->parent)->get();
+                                ?>
+                                <input type="hidden" name="subnursetype" class="subnursetypeexperience-{{ $x }}-{{ $practitioner_data->parent }}" value="{{ $subnurse_json }}">
+                                <div class="subnurse_div subnurse_div-{{ $practitioner_data->parent }} form-group level-drp">
+                                    <label class="form-label subnurse_label subnurse_label-{{ $practitioner_data->parent }}" for="input-1">{{ $np_data_name->name }}</label>
+                                    <input type="hidden" name="subnurse_list" class="subnurse_list_experience subnurse_list_experience-{{ $practitioner_data->parent }}" value="{{ $practitioner_data->parent }}">
+                                    <ul id="subtype-of-nurse-experience-{{ $x }}-{{ $practitioner_data->parent }}" style="display:none;">
+                                    @foreach($np_data as $nd)
+                                    <li data-value="{{ $nd->id }}">{{ $nd->name }}</li>
+                                    @endforeach
                                     </ul>
-                                    <select class="js-example-basic-multiple subnurse_valid-{{ $parts[1] }} addAll_removeAll_btn" data-list-id="type-of-nurse-{{ $parts[1] }}-1" id="type-of-nurse-experience-{{ $parts[1] }}-1" name="nurseType[1][type_{{ $parts[1] }}][]" id="nurse_type_exp-1-{{ $parts[1] }}" multiple="multiple"></select>
-                                    <span id="reqsubnursevalid-{{ $parts[1] }}" class="reqError text-danger valley"></span>
-                                    </div>
-                                    <div class="subnurse_level-{{ $parts[1] }}"></div>
+                                    <select class="js-example-basic-multiple subnurse_experience_valid subnurse_valid-{{ $practitioner_data->parent }} addAll_removeAll_btn" data-list-id="subtype-of-nurse-experience-{{ $x }}-{{ $practitioner_data->parent }}" name="nurseType[{{ $x }}][type_{{ $practitioner_data->parent }}][]" onchange="getNurseType('main',{{ $practitioner_data->parent }})"></select>
+                                    <span id="reqsubnurseexperiencevalid-{{ $practitioner_data->parent }}" class="reqError text-danger valley"></span>
                                 </div>
-                                <div class="show_nurse-{{ $parts[1] }}"></div>
-                              
+                                <div class="subnurse_level-{{ $practitioner_data->parent }}"></div>
+                            
+                                <div class="showNurseType-{{ $practitioner_data->parent }}"></div>
+                                <div class="showNurseSpecialityExperience-{{ $x }}-{{ $practitioner_data->parent }}">
+                                  <div class="condition_set nurse_specialities nurse_specialities-{{ $profession->nurse_data }}">
+                                    <div class="form-group drp--clr">
+                                      <label class="form-label" for="input-1">Specialties</label>
+                                      <input type="hidden" name="subspecialitynurse_list" class="subspecnurse_list_experience" value="{{ $profession->nurse_data }}">
+                                      <input type="hidden" name="subspecialitynurseid" class="subspecialitynurseid_experience" value="{{ $profession->specialties }}">
+                                      <input type="hidden" name="speciality_value" class="speciality_value_experience speciality_value_experience-{{ $x }}-{{ $profession->nurse_data }}" value="{{ json_encode((string)$parents1[0]) }}">
+                                      <ul id="speciality_preferences_experience-{{ $x }}-{{ $profession->nurse_data }}-0" style="display:none;">
+                                        @php $JobSpecialties = JobSpecialties(); @endphp
+                                        <?php
+                                        $k = 1;
+                                        ?>
+                                        @foreach($JobSpecialties as $ptl)
+                                        <li id="nursing_menus-{{ $k }}" data-value="{{ $ptl->id }}">{{ $ptl->name }}</li>
+                                        <?php
+                                        $k++;
+                                        ?>
+                                        @endforeach
+                                      </ul>
+                                      <select class="js-example-basic-multiple addAll_removeAll_btn speciality_type_field" name="nurseType[{{ $x }}][{{ $profession->nurse_data }}][type_0][]" data-list-id="speciality_preferences_experience-{{ $x }}-{{ $profession->nurse_data }}-0" onchange="getSecialities('main',{{ $profession->nurse_data }},0)"></select>
+                                      <span id="reqspecialties" class="reqError text-danger valley"></span>
+                                    </div>     
+                                  </div>
+                                </div>
+                                <div class="show_specialities_experience-{{ $x }}-{{ $profession->nurse_data }}-0">
+                                  
+                                  <?php
+                                    $i = 0;
+                                  ?>
+                                  @foreach ($parents1 as $index=>$id)
+                                      <?php
+                                        $sp_data_name = DB::table("speciality")->where('id', $id)->first();
+                                        $sp_data = DB::table("speciality")->where('parent', $id)->get();
+                                      ?>  
+                                      @if($index > 0)
+                                      <div class="show_specialities-{{ $profession->nurse_data }}-{{ $parents1[$index-1] }}">  
+                                      @endif
+                                      <div class="subspec_main_div_experience subspec_main_div_experience-{{ $profession->nurse_data }}-{{ $id }}">
+                                        <input type="hidden" name="subspectype" class="subspectype_experience-{{ $x }}-{{ $id }}" value="{{ isset($parents1[$i+1])?json_encode((string)$parents1[$i+1]):$subspecility_json }}">  
+                                        <div class="subspec_div_experience form-group level-drp">
+                                          <label class="form-label">{{ $sp_data_name->name }}</label>
 
-                              @endforeach
-                              @endif
-                            </div>
+                                          <input type="hidden" class="subspec_list_experience subspec_list_experience-{{ $x }}-@if($index==0)0 @else{{ $parents1[$i-1] }} @endif subspec_list-{{ $id }}" value="{{ $id }}">
 
+                                          <ul id="subspeciality_preferences_experience-{{ $x }}-{{ $profession->nurse_data }}-{{ $id }}" style="display:none;">
+                                            @foreach($sp_data as $sd)
+                                            <li data-value="{{ $sd->id }}">{{ $sd->name }}</li>
+                                            @endforeach
+                                          </ul>
+
+                                          <select class="js-example-basic-multiple subspec_valid- addAll_removeAll_btn"
+                                                  data-list-id="subspeciality_preferences_experience-{{ $x }}-{{ $profession->nurse_data }}-{{ $id }}"
+                                                  name="nurseType[{{ $x }}][{{ $profession->nurse_data }}][type_{{ $id }}][]"
+                                                  
+                                                  onchange="getSecialities('main', {{ $profession->nurse_data }}, {{ $id }})">
+                                          </select>
+                                        </div>
+                                        @if($index == count($parents1) - 1)
+                                        <div class="show_specialitiesStatusExperience-{{ $x }}-{{ $profession->nurse_data }}-{{ $id }}">
+                                          <div class="subspecprofdiv_experience subspecprofdiv_experience-{{ $x }}-{{ $profession->nurse_data }}-{{ $profession->specialties }}">
+                                            <div class="custom-select-wrapper">
+                                                <?php
+                                                    $sp_data_name_status = DB::table("speciality")->where('id', $profession->specialties)->first();
+                                                    $speciality_status_data = DB::table("speciality_status")->get();
+                                                  ?>
+                                                <label class="form-label">
+                                                    Specialty Status ({{ $sp_data_name_status->name }})
+                                                    
+                                                    <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>
+                                                    <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">
+                                                      <li><strong>Status definitions:</strong></li>
+                                                      <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>
+                                                      <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>
+                                                      <li><strong>First:</strong> First-ever specialty after qualification.</li>
+                                                      <li><strong>Former:</strong> Previously practiced.</li>
+                                                      <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>
+                                                      <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>
+                                                    </ul>
+                                                </label>
+                                                <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprofpart_list-{{ $profession->specialties }} subspecprof_listProfession subspecprof_listProfession-{{ $specility_data->parent }} subspecprof_list-{{ $specility_data->parent }}" value="{{ $profession->specialties }}">
+                                                
+                                                <select class="custom-select speciality_status_columns-{{ $profession->specialties }}"
+                                                    name="nurseType[{{ $x }}][{{ $profession->nurse_data }}][speciality_status][type_{{ $profession->specialties }}][status]">
+                                                    <option value="">select</option>
+                                                    @foreach($speciality_status_data as $s_status_data)
+                                                      
+                                                        <option value="{{ $s_status_data->status_id }}" @if($s_status_data->status_id == $profession->speciality_status) selected @endif>{{ $s_status_data->status_name }}</option>
+                                                        @endforeach
+                                                </select>
+                                                <span id="reqsubspeclevelvalid-{{ $specility_data->parent }}" class="reqError text-danger valley"></span>
+                                            </div>
+                                            <div class="custom-select-wrapper form-group level-drp">
+                                              <label class="form-label" for="input-1">What is your overall level of experience in nursing/midwifery?
+                                              </label>
+                                              <select class="custom-select" name="nurseType[{{ $x }}][{{ $profession->nurse_data }}][speciality_status][type_{{ $profession->specialties }}][assistent_level]">
+                                                <option value="">Please Select</option>
+                                                @for($i = 1; $i <= 30; $i++) <option value="{{ $i }}" @if($profession->assistent_level == $i) selected @endif>{{ $i }}{{ $i == 1 ? 'st' : ($i == 2 ? 'nd' : ($i == 3 ? 'rd' : 'th')) }} Year</option>
+                                                @endfor
+                                              </select>
+                                              <span id="reqassistentlevel" class="reqError text-danger valley"></span>
+                                            </div>
+                                            <div class="professional_bio professional_employee_status">
+                                              <div class="custom-select-wrapper form-group level-drp col-md-12">
+                                                <label class="form-label" for="input-1">Current Employment Status</label>
+                                                <select class="custom-select" name="nurseType[{{ $x }}][{{ $profession->nurse_data }}][speciality_status][type_{{ $profession->specialties }}][employee_status]" onchange="employeeStatus(this.value,{{ $profession->nurse_data }},{{ $profession->specialties }})">
+                                                  <option value="">select</option>
+                                                  <option value="Permanent" @if($profession->current_employee_status == "Permanent") selected @endif>Permanent</option>
+                                                  <option value="Fixed-term" @if($profession->current_employee_status == "Fixed-term") selected @endif>Fixed-term</option>
+                                                  <option value="Temporary" @if($profession->current_employee_status == "Temporary") selected @endif>Temporary</option>
+                                                  <option value="Unemployed" @if($profession->current_employee_status == "Unemployed") selected @endif>Unemployed</option>
+                                                </select>
+                                              </div>
+                                              <span id="reqemployee_status" class="reqError text-danger valley"></span>
+                                            </div>
+                                            <div class="professional_permanent-{{ $profession->nurse_data }}-{{ $profession->specialties }}" @if($profession->permanent_status == "select") style="display:none;" @endif>
+                                              <div class="form-group level-drp col-md-12">
+                                                <label class="form-label" for="input-1">Permanent</label>
+                                                <input type="hidden" name="perhfield" class="perhfield" value="{{ $profession->permanent_status }}">
+                                                <ul id="permanent_status_profession-{{ $profession->nurse_data }}-{{ $profession->specialties }}" style="display:none;">
+                                                  <li data-value="">select</li>
+                                                  @foreach($emp_prefer_data as $empp_data)
+                                                  <li data-value="{{ $empp_data->emp_prefer_id }}">{{ $empp_data->emp_type }}</li>
+                                                  @endforeach
+                                                  
+                                                </ul>
+                                                <select class="js-example-basic-multiple" data-list-id="permanent_status_profession-{{ $profession->nurse_data }}-{{ $profession->specialties }}" name="nurseType[{{ $x }}][{{ $profession->nurse_data }}][speciality_status][type_{{ $profession->specialties }}][permanent_status]" id="permanent_status"></select>
+                                                <span id="reqemployeep_status" class="reqError text-danger valley"></span>
+                                              </div>
+                                            </div>
+                                            <div class="professional_temporary-{{ $profession->nurse_data }}-{{ $profession->specialties }}"  @if($profession->temporary_status == "select") style="display:none;" @endif>
+                                              <div class="form-group level-drp col-md-12">
+                                                <label class="form-label" for="input-1">Temporary</label>
+
+                                                <input type="hidden" name="temphfield" class="temphfield_experience-{{ $x }}-{{ $profession->specialties }}" value="{{ json_encode($profession->temporary_status) }}">
+                                                
+                                                <ul id="temporary_status_profession_experience1-{{ $profession->nurse_data }}-{{ $profession->specialties }}" style="display:none;">
+                                                  <li data-value="">select</li>  
+                                                  @foreach($emp_prefertemp_data as $empp_data)
+                                                  <li data-value="{{ $empp_data->emp_prefer_id }}">{{ $empp_data->emp_type }}</li>
+                                                  @endforeach
+                                                </ul>
+                                                <select class="js-example-basic-multiple" data-list-id="temporary_status_profession_experience1-{{ $profession->nurse_data }}-{{ $profession->specialties }}" name="nurseType[{{ $x }}][{{ $profession->nurse_data }}][speciality_status][type_{{ $profession->specialties }}][temporary_status]" id="temporary_status_profession"></select>
+                                                <span id="reqemployeet_status" class="reqError text-danger valley"></span>
+                                              </div>
+                                              
+                                            </div>
+                                            <div class="professional_fixed_term-{{ $profession->nurse_data }}-{{ $profession->specialties }}" @if($profession->fixed_term_status == "select") style="display:none;" @endif>
+                                              <div class="form-group level-drp col-md-12">
+                                                <label class="form-label" for="input-1">Fixed-term</label>
+                                                <input type="hidden" name="fixtermfield" class="fixtermfield_experience-{{ $x }}-{{ $profession->specialties }}" value="{{ json_encode((string)$profession->fixed_term_status) }}">
+                                                
+                                                <ul id="fixed_term_status_experience1-{{ $profession->nurse_data }}-{{ $profession->specialties }}" style="display:none;">
+                                                  <li data-value="select">select</li>
+                                                  @foreach($emp_preferfixterm_data as $empp_data)
+                                                  <li data-value="{{ $empp_data->emp_prefer_id }}">{{ $empp_data->emp_type }}</li>
+                                                  @endforeach
+                                                </ul>
+                                                <select class="js-example-basic-multiple" data-list-id="fixed_term_status_experience1-{{ $profession->nurse_data }}-{{ $profession->specialties }}" name="nurseType[{{ $x }}][{{ $profession->nurse_data }}][speciality_status][type_{{ $profession->specialties }}][fixterm_status]"></select>
+                                                <span id="reqemployeet_status{{ $profession->nurse_data }}-{{ $profession->specialties }}" class="reqError text-danger valley"></span>
+                                              </div>
+                                              
+                                            </div>
+                                            <div class="custom-select-wrapper professional_unemplyeed-{{ $profession->nurse_data }}-{{ $profession->specialties }}" @if($profession->unemployeed_reason == NULL) style="display:none;" @endif>
+                                              <div class="form-group level-drp col-md-12">
+                                                <label class="form-label" for="input-1">Reason for Unemployment</label>
+                                                <!-- <input class="form-control" type="text" required="" name="fullname" placeholder="Steven Job"> -->
+                                                <select class="custom-select mr-10 select-active unemployeement_reason" name="nurseType[{{ $x }}][{{ $profession->nurse_data }}][speciality_status][type_{{ $profession->specialties }}][unemployeement_reason]" id="unemployeement_reason" onchange="reasonUnemployeement(this.value,{{ $profession->nurse_data }},{{ $profession->specialties }})">
+                                                  <option value="">select</option>
+                                                  <option value="Recently graduated" @if($profession->current_employee_status == "Recently graduated") selected @endif>Recently graduated</option>
+                                                  <option value="Career break (maternity leave, family reasons, etc.)" @if($profession->current_employee_status == "Career break (maternity leave, family reasons, etc.)") selected @endif>Career break (maternity leave, family reasons, etc.)</option>
+                                                  <option value="Transitioning from another job" @if($profession->current_employee_status == "Transitioning from another job") selected @endif>Transitioning from another job</option>
+                                                  <option value="Retired but seeking work" @if($profession->current_employee_status == "Retired but seeking work") selected @endif>Retired but seeking work</option>
+                                                  <option value="Laid off / Contract ended" @if($profession->current_employee_status == "Laid off / Contract ended") selected @endif>Laid off / Contract ended</option>
+                                                  <option value="Other (Please specify)" @if($profession->current_employee_status == "Other (Please specify)") selected @endif>Other (Please specify)</option>
+                                                </select>
+                                              </div>
+                                              <span id="requnempreason" class="reqError text-danger valley"></span>
+                                            </div>
+                                            <div class="form-group @if($profession->unemployeed_reason == NULL) d-none @endif specify_reason_div-{{ $profession->nurse_data }}-{{ $profession->specialties }}">
+                                              <label class="form-label" for="input-1">Other (Please specify)</label>
+                                              
+                                              <input class="form-control" type="text" name="specify_reason" value="">
+                                              <span id="otherspecify_reason" class="reqError text-danger valley"></span>
+                                            </div>
+                                            <div class="custom-select-wrapper long_unemplyeed-{{ $profession->nurse_data }}-{{ $profession->specialties }}  @if($profession->long_unemplyeed == NULL) d-none @endif">
+                                              <div class="form-group level-drp col-md-12">
+                                                <label class="form-label" for="input-1">How long have you been unemployed?</label>
+                                                <!-- <input class="form-control" type="text" required="" name="fullname" placeholder="Steven Job"> -->
+                                                <select class="custom-select long_unemployeed" name="nurseType[{{ $x }}][{{ $profession->nurse_data }}][speciality_status][type_{{ $profession->specialties }}][long_unemployeed]" id="long_unemployeed">
+                                                  <option value="">select</option>
+                                                  <option value="Less than 1 month" @if($profession->current_employee_status == "Less than 1 month") selected @endif>Less than 1 month</option>
+                                                  <option value="1 to 3 months" @if($profession->current_employee_status == "1 to 3 months") selected @endif>1 to 3 months</option>
+                                                  <option value="3 to 6 months" @if($profession->current_employee_status == "3 to 6 months") selected @endif>3 to 6 months</option>
+                                                  <option value="6 months to 1 year" @if($profession->current_employee_status == "6 months to 1 year") selected @endif>6 months to 1 year</option>
+                                                  <option value="More than 1 year" @if($profession->current_employee_status == "More than 1 year") selected @endif>More than 1 year</option>
+                                                  
+                                                </select>
+                                                <span id="reqlong_unemp" class="reqError text-danger valley"></span>
+                                              </div>
+                                              
+                                            </div>
+                                          </div>
+                                        </div>  
+                                        @endif
+                                        <?php
+                                          $i++;
+                                        ?>
+                                  @endforeach
+
+                                  @for ($i = count($parents1); $i > 0; $i--)
+                                        @if(isset($parents1[$i+1]))
+                                      </div>  
+                                        @endif
+                                      </div>
+                                  @endfor
+
+                                  
+                                </div>
+                              </div>
                           </div>
 
-                          </div>
+                          
                         </div>
                         <div class="result--show result_show_nurse">
                           <div class="container p-0">
@@ -4700,141 +4926,7 @@ p.highlight-text {
                             <span id="reqnp-1" class="reqError text-danger valley"></span>
                           </div>
                         </div>
-                        <div class="condition_set">
-                          <div class="form-group drp--clr">
-                            <label class="form-label" for="input-1">Specialties</label>
-                            @php
-                              $specialities_typeExperience = (array)json_decode($user->specialties);
-                              $specialties_data = isset($specialities_typeExperience['type_0'])?json_encode($specialities_typeExperience['type_0']):'';
-                              //print_r($specialties_data);
-                            @endphp 
-                            <input type="hidden" name="speciality_exp_value-1" class="speciality_exp-1" value="{{ $specialties_data }}">
-                            <ul id="specialties_type_experience-1-0" style="display:none;">
-                              @php $JobSpecialties = JobSpecialties(); @endphp
-                              <?php
-                              $k = 1;
-                              ?>
-                              @foreach($JobSpecialties as $ptl)
-                              <li id="nursing_menus-{{ $k }}" data-value="{{ $ptl->id }}">{{ $ptl->name }}</li>
-                              <?php
-                              $k++;
-                              ?>
-                              @endforeach
-                            </ul>
-                            <select class="js-example-basic-multiple addAll_removeAll_btn spec_exp spec_exp_1 specialties_experience exp_spe_type_1" data-list-id="specialties_type_experience-1-0" name="specialties_experience[1][type_0][]" multiple="multiple" onchange="getSecialitiesExperience('main',0,1)"></select>
-                            <span id="reqspecialtiesexp-1" class="reqError text-danger valley"></span>
-                          </div>
-                          
-                        </div>
-                        <div class="show_specialitiesExperience-1-0">
-                          <input type="hidden" name="subspec_list_experience" class="subspec_list_experience_count" value="1">
-                          @php
-                            
-                            $specTypesExperience = [];
-                            if(!empty($specialities_typeExperience)){        
-                              foreach ($specialities_typeExperience as $key => $value) {
-                                  $parts = explode('_', $key); // ["type", "0"]
-                                  
-                                  if (isset($parts[1]) && (int)$parts[1] !== 0) {
-                                      $specTypesExperience[$key] = $value;
-                                  }
-                              }
-                            }
-                          @endphp
-
-                          @if(!empty($specTypesExperience))
-                          @foreach($specTypesExperience as $key => $stypes)
-                            @php
-                              $parts = explode('_', $key);
-                              
-                              $s_data = json_encode($stypes);
-
-                              $parentId  = getParentSpecialityId($specialities_typeExperience, $parts[1]);
-                            @endphp
-                            
-                            <input type="hidden" name="subspectype" class="subspectype_experience-1 subspectype_experience-{{ $parts[1] }}-1" value="{{ $s_data }}">
-                            <div class="subspec_main_div_experience subspec_main_div_experience-{{ $parts[1] }}">
-                              <?php
-                                $sp_data_name = DB::table("speciality")->where('id', $parts[1])->first();
-                                $sp_data = DB::table("speciality")->where('parent', $parts[1])->get();
-                              ?>
-                              <div class="subspec_div subspec_div-{{ $parts[1] }} form-group level-drp">
-                              <label class="form-label subspec_label subspec_label-{{ $parts[1] }}" for="input-1">{{ $sp_data_name->name }}</label>
-                              
-                              <input type="hidden" name="subspec_list_experience" class="subspec_list_experiences-1 subspec_list_experiencess-1-{{ $parentId }} subspec_list_experience-{{ $parts[1] }}" value="{{ $parts[1] }}">
-                              <ul id="specialties_type_experience-1-{{ $parts[1] }}" style="display:none;">
-                                @foreach($sp_data as $sd)
-                                <li data-value="{{ $sd->id }}">{{ $sd->name }}</li>
-                                @endforeach
-                              </ul>
-                              <select class="js-example-basic-multiple subspec_valid-{{ $parts[1] }} addAll_removeAll_btn" data-list-id="specialties_type_experience-1-{{ $parts[1] }}" id="specialties_type_exp-{{ $parts[1] }}-1" name="specialties_experience[1][type_{{ $parts[1] }}][]" multiple="multiple" onchange="getSecialitiesExperience('main',{{ $parts[1] }},1)"></select>
-                              <span id="reqsubspecvalid-{{ $parts[1] }}" class="reqError text-danger valley"></span>
-                              </div>
-                              <div class="subspec_level-{{ $parts[1] }}"></div>
-                            
-                              <div class="show_specialitiesStatusExperience-{{ $parts[1] }}">
-                                  <?php
-                                    
-                                    $speciality_status = isset($specialities_typeExperience['speciality_status'])?(array)$specialities_typeExperience['speciality_status']:[];
-                                    //print_r($specialities_type['speciality_status']);
-
-                                    //print_r($speciality_status);
-                                  ?>
-
-                                  @foreach($speciality_status as $key=>$s_status)
-
-                                      <?php
-                                        $parts1 = explode('_', $key);
-                                        $sp_data_name = DB::table("speciality")->where('id', $parts1[1])->first();
-                                        $speciality_status_data = DB::table("speciality_status")->get();
-                                        
-                                      ?>
-                                      @if (in_array($parts1[1], $stypes))
-                                      <div class="custom-select-wrapper subspecprofdiv subspecprofdiv-{{ $parts1[1] }} form-group level-drp" style="margin-bottom: 5px;">
-                                        <label class="form-label subspeclabel-{{ $parts1[1] }}" for="input-1">
-                                          Specialty Status ({{ $sp_data_name->name }}) 
-                                          <span class="info tooltip-btn" tabindex="0" aria-describedby="statusTooltip">ⓘ</span>
-                                          
-                                            <ul class="tooltip_speciality_status" style="padding-left:18px; margin:8px 0 0 0">
-                                              <li><strong>Status definitions:</strong></li>
-                                              <li><strong>Current:</strong> Actively practicing, used in present or most recent job.</li>
-                                              <li><strong>Principal:</strong> Main/strongest specialty (only one allowed).</li>
-                                              <li><strong>First:</strong> First-ever specialty after qualification.</li>
-                                              <li><strong>Former:</strong> Previously practiced.</li>
-                                              <li><strong>Upskilling / Transitioning / Training:</strong> Moving into this specialty.</li>
-                                              <li><strong>—</strong> (No status selected — default when nurse doesn’t pick one).</li>
-                                            </ul>
-                                          
-                                        </label>
-                                        <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprof_listProfession subspecprof_listProfession-{{ $parts1[1] }} subspecprof_list-{{ $parts1[1] }}" value="{{ $parts1[1] }}">
-                                        <input type="hidden" name="subspecprof_list" class="subspecprofpart_list subspecprofpart_list-{{ $parts[1] }}" value="{{ $parts1[1] }}">
-                                        <select class="custom-select speciality_status_column speciality_status_column-{{ $parts[1] }} speciality_status_columns-{{ $parts1[1] }} form-input mr-10 langprof_level_valid-{{ $parts1[1] }}" name="specialties_experience[1][speciality_status][type_{{ $parts1[1] }}][status]" onchange="changeSpecialityStatus(this.value,{{ $parts1[1] }},{{ $parts[1] }})">
-                                          <option value="">select</option>
-                                          @foreach($speciality_status_data as $s_status_data)
-                                        
-                                          <option value="{{ $s_status_data->status_name }}" @if($s_status_data->status_name == $s_status->status) selected @endif>{{ $s_status_data->status_name }}</option>
-                                          @endforeach
-                                          
-                                        </select>
-                                        <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_current_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_current]" value="0">
-                                        <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_principal_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_principal]" value="0">
-                                        <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_first_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_first]" value="0">
-                                        <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_former_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_former]" value="0">
-                                        <input type="hidden" class="speciality_flag-{{ $parts1[1] }} is_upskilling_{{ $parts1[1] }}" name="specialties[speciality_status][type_{{ $parts1[1] }}][is_upskilling]" value="0">
-                                      </div>
-                                      
-                                      <span id="reqsubspeclevelvalid-{{ $parts1[1] }}" class="reqError text-danger valley"></span>
-                                      @endif
-                                      
-                                      
-
-                                  @endforeach
-                              </div>
-                            </div>
-
-                          @endforeach
-                          @endif
-                        </div>
+                        
                         
                         <div class="speciality_boxes row result--show">
                           <?php
@@ -4999,38 +5091,9 @@ p.highlight-text {
                           <div class="surgical_operative_carep_level_two"></div>
                           <div class="surgical_operative_carep_level_three"></div>
                         </div>
-                        <div class="form-group level-drp level_exp_field-1">
-                          <label class="form-label" for="input-1">What is your Level of experience in this specialty?
-                          </label>
-                          
-                          <select class="form-input mr-10 select-active reqlevelexp reqlevelexp-1" name="exper_assistent_level[1]">
-                            <option value="select">select</option>
-                            @for($i = 1; $i <= 30; $i++) <option value="{{ $i }}">{{ $i }}{{ $i == 1 ? 'st' : ($i == 2 ? 'nd' : ($i == 3 ? 'rd' : 'th')) }} Year</option>
-                              @endfor
-                          </select>
-                          <span id="reqlevelexp-1" class="reqError text-danger valley"></span>
-                        </div>
-                        <!-- <div class="form-group level-drp">
-                          
-                          <label class="form-label" for="input-1">Position Held</label>
-                          <?php
-                            $employee_postion_data = DB::table('employee_positions')->where("position_id","!=","35")->where("subposition_id",0)->orderBy("position_name","asc")->get();
-                            
-                          ?>
-                          
-                          <ul id="position_held_field-1" style="display:none;">
-                           
-                            @if(!empty($employee_postion_data))
-                            @foreach($employee_postion_data as $emp_data)
-                            <li data-value="{{ $emp_data->position_id }}">{{ $emp_data->position_name }}</li>
-                            @endforeach
-                            @endif
-                          </ul>
-                          <select class="js-example-basic-multiple addAll_removeAll_btn pos_held pos_held_1" data-list-id="position_held_field-1" name="positions_held[1]" id="position_held_field-1" multiple onchange="getPostions('',1)"></select>
-                          <span id="reqpositionheld-1" class="reqError text-danger valley"></span>
                         
-                        </div> -->
-                        <div class="show_positions-1"></div>
+                        
+                        
                         <div class="row">
                           <div class="col-md-6">
                             <div class="form-group level-drp">
@@ -5052,20 +5115,6 @@ p.highlight-text {
                         </div>
                         <br>
                         
-                        <div class="form-group level-drp">
-                          <label class="form-label" for="input-1">Employment type</label>
-                          
-                          <ul id="employeement_type_experience-1" style="display:none;">
-                            @if(!empty($employeement_type_preferences))
-                            @foreach($employeement_type_preferences as $emptype_data)
-                            <li data-value="{{ $emptype_data->emp_prefer_id }}">{{ $emptype_data->emp_type }}</li>
-                            @endforeach
-                            @endif
-                            
-                          </ul>
-                          <select class="js-example-basic-multiple addAll_removeAll_btn employeement_type_exp employeement_type_exp-1" data-list-id="employeement_type_experience-1" name="employeement_type[1]" multiple onchange="showEmpType(this.value,1,'')"></select>
-                        </div>  
-                        <div class="show_emp_data-1"></div>  
                           
                         <div class="exp_permanent-1 exp_permanent" style="display: none;">
                           <div class="form-group level-drp col-md-12">
@@ -5168,13 +5217,7 @@ p.highlight-text {
                           <select class="js-example-basic-multiple addAll_removeAll_btn type_of_evi type_of_evi_1" data-list-id="type_of_evidence" name="type_of_evidence[1][]" multiple="multiple"></select>
                           <span id="reqtype_evidenceexp-1" class="reqError text-danger valley"></span>
                         </div>
-                        <!-- <div class="form-group level-drp">
-                          <?php
-                          $user_id = Auth::guard('nurse_middle')->user()->id;
-                          ?>
-                          <label class="form-label" for="input-1">Upload evidence</label>
-                          <input class="form-control" type="file" name="upload_evidence[1][]" onchange="changeEviImg('{{ $user_id }}')" multiple="">
-                        </div> -->
+                        
                         <div class="form-group level-drp">
                           <?php
                           $user_id = Auth::guard('nurse_middle')->user()->id;
@@ -5188,14 +5231,25 @@ p.highlight-text {
                         <div class="col-md-12">
                           <!-- Add Delete Button -->
                           <div class="add_new_certification_div_2">
+                            <div class="delete-exp-btn">
                             <a
                               style="cursor: pointer; margin-bottom: 35px !important;"
                               class="delete-work-experience">
                               - Delete Work Experience
                             </a>
-                          
+                            </div>
+                            <div class="duplicate-exp-btn">
+                              <a style="cursor: pointer;margin-top: 20px;" type="button" class="duplicate-exp">
+                              Duplicate
+                              </a> 
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                              </div>  
+                      @php
+                        $x++;      
+                      @endphp
+                      @endforeach
                       @endif
 
 
