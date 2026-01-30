@@ -333,8 +333,75 @@ class JobsController extends Controller{
 
     public function getJobsSorting(Request $request)
     {
+        // echo "<pre>";print_r($request->all());die;
         $query = DB::table('job_boxes');
-        // APPLY SAVED SEARCH (if exists)      
+        // APPLY SAVED SEARCH (if exists)  
+        if ($request->has('filters_data')) {
+
+            $filters = $request->filters_data;
+
+            // Sector
+            if (!empty($filters['sector'])) {
+                $query->whereIn('sector', $filters['sector']);
+            }
+
+            // // Employment Type
+            if (!empty($filters['emp_type'])) {
+                $query->where(function ($q) use ($filters) {
+                    foreach ($filters['emp_type'] as $id) {
+                        $q->orWhereJsonContains('emplyeement_type', $id);
+                    }
+                });
+            }
+
+            // Shift Type
+            if (!empty($filters['shift_modal'])) {
+                $query->where(function ($q) use ($filters) {
+                    foreach ($filters['shift_modal'] as $id) {
+                        $q->orWhereJsonContains('shift_type', $id);
+                    }
+                });
+            }
+
+            // Work Environment
+            if (!empty($filters['work_environment_modals'])) {
+                $query->where(function ($q) use ($filters) {
+                    foreach ($filters['work_environment_modals'] as $id) {
+                        $q->orWhereJsonContains('work_environment', $id);
+                    }
+                });
+            }
+
+            // type of nurse
+            if (!empty($filters['nurse_type'])) {
+                $query->where(function ($q) use ($filters) {
+                    foreach ($filters['nurse_type'] as $id) {
+                        $q->orWhereJsonContains('nurse_type_id', $id);
+                    }
+                });
+            }
+
+            // type of nurse
+            if (!empty($filters['benefits'])) {
+                $query->where(function ($q) use ($filters) {
+                    foreach ($filters['benefits'] as $id) {
+                        $q->orWhereJsonContains('benefits', $id);
+                    }
+                });
+            }
+
+            // year of experience 
+            if (!empty($filters['experience'])) {
+                $query->where('experience_level', $filters['experience']);
+            }
+
+            if (isset($filters['salary_min']) && isset($filters['salary_max'])) {
+                $query->whereBetween('salary', [
+                    (int) $filters['salary_min'],
+                    (int) $filters['salary_max']
+                ]);
+            }
+        }
         if ($request->search_id) {
 
             $saved = DB::table('saved_searches')

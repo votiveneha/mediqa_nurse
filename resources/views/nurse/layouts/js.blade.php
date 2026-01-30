@@ -1575,7 +1575,7 @@ input.form-control.numbers.js_mobile_input {
     return false;
   }
 
-     function updateExperience() {
+ function updateExperience() {
     var isValid = true;
 
     var s = 1;
@@ -1630,16 +1630,16 @@ input.form-control.numbers.js_mobile_input {
       o++;
     });
 
-    // var a = 1;
-    // $(".nurse_type_exp").each(function() {
-    //   if ($(".nurse_type_exp_" + a).length > 0) {
-    //     if ($(".nurse_type_exp_" + a).val() == '') {
-    //       document.getElementById("reqnurseTypeexpId-" + a).innerHTML = "* Please select the type of nurse";
-    //       isValid = false;
-    //     }
-    //   }
-    //   a++;
-    // });
+    var a = 1;
+    $(".nurse_type_exp").each(function() {
+      if ($(".nurse_type_exp_" + a).length > 0) {
+        if ($(".nurse_type_exp_" + a).val() == '') {
+          document.getElementById("reqnurseTypeexpId-" + a).innerHTML = "* Please select the type of nurse";
+          isValid = false;
+        }
+      }
+      a++;
+    });
 
     // var x = 1;
     // $(".type_nurse_input").each(function(i,val) {
@@ -1812,16 +1812,16 @@ input.form-control.numbers.js_mobile_input {
     }
 
 
-    var b = 1;
-    $(".spec_exp").each(function() {
-      if ($(".spec_exp_" + b).length > 0) {
-        if ($(".spec_exp_" + b).val() == '') {
-          document.getElementById("reqspecialtiesexp-" + b).innerHTML = "* Please select the specialties";
-          isValid = false;
-        }
-      }
-      b++;
-    });
+    // var b = 1;
+    // $(".spec_exp").each(function() {
+    //   if ($(".spec_exp_" + b).length > 0) {
+    //     if ($(".spec_exp_" + b).val() == '') {
+    //       document.getElementById("reqspecialtiesexp-" + b).innerHTML = "* Please select the specialties";
+    //       isValid = false;
+    //     }
+    //   }
+    //   b++;
+    // });
 
 
     // var c = 1;
@@ -1852,27 +1852,27 @@ input.form-control.numbers.js_mobile_input {
     //   c++;
     // });
 
-    var d = 1;
-    $(".employeement_start_date_exp").each(function() {
-      if ($(".employeement_start_date_exp-" + d).length > 0) {
-        if ($(".employeement_start_date_exp-" + d).val() == '') {
-          document.getElementById("reqempsdateexp-" + d).innerHTML = "* Please enter the employment start date";
-          isValid = false;
-        }
-      }
-      d++;
-    });
+    // var d = 1;
+    // $(".employeement_start_date_exp").each(function() {
+    //   if ($(".employeement_start_date_exp-" + d).length > 0) {
+    //     if ($(".employeement_start_date_exp-" + d).val() == '') {
+    //       document.getElementById("reqempsdateexp-" + d).innerHTML = "* Please enter the employment start date";
+    //       isValid = false;
+    //     }
+    //   }
+    //   d++;
+    // });
 
-    var e = 1;
-    $(".employeement_end_date_exp").each(function() {
-      if ($(".empl_end_date-" + e).is(':visible') == true) {
-        if ($(".employeement_end_date_exp-" + e).val() == '') {
-          document.getElementById("reqemployeementenddateexp-" + e).innerHTML = "* Please enter the employment end date";
-          isValid = false;
-        }
-      }
-      e++;
-    });
+    // var e = 1;
+    // $(".employeement_end_date_exp").each(function() {
+    //   if ($(".empl_end_date-" + e).is(':visible') == true) {
+    //     if ($(".employeement_end_date_exp-" + e).val() == '') {
+    //       document.getElementById("reqemployeementenddateexp-" + e).innerHTML = "* Please enter the employment end date";
+    //       isValid = false;
+    //     }
+    //   }
+    //   e++;
+    // });
 
     var f = 1;
     $(".res-exp").each(function() {
@@ -1948,57 +1948,57 @@ input.form-control.numbers.js_mobile_input {
     });
 
 
-    var k = 1;
-    $(".emp_exp_type").each(function() {
-      if ($(".emp_exp_type-" + k).length > 0) {
-        if ($(".emp_exp_type-" + k).val() == '') {
-          document.getElementById("reqemptype-" + k).innerHTML = "* Please select the employment type";
-          isValid = false;
-        }
-      }
-      k++;
-    });
+    // var k = 1;
+    // $(".emp_exp_type").each(function() {
+    //   if ($(".emp_exp_type-" + k).length > 0) {
+    //     if ($(".emp_exp_type-" + k).val() == '') {
+    //       document.getElementById("reqemptype-" + k).innerHTML = "* Please select the employment type";
+    //       isValid = false;
+    //     }
+    //   }
+    //   k++;
+    // });
 
-    var x = 1;
-    $(".permanent_exp").each(function() {
-      if ($(".permanent_exp-" + x).length > 0 && $(".exp_permanent-" + x).is(":visible") == true) {
+    // var x = 1;
+    // $(".permanent_exp").each(function() {
+    //   if ($(".permanent_exp-" + x).length > 0 && $(".exp_permanent-" + x).is(":visible") == true) {
 
-        if ($(".permanent_exp-" + x).val() == 'select') {
+    //     if ($(".permanent_exp-" + x).val() == 'select') {
 
-          document.getElementById("reqemployeep_statusexp-" + x).innerHTML = "* Please select the Permanent Status";
-          isValid = false;
-        }
-      }
-      x++;
-    });
+    //       document.getElementById("reqemployeep_statusexp-" + x).innerHTML = "* Please select the Permanent Status";
+    //       isValid = false;
+    //     }
+    //   }
+    //   x++;
+    // });
 
-    var y = 1;
-    $(".temporary_exp").each(function() {
-      if ($(".temporary_exp-" + y).length > 0 && $(".exp_temporary-" + y).is(":visible") == true) {
+    // var y = 1;
+    // $(".temporary_exp").each(function() {
+    //   if ($(".temporary_exp-" + y).length > 0 && $(".exp_temporary-" + y).is(":visible") == true) {
 
-        if ($(".temporary_exp-" + y).val() == 'select') {
+    //     if ($(".temporary_exp-" + y).val() == 'select') {
 
-          document.getElementById("reqemployeetexp_status-" + y).innerHTML = "* Please select the Temporary Status";
-          isValid = false;
-        }
-      }
-      y++;
-    });
+    //       document.getElementById("reqemployeetexp_status-" + y).innerHTML = "* Please select the Temporary Status";
+    //       isValid = false;
+    //     }
+    //   }
+    //   y++;
+    // });
 
-    $(".speciality_status_column").each(function () {
+    // $(".speciality_status_column").each(function () {
 
-      if ($(this).is(":visible") && $(this).val() === "") {
+    //   if ($(this).is(":visible") && $(this).val() === "") {
 
-        var subSpecId = $(this).attr("class").match(/speciality_status_column-(\d+)/);
+    //     var subSpecId = $(this).attr("class").match(/speciality_status_column-(\d+)/);
 
-        if (subSpecId && subSpecId[1]) {
-          $("#reqemployeetexp_status-" + subSpecId[1])
-            .html("* Please select Specialty Status");
-        }
+    //     if (subSpecId && subSpecId[1]) {
+    //       $("#reqemployeetexp_status-" + subSpecId[1])
+    //         .html("* Please select Specialty Status");
+    //     }
 
-        isValid = false;
-      }
-    });
+    //     isValid = false;
+    //   }
+    // });
 
     if (isValid == true) {
       $('#experience_form').find('.text-danger').hide();

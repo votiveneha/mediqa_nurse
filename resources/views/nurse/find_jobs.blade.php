@@ -1080,7 +1080,7 @@
                             <span>Position</span>
                             <span class="arrow">›</span>
                           </li> -->
-                          <li class="filter-item" onclick="openModal('Benefits','benefits_preferences','subbenefit_id','benefits_id','benefits_name')">
+                          <li class="filter-item" onclick="openModal_enviroment('Benefits')">
                             <span>Benefits</span>
                             <span class="arrow">›</span>
                           </li>
@@ -2435,6 +2435,7 @@ $('#renameCancel').click(function() {
       let isAjaxMode = false;
     function fetchJobs(page = 1) {
           removePageParam();
+          let filtersData = JSON.parse(sessionStorage.getItem("filters_data")) || {};
           isAjaxMode = true;
           $(".normal-pagination").addClass("d-none");
           $(".ajax-pagination").removeClass("d-none");
@@ -2443,6 +2444,7 @@ $('#renameCancel').click(function() {
             url: "{{ url('/nurse/getJobsSorting') }}",
             data: {
                 keywords: filters.keywords,
+                filters_data: filtersData,
                 locations: filters.locations,
                 agency: filters.agency,
                 sort_name: filters.sort_by,
@@ -2453,10 +2455,10 @@ $('#renameCancel').click(function() {
           success: function (res) {
               if (!res.status) {
                   $(".ajax-pagination").html(`
-                      <div class="no-jobs-box">
-                          <h3>No Jobs Found</h3>
-                          <p>Try changing your filters.</p>
-                      </div>
+                    <div class="no-jobs-box" >
+                        <h3>🚫 No Jobs Found</h3>
+                        <p>Sorry, no jobs match your search.</p>
+                    </div>
                   `);
               } else {
                   $(".ajax-pagination").html(res.html);
