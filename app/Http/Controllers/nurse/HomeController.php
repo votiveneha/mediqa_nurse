@@ -311,6 +311,7 @@ class HomeController extends Controller
                                 $post->user_id = $r->id;
                                 $post->nurse_data = $ntype;
                                 $post->specialties = $spec;
+                                $post->assistent_level = $request->assistent_level;
                                 $run = $post->save();
                             
                         
@@ -1280,14 +1281,19 @@ public function ResetPassword(Request $request)
     {
         $user = auth('nurse_middle')->user();
 
-        $country_detail =  DB::table('country')->where('id', $request->country_code)->first();
+        if ($request->country_code == null && $request->country_code == "") {
+            $countryCode = 14;
+        } else {
+            $countryCode = $request->country_code;
+        }
+        $country_detail =  DB::table('country')->where('id', $countryCode)->first();
         $cleanCode = ltrim($country_detail->phonecode, '+');
         $cleanCode = explode('-', $cleanCode)[0];
         // Update user active country
         $user->update([
             'active_country' => $request->country_id,
             'country'        => $request->country_id,
-            'country_code'   => $request->country_code,
+            'country_code'   => $countryCode,
             'registration_countries'   => [$request->country_id],
         ]);
 

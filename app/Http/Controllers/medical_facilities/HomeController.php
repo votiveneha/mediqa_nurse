@@ -103,14 +103,15 @@ class HomeController extends Controller
             $user->role = "healthcare-facilities";
             $user->password = Hash::make($password);
             $run = $user->save();
-            Auth::guard('healthcare_facilities')->login($user);
-            Auth::login($user);
+            $r   = User::where('email', $emailaddress)->first();
+            Auth::guard('healthcare_facilities')->login($r);
+            Auth::login($r);
         }else{
             $run = 0;
         }
 
         if ($run) {
-            Session::put('user_id', $user->id);
+            Session::put('user_id', $r->id);
             $json['status'] = 1;
             $json['message'] = 'Congratulations! Your registration was successful. Please check your email; we have sent you a verification email to your registered address!';
         }else{
@@ -183,7 +184,7 @@ class HomeController extends Controller
             return view('auth.email-verification-pending', compact('title', 'message'));
         } else {
             $title = "s";
-            return redirect()->route('healthcare-facilities.login');
+            return redirect()->route('medical-facilities.login');
         }
     }
 

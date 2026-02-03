@@ -811,7 +811,7 @@ input.form-control.numbers.js_mobile_input {
       var val = $(this).val();
       //var subpartsval = $(".subspecprofpart_list-"+val).val();
       console.log("subnurse_list",val);
-      if ($('.subnurse_valid-'+val).val() == '') {
+      if ($('.subnurse_valid-'+val).val() == '0') {
         document.getElementById("reqsubnursevalid-"+val).innerHTML = "* Please select the type of nurse";
         isValid = false;
       }
@@ -824,7 +824,7 @@ input.form-control.numbers.js_mobile_input {
         var val_spec = $(this).val();
         //var subpartsval = $(".subspecprofpart_list-"+val).val();
         console.log("subspec_list",val_spec);
-        if ($('.js-example-basic-multiple'+val_spec+"-0").val() == '') {
+        if ($('.js-example-basic-multiple'+val_spec+"-0").val() == '0') {
           document.getElementById("reqspecialties"+val_spec+"-0").innerHTML = "* Please select the Specialties";
           isValid = false;
         }
@@ -833,7 +833,7 @@ input.form-control.numbers.js_mobile_input {
           var val_subspec = $(this).val();
           //var subpartsval = $(".subspecprofpart_list-"+val).val();
           console.log("subspec_list",val_subspec);
-          if ($('.js-example-basic-multiple'+val_spec+"-"+val_subspec).val() == '') {
+          if ($('.js-example-basic-multiple'+val_spec+"-"+val_subspec).val() == '0') {
             document.getElementById("reqsubspecvalid"+val_spec+"-"+val_subspec).innerHTML = "* Please select the Specialties";
             isValid = false;
           }

@@ -1362,7 +1362,8 @@ p.highlight-text {
                                 <div class="form-group drp--clr">
                                   <label class="form-label" for="input-1">Specialties</label>
                                   <input type="hidden" name="subspecialitynurse_list" class="subspecnurse_list" value="{{ $profession_single_data->nurse_data }}">
-                                  <input type="hidden" name="speciality_value" class="speciality_value" value="{{ $btn_name == 'edit' ? json_encode($parents1[0]):'' }}">
+                                  <input type="hidden" name="speciality_value" class="speciality_value" value="{{ $btn_name == 'edit' ? json_encode((string)$parents1[0]):'' }}">
+                                  <input type="hidden" name="subspecialitynurseid" class="subspecialitynurseid" value="{{ $profession_single_data->specialties }}">
                                   <ul id="speciality_preferences-{{ $profession_single_data->nurse_data }}-0" style="display:none;">
                                     @php $JobSpecialties = JobSpecialties(); @endphp
                                     <?php
@@ -1441,7 +1442,7 @@ p.highlight-text {
                                                     <option value="">select</option>
                                                     @foreach($speciality_status_data as $s_status_data)
                                                       
-                                                        <option value="{{ $s_status_data->status_name }}" @if($s_status_data->status_name == $profession_single_data->speciality_status) selected @endif>{{ $s_status_data->status_name }}</option>
+                                                        <option value="{{ $s_status_data->status_id }}" @if($s_status_data->status_id == $profession_single_data->speciality_status) selected @endif>{{ $s_status_data->status_name }}</option>
                                                         @endforeach
                                                 </select>
                                                 <span id="reqsubspeclevelvalid-{{ $specility_data->parent }}" class="reqError text-danger valley"></span>
@@ -1459,7 +1460,7 @@ p.highlight-text {
                                             <div class="professional_bio professional_employee_status">
                                               <div class="custom-select-wrapper form-group level-drp col-md-12">
                                                 <label class="form-label" for="input-1">Current Employment Status</label>
-                                                <select class="custom-select" name="nurseType[{{ $profession_single_data->nurse_data }}][speciality_status][type_{{ $profession_single_data->specialties }}][employee_status]" onchange="employeeStatus(this.value,{{ $profession_single_data->nurse_data }},{{ $specility_data->parent }})">
+                                                <select class="custom-select" name="nurseType[{{ $profession_single_data->nurse_data }}][speciality_status][type_{{ $profession_single_data->specialties }}][employee_status]" onchange="employeeStatus(this.value,{{ $profession_single_data->nurse_data }},{{ $profession_single_data->specialties }})">
                                                   <option value="">select</option>
                                                   <option value="Permanent" @if($profession_single_data->current_employee_status == "Permanent") selected @endif>Permanent</option>
                                                   <option value="Fixed-term" @if($profession_single_data->current_employee_status == "Fixed-term") selected @endif>Fixed-term</option>
@@ -1469,7 +1470,7 @@ p.highlight-text {
                                               </div>
                                               <span id="reqemployee_status" class="reqError text-danger valley"></span>
                                             </div>
-                                            <div class="professional_permanent-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}" @if($profession_single_data->permanent_status == "select") style="display:none;" @endif>
+                                            <div class="professional_permanent-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}" @if($profession_single_data->current_employee_status != "Permanent") style="display:none;" @endif>
                                               <div class="form-group level-drp col-md-12">
                                                 <label class="form-label" for="input-1">Permanent</label>
                                                 <input type="hidden" name="perhfield" class="perhfield" value="{{ $profession_single_data->permanent_status }}">
@@ -1484,7 +1485,7 @@ p.highlight-text {
                                                 <span id="reqemployeep_status" class="reqError text-danger valley"></span>
                                               </div>
                                             </div>
-                                            <div class="professional_temporary-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}"  @if($profession_single_data->temporary_status == "select") style="display:none;" @endif>
+                                            <div class="professional_temporary-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}"  @if($profession_single_data->current_employee_status != "Temporary") style="display:none;" @endif>
                                               <div class="form-group level-drp col-md-12">
                                                 <label class="form-label" for="input-1">Temporary</label>
 
@@ -1501,7 +1502,7 @@ p.highlight-text {
                                               </div>
                                               
                                             </div>
-                                            <div class="professional_fixed_term-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}" @if($profession_single_data->fixed_term_status == "select") style="display:none;" @endif>
+                                            <div class="professional_fixed_term-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}" @if($profession_single_data->current_employee_status != "Fixed-term") style="display:none;" @endif>
                                               <div class="form-group level-drp col-md-12">
                                                 <label class="form-label" for="input-1">Fixed-term</label>
                                                 <input type="hidden" name="fixtermfield" class="fixtermfield" value="{{ json_encode((string)$profession_single_data->fixed_term_status) }}">
@@ -1517,7 +1518,7 @@ p.highlight-text {
                                               </div>
                                               
                                             </div>
-                                            <div class="custom-select-wrapper professional_unemplyeed-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}" @if($profession_single_data->unemployeed_reason == NULL) style="display:none;" @endif>
+                                            <div class="custom-select-wrapper professional_unemplyeed-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}" @if($profession_single_data->current_employee_status != "Fixed-term") style="display:none;" @endif>
                                               <div class="form-group level-drp col-md-12">
                                                 <label class="form-label" for="input-1">Reason for Unemployment</label>
                                                 <!-- <input class="form-control" type="text" required="" name="fullname" placeholder="Steven Job"> -->
@@ -1533,13 +1534,13 @@ p.highlight-text {
                                               </div>
                                               <span id="requnempreason" class="reqError text-danger valley"></span>
                                             </div>
-                                            <div class="form-group @if($profession_single_data->unemployeed_reason == NULL) d-none @endif specify_reason_div-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}">
+                                            <div class="form-group @if($profession_single_data->any_help == NULL || $profession_single_data->any_help == '') d-none @endif specify_reason_div-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}">
                                               <label class="form-label" for="input-1">Other (Please specify)</label>
                                               
                                               <input class="form-control" type="text" name="specify_reason" value="">
                                               <span id="otherspecify_reason" class="reqError text-danger valley"></span>
                                             </div>
-                                            <div class="custom-select-wrapper long_unemplyeed-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}  @if($profession_single_data->long_unemplyeed == NULL) d-none @endif">
+                                            <div class="custom-select-wrapper long_unemplyeed-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}  @if($profession_single_data->long_unemplyeed == NULL || $profession_single_data->long_unemplyeed == '') d-none @endif">
                                               <div class="form-group level-drp col-md-12">
                                                 <label class="form-label" for="input-1">How long have you been unemployed?</label>
                                                 <!-- <input class="form-control" type="text" required="" name="fullname" placeholder="Steven Job"> -->
@@ -1830,7 +1831,7 @@ p.highlight-text {
                       <span id="reqcareergoals" class="reqError text-danger valley"></span>
                     </div>
                     <div class="declaration_box">
-                      <input type="checkbox" name="declare_information" class="declare_information" value="1" @if(Auth::guard('nurse_middle')->user()->declaration_status == 1) checked @endif>
+                      <input type="checkbox" name="declare_information" class="declare_information" value="1" @if($btn_name != '' && $profession_single_data->declaration_status == 1) checked @endif>
                       <label for="declare_information">I declare that the information provided is true and correct</label>
                     </div>
                     <span id="reqdeclare_information" class="reqError text-danger valley"></span>
@@ -7348,27 +7349,32 @@ if (!empty($interviewReferenceData)) {
     }
   });
 
-  // if ($(".speciality_value").val() != "") {
-  //   var speciality_value = JSON.parse($(".speciality_value").val());
-  //   var subspecialitynurse_list = $(".subspecnurse_list").val();
-  //   console.log("speciality_value",speciality_value);
-  //   $('.js-example-basic-multiple[data-list-id="speciality_preferences-'+subspecialitynurse_list+'-0"]').select2().val(speciality_value).trigger('change');
-  // }
+  var btn_name = "{{ $btn_name }}";
+  if(btn_name == 'edit'){
 
-  // $(".subspec_list").each(function(){
-  //   var subspec_val = $(this).val();
-  //   if ($(".subspectype-"+subspec_val).val() != "") {
-  //     var spec_type = JSON.parse($(".subspectype-"+subspec_val).val());
-  //     console.log("spec_types",subspec_val);
-  //     var subspecialitynurse_list = $(".subspecnurse_list").val();
-  //     //$('.js-example-basic-multiple[data-list-id="speciality_preferences-'+subspec_val+'"]').select2().val(spec_type).trigger('change');
-  //     $('.js-example-basic-multiple[data-list-id="speciality_preferences-'
-  //       + subspecialitynurse_list + '-'+subspec_val+'"]')
-  //       .select2()
-  //       .val(spec_type)
-  //       .trigger('change');
-  //   }
-  // });
+  
+    if ($(".speciality_value").val() != "") {
+      var speciality_value = JSON.parse($(".speciality_value").val());
+      var subspecialitynurse_list = $(".subspecnurse_list").val();
+      console.log("speciality_value",speciality_value);
+      $('.js-example-basic-multiple[data-list-id="speciality_preferences-'+subspecialitynurse_list+'-0"]').select2().val(speciality_value).trigger('change');
+    }
+
+    $(".subspec_list").each(function(){
+      var subspec_val = $(this).val();
+      if ($(".subspectype-"+subspec_val).val() != "") {
+        var spec_type = JSON.parse($(".subspectype-"+subspec_val).val());
+        console.log("spec_types",subspec_val);
+        var subspecialitynurse_list = $(".subspecnurse_list").val();
+        //$('.js-example-basic-multiple[data-list-id="speciality_preferences-'+subspec_val+'"]').select2().val(spec_type).trigger('change');
+        $('.js-example-basic-multiple[data-list-id="speciality_preferences-'
+          + subspecialitynurse_list + '-'+subspec_val+'"]')
+          .select2()
+          .val(spec_type)
+          .trigger('change');
+      }
+    });
+  }
 
   
 
@@ -7621,21 +7627,39 @@ if (!empty($interviewReferenceData)) {
   
 
   
-  if ($(".perhfield").val() != "") {
-    var perhfield = $(".perhfield").val();
-    
-    console.log("perhfield",$(".perhfield").val());
-    $('.js-example-basic-multiple[data-list-id="permanent_status_profession"]').select2().val(perhfield).trigger('change');
-    
-  }
+  var nurse_id = $(".subspecnurse_list").val();
+  var speciality_id = $(".subspecialitynurseid").val();
+ 
+  var btn_name = "{{ $btn_name }}";
+  console.log("btn_name",btn_name);
+  
+  if(btn_name == 'edit'){
+    if ($(".perhfield").val() != "") {
+      var perhfield = $(".perhfield").val();
+      
+      console.log("perhfield",$(".perhfield").val());
+      $('.js-example-basic-multiple[data-list-id="permanent_status_profession-'+nurse_id+"-"+speciality_id+'"]').select2().val(perhfield).trigger('change');
+      
+    }
 
-  if ($(".temphfield").val() != "") {
-    var temphfield = $(".temphfield").val();
-    
-    console.log("temphfield",$(".temphfield").val());
-    $('.js-example-basic-multiple[data-list-id="temporary_status_profession"]').select2().val(temphfield).trigger('change');
-    
+    if ($(".temphfield").val() != "") {
+      var temphfield = JSON.parse($(".temphfield").val());
+      
+      console.log("temphfield",$(".temphfield").val());
+      $('.js-example-basic-multiple[data-list-id="temporary_status_profession1-'+nurse_id+"-"+speciality_id+'"]').select2().val(temphfield).trigger('change');
+      
+    }
+
+    if ($(".fixtermfield").val() != "") {
+      
+      var fixtermfield = JSON.parse($(".fixtermfield").val());
+      
+      console.log("fixtermfield",$(".fixtermfield").val());
+      $('.js-example-basic-multiple[data-list-id="fixed_term_status_profession1-'+nurse_id+"-"+speciality_id+'"]').select2().val(fixtermfield).trigger('change');
+      
+    }
   }
+  
 
   var k = 1;
   $(".pos_hide").each(function(){
@@ -7932,8 +7956,10 @@ if (!empty($interviewReferenceData)) {
 
     if(btn_name == "edit"){
       var multiple = "";
+      var select_text = "<li data-value='0'>select</li>";
     }else{
       var multiple = "multiple";
+      var select_text = "";
     }
 
     $(".showNurseType-"+k+" .subnurse_list").each(function(i,val){
@@ -7989,7 +8015,9 @@ if (!empty($interviewReferenceData)) {
                             <div class="subnurse_div subnurse_div-'+data1.main_nurse_id+' form-group level-drp">\
                             <label class="form-label subnurse_label subnurse_label-'+data1.main_nurse_id+'" for="input-1">'+data1.main_nurse_name+'</label>\
                             <input type="hidden" name="subnurse_list" class="subnurse_list subnurse_list-'+data1.main_nurse_id+'" value="'+data1.main_nurse_id+'">\
-                            <ul id="type-of-nurse-'+data1.main_nurse_id+'" style="display:none;">'+nurse_text+'</ul>\
+                            <ul id="type-of-nurse-'+data1.main_nurse_id+'" style="display:none;">\
+                            '+select_text+'\
+                            '+nurse_text+'</ul>\
                             <select class="js-example-basic-multiple'+data1.main_nurse_id+' subnurse_valid-'+data1.main_nurse_id+' addAll_removeAll_btn" data-list-id="type-of-nurse-'+data1.main_nurse_id+'" name="nurseType[type_'+data1.main_nurse_id+'][]" onchange="getNurseType(\''+sub+'\',\''+data1.main_nurse_id+'\')" '+multiple+'></select>\
                             <span id="reqsubnursevalid-'+data1.main_nurse_id+'" class="reqError text-danger valley"></span>\
                             </div>\
@@ -8016,7 +8044,9 @@ if (!empty($interviewReferenceData)) {
                                 <div class="form-group drp--clr">\
                                   <label class="form-label" for="input-1">Specialties</label>\
                                   <input type="hidden" name="subspecnurse_list" class="subspecnurse_list subspecnurse_list-'+data1.main_nurse_id+'" value="'+data1.main_nurse_id+'">\
-                                  <ul id="speciality_preferences-'+data1.main_nurse_id+'-0" style="display:none;">'+speciality_text+'</ul>\
+                                  <ul id="speciality_preferences-'+data1.main_nurse_id+'-0" style="display:none;">\
+                                  '+select_text+'\
+                                  '+speciality_text+'</ul>\
                                   <select class="js-example-basic-multiple'+data1.main_nurse_id+'-0 addAll_removeAll_btn speciality_type_field" data-list-id="speciality_preferences-'+data1.main_nurse_id+'-0" name="nurseType['+data1.main_nurse_id+'][type_0][]" '+multiple+' onchange="getSecialities(\''+sub+'\',\''+data1.main_nurse_id+'\',0)"></select>\
                                   <span id="reqspecialties'+data1.main_nurse_id+'-0" class="reqError text-danger valley"></span>\
                                 </div>\
@@ -8717,8 +8747,10 @@ $.each(specialityTree, function (parentKey, children) {
 
     if(btn_name == "edit"){
       var multiple = "";
+      var select_text = "<li data-value='0'>select</li>";
     }else{
       var multiple = "multiple";
+      var select_text = "";
     }
 
     /* ===============================
@@ -8788,7 +8820,8 @@ $.each(specialityTree, function (parentKey, children) {
                                 <input type="hidden" class="subspec_list subspec_listProf-${k} subspec_list-${k}" value="${data1.main_speciality_id}">
 
                                 <ul id="speciality_preferences-${nurse_id}-${data1.main_speciality_id}" style="display:none;">
-                                    ${speciality_text}
+                                  ${select_text}\  
+                                  ${speciality_text}
                                 </ul>
 
                                 <select class="js-example-basic-multiple${nurse_id}-${data1.main_speciality_id} subspec_valid-${data1.main_speciality_id} addAll_removeAll_btn"
@@ -9059,39 +9092,41 @@ $.each(specialityTree, function (parentKey, children) {
   }
 
     function changeSpecialityStatus(selectedValue,data_id,nurse_id){
+      
       $(".speciality_flag-"+data_id).val(0);
       
       // Reset all hidden inputs first
       
       // Set selected flag
-      if (selectedValue === "Current") {
+      if (selectedValue === "1") {
         //wrapper.find(`[name="specialty[${data_id}][is_current]"]`).value = 1;
         $(".is_current_"+data_id).val(1);
       }
-      if (selectedValue === "First") {
+      if (selectedValue === "3") {
         
         $(".is_first_"+data_id).val(1);
       }
-      if (selectedValue === "Former") {
+      if (selectedValue === "4") {
         $(".is_former_"+data_id).val(1);
       }
-      if (selectedValue === "Upskilling") {
+      if (selectedValue === "5") {
         $(".is_upskilling_"+data_id).val(1);
       }
       // If user selects Principal, validate
-      if (selectedValue === "Principal") {
+      if (selectedValue === "2") {
 
           $(".is_principal_"+data_id).val(1);
 
           let countPrincipal = 0;
 
           $(".speciality_status_column").each(function () {
-              if ($(this).val() === "Principal") {
+              if ($(this).val() === "2") {
                   countPrincipal++;
               }
           });
           
           if (countPrincipal > 1) {
+              
               // Show message
               //alert("You can mark only one specialty as Principal, please select your main one.");
               $("#reqsubspecstatusvalid"+nurse_id+"-"+data_id).text("You can mark only one specialty as Principal, please select your main one.");
