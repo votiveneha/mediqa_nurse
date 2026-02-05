@@ -49,6 +49,8 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
   Route::get('/logout', 'HomeController@logout')->name('logout');
   Route::middleware('healthcare')->group(function () {
     Route::get('/my-profile', 'HomeController@manage_profile')->name('my-profile');
+    Route::get('/job_posting', 'JobPostingController@job_posting')->name('job_posting');
+    Route::get('/change_password', 'JobPostingController@change_password')->name('change_password');
   });
 });
 

@@ -381,11 +381,20 @@ class JobsController extends Controller{
                 });
             }
 
-            // type of nurse
+            // type of bendfits
             if (!empty($filters['benefits'])) {
                 $query->where(function ($q) use ($filters) {
                     foreach ($filters['benefits'] as $id) {
                         $q->orWhereJsonContains('benefits', $id);
+                    }
+                });
+            }
+
+            // type of speciality
+            if (!empty($filters['speciality'])) {
+                $query->where(function ($q) use ($filters) {
+                    foreach ($filters['speciality'] as $id) {
+                        $q->orWhereJsonContains('typeofspeciality', $id);
                     }
                 });
             }

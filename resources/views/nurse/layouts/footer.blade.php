@@ -1,4 +1,4 @@
-     @if (!Auth::guard('nurse_middle')->check()) 
+     @if (!Auth::guard('nurse_middle')->check() && !Auth::guard('healthcare_facilities')->check()) 
     <footer class="footer mt-50">
 
       <div class="container">

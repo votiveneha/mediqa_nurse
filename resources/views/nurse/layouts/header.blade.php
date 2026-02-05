@@ -481,16 +481,64 @@ img, iframe, video {
           <div class="header-logo"><a class='d-flex' href='{{ route("home_main") }}'><img alt="jobBox" src="{{ asset(env('LOGO_PATH'))}}"></a></div>
         </div>
         <div class="header-nav">
-          <nav class="nav-main-menu">
+          <nav class="nav-main-menu" style="display:block;">
             <ul class="main-menu">
               <li>
-                <a class="{{ request()->is('healthcare-facilities/my-profile') ?'active':'' }}  hover-up " href='{{ route("medical-facilities.my-profile") }}'>Profile</a>
+                <a class="hover-up " href='#'>Settings</a>
               </li>
               <li>
-                <a class="{{ request()->is('healthcare-facilities/my-profile') ?'active':'' }}  hover-up " href='{{ route("medical-facilities.logout") }}'>Logout</a>
+                <a class="{{ request()->is('healthcare-facilities/job_posting') ?'active':'' }} hover-up " href="{{ route('medical-facilities.job_posting') }}">Job Postings</a>
               </li>
+              <li>
+                <a class="hover-up " href='#'>Talent Search</a>
+              </li>
+              <li>
+                <a class="hover-up " href='#'>Applicants</a>
+              </li>
+              <li>
+                <a class="hover-up " href='#'>Interviews</a>
+              </li>
+              <li>
+                <a class="hover-up " href='#'>Compliance</a>
+              </li>
+              <li>
+                <a class="hover-up " href='#'>Reports & Analytics</a>
+              </li>
+              
             </ul>
           </nav>
+          <div class="header-right">
+          <div class="block-signin d-flex align-items-center gap-3 justify-content-end">
+            <!-- <a class='text-link-bd-btom hover-up' href='nurse_signup.php'>Become a Nurse</a> -->
+            <div class="dropdown d-inline-block">
+              <a class="btn btn-notify" id="dropdownNotify" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-display="static">
+                <i class="fa-regular fa-bell"></i>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-light dropdown-menu-end" aria-labelledby="dropdownNotify">
+                <li><a class="dropdown-item active" href="#">0 notifications</a></li>
+                <li><a class="dropdown-item" href="#">0 messages</a></li>
+                <li><a class="dropdown-item" href="#">0 replies</a></li>
+              </ul>
+            </div>
+
+
+            <div class="member-login d-flex align-items-center gap-1">
+             
+              <div class="info-member">
+                <div class="dropdown">
+
+                  <a class="font-xs color-text-paragraph-2 icon-down" data-bs-toggle="dropdown" style="cursor:pointer;"> <img alt="{{  Auth::guard('healthcare_facilities')->user()->name }}" src="{{ asset( Auth::guard('healthcare_facilities')->user()->profile_img)}}"><strong class="color-brand-1" >{{ Auth::guard('healthcare_facilities')->user()->name }}</strong></a>
+                  <ul class="dropdown-menu dropdown-menu-light dropdown-menu-end" aria-labelledby="dropdownProfisle">
+                    <!-- <li> --><a href='#' class="dropdown-item">Settings</a><!-- </li> -->
+                    <!--  <li> --><a href='{{ route("medical-facilities.change_password") }}' class="dropdown-item change_password_link" style="cursor: pointer;">change Password</a><!-- </li> -->
+                    <!-- <li> --><a href='{{ route("medical-facilities.logout") }}' class="dropdown-item">Logout</a><!-- </li> -->
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <!-- <a class='btn btn-default btn-shadow hover-up' href='#'>Sign in</a> -->
+          </div>
+        </div>
         </div>
       </div>
     </div>  

@@ -1518,26 +1518,26 @@ p.highlight-text {
                                               </div>
                                               
                                             </div>
-                                            <div class="custom-select-wrapper professional_unemplyeed-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}" @if($profession_single_data->current_employee_status != "Fixed-term") style="display:none;" @endif>
+                                            <div class="custom-select-wrapper professional_unemplyeed-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}" @if($profession_single_data->current_employee_status != "Unemployed") style="display:none;" @endif>
                                               <div class="form-group level-drp col-md-12">
                                                 <label class="form-label" for="input-1">Reason for Unemployment</label>
                                                 <!-- <input class="form-control" type="text" required="" name="fullname" placeholder="Steven Job"> -->
                                                 <select class="custom-select mr-10 select-active unemployeement_reason" name="nurseType[{{ $profession_single_data->nurse_data }}][speciality_status][type_{{ $profession_single_data->specialties }}][unemployeement_reason]" id="unemployeement_reason" onchange="reasonUnemployeement(this.value,{{ $profession_single_data->nurse_data }},{{ $profession_single_data->specialties }})">
                                                   <option value="">select</option>
-                                                  <option value="Recently graduated" @if($profession_single_data->current_employee_status == "Recently graduated") selected @endif>Recently graduated</option>
-                                                  <option value="Career break (maternity leave, family reasons, etc.)" @if($profession_single_data->current_employee_status == "Career break (maternity leave, family reasons, etc.)") selected @endif>Career break (maternity leave, family reasons, etc.)</option>
-                                                  <option value="Transitioning from another job" @if($profession_single_data->current_employee_status == "Transitioning from another job") selected @endif>Transitioning from another job</option>
-                                                  <option value="Retired but seeking work" @if($profession_single_data->current_employee_status == "Retired but seeking work") selected @endif>Retired but seeking work</option>
-                                                  <option value="Laid off / Contract ended" @if($profession_single_data->current_employee_status == "Laid off / Contract ended") selected @endif>Laid off / Contract ended</option>
-                                                  <option value="Other (Please specify)" @if($profession_single_data->current_employee_status == "Other (Please specify)") selected @endif>Other (Please specify)</option>
+                                                  <option value="Recently graduated" @if($profession_single_data->unemployeed_reason == "Recently graduated") selected @endif>Recently graduated</option>
+                                                  <option value="Career break (maternity leave, family reasons, etc.)" @if($profession_single_data->unemployeed_reason == "Career break (maternity leave, family reasons, etc.)") selected @endif>Career break (maternity leave, family reasons, etc.)</option>
+                                                  <option value="Transitioning from another job" @if($profession_single_data->unemployeed_reason == "Transitioning from another job") selected @endif>Transitioning from another job</option>
+                                                  <option value="Retired but seeking work" @if($profession_single_data->unemployeed_reason == "Retired but seeking work") selected @endif>Retired but seeking work</option>
+                                                  <option value="Laid off / Contract ended" @if($profession_single_data->unemployeed_reason == "Laid off / Contract ended") selected @endif>Laid off / Contract ended</option>
+                                                  <option value="Other (Please specify)" @if($profession_single_data->unemployeed_reason == "Other (Please specify)") selected @endif>Other (Please specify)</option>
                                                 </select>
                                               </div>
                                               <span id="requnempreason" class="reqError text-danger valley"></span>
                                             </div>
-                                            <div class="form-group @if($profession_single_data->any_help == NULL || $profession_single_data->any_help == '') d-none @endif specify_reason_div-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}">
+                                            <div class="form-group @if($profession_single_data->current_employee_status != 'Unemployed' && $profession_single_data->current_employee_status == 'Other (Please specify)') d-none @endif specify_reason_div-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}">
                                               <label class="form-label" for="input-1">Other (Please specify)</label>
                                               
-                                              <input class="form-control" type="text" name="specify_reason" value="">
+                                              <input class="form-control" type="text" name="nurseType[{{ $profession_single_data->nurse_data }}][speciality_status][type_{{ $profession_single_data->specialties }}][specify_reason]" value="{{ $profession_single_data->any_help }}">
                                               <span id="otherspecify_reason" class="reqError text-danger valley"></span>
                                             </div>
                                             <div class="custom-select-wrapper long_unemplyeed-{{ $profession_single_data->nurse_data }}-{{ $profession_single_data->specialties }}  @if($profession_single_data->long_unemplyeed == NULL || $profession_single_data->long_unemplyeed == '') d-none @endif">
@@ -1546,11 +1546,11 @@ p.highlight-text {
                                                 <!-- <input class="form-control" type="text" required="" name="fullname" placeholder="Steven Job"> -->
                                                 <select class="custom-select long_unemployeed" name="nurseType[{{ $profession_single_data->nurse_data }}][speciality_status][type_{{ $profession_single_data->specialties }}][long_unemployeed]" id="long_unemployeed">
                                                   <option value="">select</option>
-                                                  <option value="Less than 1 month" @if($profession_single_data->current_employee_status == "Less than 1 month") selected @endif>Less than 1 month</option>
-                                                  <option value="1 to 3 months" @if($profession_single_data->current_employee_status == "1 to 3 months") selected @endif>1 to 3 months</option>
-                                                  <option value="3 to 6 months" @if($profession_single_data->current_employee_status == "3 to 6 months") selected @endif>3 to 6 months</option>
-                                                  <option value="6 months to 1 year" @if($profession_single_data->current_employee_status == "6 months to 1 year") selected @endif>6 months to 1 year</option>
-                                                  <option value="More than 1 year" @if($profession_single_data->current_employee_status == "More than 1 year") selected @endif>More than 1 year</option>
+                                                  <option value="Less than 1 month" @if($profession_single_data->long_unemplyeed == "Less than 1 month") selected @endif>Less than 1 month</option>
+                                                  <option value="1 to 3 months" @if($profession_single_data->long_unemplyeed == "1 to 3 months") selected @endif>1 to 3 months</option>
+                                                  <option value="3 to 6 months" @if($profession_single_data->long_unemplyeed == "3 to 6 months") selected @endif>3 to 6 months</option>
+                                                  <option value="6 months to 1 year" @if($profession_single_data->long_unemplyeed == "6 months to 1 year") selected @endif>6 months to 1 year</option>
+                                                  <option value="More than 1 year" @if($profession_single_data->long_unemplyeed == "More than 1 year") selected @endif>More than 1 year</option>
                                                   
                                                 </select>
                                                 <span id="reqlong_unemp" class="reqError text-danger valley"></span>

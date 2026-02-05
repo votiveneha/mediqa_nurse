@@ -142,7 +142,7 @@ class HomeController extends Controller
                 setcookie("email", "");
                 setcookie("password", "");
             }
-            return redirect('/healthcare-facilities/my-profile')->with('success', 'You are Logged in sucessfully.');
+            return redirect('/healthcare-facilities/job_posting')->with('success', 'You are Logged in sucessfully.');
         } else {
             return back()->with('error', 'Invalid login details.');
         }
