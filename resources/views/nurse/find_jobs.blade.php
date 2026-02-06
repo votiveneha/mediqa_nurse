@@ -923,6 +923,38 @@
   
 }
     
+.saved-search-tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Tooltip */
+.saved-search-tab .tooltip-text {
+    position: absolute;
+    top: 50%;
+    left: 105%;
+    transform: translateY(-50%);
+    background: #111;
+    color: #fff;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+
+    z-index: 999;
+}
+
+/* Show on hover */
+.saved-search-tab:hover .tooltip-text {
+    opacity: 1;
+    visibility: visible;
+}
 
 </style>
 @endsection
@@ -947,30 +979,50 @@
             ×
             </button>
             </div> -->
-         <div class="saved-searches-row" id="search-tabs">
+        <div class="saved-searches-row" id="search-tabs">
             <div class="searchtabs">
-              @if($saved_searches_data->isNotEmpty()) 
-              @php
-                $i = 1;
-              @endphp
-              
-              @foreach($saved_searches_data as $saved_searches)
-              <div class="saved-search-tab" data-id="{{ $saved_searches->searches_id }}">
-                @if ($saved_searches->name === null || $saved_searches->name === "" ) 
-                  Saved search {{ $i }}
-                @else
-                  {{ $saved_searches->name }} 
+
+                @if($saved_searches_data->isNotEmpty()) 
+                    @php $i = 2; @endphp
+
+                    {{-- My Preferences (shown only once) --}}
+                    @if(!empty($saved_my_preference))
+                        <div class="saved-search-tab active tooltip-wrapper"
+                            data-id="{{ $saved_my_preference->searches_id }}">
+                            My Preferences
+                            <span class="tooltip-text">
+                                This search is always linked to your current preferences.
+                            </span>
+                        </div>
+                    @endif
+
+
+                    {{-- Other saved searches --}}
+                    @foreach($saved_searches_data as $saved_searches)
+
+                        @if($saved_searches->status_my_preference == 1)
+                            @continue
+                        @endif
+
+                        <div class="saved-search-tab" data-id="{{ $saved_searches->searches_id }}">
+                            @if(empty($saved_searches->name))
+                                Saved search {{ $i }}
+                            @else
+                                {{ $saved_searches->name }}
+                            @endif
+                        </div>
+
+                        @php $i++; @endphp
+                    @endforeach
                 @endif
-              </div>
-              @php
-                $i++;
-              @endphp
-              @endforeach
-              @endif
+
             </div>
-            <div class="add-new" @if($saved_searches_data->isEmpty()) style="display:none;" @endif><button class="saved-add-search">+ Save New</button></div>
-            
-         </div>
+
+            <div class="add-new" @if($saved_searches_data->isEmpty()) style="display:none;" @endif>
+                <button class="saved-add-search">+ Save New</button>
+            </div>
+        </div>
+
          <div class="job_tabs">
             
             <ul class="tab-nav">
@@ -1110,6 +1162,9 @@
                           </li>
                       </ul>
                     </div>
+                    {{-- <div>
+                      <button id="reset-filter-button">Reset Filter</button>                 
+                    </div> --}}
                 </div>
                 <!-- Job Listings -->
                 <div class="job-listings col-md-8">
@@ -1602,11 +1657,25 @@
                   @foreach($saved_searches_data as $saved_searches)
                   <tr data-id="{{ $i }}" data-value="{{ $saved_searches->searches_id }}" data-filters='{{ $saved_searches->filters }}' data-name='{{ $saved_searches->delivery }}'>
                     <td>
-                      @if($i != 0)
+                      @if($saved_searches->status_my_preference != 1 && $i != 0)
                       <input type="checkbox" class="select-item">
                       @endif
                     </td>
-                    <td>Saved search {{ $i }}</td>
+                    {{-- <td>Saved search {{ $i }}</td> --}}
+                  <td>
+                    {{-- My Preferences --}}
+                    @if($saved_searches->status_my_preference == 1)
+                            My Preferences
+
+                        {{-- Named saved search --}}
+                        @elseif(!empty($saved_searches->name))
+                            {{ $saved_searches->name }}
+
+                        {{-- Auto numbered --}}
+                        @else
+                            Saved search {{ $i }}
+                        @endif
+                    </td>
                     <td>{{ $saved_searches->type }}</td>
                     <td>
                       <div class="filter-summary">
@@ -1676,9 +1745,10 @@
                       <button class="btn-run" data-id="{{ $saved_searches->searches_id }}">Run</button>
                       <button class="btn-edit" data-id="{{ $saved_searches->searches_id }}">Edit</button>
                       <button class="btn-duplicate">Duplicate</button>
-                      @if($i != 0)
-                      <button class="btn-delete" data-name="single-delete">Delete</button>
-                      @endif
+                        @if($saved_searches->status_my_preference != 1 && $i != 0)
+                            <button class="btn-delete" data-name="single-delete">Delete</button>
+                        @endif
+
                       </div>
                     </td>
                   </tr>

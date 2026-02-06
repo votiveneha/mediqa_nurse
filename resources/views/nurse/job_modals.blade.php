@@ -1136,24 +1136,6 @@ function applyNurse() {
 
   }
 
-   function filterAllEmployment() {
-   
-  var input = document.getElementsByClassName("employmentSearch1")[0];
-  var filter = input.value.toLowerCase().trim();
-  alert("hello");
-  // Get ALL labels inside ALL accordions
-  var labels = document.querySelectorAll(".accordion-content label");
-
-  labels.forEach(function(label) {
-    var text = label.textContent.toLowerCase();
-    if (text.indexOf(filter) > -1) {
-      label.style.display = "block"; // show
-    } else {
-      label.style.display = "none"; // hide
-    }
-  });
-}
-
 function filterAllEmployment() {
    
   var input = document.getElementById("employmentSearch");
@@ -1296,7 +1278,7 @@ function openModal_enviroment(filter_type) {
             var subsub_spec_data = '';
             if(get_spec.length>0){
               for(var j=0;j<get_spec.length;j++){
-                subsub_spec_data += '<label class="subsub_checkbox subsub_checkbox-'+data1[i].id+'" style="display:none;"><input type="checkbox" class="specialty">'+get_spec[j].name+'</label>'; 
+                subsub_spec_data += '<label class="subsub_checkbox  subsub_checkbox-'+data1[i].id+'" style="display:none;"><input type="checkbox" class="sub_speciality_checkbox specialty" value="'+data1[i].id+'">'+get_spec[j].name+'</label>'; 
               }
               console.log("subsub_spec_data",subsub_spec_data);
               var data_name = data1[i].name;
@@ -1306,7 +1288,7 @@ function openModal_enviroment(filter_type) {
               var onclickfun = '';
             }
             
-            sub_spec_data += '<label class="sub_checkbox"><input type="checkbox" class="specialty sub_checkbox-'+data1[i].id+'" onclick="'+onclickfun+'">'+data1[i].name+get_spec_count+'</label>'+subsub_spec_data; 
+            sub_spec_data += '<label class="sub_checkbox"><input type="checkbox" class="specialty sub_speciality_check sub_checkbox-'+data1[i].id+'" value="'+data1[i].id+'" onclick="'+onclickfun+'">'+data1[i].name+get_spec_count+'</label>'+subsub_spec_data; 
         }
         $(".checkbox-list-spec").html(sub_spec_data);
       }
@@ -1318,7 +1300,7 @@ function applySpeciality() {
 
     let selectedValues = [];
 
-    $(".specialty_check:checked").each(function () {
+    $(".sub_speciality_check:checked").each(function () {
         selectedValues.push($(this).val());
     });
 
@@ -1638,42 +1620,6 @@ function toggleAccordion(header) {
     fetchJobs(1);   // ✅ single source of truth
 }
 
-  // function applyExperience(){
-  //   var experience = $(".assistent_level").val();
-  //   sessionStorage.setItem("experience_value", experience);
-
-  //   var experience_data = sessionStorage.getItem("experience_value");
-  //   console.log("experience_data",experience_data);
-
-  //   if(experience_data !== null){
-      
-  //       $(".assistent_level").prop("disabled", true);
-  //       $(".edit-btn-experience-modal").show();
-
-  //   }
-  //   $.ajax({
-  //     type: "POST",
-  //     url: "{{ url('/nurse/getExperienceData') }}",
-  //     data: {experience:experience,_token:'{{ csrf_token() }}'},
-  //     cache: false,
-  //     success: function(data){
-  //       if(data == ""){
-          
-  //         $(".job-listings").html('\<div id="no-jobs" class="no-jobs-box">\
-  //                   <h3>🚫 No Jobs Found</h3>\
-  //                   <p>Sorry, no jobs match your search.</p>\
-  //                 </div>');
-  //       }else{
-  //         $(".job-listings").append(data);
-          
-          
-  //       }
-        
-  //       $("#yearExperienceModal").hide();
-        
-  //     }
-  //   });    
-  // }
 </script>
 
 @endsection

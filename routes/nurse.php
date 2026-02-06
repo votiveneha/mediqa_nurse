@@ -47,9 +47,12 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
   Route::get('/login', 'HomeController@login')->name('login');
   Route::post('/userloginAction', 'HomeController@userloginAction')->name('userloginAction');
   Route::get('/logout', 'HomeController@logout')->name('logout');
+  Route::get('/getWorkplaceData', 'JobPostingController@getWorkplaceData')->name('getWorkplaceData');
+  Route::get('/getSubWorkplaceData', 'JobPostingController@getSubWorkplaceData')->name('getSubWorkplaceData');
   Route::middleware('healthcare')->group(function () {
     Route::get('/my-profile', 'HomeController@manage_profile')->name('my-profile');
     Route::get('/job_posting', 'JobPostingController@job_posting')->name('job_posting');
+    Route::get('/updateBasicJobs', 'JobPostingController@updateBasicJobs')->name('updateBasicJobs');
     Route::get('/change_password', 'JobPostingController@change_password')->name('change_password');
   });
 });
@@ -241,10 +244,15 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::get('/getTestLanguagesData', 'LanguageSkillsContoller@getTestLanguagesData')->name('getTestLanguagesData');
   Route::post('/updateLanguageSkills', 'LanguageSkillsContoller@updateLanguageSkills')->name('updateLanguageSkills');
   Route::post('/uploadlangEvidenceImgs', 'LanguageSkillsContoller@uploadlangEvidenceImgs')->name('uploadlangEvidenceImgs');
-  Route::post('/deletelangEvidenceImg', 'LanguageSkillsContoller@deletelangEvidenceImg')->name('deletelangEvidenceImg');   
-  
-  /**************[Work Preferences & Flexibility]**************/
-  Route::get('/match_percentage', 'MatchController@match_percentage')->name('match_percentage');
+  Route::post('/deletelangEvidenceImg', 'LanguageSkillsContoller@deletelangEvidenceImg')->name('deletelangEvidenceImg');
+
+  /**************[My-carrer ]**************/
+  Route::get('/match_percentage', 'MyCareerController@match_percentage')->name('match_percentage');
+  Route::get('matchedJobs', 'MyCareerController@matchedJobs')->name('matchedJobs');
+  Route::get('application', 'MyCareerController@application')->name('application');
+
+
+    /**************[Work Preferences & Flexibility]**************/
   Route::get('/sector_preferences', 'WorkPreferencesController@index')->name('sector_preferences');
   Route::post('/updateSectorPreferences', 'WorkPreferencesController@updateSectorPreferences')->name('updateSectorPreferences');
   Route::get('/work_environment_preferences', 'WorkPreferencesController@work_environment_preferences')->name('work_environment_preferences');
@@ -294,7 +302,6 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::post('get_tags', 'JobsController@get_tags')->name('get_tags');
   Route::post('get_filters_data', 'JobsController@get_filters_data')->name('get_filters_data');
   Route::get('getEmptypeData', 'JobsController@getEmptypeData')->name('getEmptypeData');
-  Route::get('matchedJobs', 'MatchController@matchedJobs')->name('matchedJobs');
   Route::get('getSpecialityDatas', 'WorkPreferencesController@getSpecialityDatas')->name('getSpecialityDatas');
   Route::get('deleteSpecialityRows', 'HomeController@deleteSpecialityRows')->name('deleteSpecialityRows');
   });

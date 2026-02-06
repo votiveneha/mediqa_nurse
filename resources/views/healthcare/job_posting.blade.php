@@ -102,6 +102,13 @@
   width: 20px;
 }
 
+form#job_posting_form ul.select2-selection__rendered {
+    box-shadow: none;
+    max-height: inherit;
+    border: none;
+    position: relative;
+  }
+
 </style>
 @endsection
 
@@ -127,14 +134,236 @@
                     <div class="card shadow-sm border-0 p-4 mt-30">
                       <h3 class="mt-0 color-brand-1 mb-2">Post a Job</h3>
     
-                      <form id="language_skills_form" method="POST" onsubmit="return update_language_skills()">
+                      <form id="job_posting_form" method="POST" onsubmit="return job_posting_form()">
                         @csrf
                         <input type="hidden" name="user_id" value="{{ Auth::guard('healthcare_facilities')->user()->id }}">
+                        <div class="form-group level-drp">
+                          <label class="form-label" for="input-1">Sector Preferences
+                          </label>
+                          <select class="form-input mr-10 select-active" name="sector_preferences">
+                            <option value="">select</option>
+                            <option value="Public & Government">Public & Government</option>
+                            <option value="Private" >Private</option>
+                            <option value="Public Government & Private">Public Government & Private</option>
+                          </select>
+                          <span id='reqsector_preferences' class='reqError text-danger valley'></span>
+                        </div>
+                        <div class="form-group drp--clr">
+                          <label class="form-label" for="input-1">Type of Nurse?</label>
+                          <ul id="type-of-nurse-0" style="display:none;">
+                            @php $specialty = specialty();$spcl=$specialty[0]->id;@endphp
+                            <?php
+                            $j = 1;
+                            ?>
+                            <li data-value="">select</li>
+                            @foreach($specialty as $spl)
+                            <li id="nursing_menus-{{ $j }}" data-value="{{ $spl->id }}">{{ $spl->name }}</li>
+                            <?php
+                            $j++;
+                            ?>
+                            @endforeach
+                          </ul>
 
+                          <select class="js-example-basic-multiple addAll_removeAll_btn nurse_type_field" data-list-id="type-of-nurse-0" name="nurseType[type_0][]" id="nurse_type" onchange="getNurseType('main',0)"></select>
+                          <span id="reqnurseTypeId" class="reqError text-danger valley"></span>    
+                        </div>    
+                        <div class="showNurseType-0"></div>
+                        <div class="form-group drp--clr">
+                          <label class="form-label" for="input-1">Primary Specialty</label>
+                          
+                          <ul id="speciality_preferences-primary-0" style="display:none;">
+                            @php $JobSpecialties = JobSpecialties(); @endphp
+                            <li data-value="">select</li>
+                            <?php
+                            $k = 1;
+                            ?>
+                            @foreach($JobSpecialties as $ptl)
+                            <li id="nursing_menus-{{ $k }}" data-value="{{ $ptl->id }}">{{ $ptl->name }}</li>
+                            <?php
+                            $k++;
+                            ?>
+                            @endforeach
+                          </ul>
+                          <select class="js-example-basic-multiple addAll_removeAll_btn speciality_type_field" data-list-id="speciality_preferences-primary-0" name="nurseType[]" onchange="getSecialities('main',0,'primary','')"></select>
+                          <span id="reqspecialties" class="reqError text-danger valley"></span>
+                        </div>
+                        <div class="show_specialities-primary-0"></div>
+                        <div class="declaration_box mt-2 mb-2">
+                          <input class="currently_position currently_position" type="checkbox">Willing to Upskill
+                        </div>
+                        <div class="experience_helper">Facility is open to candidates who do not yet meet the minimum specialty experience and can provide orientation or training.</div>
+                        <div class="form-group drp--clr">
+                          <label class="form-label" for="input-1">Secondary Specialty</label>
+                          
+                          <ul id="speciality_preferences-secondary-0" style="display:none;">
+                            @php $JobSpecialties = JobSpecialties(); @endphp
+                            <li data-value="">select</li>
+                            <?php
+                            $k = 1;
+                            ?>
+                            @foreach($JobSpecialties as $ptl)
+                            <li id="nursing_menus-{{ $k }}" data-value="{{ $ptl->id }}">{{ $ptl->name }}</li>
+                            <?php
+                            $k++;
+                            ?>
+                            @endforeach
+                          </ul>
+                          <select class="js-example-basic-multiple addAll_removeAll_btn speciality_type_field" data-list-id="speciality_preferences-secondary-0" name="nurseType[]" multiple onchange="getSecialities('main',0,'secondary','multiple')"></select>
+                          <span id="reqspecialties" class="reqError text-danger valley"></span>
+                        </div>
+                        <div class="show_specialities-secondary-0"></div>
+                        <div class="experience_helper">Secondary specialties are considered a plus, not a requirement.</div>
+                        <div class="form-group level-drp">
+                          
+                            <label class="form-label" for="input-1">Work Environment Preferences</label>
+                            <?php
+                                
+                                $workplace_data = DB::table('work_enviornment_preferences')->where("sub_env_id",0)->orderBy("env_name","asc")->get();
+                                
+                                if(!empty($work_preferences_data)){
+                                  $facility_type = (array)json_decode($work_preferences_data->work_environment_preferences);
+                                }else{
+                                  $facility_type = array();
+                                }
+                                
+                                
+
+                                $p_memb_arr = array();
+
+                                if(!empty($facility_type) && !in_array("444", (array)$facility_type[1])){
+                                    foreach ($facility_type[1] as $index => $p_memb) {
+                                    
+                                        //print_r($p_memb);
+                                        $p_memb_arr[] = $index;
+                                        
+                                    }
+                                }else{
+                                  if(isset($facility_type[1])){
+                                    $p_memb_arr[] = $facility_type[1];
+                                  }
+                                  
+                                }
+
+                                $p_memb_json = json_encode($p_memb_arr);
+                            ?>
+                            <input type="hidden" name="mainfactype" class="mainfactype mainfactype-1" value="{{ $p_memb_json }}">
+                            <ul id="wp_data-1" style="display:none;">
+                             
+                              @if(!empty($workplace_data))
+                              @foreach($workplace_data as $wp_data)
+                              <li data-value="{{ $wp_data->prefer_id }}">{{ $wp_data->env_name }}</li>
+                              @endforeach
+                              @endif
+                            </ul>
+                            <select class="js-example-basic-multiple addAll_removeAll_btn facworktype facworktype-1" data-list-id="wp_data-1" name="subworkthlevel[1][]" multiple onchange="getWpData('',1)"></select>
+                            <span id="reqfacworktype" class="reqError text-danger valley"></span>
+                          
+                        </div>
+                        <div class="wp_data-1">
+                            @if(isset($facility_type[1]) && !in_array("444", (array)$facility_type[1]))
+                            @foreach ($p_memb_arr as $p_arr)
+                            <?php
+                                $sdata = (array)$facility_type[1];
+                                $subface_data = (array)$sdata[$p_arr];
+                                $environment_list = DB::table("work_enviornment_preferences")->where("sub_env_id",$p_arr)->where("sub_envp_id","0")->get();
+                                $environment_name = DB::table("work_enviornment_preferences")->where("prefer_id",$p_arr)->first();
+                                
+                                $p_memb_arr = array();
+
+                                if (array_key_exists(0, $subface_data)){
+                                if(!empty($subface_data)){
+                                    foreach ($subface_data as $index => $s_data) {
+                                
+                                    //print_r($p_memb);
+                                    $p_memb_arr[] = $s_data;
+                                    
+                                    }
+                                }
+                                }else{
+                                    if(!empty($subface_data)){
+                                        foreach ($subface_data as $index => $s_data) {
+                                    
+                                        //print_r($p_memb);
+                                        $p_memb_arr[] = $index;
+                                        
+                                        }
+                                    }
+                                }
+                                
+
+                                
+                                //print_r($p_memb_arr);
+                                $p_memb_json = json_encode($p_memb_arr);
+                            ?>
+                            <div class="wp_main_div wp_main_div-{{ $p_arr }}"><div class="subworkdiv subworkdiv-{{ $p_arr }} form-group level-drp">
+                                <label class="form-label work_label work_label-1{{ $p_arr }}" for="input-1">{{ $environment_name->env_name }}</label>
+                                <input type="hidden" name="subwork" class="subwork subwork-{{ $p_arr }}" value="1">
+                                <input type="hidden" name="subwork_list" class="subwork_list subwork_list-1" value="{{ $p_arr }}">
+                                <input type="hidden" name="subworkjs" class="subworkjs-1 subworkjs-1{{ $p_arr }}" value="{{ $p_memb_json }}">
+                                <ul id="subwork_field-1{{ $p_arr }}" style="display:none;">
+                                @if(!empty($environment_list))
+                                @foreach($environment_list as $env_list)
+                                <li data-value="{{ $env_list->prefer_id }}">{{ $env_list->env_name }}</li>
+                                
+                                @endforeach
+                                @endif
+                                </ul>
+                                <select class="js-example-basic-multiple addAll_removeAll_btn work_valid-1 work_valid-1{{ $p_arr }}" data-list-id="subwork_field-1{{ $p_arr }}" name="subworkthlevel[1][{{ $p_arr }}][]" onchange="getWpSubData('',1,{{ $p_arr }})" multiple></select>
+                                <span id="reqsubwork-1{{ $p_arr }}" class="reqError text-danger valley"></span>
+                                </div>
+                                <div class="showsubwpdata showsubwpdata-1{{ $p_arr }}">
+                                @if(array_key_exists(0, $subface_data) == false)
+                                @if(!empty($p_memb_arr))
+                                @foreach ($p_memb_arr as $p_arr1)
+                                <?php
+                                    $subface_data1 = $subface_data[$p_arr1];
+                                    $environment_list = DB::table("work_enviornment_preferences")->where("sub_env_id",$p_arr)->where("sub_envp_id",$p_arr1)->get();
+                                    $environment_name = DB::table("work_enviornment_preferences")->where("prefer_id",$p_arr1)->first();
+                                    
+                                    
+
+                                    $p_memb_json = json_encode($subface_data1);
+                                ?>
+                                <div class="subpworkdiv subpworkdiv-{{ $p_arr1 }} form-group level-drp">
+                                    <label class="form-label pwork_label pwork_label-1{{ $p_arr1 }}" for="input-1">{{ $environment_name->env_name }}</label>
+                                    <input type="hidden" name="subpwork" class="subpwork subpwork-{{ $p_arr1 }}" value="1">
+                                    <input type="hidden" name="subpwork_list" class="subpwork_list subpwork_list-1" value="{{ $p_arr1 }}">
+                                    <input type="hidden" name="subworkjs1" class="subworkjs1-1 subworkjs1-1{{ $p_arr1 }}" value="{{ $p_memb_json }}">
+                                    <ul id="subpwork_field-1{{ $p_arr1 }}" style="display:none;">
+                                    @if(!empty($environment_list))
+                                    
+                                    @foreach($environment_list as $env_list)
+                                    <li data-value="{{ $env_list->prefer_id }}">{{ $env_list->env_name }}</li>
+                                    
+                                    @endforeach
+                                    @endif
+                                    </ul>
+                                    <select class="js-example-basic-multiple addAll_removeAll_btn pwork_valid-{{ $p_arr1 }} pwork_valid-1{{ $p_arr1 }}" data-list-id="subpwork_field-1{{ $p_arr1 }}" name="subworkthlevel[1][{{ $p_arr }}][{{ $p_arr1 }}][]" multiple></select>
+                                    <span id="reqsubpwork-1{{ $p_arr1 }}" class="reqError text-danger valley"></span>
+                                </div>
+                                @endforeach
+                                @endif
+                                @endif
+                                </div>
+                            </div>
+                            @endforeach
+                            @endif
+                        </div>
+                        <div class="form-group">
+                          <label class="form-label" for="input-1">Job Title</label>
+                          
+                          <input class="form-control" type="text" name="job_title" value="">
+                          <span id="reqotherjob_title" class="reqError text-danger valley"></span>
+                        </div>
+                        <div class="form-group">
+                          <label class="form-label" for="input-1">Positions Open</label>
+                          
+                          <input class="form-control" type="text" name="position_open" value="">
+                          <span id="reqposition_open" class="reqError text-danger valley"></span>
+                        </div>
                         
-                        <span id="reqdeclare_information_profess" class="reqError text-danger valley"></span>
                         <div class="box-button mt-15">
-                          <button class="btn btn-apply-big font-md font-bold" type="submit" id="submitLanguageSkills">Save Changes</button>
+                          <button class="btn btn-apply-big font-md font-bold" type="submit" id="submitJobPosting">Save Changes</button>
                         </div>
                       </form>
     
@@ -160,7 +389,117 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js">
 </script>
+<script>
+    $('.addAll_removeAll_btn').on('select2:open', function() {
+        var $dropdown = $(this);
+        var searchBoxHtml = `
+            
+            <div class="extra-buttons">
+                <button class="select-all-button" type="button">Select All</button>
+                <button class="remove-all-button" type="button">Remove All</button>
+            </div>`;
 
+        // Remove any existing extra buttons before adding new ones
+        $('.select2-results .extra-search-container').remove();
+        $('.select2-results .extra-buttons').remove();
+
+        // Append the new extra buttons and search box
+        $('.select2-results').prepend(searchBoxHtml);
+
+        // Handle Select All button for the current dropdown
+        $('.select-all-button').on('click', function() {
+            var $currentDropdown = $dropdown;
+            var allValues = $currentDropdown.find('option').map(function() {
+                return $(this).val();
+            }).get();
+            $currentDropdown.val(allValues).trigger('change');
+        });
+
+        // Handle Remove All button for the current dropdown
+        $('.remove-all-button').on('click', function() {
+            var $currentDropdown = $dropdown;
+            $currentDropdown.val(null).trigger('change');
+        });
+    });
+    $('.js-example-basic-multiple').on('select2:open', function() {
+        var searchBoxHtml = `
+            <div class="extra-search-container">
+                <input type="text" class="extra-search-box" placeholder="Search...">
+                <button class="clear-button" type="button">&times;</button>
+            </div>`;
+        
+        if ($('.select2-results').find('.extra-search-container').length === 0) {
+            $('.select2-results').prepend(searchBoxHtml);
+        }
+
+        var $searchBox = $('.extra-search-box');
+        var $clearButton = $('.clear-button');
+
+        $searchBox.on('input', function() {
+
+            var searchTerm = $(this).val().toLowerCase();
+            $('.select2-results__option').each(function() {
+                var text = $(this).text().toLowerCase();
+                if (text.includes(searchTerm)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+
+            $clearButton.toggle($searchBox.val().length > 0);
+        });
+
+        $clearButton.on('click', function() {
+            $searchBox.val('');
+            $searchBox.trigger('input');
+        });
+    });
+
+    $('.js-example-basic-multiple').select2();
+
+    // Dynamically add the clear button
+    const clearButton = $('<span class="clear-btn">✖</span>');
+    $('.select2-container').append(clearButton);
+
+    // Handle the visibility of the clear button
+    function toggleClearButton() {
+
+        const selectedOptions = $('.js-example-basic-multiple').val();
+        if (selectedOptions && selectedOptions.length > 0) {
+            clearButton.show();
+        } else {
+            clearButton.hide();
+        }
+    }
+
+    // Attach change event to select2
+    $('.js-example-basic-multiple').on('change', toggleClearButton);
+
+    // Clear button click event
+    clearButton.click(function() {
+
+        $('.js-example-basic-multiple').val(null).trigger('change');
+        toggleClearButton();
+    });
+
+    // Initial check
+    toggleClearButton();
+    $('.js-example-basic-multiple').each(function() {
+        let listId = $(this).data('list-id');
+
+        let items = [];
+        console.log("listId",listId);
+        $('#' + listId + ' li').each(function() {
+            console.log("value",$(this).data('value'));
+            items.push({ id: $(this).data('value'), text: $(this).text() });
+        });
+        console.log("items",items);
+        $(this).select2({
+            data: items
+        });
+    });
+</script>
 <script>
 
     function printErrorMsg(msg) {
@@ -233,6 +572,505 @@
       };
       drawNewGraph('graph1');
     });
-  
+
+    function getOrdinalSuffix(i) {
+      if (i % 100 >= 11 && i % 100 <= 13) {
+          return 'th';
+      }
+      switch (i % 10) {
+          case 0: return '';
+          case 1: return 'st';
+          case 2: return 'nd';
+          case 3: return 'rd';
+          default: return 'th';
+      }
+    }
+
+    function getNurseType(level,k){
+      //alert("hello");
+
+      if(level == "main"){
+        var selectedValues1 = $('.js-example-basic-multiple[data-list-id="type-of-nurse-'+k+'"]').val();
+      }else{
+        var selectedValues1 = $('.js-example-basic-multiple'+k+'[data-list-id="type-of-nurse-'+k+'"]').val();
+      }
+      
+      
+
+      let selectedValues = Array.isArray(selectedValues1) ? selectedValues1 : [selectedValues1];
+
+      console.log("selectedValues",selectedValues1);
+
+
+      $(".showNurseType-"+k+" .subnurse_list").each(function(i,val){
+          var val1 = $(val).val();
+          console.log("val",val1);
+          if(selectedValues.includes(val1) == false){
+            $(".showNurseType-" + k).find(".subnurse_main_div-" + val1).remove();
+              
+          }
+      });
+      
+      $(".subspecnurse_list").each(function () {
+
+          var val1 = $(this).val();
+          console.log("selectedValues_status", selectedValues);
+          console.log("val1_specStatus", val1);
+          if(selectedValues.includes(val1) == false){
+
+            
+            $(".showNurseSpeciality-" + k)
+            .find(".nurse_specialities-" + val1)
+            .remove();
+            
+          }
+      });
+
+      for(var i=0;i<selectedValues.length;i++){
+        if($(".showNurseType-"+k+" .subnurse_main_div-"+selectedValues[i]).length < 1){
+          $.ajax({
+            type: "GET",
+            url: "{{ url('/nurse/getNurseDatas') }}",
+            data: {nurse_id:selectedValues[i]},
+            cache: false,
+            success: function(data){
+              var data1 = JSON.parse(data);
+              console.log("data1",data1);
+
+              var nurse_text = "";
+              for(var j=0;j<data1.sub_nurse_data.length;j++){
+                
+                nurse_text += "<li data-value='"+data1.sub_nurse_data[j].id+"'>"+data1.sub_nurse_data[j].name+"</li>"; 
+                
+              }
+              var sub = 'sub';
+              var experience_text = "";
+              for(var i=1;i<=30;i++){
+                experience_text += "<option value='" + i + "'>" + i + getOrdinalSuffix(i) + " Year</option>";
+              }
+
+              if(data1.sub_nurse_data.length > 0){
+                
+                $(".showNurseType-"+k).append('\<div class="subnurse_main_div subnurse_main_div-'+data1.main_nurse_id+'">\
+                              <div class="subnurse_div subnurse_div-'+data1.main_nurse_id+' form-group level-drp">\
+                              <label class="form-label subnurse_label subnurse_label-'+data1.main_nurse_id+'" for="input-1">'+data1.main_nurse_name+'</label>\
+                              <input type="hidden" name="subnurse_list" class="subnurse_list subnurse_list-'+data1.main_nurse_id+'" value="'+data1.main_nurse_id+'">\
+                              <ul id="type-of-nurse-'+data1.main_nurse_id+'" style="display:none;">\
+                              <li data-value="">select</li>\
+                              '+nurse_text+'</ul>\
+                              <select class="js-example-basic-multiple'+data1.main_nurse_id+' subnurse_valid-'+data1.main_nurse_id+' addAll_removeAll_btn" data-list-id="type-of-nurse-'+data1.main_nurse_id+'" name="nurseType[type_'+data1.main_nurse_id+'][]" onchange="getNurseType(\''+sub+'\',\''+data1.main_nurse_id+'\')"></select>\
+                              <span id="reqsubnursevalid-'+data1.main_nurse_id+'" class="reqError text-danger valley"></span>\
+                              </div>\
+                              <div class="subnurse_level-'+data1.main_nurse_id+'"></div>\
+                              <div class="showNurseType-'+data1.main_nurse_id+'"></div>\
+                              <div class="showNurseSpeciality-'+data1.main_nurse_id+'"></div>\
+                              </div>\
+                              ');
+                selectTwoFunction(data1.main_nurse_id);
+                              
+              }
+
+              
+              
+            }
+          });
+        }
+      }
+    }
+
+    function getSecialities(level,k,specialities_type,multiple){
+      // alert();
+
+      if(level == "main"){
+        var selectedValues1 = $('.js-example-basic-multiple[data-list-id="speciality_preferences-'+specialities_type+"-"+k+'"]').val();
+      }else{
+        var selectedValues1 = $('.js-example-basic-multiple'+k+'[data-list-id="speciality_preferences-'+specialities_type+"-"+k+'"]').val();
+      }
+      
+      let selectedValues = Array.isArray(selectedValues1) ? selectedValues1 : [selectedValues1];
+    
+      console.log("selectedValues",selectedValues1);
+
+      $(".show_specialities-"+specialities_type+"-"+k+" .subspec_list-"+specialities_type).each(function(i,val){
+          var val1 = $(val).val();
+          console.log("subspec_listval",val1);
+          if(selectedValues.includes(val1) == false){
+            $(".subspec_main_div-"+val1).remove();
+              
+          }
+      });
+
+      $(".subspecprofpart_list-"+specialities_type+"-"+k).each(function () {
+            
+          var val1 = $(this).val();
+          console.log("selectedValues_status", selectedValues);
+          console.log("val1_specStatus", val1);
+          if(selectedValues.includes(val1) == false){
+
+            
+            $(".subexper_div-"+val1).remove();
+            
+          }
+      });
+
+      for(var i=0;i<selectedValues.length;i++){
+        
+        if($(".show_specialities-"+specialities_type+"-"+k+" .subspec_main_div-"+selectedValues[i]).length < 1){
+          
+          $.ajax({
+            type: "GET",
+            url: "{{ url('/nurse/getSpecialityDatas1') }}",
+            data: {speciality_id:selectedValues[i]},
+            cache: false,
+            success: function(data){
+              var data1 = JSON.parse(data);
+              console.log("data1",data1);
+
+              var speciality_text = "";
+              for(var j=0;j<data1.sub_spciality_data.length;j++){
+                
+                speciality_text += "<li data-value='"+data1.sub_spciality_data[j].id+"'>"+data1.sub_spciality_data[j].name+"</li>"; 
+                
+              }
+
+              
+              
+              var sub = 'sub';
+
+
+              if(data1.sub_spciality_data.length > 0){
+                $(".show_specialities-"+specialities_type+"-"+k).append('\<div class="subspec_main_div subspec_main_div-'+data1.main_speciality_id+'">\
+                              <div class="subspec_div subspec_div-'+data1.main_speciality_id+' form-group level-drp">\
+                              <label class="form-label subspec_label subspec_label-'+data1.main_speciality_id+'" for="input-1">'+data1.main_speciality_name+'</label>\
+                              <input type="hidden" name="subspec_list" class="subspec_list-'+specialities_type+' subspec_list-'+specialities_type+"-"+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
+                              <ul id="speciality_preferences-'+specialities_type+"-"+data1.main_speciality_id+'" style="display:none;">\
+                              <li data-value="">select</li>\
+                              '+speciality_text+'</ul>\
+                              <select class="js-example-basic-multiple'+data1.main_speciality_id+' subspec_valid-'+data1.main_speciality_id+' addAll_removeAll_btn" data-list-id="speciality_preferences-'+specialities_type+"-"+data1.main_speciality_id+'" onchange="getSecialities(\''+sub+'\',\''+data1.main_speciality_id+'\',\''+specialities_type+'\',\''+multiple+'\')" '+multiple+'></select>\
+                              <span id="reqsubspecvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
+                              </div>\
+                              <div class="subspec_level-'+data1.main_speciality_id+'"></div>\
+                              <div class="show_specialities-'+specialities_type+"-"+data1.main_speciality_id+'"></div>\
+                              <div class="show_specialities_experience-'+specialities_type+"-"+data1.main_speciality_id+'"></div>\
+                              </div>');
+
+                              selectTwoFunction(data1.main_speciality_id);
+              
+              }else{
+
+                var experience_text = "";
+                for(var i=0;i<=30;i++){
+                  experience_text += "<option value='" + i + "'>" + i + getOrdinalSuffix(i) + " Year</option>";
+                }
+
+                if ($(".subexper_div-" + data1.main_speciality_id).length === 0 && specialities_type == "primary") {
+
+                  $(".show_specialities_experience-"+specialities_type+"-"+k).append('\<div class="subexper_div subexper_div-'+data1.main_speciality_id+'">\
+                  <div class="custom-select-wrapper form-group level-drp">\
+                    <label class="form-label" for="input-1">Minimum Specialty Experience\
+                    </label>\
+                    <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprofpart_list-'+specialities_type+"-"+k+' subspecprof_listProfession subspecprof_listProfession-'+data1.main_speciality_id+' subspecprof_list-'+k+'" value="'+data1.main_speciality_id+'">\
+                    <select class="custom-select experience_level-'+data1.main_speciality_id+'" name="nurseType[${nurse_id}][speciality_status][type_'+data1.main_speciality_id+'][assistent_level]">\
+                      <option value="">Please Select</option>\
+                      '+experience_text+'\
+                    </select>\
+                    <span id="reqassistentlevel'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
+                    <div class="experience_helper">Set 0 for Graduate or Transition roles.Tick “Willing to upskill” if you’ll consider near-fit candidates.</div>\
+                  </div>\
+                </div>');
+
+                }
+
+              }
+
+              
+            }
+          });
+        }
+      }
+    }
+
+    function getWpData(ap, k){
+        if(ap == 'ap'){
+            var selectedValues = $('.js-example-basic-multiple'+k+'[data-list-id="wp_data-'+k+'"]').val();
+        }else{
+            var selectedValues = $('.js-example-basic-multiple[data-list-id="wp_data-'+k+'"]').val();
+        }
+
+        console.log("selectedValueswp",selectedValues);
+
+        $(".wp_data-"+k+" .subwork_list").each(function(i,val){
+            var val1 = $(val).val();
+            console.log("val",val1);
+            if(selectedValues.includes(val1) == false){
+                $(".wp_main_div-"+val1).remove();
+                
+            }
+        });
+
+        for(var i=0;i<selectedValues.length;i++){
+            if($(".wp_data-"+k+" .wp_main_div-"+selectedValues[i]).length < 1 && selectedValues[i] != "444"){
+                $.ajax({
+                    type: "GET",
+                    url: "{{ url('/healthcare-facilities/getWorkplaceData') }}",
+                    data: {place_id:selectedValues[i]},
+                    cache: false,
+                    success: function(data){
+                        var data1 = JSON.parse(data);
+                        console.log("data1",data1);
+
+                        var wp_text = "";
+                        for(var j=0;j<data1.work_data.length;j++){
+                        
+                            wp_text += "<li data-value='"+data1.work_data[j].prefer_id+"'>"+data1.work_data[j].env_name+"</li>"; 
+                        
+                        }
+
+                        $('.js-example-basic-multiple[data-list-id="wp_data-1"]').removeAttr("name");
+                        
+                        var ap = "ap";
+                        $(".wp_data-"+k).append('\<div class="wp_main_div wp_main_div-'+data1.prefer_id+'"><div class="subworkdiv subworkdiv-'+data1.prefer_id+' form-group level-drp">\
+                            <label class="form-label work_label work_label-'+k+data1.prefer_id+'" for="input-1">'+data1.env_name+'</label>\
+                            <input type="hidden" name="subwork" class="subwork subwork-'+data1.prefer_id+'" value="'+k+'">\
+                            <input type="hidden" name="subwork_list" class="subwork_list subwork_list-'+k+'" value="'+data1.prefer_id+'">\
+                            <ul id="subwork_field-'+k+data1.prefer_id+'" style="display:none;">'+wp_text+'</ul>\
+                            <select class="js-example-basic-multiple'+k+data1.prefer_id+' addAll_removeAll_btn work_valid-'+k+' work_valid-'+k+data1.prefer_id+'" data-list-id="subwork_field-'+k+data1.prefer_id+'" name="subworkthlevel['+k+']['+data1.prefer_id+'][]" onchange="getWpSubData(\''+ap+'\',\''+k+'\',\''+data1.prefer_id+'\')" multiple></select>\
+                            <span id="reqsubwork-'+k+data1.prefer_id+'" class="reqError text-danger valley"></span>\
+                            </div><div class="showsubwpdata showsubwpdata-'+k+data1.prefer_id+'"></div></div>');
+
+                            let $fields = $(".wp_data-"+k+" .wp_main_div");
+
+                            let sortedFields = $fields.sort(function (a, b) {
+                                return $(a).find(".work_label").text().localeCompare($(b).find(".work_label").text());
+                            });
+
+                            $(".wp_data-"+k).append(sortedFields);
+                        
+                        selectTwoFunction(k+data1.prefer_id);
+                    }    
+                });            
+            }
+        }
+    }
+
+    
+
+    function getWpSubData(ap,k,l){
+        if(ap == 'ap'){
+            var selectedValues = $('.js-example-basic-multiple'+k+l+'[data-list-id="subwork_field-'+k+l+'"]').val();
+        }else{
+            var selectedValues = $('.js-example-basic-multiple[data-list-id="subwork_field-'+k+l+'"]').val();
+        }
+
+        console.log("selectedValues",selectedValues);
+
+        $(".showsubwpdata-"+k+l+" .subpwork_list").each(function(i,val){
+            var val1 = $(val).val();
+            console.log("val",val1);
+            if(selectedValues.includes(val1) == false){
+                $(".subpworkdiv-"+val1).remove();
+                
+            }
+        });
+
+        var ne_st = k.toString() + l.toString();
+        
+        if($.trim($(".showsubwpdata-"+ne_st).html()) != ''){
+           $('.js-example-basic-multiple[data-list-id="subwork_field-'+k+l+'"]').removeAttr("name");
+        }
+
+        for(var i=0;i<selectedValues.length;i++){
+            if($(".showsubwpdata-"+k+l+" .subpworkdiv-"+selectedValues[i]).length < 1){
+                $.ajax({
+                    type: "GET",
+                    url: "{{ url('/healthcare-facilities/getSubWorkplaceData') }}",
+                    data: {place_id:l,subplace_id:selectedValues[i]},
+                    cache: false,
+                    success: function(data){
+                        var data1 = JSON.parse(data);
+                        console.log("data1",data1);
+                        
+                            
+                        if(data1.work_data.length > 0){
+                            var wp_text = "";
+                            for(var j=0;j<data1.work_data.length;j++){
+                            
+                                wp_text += "<li data-value='"+data1.work_data[j].prefer_id+"'>"+data1.work_data[j].env_name+"</li>"; 
+                            
+                            }
+                            
+                            $('.js-example-basic-multiple'+k+l+'[data-list-id="subwork_field-'+k+l+'"]').removeAttr("name");
+                            
+                            
+                            var ap = "";
+                            $(".showsubwpdata-"+k+l).append('\<div class="subpworkdiv subpworkdiv-'+data1.subplace_id+' form-group level-drp">\
+                                <label class="form-label pwork_label pwork_label-'+k+data1.subplace_id+'" for="input-1">'+data1.env_name+'</label>\
+                                <input type="hidden" name="subpwork" class="subpwork subpwork-'+data1.subplace_id+'" value="'+k+'">\
+                                <input type="hidden" name="subpwork_list" class="subpwork_list subpwork_list-'+k+'" value="'+data1.subplace_id+'">\
+                                <ul id="subpwork_field-'+k+data1.subplace_id+'" style="display:none;">'+wp_text+'</ul>\
+                                <select class="js-example-basic-multiple'+k+data1.subplace_id+' addAll_removeAll_btn pwork_valid-'+k+' pwork_valid-'+k+data1.subplace_id+'" data-list-id="subpwork_field-'+k+data1.subplace_id+'" name="subworkthlevel['+k+']['+l+']['+data1.subplace_id+'][]" multiple></select>\
+                                <span id="reqsubpwork-'+k+data1.subplace_id+'" class="reqError text-danger valley"></span>\
+                            </div>');
+
+                            let $fields = $(".showsubwpdata-"+k+l+" .subpworkdiv");
+
+                            let sortedFields = $fields.sort(function (a, b) {
+                                return $(a).find(".pwork_label").text().localeCompare($(b).find(".pwork_label").text());
+                            });
+
+                            $(".showsubwpdata-"+k+l).append(sortedFields);
+
+                            selectTwoFunction(k+data1.subplace_id);
+                        }
+                    }    
+                });            
+            }
+        }
+    }
+    
+    function selectTwoFunction(select_id) {
+
+      let $select = $('.js-example-basic-multiple' + select_id);
+
+      // === 1️⃣ Initialize ONLY if not already initialized ===
+      if ($select.data('select2')) {
+          return; // VERY IMPORTANT: stops re-init
+      }
+
+      // === 2️⃣ Load options from UL (clone per dropdown) ===
+      let listId = $select.data('list-id');
+      let items = [];
+
+      $('#' + listId + ' li').each(function() {
+          items.push({
+              id: $(this).data('value'),
+              text: $(this).text()
+          });
+      });
+
+      // === 3️⃣ Initialize Select2 (ONLY ON THIS DROPDOWN) ===
+      $select.select2({
+          data: items,
+          width: '100%',
+          closeOnSelect: true
+      });
+
+      // === 4️⃣ Add Select All / Remove All buttons (SCOPED) ===
+      $select.on('select2:open', function() {
+          let $dropdown = $(this);
+
+          let buttons = `
+          <div class="extra-buttons">
+              <button class="select-all-button" type="button">Select All</button>
+              <button class="remove-all-button" type="button">Remove All</button>
+          </div>
+          `;
+
+          $('.select2-results .extra-buttons').remove();
+          $('.select2-results').prepend(buttons);
+
+          $('.select-all-button').off('click').on('click', function() {
+              let allValues = $dropdown.find('option').map(function() {
+                  return $(this).val();
+              }).get();
+              $dropdown.val(allValues).trigger('change');
+          });
+
+          $('.remove-all-button').off('click').on('click', function() {
+              $dropdown.val(null).trigger('change');
+          });
+      });
+
+      // === 5️⃣ Add search box (SCOPED) ===
+      $select.on('select2:open', function() {
+
+          let searchBoxHtml = `
+          <div class="extra-search-container">
+              <input type="text" class="extra-search-box" placeholder="Search...">
+              <button class="clear-button" type="button">&times;</button>
+          </div>
+          `;
+
+          if ($('.select2-results').find('.extra-search-container').length === 0) {
+              $('.select2-results').prepend(searchBoxHtml);
+          }
+
+          $('.extra-search-box').off('input').on('input', function() {
+              let searchTerm = $(this).val().toLowerCase();
+
+              $('.select2-results__option').each(function() {
+                  let text = $(this).text().toLowerCase();
+                  $(this).toggle(text.includes(searchTerm));
+              });
+          });
+
+          $('.clear-button').off('click').on('click', function() {
+              $('.extra-search-box').val('').trigger('input');
+          });
+      });
+
+      // === 6️⃣ Clear button PER DROPDOWN (not global) ===
+      let clearButton = $('<span class="clear-btn">✖</span>');
+      $select.next('.select2').append(clearButton);
+
+      function toggleClearButton() {
+          let val = $select.val();
+          clearButton.toggle(!!(val && val.length));
+      }
+
+      $select.on('change', toggleClearButton);
+      clearButton.on('click', function() {
+          $select.val(null).trigger('change');
+          toggleClearButton();
+      });
+
+      toggleClearButton();
+    }
+
+    function job_posting_form() {
+      var isValid = true;
+
+      if (isValid == true) {
+        $.ajax({
+        url: "{{ route('medical-facilities.updateBasicJobs') }}",
+        type: "POST",
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: new FormData($('#job_posting_form')[0]),
+        dataType: 'json',
+        beforeSend: function() {
+          $('#submitJobPosting').prop('disabled', true);
+          $('#submitJobPosting').text('Process....');
+        },
+        success: function(res) {
+          if (res.status == '1') {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'Job Post Successfully',
+            }).then(function() {
+              window.location.href = "{{ route('medical-facilities.job_posting') }}";
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: res.message,
+            })
+          }
+        },
+        error: function(errorss) {
+          $('#submitJobPosting').prop('disabled', false);
+          $('#submitJobPosting').text('Save Changes');
+          console.log("errorss", errorss);
+          
+        }
+      
+        });
+      }
+
+      return false;
+    }  
   </script>
 @endsection

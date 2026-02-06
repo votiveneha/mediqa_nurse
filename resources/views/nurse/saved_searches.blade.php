@@ -13,7 +13,7 @@
                         type="text"
                         id="search-name"
                         name="search_name"
-                        placeholder="Type location, shift, specialty..."
+                        placeholder="Type Sndney,Night shifts,ICU....."
                     >
                 </div>
             </div>
@@ -450,95 +450,95 @@
 </script>
 <script>
    $(document).ready(function () {
-    if ($('#toggleRegisteredPreferences').is(':checked')) {
-        console.log('Checkbox is checked');
+    // if ($('#toggleRegisteredPreferences').is(':checked')) {
+    //     console.log('Checkbox is checked');
 
-        $.ajax({
-            url: '{{ route("nurse.get_filters_data") }}',
-            type: 'POST',
-            data: {
-                _token: "{{ csrf_token() }}"
-            },
-            success: function(res) {
+    //     $.ajax({
+    //         url: '{{ route("nurse.get_filters_data") }}',
+    //         type: 'POST',
+    //         data: {
+    //             _token: "{{ csrf_token() }}"
+    //         },
+    //         success: function(res) {
                 
-                var res_data = JSON.parse(res);
-                var filter_data = [];
-                for(var i=0;i<res_data.length;i++){
-                    $("#smartInput").prepend('<span class="tag">'+res_data[i]+'\
-                    <span class="remove-tag remove-tag-'+i+'">×</span>\
-                    </span>');
-                    //removeTag(res_data[i]);
-                    filter_data.push(res_data[i]);
-                }
+    //             var res_data = JSON.parse(res);
+    //             var filter_data = [];
+    //             for(var i=0;i<res_data.length;i++){
+    //                 $("#smartInput").prepend('<span class="tag">'+res_data[i]+'\
+    //                 <span class="remove-tag remove-tag-'+i+'">×</span>\
+    //                 </span>');
+    //                 //removeTag(res_data[i]);
+    //                 filter_data.push(res_data[i]);
+    //             }
                 
-                $("#suggestion-search-name").val(JSON.stringify(filter_data));
-                $("#search_type").val("Dynamic");
-                //console.log("res_data", res_data);
-            }
-        });     
-    }
+    //             $("#suggestion-search-name").val(JSON.stringify(filter_data));
+    //             $("#search_type").val("Dynamic");
+    //             //console.log("res_data", res_data);
+    //         }
+    //     });     
+    // }
     let availableTags = [];
 
-    $.ajax({
-        url: '{{ route("nurse.get_tags") }}',
-        type: 'POST',
-        data: {
-            _token: "{{ csrf_token() }}"
-        },
-        success: function(res) {
+    // $.ajax({
+    //     url: '{{ route("nurse.get_tags") }}',
+    //     type: 'POST',
+    //     data: {
+    //         _token: "{{ csrf_token() }}"
+    //     },
+    //     success: function(res) {
             
-            var res_data = JSON.parse(res);
+    //         var res_data = JSON.parse(res);
             
-            availableTags = res_data;
+    //         availableTags = res_data;
             
 
-            //console.log("availableTags", availableTags);
-        }
-    });     
+    //         //console.log("availableTags", availableTags);
+    //     }
+    // });     
 
 
 
-    let selectedTags = [];
+    // let selectedTags = [];
 
-    // 🔹 Autocomplete setup
-    $("#search-name").autocomplete({
-        source: function(request, response) {
-        const term = request.term.toLowerCase();
-        const filtered = availableTags.filter(tag => 
-            tag.toLowerCase().includes(term) && !selectedTags.includes(tag)
-        );
-        response(filtered);
-        },
-        select: function(event, ui) {
-        addTag(ui.item.value);
-        $(this).val('');
-        return false;
-        }
-    });
+    // // 🔹 Autocomplete setup
+    // $("#search-name").autocomplete({
+    //     source: function(request, response) {
+    //     const term = request.term.toLowerCase();
+    //     const filtered = availableTags.filter(tag => 
+    //         tag.toLowerCase().includes(term) && !selectedTags.includes(tag)
+    //     );
+    //     response(filtered);
+    //     },
+    //     select: function(event, ui) {
+    //     addTag(ui.item.value);
+    //     $(this).val('');
+    //     return false;
+    //     }
+    // });
 
     // 🔹 Add tag to UI
-    function addTag(tagText) {
+    // function addTag(tagText) {
         
-        if (!selectedTags.includes(tagText)) {
-            selectedTags.push(tagText);
-            const tagEl = $('<span class="tag"></span>').text(tagText);
-            const removeBtn = $('<span class="remove-tag">&times;</span>').click(function() {
-                removeTag(tagText);
-            });
-            tagEl.append(removeBtn);
-            $("#smartInput").prepend(tagEl);
-            //updateSuggestion();
-            updateHiddenField();
-        }
-    }
+    //     if (!selectedTags.includes(tagText)) {
+    //         selectedTags.push(tagText);
+    //         const tagEl = $('<span class="tag"></span>').text(tagText);
+    //         const removeBtn = $('<span class="remove-tag">&times;</span>').click(function() {
+    //             removeTag(tagText);
+    //         });
+    //         tagEl.append(removeBtn);
+    //         $("#smartInput").prepend(tagEl);
+    //         //updateSuggestion();
+    //         updateHiddenField();
+    //     }
+    // }
 
     // 🔹 Remove tag
-    function removeTag(tagText) {
-        selectedTags = selectedTags.filter(tag => tag !== tagText);
-        $(".tag").filter(function() { return $(this).text().includes(tagText); }).remove();
-        //updateSuggestion();
-        updateHiddenField();
-    }
+    // function removeTag(tagText) {
+    //     selectedTags = selectedTags.filter(tag => tag !== tagText);
+    //     $(".tag").filter(function() { return $(this).text().includes(tagText); }).remove();
+    //     //updateSuggestion();
+    //     updateHiddenField();
+    // }
 
     // 🔹 Update suggestion dynamically
     // function updateSuggestion() {
@@ -549,18 +549,18 @@
     //     }
     // }
 
-    function updateHiddenField() {
-        $("#suggestion-search-name").val(JSON.stringify(selectedTags));
-    }
+    // function updateHiddenField() {
+    //     $("#suggestion-search-name").val(JSON.stringify(selectedTags));
+    // }
 
     // 🔹 Press Enter to add text manually
-    $("#search-name").on("keydown", function(e) {
-        if (e.key === "Enter" && this.value.trim() !== "") {
-        e.preventDefault();
-        addTag(this.value.trim());
-        this.value = "";
-        }
-    });
+    // $("#search-name").on("keydown", function(e) {
+    //     if (e.key === "Enter" && this.value.trim() !== "") {
+    //     e.preventDefault();
+    //     addTag(this.value.trim());
+    //     this.value = "";
+    //     }
+    // });
 
     
     
@@ -569,89 +569,89 @@
         $('.select-item').prop('checked', isChecked);
     });
 
-    $(document).on('click', '.btn-run', function(e) {
-        e.preventDefault();
-        const id = $(this).data('id');
-        const baseUrl = `{{ url('/nurse/run-saved-search') }}`;
-        $.ajax({
-            url: `${baseUrl}/${id}`,
-            type: 'POST',
-            data: {
-                _token: "{{ csrf_token() }}"
-            },
-            beforeSend: function() {
-                console.log("Running saved search...");
-            },
-            success: function(res) {
-                const now = new Date();
+    // $(document).on('click', '.btn-run', function(e) {
+    //     e.preventDefault();
+    //     const id = $(this).data('id');
+    //     const baseUrl = `{{ url('/nurse/run-saved-search') }}`;
+    //     $.ajax({
+    //         url: `${baseUrl}/${id}`,
+    //         type: 'POST',
+    //         data: {
+    //             _token: "{{ csrf_token() }}"
+    //         },
+    //         beforeSend: function() {
+    //             console.log("Running saved search...");
+    //         },
+    //         success: function(res) {
+    //             const now = new Date();
 
-                const formattedDateTime =
-                now.getFullYear() + '-' +
-                String(now.getMonth() + 1).padStart(2, '0') + '-' +
-                String(now.getDate()).padStart(2, '0') + ' ' +
-                String(now.getHours()).padStart(2, '0') + ':' +
-                String(now.getMinutes()).padStart(2, '0') + ':' +
-                String(now.getSeconds()).padStart(2, '0');
+    //             const formattedDateTime =
+    //             now.getFullYear() + '-' +
+    //             String(now.getMonth() + 1).padStart(2, '0') + '-' +
+    //             String(now.getDate()).padStart(2, '0') + ' ' +
+    //             String(now.getHours()).padStart(2, '0') + ':' +
+    //             String(now.getMinutes()).padStart(2, '0') + ':' +
+    //             String(now.getSeconds()).padStart(2, '0');
 
-                console.log(formattedDateTime);
-                $(".last_run_at-"+id).text(formattedDateTime);
-                if (res.success) {
-                    // Example: display job cards dynamically
-                    renderJobResults(res.jobs);
-                } else {
-                    alert("No jobs found.");
-                }
-            },
-            error: function(xhr) {
-                console.error("Error:", xhr.responseText);
-            }
-        });
-    });
+    //             console.log(formattedDateTime);
+    //             $(".last_run_at-"+id).text(formattedDateTime);
+    //             if (res.success) {
+    //                 // Example: display job cards dynamically
+    //                 renderJobResults(res.jobs);
+    //             } else {
+    //                 alert("No jobs found.");
+    //             }
+    //         },
+    //         error: function(xhr) {
+    //             console.error("Error:", xhr.responseText);
+    //         }
+    //     });
+    // });
 
-    function renderJobResults(jobs) {
-        let html = '';
-        if (jobs.length === 0) {
-            html = `<p>No matching jobs found.</p>`;
-        } else {
-            jobs.forEach(job => {
-                html += `
-                    <div class="job-card">
-                        <h4>${job.title}</h4>
-                        <p>${job.location}</p>
-                        <p>${job.pay_range}</p>
-                        <button class="apply-now">Apply Now</button>
-                    </div>
-                `;
-            });
-        }
-        $('#jobResultsContainer').html(html);
-    }
+    // function renderJobResults(jobs) {
+    //     let html = '';
+    //     if (jobs.length === 0) {
+    //         html = `<p>No matching jobs found.</p>`;
+    //     } else {
+    //         jobs.forEach(job => {
+    //             html += `
+    //                 <div class="job-card">
+    //                     <h4>${job.title}</h4>
+    //                     <p>${job.location}</p>
+    //                     <p>${job.pay_range}</p>
+    //                     <button class="apply-now">Apply Now</button>
+    //                 </div>
+    //             `;
+    //         });
+    //     }
+    //     $('#jobResultsContainer').html(html);
+    // }
 
-    $(document).on('change', '.alert-toggle-input', function() {
-        const $this = $(this); // the toggle that changed
-        const search_id = $this.data('id'); 
-        const baseUrl = `{{ url('/nurse/updateAlert') }}`;
+    // $(document).on('change', '.alert-toggle-input', function() {
+    //     const $this = $(this); // the toggle that changed
+    //     const search_id = $this.data('id'); 
+    //     const baseUrl = `{{ url('/nurse/updateAlert') }}`;
 
-        // Check if this specific toggle is checked
-        const frequency = $this.is(':checked') ? "Realtime" : "Off";
+    //     // Check if this specific toggle is checked
+    //     const frequency = $this.is(':checked') ? "Realtime" : "Off";
 
-        $.ajax({
-            type: "POST",
-            url: `${baseUrl}/${search_id}`,
-            data: {
-                search_id: search_id,
-                frequency_value: frequency,
-                _token: "{{ csrf_token() }}"
-            },
-            cache: false,
-            success: function (data) {
-                console.log("Updated alert:", frequency);
-            },
-            error: function (xhr) {
-                console.error("Error:", xhr.responseText);
-            }
-        });
-    });
+    //     $.ajax({
+    //         type: "POST",
+    //         url: `${baseUrl}/${search_id}`,
+    //         data: {
+    //             search_id: search_id,
+    //             frequency_value: frequency,
+    //             _token: "{{ csrf_token() }}"
+    //         },
+    //         cache: false,
+    //         success: function (data) {
+    //             console.log("Updated alert:", frequency);
+    //         },
+    //         error: function (xhr) {
+    //             console.error("Error:", xhr.responseText);
+    //         }
+    //     });
+    // });
 
     $('.filter-options input[type="checkbox"]:checked').prop('disabled', true);
     // Toggle filter sections
@@ -1004,26 +1004,26 @@
 
         // }
 
-        if ($('[name="search_type"]').val() == '') {
+        // if ($('[name="search_type"]').val() == '') {
 
-            document.getElementById("reqsearch-type").innerHTML = "* Please select the Search Type";
-            isValid = false;
+        //     document.getElementById("reqsearch-type").innerHTML = "* Please select the Search Type";
+        //     isValid = false;
 
-        }
+        // }
 
-        if ($('[name="alert_frequency"]').val() == '') {
+        // if ($('[name="alert_frequency"]').val() == '') {
 
-            document.getElementById("reqalert-frequency").innerHTML = "* Please select the Alert Frequency";
-            isValid = false;
+        //     document.getElementById("reqalert-frequency").innerHTML = "* Please select the Alert Frequency";
+        //     isValid = false;
 
-        }
+        // }
 
-        if ($('[name="delivery_method"]').val() == '') {
+        // if ($('[name="delivery_method"]').val() == '') {
 
-            document.getElementById("reqdelivery-method").innerHTML = "* Please select the Delivery Method";
-            isValid = false;
+        //     document.getElementById("reqdelivery-method").innerHTML = "* Please select the Delivery Method";
+        //     isValid = false;
 
-        }
+        // }
 
         if (isValid == true) {
             const name = $('#search-name').val().trim() || 'New Search';

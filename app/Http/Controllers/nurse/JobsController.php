@@ -61,6 +61,9 @@ class JobsController extends Controller{
         $data['saved_searches_data'] = DB::table("saved_searches")
             ->where("user_id", $user_id)
             ->get();
+        $data['saved_my_preference'] = DB::table("saved_searches")
+            ->where("user_id", $user_id)->where('status_my_preference', 1)
+            ->first();
         $today = now();
 
         foreach ($data['saved_searches_data'] as $search) {
@@ -739,7 +742,7 @@ class JobsController extends Controller{
     }
 
     // public function addSavedSearches(Request $request){
-        
+
     //     $user_id = Auth::guard('nurse_middle')->user()->id;
     //     $search_id = $request->search_id;
     //     $filter_location = $request->edit_filter_location;
@@ -794,21 +797,22 @@ class JobsController extends Controller{
 
     //         $lastInsertedId = $saved_searches->id;
     //     }
-        
+
 
     //     if ($run) {
     //         $json['status'] = 1;
     //         $json['id'] = $lastInsertedId;
     //     } else {
     //         $json['status'] = 0;
-            
+
     //     }
 
     //     echo json_encode($json);
     // }
 
-        public function addSavedSearches(Request $request)
+    public function addSavedSearches(Request $request)
     {
+        // print_r($request->all());die;
         $user_id = Auth::guard('nurse_middle')->user()->id;
 
         // 1️⃣ Build filters JSON from form
@@ -888,14 +892,15 @@ class JobsController extends Controller{
             $savedSearch->save();
 
             $id = $savedSearch->searches_id;
-        }
-
-        // 3️⃣ Create new search
-        else {
-
+            // echo "hi"; die;
+        } else {
+            // echo "bye";
+            // die;
+            // print_r($request->all());die;
             $savedSearch = SavedSearches::create([
                 'user_id' => $user_id,
                 'type' => $request->search_type,
+                'name' => $request->search_name,
                 'alert' => $request->alert_frequency,
                 'delivery' => $request->delivery_method,
                 'filters' => $filters, // ✅ ARRAY
