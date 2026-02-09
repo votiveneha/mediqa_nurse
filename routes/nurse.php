@@ -49,11 +49,14 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
   Route::get('/logout', 'HomeController@logout')->name('logout');
   Route::get('/getWorkplaceData', 'JobPostingController@getWorkplaceData')->name('getWorkplaceData');
   Route::get('/getSubWorkplaceData', 'JobPostingController@getSubWorkplaceData')->name('getSubWorkplaceData');
+  Route::get('/getEmpData', 'JobPostingController@getEmpData')->name('getEmpData');
   Route::middleware('healthcare')->group(function () {
     Route::get('/my-profile', 'HomeController@manage_profile')->name('my-profile');
     Route::get('/job_posting', 'JobPostingController@job_posting')->name('job_posting');
+    Route::get('/contract_pay', 'JobPostingController@contract_pay')->name('contract_pay');
     Route::get('/updateBasicJobs', 'JobPostingController@updateBasicJobs')->name('updateBasicJobs');
     Route::get('/change_password', 'JobPostingController@change_password')->name('change_password');
+    Route::post('/updateContractPay', 'JobPostingController@updateContractPay')->name('updateContractPay');
   });
 });
 

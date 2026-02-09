@@ -1,12 +1,12 @@
 <?php
 
 namespace App\Http\Controllers\nurse;
-
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Helpers\MatchHelper;
 use App\Models\User;
 use App\Models\JobsModel;
+use App\Models\NurseApplication;
 use App\Models\SpecialityModel;
 use Illuminate\Support\Facades\Auth;
 use DB;
@@ -21,25 +21,92 @@ class MyCareerController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
 
+    // public function applicationTimeline(Request $request)
+    // {
+    //     print_r($request->all());die;
+    //     $application = NurseApplication::with('job')->findOrFail($request->application_id);
+
+    //     print_r($application);die;
+
+    //     $timeline = [];
+
+    //     $timeline[] = [
+    //         'title' => 'Application Submitted',
+    //         'desc'  => 'Your profile has been submitted',
+    //         'date'  => $application->created_at->format('d M Y')
+    //     ];
+
+    //     if ($application->status >= 2) {
+    //         $timeline[] = [
+    //             'title' => 'Under Review',
+    //             'desc'  => 'HR team is reviewing your application',
+    //             'date'  => now()->format('d M Y')
+    //         ];
+    //     }
+
+    //     if ($application->status >= 4) {
+    //         $timeline[] = [
+    //             'title' => 'Interview Scheduled',
+    //             'desc'  => 'Interview details shared',
+    //             'date'  => now()->format('d M Y')
+    //         ];
+    //     }
+
+    //     return response()->json([
+    //         'job_title' => $application->job->title,
+    //         'facility'  => $application->job->facility_name,
+    //         'timeline'  => $timeline,
+    //         'footer_action' =>
+    //         $application->status == 7 ? 'offer' : ($application->status >= 4 ? 'interview' : 'withdraw')
+    //     ]);
+    // }
+
     public function application()
     {
+        $nurseId = Auth::guard("nurse_middle")->user()->id;
 
-        return view('nurse.my_career.nurse_application');
+        // echo $nurseId;die;
+        // ACTIVE APPLICATIONS
+        $active_list = NurseApplication::with('job', 'health_care')->where('nurse_id', $nurseId)
+            ->whereNotIn('status', [8, 9, 10, 11]) // hired, rejected, declined, withdrawn
+            ->where('is_archived_by_nurse', 0)
+            ->latest('applied_at')
+            ->get();
+
+
+        // echo "<pre>";
+        // print_r($active_list);
+        // die;
+
+        // ARCHIVED APPLICATIONS
+        $archived_list = NurseApplication::with('job','health_care')->where('nurse_id', $nurseId)
+            ->where(function ($q) {
+                $q->whereIn('status', [8, 9, 10, 11])
+                    ->orWhere('is_archived_by_nurse', 1);
+            })
+            ->latest('applied_at')
+            ->get();
+
+
+        return view(
+            'nurse.my_career.nurse_application',
+            compact('active_list', 'archived_list')
+        );
     }
     public function match_percentage()
     {
-
+        
         $user = Auth::guard("nurse_middle")->user();
         $jobs = JobsModel::get();
+        
 
-
-        $data['education_certification_percent'] = $this->matchEducationPercent($jobs, $user);
-        $data['experience_certification_percent'] = $this->matchExperiencePercent($jobs, $user);
-
+        $data['education_certification_percent'] = $this->matchEducationPercent($jobs,$user);
+        $data['experience_certification_percent'] = $this->matchExperiencePercent($jobs,$user);
+        
 
         //print_r($training_id_arr);
 
-
+        
 
 
         //print_r($nurse_percent);die;
@@ -72,7 +139,7 @@ class MyCareerController extends Controller
         $training_data = json_decode($training->training_data, true);
 
         $training_id_arr = [];
-        if (!empty($training_data)) {
+        if(!empty($training_data)){
             foreach ($training_data as $parent => $childs) {
                 $training_id_arr[] = $parent;
                 $training_id_arr = array_merge($training_id_arr, array_keys($childs));
@@ -84,8 +151,8 @@ class MyCareerController extends Controller
         // -------- USER EDUCATION -------- //
         $education_data = json_decode($training->education_data, true);
         $education_id_arr = [];
-
-        if (!empty($$education_data)) {
+        
+        if(!empty($$education_data)){
             foreach ($education_data as $parent => $childs) {
                 $education_id_arr[] = $parent;
                 $education_id_arr = array_merge($education_id_arr, array_keys($childs));
@@ -114,7 +181,7 @@ class MyCareerController extends Controller
     public function matchExperiencePercent($jobs, $user)
     {
         $user_experience = $user->assistent_level;
-
+        
 
         $emplyeement_positionsarr = [];
         $experience_level_arr = [];
@@ -125,23 +192,24 @@ class MyCareerController extends Controller
             }
         }
 
-
+        
 
         $found_experience = 0;
-        if (in_array($user_experience, $experience_level_arr)) {
+        if(in_array($user_experience,$experience_level_arr)){
             $found_experience = 1;
         }
 
         $user_position_data = DB::table("user_experience")->where("user_id", $user->id)->get();
         $user_positionsarr = [];
-
+        
         foreach ($user_position_data as $user_position) {
-
+            
             foreach (json_decode($user_position->position_held) as $position_held) {
 
-                foreach ($position_held as $position) {
+                foreach($position_held as $position){
                     $user_positionsarr[] = $position;
                 }
+                
             }
         }
 
@@ -153,19 +221,18 @@ class MyCareerController extends Controller
         $match = $found_experience + $found_position;
         return round(($match / 2) * 100);
     }
-
-    public function matchedJobs()
-    {
+    
+    public function matchedJobs(){
 
         $user = Auth::guard("nurse_middle")->user();
         $jobs = JobsModel::get();
         $data['jobs'] = $jobs;
-        $workData = $this->matchSingleWorkEnvironmentPercent($jobs, $user);
-
-        $data['employeement_type_data'] = DB::table("employeement_type_preferences")->where("sub_prefer_id", 0)->get();
-        $data['shift_type_data'] = DB::table("work_shift_preferences")->where("shift_id", 0)->where("sub_shift_id", NULL)->get();
-        $data['employee_positions'] = DB::table("employee_positions")->where("subposition_id", 0)->get();
-        $data['benefits_preferences'] = DB::table("benefits_preferences")->where("subbenefit_id", 0)->get();
+        $workData = $this->matchSingleWorkEnvironmentPercent($jobs,$user);
+        
+        $data['employeement_type_data'] = DB::table("employeement_type_preferences")->where("sub_prefer_id",0)->get();
+        $data['shift_type_data'] = DB::table("work_shift_preferences")->where("shift_id",0)->where("sub_shift_id",NULL)->get();
+        $data['employee_positions'] = DB::table("employee_positions")->where("subposition_id",0)->get();
+        $data['benefits_preferences'] = DB::table("benefits_preferences")->where("subbenefit_id",0)->get();
         $data['work_environment_data'] = DB::table("work_enviornment_preferences")
             ->where("sub_env_id", 0)
             ->where("sub_envp_id", 0)
@@ -173,22 +240,27 @@ class MyCareerController extends Controller
         $data['work_shift_data'] = DB::table("work_shift_preferences")
             ->where("shift_id", 0)
             ->where("sub_shift_id", NULL)
-            ->get();
+            ->get();    
         $data['type_of_nurse'] = DB::table("practitioner_type")
             ->where("parent", 0)
-            ->get();
+            ->get();        
         $data['speciality'] = DB::table("speciality")
             ->where("parent", 0)
-            ->get();
-        $user_id = Auth::guard('nurse_middle')->user()->id;
+            ->get();     
+        $user_id = Auth::guard('nurse_middle')->user()->id;    
         $data['work_preferences_data'] = DB::table("work_preferences")
             ->where("user_id", $user_id)
-            ->first();
+            ->first();    
         $data['saved_searches_data'] = DB::table("saved_searches")
             ->where("user_id", $user_id)
-            ->get();
+            ->get(); 
         return view("nurse.my_career.matchedjobsnew")->with($data);
     }
+    
+    public function matchSingleWorkEnvironmentPercent($jobs,$user)
+    {
 
-    public function matchSingleWorkEnvironmentPercent($jobs, $user) {}
+    }
+
+
 }

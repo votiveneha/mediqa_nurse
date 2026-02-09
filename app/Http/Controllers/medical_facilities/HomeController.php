@@ -100,7 +100,7 @@ class HomeController extends Controller
             $user = new User();
             $user->name = $hospital_name;
             $user->email = $emailaddress;
-            $user->role = "healthcare-facilities";
+            $user->role = 2;
             $user->password = Hash::make($password);
             $run = $user->save();
             $r   = User::where('email', $emailaddress)->first();
@@ -134,7 +134,7 @@ class HomeController extends Controller
     public function userloginAction(Request $request)
     {
         
-        if (Auth::guard('healthcare_facilities')->attempt(['email' => $request->email, 'password' => $request->password, 'role' => 'healthcare-facilities'])) {
+        if (Auth::guard('healthcare_facilities')->attempt(['email' => $request->email, 'password' => $request->password, 'role' => 2])) {
             if (isset($request->remember_me) && !empty($request->remember_me)) {
                 setcookie("email", $request->email, time() + 3600);
                 setcookie("password", $request->password, time() + 3600);

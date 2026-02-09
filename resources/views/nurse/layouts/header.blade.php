@@ -606,7 +606,7 @@ img, iframe, video {
                 <a class='@if(count($all_tabs) < 15) disabled-link @endif menu-link hover-up' href='#'>Saved Jobs</a>
               </li>
               <li class="@if(count($all_tabs) < 15) tooltip-link @endif" @if(count($all_tabs) < 15) data-tooltip="Please complete the profile first" @endif>
-                <a class='@if(count($all_tabs) < 15) disabled-link @endif menu-link hover-up' href='{{ route("nurse.match_percentage") }}'>My Career</i></a>
+                <a class='@if(count($all_tabs) < 15) disabled-link @endif menu-link hover-up {{ request()->is('nurse/match_percentage') ?'active':'' }} {{ request()->is('nurse/application') ?'active':'' }}' href='{{ route("nurse.match_percentage") }} '>My Career</i></a>
                 
               </li>
               <!-- <li class="">

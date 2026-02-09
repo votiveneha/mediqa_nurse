@@ -243,6 +243,7 @@ class HomeController extends Controller
         $companyinsert['name']        = $request->fullname;
         $companyinsert['lastname']    = $request->lastname;
         $companyinsert['email']       = $request->email;
+        $companyinsert['role']          = 1;
         // $companyinsert['country']     = country_id($request->countryCode) ?? '';
         // $companyinsert['country_code']= $request->countryCode;
         // $companyinsert['country_iso'] = $request->countryiso;
@@ -784,7 +785,7 @@ class HomeController extends Controller
             return back()->with('error', 'Your account has been blocked by the admin. Please contact the administrator.');
         } elseif (User::where("email", $request->email)->where('status', '0')->exists()) {
             return back()->with('error', 'No user found with this email. None of the accounts are associated with this detail.');
-        } elseif (Auth::guard('nurse_middle')->attempt(['email' => $request->email, 'password' => $request->password])) {
+        } elseif (Auth::guard('nurse_middle')->attempt(['email' => $request->email, 'password' => $request->password, 'role' => 1])) {
             if (isset($request->remember_me) && !empty($request->remember_me)) {
                 setcookie("email", $request->email, time() + 3600);
                 setcookie("password", $request->password, time() + 3600);
