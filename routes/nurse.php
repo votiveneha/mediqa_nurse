@@ -54,7 +54,7 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
     Route::get('/my-profile', 'HomeController@manage_profile')->name('my-profile');
     Route::get('/job_posting', 'JobPostingController@job_posting')->name('job_posting');
     Route::get('/contract_pay', 'JobPostingController@contract_pay')->name('contract_pay');
-    Route::get('/updateBasicJobs', 'JobPostingController@updateBasicJobs')->name('updateBasicJobs');
+    Route::post('/updateBasicJobs', 'JobPostingController@updateBasicJobs')->name('updateBasicJobs');
     Route::get('/change_password', 'JobPostingController@change_password')->name('change_password');
     Route::post('/updateContractPay', 'JobPostingController@updateContractPay')->name('updateContractPay');
   });

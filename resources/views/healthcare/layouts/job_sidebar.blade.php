@@ -66,10 +66,10 @@
     <ul class="nav" role="tablist">
       <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="#" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-marker"></i> Location & Work Model</a></li>
       
-      <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="{{ route('medical-facilities.job_posting') }}" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-user"></i> Role & Basics</a></li>
+      <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs  {{ request()->routeIs('medical-facilities.job_posting') ? 'active' : '' }}" href="{{ route('medical-facilities.job_posting') }}" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-user"></i> Role & Basics</a></li>
       <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="#" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-clipboard-check"></i> Requirements</a></li>
-      <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="{{ route('medical-facilities.contract_pay') }}" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-document"></i> Contract & Pay</a></li>
-      <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="#" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-calendar-clock"></i> Shifts & Scheduling</a></li>
+      <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs {{ request()->routeIs('medical-facilities.contract_pay') ? 'active' : '' }}" href="{{ route('medical-facilities.contract_pay') }}" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-document"></i> Contract & Pay</a></li>
+      <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs {{ request()->routeIs('medical-facilities.shift_scheduling') ? 'active' : '' }}" href="#" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-calendar-clock"></i> Shifts & Scheduling</a></li>
       <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="#" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-gift"></i> Benefits</a></li>
       <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="#" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-eye"></i> Visibility & Apply Settings</a></li>
       <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="#" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-align-left"></i> Job Description</a></li>

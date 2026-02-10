@@ -189,7 +189,7 @@ form#job_posting_form ul.select2-selection__rendered {
                         </div>
                         <div class="show_specialities-primary-0"></div>
                         <div class="declaration_box mt-2 mb-2">
-                          <input class="currently_position currently_position" type="checkbox">Willing to Upskill
+                          <input class="currently_position currently_position" name="willing_upskill" type="checkbox">Willing to Upskill
                         </div>
                         <div class="experience_helper">Facility is open to candidates who do not yet meet the minimum specialty experience and can provide orientation or training.</div>
                         <div class="form-group drp--clr">
@@ -352,7 +352,7 @@ form#job_posting_form ul.select2-selection__rendered {
                         <div class="form-group">
                           <label class="form-label" for="input-1">Job Title</label>
                           
-                          <input class="form-control" type="text" name="job_title" value="">
+                          <input class="form-control job_title" type="text" name="job_title" value="">
                           <span id="reqotherjob_title" class="reqError text-danger valley"></span>
                         </div>
                         <div class="form-group">
@@ -658,7 +658,7 @@ form#job_posting_form ul.select2-selection__rendered {
                               <ul id="type-of-nurse-'+data1.main_nurse_id+'" style="display:none;">\
                               <li data-value="">select</li>\
                               '+nurse_text+'</ul>\
-                              <select class="js-example-basic-multiple'+data1.main_nurse_id+' subnurse_valid-'+data1.main_nurse_id+' addAll_removeAll_btn" data-list-id="type-of-nurse-'+data1.main_nurse_id+'" name="nurseType[type_'+data1.main_nurse_id+'][]" onchange="getNurseType(\''+sub+'\',\''+data1.main_nurse_id+'\')"></select>\
+                              <select class="js-example-basic-multiple'+data1.main_nurse_id+' subnurse_valid-'+data1.main_nurse_id+' addAll_removeAll_btn" data-list-id="type-of-nurse-'+data1.main_nurse_id+'" name="subnursetype" id="subnursetype" onchange="getNurseType(\''+sub+'\',\''+data1.main_nurse_id+'\')"></select>\
                               <span id="reqsubnursevalid-'+data1.main_nurse_id+'" class="reqError text-danger valley"></span>\
                               </div>\
                               <div class="subnurse_level-'+data1.main_nurse_id+'"></div>\
@@ -678,6 +678,23 @@ form#job_posting_form ul.select2-selection__rendered {
       }
     }
 
+    function updateJobTitle() {
+      let nurseTypeText = $('#subnursetype option:selected').text();
+      let specialityText = $('#subspecialities option:selected').text();
+
+      if (
+          $('#nurse_type').val() !== '' &&
+          $('#subspecialities').val() !== ''
+      ) {
+          // Remove abbreviation if needed
+          nurseTypeText = nurseTypeText.replace(/\s*\(.*?\)/g, '');
+
+          $('.job_title').val(nurseTypeText + ' – ' + specialityText);
+      } else {
+          $('.job_title').val('');
+      }
+    }
+
     function getSecialities(level,k,specialities_type,multiple){
       // alert();
 
@@ -685,6 +702,7 @@ form#job_posting_form ul.select2-selection__rendered {
         var selectedValues1 = $('.js-example-basic-multiple[data-list-id="speciality_preferences-'+specialities_type+"-"+k+'"]').val();
       }else{
         var selectedValues1 = $('.js-example-basic-multiple'+k+'[data-list-id="speciality_preferences-'+specialities_type+"-"+k+'"]').val();
+        updateJobTitle();
       }
       
       let selectedValues = Array.isArray(selectedValues1) ? selectedValues1 : [selectedValues1];
@@ -746,7 +764,7 @@ form#job_posting_form ul.select2-selection__rendered {
                               <ul id="speciality_preferences-'+specialities_type+"-"+data1.main_speciality_id+'" style="display:none;">\
                               <li data-value="">select</li>\
                               '+speciality_text+'</ul>\
-                              <select class="js-example-basic-multiple'+data1.main_speciality_id+' subspec_valid-'+data1.main_speciality_id+' addAll_removeAll_btn" data-list-id="speciality_preferences-'+specialities_type+"-"+data1.main_speciality_id+'" onchange="getSecialities(\''+sub+'\',\''+data1.main_speciality_id+'\',\''+specialities_type+'\',\''+multiple+'\')" '+multiple+'></select>\
+                              <select class="js-example-basic-multiple'+data1.main_speciality_id+' subspec_valid-'+data1.main_speciality_id+' addAll_removeAll_btn" name="subspeciality['+specialities_type+']['+data1.main_speciality_id+'][]" data-list-id="speciality_preferences-'+specialities_type+"-"+data1.main_speciality_id+'" id="subspecialities" onchange="getSecialities(\''+sub+'\',\''+data1.main_speciality_id+'\',\''+specialities_type+'\',\''+multiple+'\')" '+multiple+'></select>\
                               <span id="reqsubspecvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
                               </div>\
                               <div class="subspec_level-'+data1.main_speciality_id+'"></div>\
@@ -770,7 +788,7 @@ form#job_posting_form ul.select2-selection__rendered {
                     <label class="form-label" for="input-1">Minimum Specialty Experience\
                     </label>\
                     <input type="hidden" name="subspecprof_list" class="subspecprof_list subspecprofpart_list-'+specialities_type+"-"+k+' subspecprof_listProfession subspecprof_listProfession-'+data1.main_speciality_id+' subspecprof_list-'+k+'" value="'+data1.main_speciality_id+'">\
-                    <select class="custom-select experience_level-'+data1.main_speciality_id+'" name="nurseType[${nurse_id}][speciality_status][type_'+data1.main_speciality_id+'][assistent_level]">\
+                    <select class="custom-select experience_level-'+data1.main_speciality_id+'" name="speciality_experience">\
                       <option value="">Please Select</option>\
                       '+experience_text+'\
                     </select>\
@@ -1029,6 +1047,55 @@ form#job_posting_form ul.select2-selection__rendered {
 
     function job_posting_form() {
       var isValid = true;
+
+      if ($('#sector_preferences').val() == '') {
+
+        document.getElementById("reqsector_preferences").innerHTML = "* Please select the Sector Preferences.";
+        isValid = false;
+
+      }
+
+      if ($('.nurse_type_field').val() == '0') {
+        
+        document.getElementById("reqnurseTypeId").innerHTML = "* Please select the Type of Nurse?";
+        isValid = false;
+
+      }
+
+      if ($('.speciality_type_field').val() == '0') {
+        
+        document.getElementById("reqspecialties").innerHTML = "* Please select the Primary Specialty";
+        isValid = false;
+
+      }
+
+      if ($('.secondary_specialities').val() == '') {
+        
+        document.getElementById("reqsecondaryspecialties").innerHTML = "* Please select the Secondary Specialties";
+        isValid = false;
+
+      }
+
+      if ($('.facworktype-1').val() == '') {
+        
+        document.getElementById("reqfacworktype").innerHTML = "* Please select the Work Environment Preferences";
+        isValid = false;
+
+      }
+
+      if ($('.job_title').val() == '') {
+        
+        document.getElementById("reqjob_title").innerHTML = "* Please enter the Job Title";
+        isValid = false;
+
+      }
+
+      if ($('.position_open').val() == '') {
+        
+        document.getElementById("reqposition_open").innerHTML = "* Please enter the Positions Open";
+        isValid = false;
+
+      }
 
       if (isValid == true) {
         $.ajax({

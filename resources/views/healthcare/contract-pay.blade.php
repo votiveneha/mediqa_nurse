@@ -152,7 +152,7 @@ form#job_posting_form ul.select2-selection__rendered {
                                 @endforeach
                                 @endif
                             </ul>
-                            <select class="js-example-basic-multiple addAll_removeAll_btn emptype_valid-1" data-list-id="mainemptype_field" name="emptype_preferences" onchange="empType(this.value)"></select>
+                            <select class="js-example-basic-multiple addAll_removeAll_btn emptype_valid-1" id="mainemptype_fields" data-list-id="mainemptype_field" name="emptype_preferences" onchange="empType(this.value)"></select>
                             <span id="reqemptype_prefer" class="reqError text-danger valley"></span>
                         </div>
                         <div class="emp_data"></div>
@@ -160,32 +160,32 @@ form#job_posting_form ul.select2-selection__rendered {
                             <div class="form-group level-drp">
                                 <label class="form-label" for="input-1">Hours per week
                                 </label>
-                                <input class="form-control per_hours_per_week" type="text" name="per_hours_week" value="">
-                                <span id='reqsector_preferences' class='reqError text-danger valley'></span>
+                                <input class="form-control per_hours_per_week" type="text" name="per_hours_week" id="per_hours_week" value="">
+                                <span id='reqhoursweek' class='reqError text-danger valley'></span>
                             </div>
                             <div class="form-group level-drp">
                                 <label class="form-label" for="input-1">Salary format
                                 </label>
-                                <select class="form-input mr-10 select-active custom-select" name="per_salary_format" id="per_salary_format">
+                                <select class="form-input mr-10 select-active" name="per_salary_format" id="per_salary_format">
                                     <option value="">select</option>
                                     <option value="Annual salary">Annual salary</option>
                                     <option value="Annual salary range" >Annual salary range</option>
                                     
                                 </select>
-                                <span id='reqsector_preferences' class='reqError text-danger valley'></span>
+                                <span id='reqper_salary_format' class='reqError text-danger valley'></span>
                             </div>
                             <div class="row">
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(min)
                                     </label>
-                                    <input class="form-control per_salary_min" type="text" name="per_salary_min" value="">
-                                    <span id='reqsector_preferences' class='reqError text-danger valley'></span>
+                                    <input class="form-control per_salary_min" type="text" name="per_salary_min" id="per_salary_min" value="">
+                                    <span id='reqper_salary_min' class='reqError text-danger valley'></span>
                                 </div>
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(max)
                                     </label>
-                                    <input class="form-control per_salary_max" type="text" name="per_salary_max" value="">
-                                    <span id='reqsector_preferences' class='reqError text-danger valley'></span>
+                                    <input class="form-control per_salary_max" type="text" name="per_salary_max" id="per_salary_max" value="">
+                                    <span id='reqper_salary_max' class='reqError text-danger valley'></span>
                                 </div>
                             </div>
                         </div>
@@ -193,42 +193,44 @@ form#job_posting_form ul.select2-selection__rendered {
                             <div class="form-group">
                                 <label>Contract length <span class="required">*</span></label>
                                 <div style="display:flex; gap:10px;">
-                                    <input type="number" name="contract_length_value" min="1" placeholder="e.g. 6">
-                                    <select class="form-input mr-10 select-active custom-select" name="contract_length_unit">
+                                    <input type="number" name="contract_length_value" min="1" id="contract_length_value" placeholder="e.g. 6">
+                                    <span id='reqcontract_length_value' class='reqError text-danger valley'></span>
+                                    <select name="contract_length_unit" id="contract_length_unit">
                                         <option value="months">Months</option>
                                         <option value="years">Years</option>
                                     </select>
+                                    <span id='reqcontract_length_unit' class='reqError text-danger valley'></span>
                                 </div>
                             </div>
                             <div class="form-group level-drp">
                                 <label class="form-label" for="input-1">Hours per week
                                 </label>
-                                <input class="form-control fixed_term_hours_per_week" type="text" name="fixed_term_hours_week" value="">
-                                <span id='reqsector_preferences' class='reqError text-danger valley'></span>
+                                <input class="form-control fixed_term_hours_per_week" id="fixed_term_hours_week" type="text" name="fixed_term_hours_week" value="">
+                                <span id='reqfixed_term_hours_week' class='reqError text-danger valley'></span>
                             </div>
                             <div class="form-group level-drp">
                                 <label class="form-label" for="input-1">Salary format
                                 </label>
-                                <select class="form-input mr-10 select-active" name="fixed_term_salary_format" id="per_salary_format">
+                                <select class="form-input mr-10 select-active" name="fixed_term_salary_format" id="fixed_term_salary_format">
                                     <option value="">select</option>
                                     <option value="Annual">Annual</option>
                                     <option value="Weekly">Weekly</option>
                                     <option value="Hourly">Hourly</option>
                                 </select>
-                                <span id='reqsector_preferences' class='reqError text-danger valley'></span>
+                                <span id='reqfixed_term_salary_format' class='reqError text-danger valley'></span>
                             </div>
                             <div class="row">
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(min)
                                     </label>
-                                    <input class="form-control fixed_term_salary_min" type="text" name="fixed_term_salary_min" value="">
-                                    <span id='reqsector_preferences' class='reqError text-danger valley'></span>
+                                    <input class="form-control fixed_term_salary_min" type="text" name="fixed_term_salary_min" value="" id="fixed_term_salary_min">
+                                    <span id='reqfixed_term_salary_min' class='reqError text-danger valley'></span>
                                 </div>
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(max)
                                     </label>
-                                    <input class="form-control per_salary_max" type="text" name="fixed_term_salary_max" value="">
-                                    <span id='reqsector_preferences' class='reqError text-danger valley'></span>
+                                    <input class="form-control per_salary_max" type="text" name="fixed_term_salary_max" value="" id="fixed_term_salary_max">
+                                    <span id='reqfixed_term_salary_max' class='reqError text-danger valley'></span>
                                 </div>
                             </div>
                         </div>
@@ -237,32 +239,32 @@ form#job_posting_form ul.select2-selection__rendered {
                             <div class="form-group level-drp">
                                 <label class="form-label" for="input-1">Shift dates & times
                                 </label>
-                                <input class="form-control temporary_hours_per_week" type="datetime-local" name="temporary_hours_week" value="">
-                                <span id='reqsector_preferences' class='reqError text-danger valley'></span>
+                                <input class="form-control temporary_hours_per_week" type="datetime-local" name="temporary_hours_week" value="" id="temporary_hours_week">
+                                <span id='reqtemporary_hours_per_week' class='reqError text-danger valley'></span>
                             </div>
                             <div class="form-group level-drp">
                                 <label class="form-label" for="input-1">Salary format
                                 </label>
-                                <select class="form-input mr-10 select-active custom-select" name="temporary_salary_format" id="temporary_salary_format">
+                                <select class="form-input mr-10 select-active" name="temporary_salary_format" id="temporary_salary_format">
                                     <option value="">select</option>
                                     <option value="Hourly">Hourly (recommended)</option>
                                     <option value="Weekly">Weekly</option>
                                     
                                 </select>
-                                <span id='reqsector_preferences' class='reqError text-danger valley'></span>
+                                <span id='reqtemporary_salary_format' class='reqError text-danger valley'></span>
                             </div>
                             <div class="row">
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(min)
                                     </label>
-                                    <input class="form-control temporary_salary_min" type="text" name="temporary_salary_min" value="">
-                                    <span id='reqsector_preferences' class='reqError text-danger valley'></span>
+                                    <input class="form-control temporary_salary_min" type="text" name="temporary_salary_min" value="" id="temporary_salary_min">
+                                    <span id='reqtemporary_salary_min' class='reqError text-danger valley'></span>
                                 </div>
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(max)
                                     </label>
-                                    <input class="form-control temporary_salary_max" type="text" name="temporary_salary_max" value="">
-                                    <span id='reqsector_preferences' class='reqError text-danger valley'></span>
+                                    <input class="form-control temporary_salary_max" type="text" name="temporary_salary_max" value="" id="temporary_salary_max">
+                                    <span id='reqtemporary_salary_max' class='reqError text-danger valley'></span>
                                 </div>
                             </div>
                         </div>
@@ -804,8 +806,8 @@ form#job_posting_form ul.select2-selection__rendered {
                       <ul id="emptype_field-'+emp_prefer_data.employeement_type_id+'" style="display:none;">\
                       <li data-value="0">select</li>\
                       '+emp_text+'</ul>\
-                      <select class="js-example-basic-multiple'+emp_prefer_data.employeement_type_id+' addAll_removeAll_btn emptype_valid-1" data-list-id="emptype_field-'+emp_prefer_data.employeement_type_id+'" name="subemptype" onchange="open_emp_type('+value+')"></select>\
-                      <span id="reqemptype-1" class="reqError text-danger valley"></span>\
+                      <select class="js-example-basic-multiple'+emp_prefer_data.employeement_type_id+' addAll_removeAll_btn emptype_valid-1" data-list-id="emptype_field-'+emp_prefer_data.employeement_type_id+'" id="subemptypefield" name="subemptype" onchange="open_emp_type('+value+')"></select>\
+                      <span id="reqsubemptype" class="reqError text-danger valley"></span>\
                       </div></div>');
 
                       
@@ -838,6 +840,7 @@ form#job_posting_form ul.select2-selection__rendered {
     
 
     function getWpSubData(ap,k,l){
+        $('#submitContractPay').prop('disabled', true);
         if(ap == 'ap'){
             var selectedValues = $('.js-example-basic-multiple'+k+l+'[data-list-id="subwork_field-'+k+l+'"]').val();
         }else{
@@ -903,6 +906,8 @@ form#job_posting_form ul.select2-selection__rendered {
                             $(".showsubwpdata-"+k+l).append(sortedFields);
 
                             selectTwoFunction(k+data1.subplace_id);
+
+                            $('#submitContractPay').prop('disabled', false);
                         }
                     }    
                 });            
@@ -1012,12 +1017,129 @@ form#job_posting_form ul.select2-selection__rendered {
     function contract_pay_form() {
       var isValid = true;
 
-    //   if ($('#sector_preferences').val() == '') {
+      if ($('#mainemptype_fields').val() == '0') {
 
-    //     document.getElementById("reqsector_preferences").innerHTML = "* Please select the Sector Preferences.";
-    //     isValid = false;
+        document.getElementById("reqemptype_prefer").innerHTML = "* Please enter the Employment type";
+        isValid = false;
 
-    //   }
+      }
+
+      if ($('#subemptypefield').val() == '0') {
+
+        document.getElementById("reqsubemptype").innerHTML = "* Please enter the Employment type";
+        isValid = false;
+
+      }
+
+      var mainempfield = $('#mainemptype_fields').val();
+      
+
+      if(mainempfield == "1"){
+        if ($('#per_hours_week').val() == '') {
+
+          document.getElementById("reqhoursweek").innerHTML = "* Please enter the Hours per week";
+          isValid = false;
+
+        }
+
+        
+
+        if ($('#per_salary_format').val() == '') {
+
+          document.getElementById("reqper_salary_format").innerHTML = "* Please select the Salary format";
+          isValid = false;
+
+        }
+
+        if ($('#per_salary_min').val() == '') {
+
+          document.getElementById("reqper_salary_min").innerHTML = "* Please enter the minimum salary";
+          isValid = false;
+
+        }
+
+        if ($('#per_salary_max').val() == '') {
+
+          document.getElementById("reqper_salary_max").innerHTML = "* Please enter the maximum salary";
+          isValid = false;
+
+        }
+      }
+
+      if(mainempfield == "2"){
+        if ($('#contract_length_value').val() == '') {
+
+          document.getElementById("reqcontract_length_value").innerHTML = "* Please enter the Contract length";
+          isValid = false;
+
+        }
+
+        if ($('#contract_length_unit').val() == '') {
+
+          document.getElementById("reqcontract_length_unit").innerHTML = "* Please select the contract length unit";
+          isValid = false;
+
+        }
+
+        if ($('#fixed_term_hours_week').val() == '') {
+
+          document.getElementById("reqfixed_term_hours_week").innerHTML = "* Please enter the hours per week";
+          isValid = false;
+
+        }
+
+        if ($('#fixed_term_salary_format').val() == '') {
+
+          document.getElementById("reqfixed_term_salary_format").innerHTML = "* Please select the Salary format";
+          isValid = false;
+
+        }
+
+        if ($('#fixed_term_salary_min').val() == '') {
+
+          document.getElementById("reqfixed_term_salary_min").innerHTML = "* Please enter the minimum salary";
+          isValid = false;
+
+        }
+
+        if ($('#fixed_term_salary_max').val() == '') {
+
+          document.getElementById("reqfixed_term_salary_max").innerHTML = "* Please enter the maximum salary";
+          isValid = false;
+
+        }
+      }
+
+      if(mainempfield == "3"){
+        if ($('#temporary_hours_week').val() == '') {
+
+          document.getElementById("reqtemporary_hours_per_week").innerHTML = "* Please enter the Shift dates & times";
+          isValid = false;
+
+        }
+
+        if ($('#temporary_salary_format').val() == '') {
+
+          document.getElementById("reqtemporary_salary_format").innerHTML = "* Please select the Salary format";
+          isValid = false;
+
+        }
+
+        if ($('#temporary_salary_min').val() == '') {
+
+          document.getElementById("reqtemporary_salary_min").innerHTML = "* Please enter the Salary(min)";
+          isValid = false;
+
+        }
+
+        if ($('#temporary_salary_max').val() == '') {
+
+          document.getElementById("reqtemporary_salary_max").innerHTML = "* Please select the Salary(max)";
+          isValid = false;
+
+        }
+
+      }
 
       
 
@@ -1039,9 +1161,9 @@ form#job_posting_form ul.select2-selection__rendered {
             Swal.fire({
               icon: 'success',
               title: 'Success',
-              text: 'Job Post Successfully',
+              text: 'Contract & Pay added Successfully',
             }).then(function() {
-              window.location.href = "{{ route('medical-facilities.job_posting') }}";
+              window.location.href = "{{ route('medical-facilities.contract_pay') }}";
             });
           } else {
             Swal.fire({
