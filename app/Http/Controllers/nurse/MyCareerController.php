@@ -23,10 +23,10 @@ class MyCareerController extends Controller
 
     // public function applicationTimeline(Request $request)
     // {
-    //     print_r($request->all());die;
+    //     // print_r($request->all());die;
     //     $application = NurseApplication::with('job')->findOrFail($request->application_id);
 
-    //     print_r($application);die;
+    //     // print_r($application);die;
 
     //     $timeline = [];
 
@@ -53,13 +53,115 @@ class MyCareerController extends Controller
     //     }
 
     //     return response()->json([
-    //         'job_title' => $application->job->title,
+    //         'job_title' => $application->job_title,
     //         'facility'  => $application->job->facility_name,
     //         'timeline'  => $timeline,
     //         'footer_action' =>
     //         $application->status == 7 ? 'offer' : ($application->status >= 4 ? 'interview' : 'withdraw')
     //     ]);
     // }
+
+    public function applicationTimeline(Request $request)
+    {
+        $application = NurseApplication::with('job')->findOrFail($request->application_id);
+
+        $timeline = [];
+
+        $timeline[] = [
+            'title' => 'Application Submitted',
+            'desc'  => 'Your profile has been submitted',
+            'date'  => $application->created_at->format('d M Y')
+        ];
+
+        if ($application->status >= 2) {
+            $timeline[] = [
+                'title' => 'Under Review',
+                'desc'  => 'HR team is reviewing your application',
+                'date'  => now()->format('d M Y')
+            ];
+        }
+
+        if ($application->status >= 4) {
+            $timeline[] = [
+                'title' => 'Interview Scheduled',
+                'desc'  => 'Interview details shared',
+                'date'  => now()->format('d M Y')
+            ];
+        }
+
+        /* ---------- Action mapping ---------- */
+        $action = match ($application->status) {
+            1, 2, 3 => [
+                'type' => 'withdraw',
+                'label' => 'Withdraw Application',
+                'class' => 'btn-dark'
+            ],
+            4 => [
+                'type' => 'interview',
+                'label' => 'View Interview Details',
+                'class' => 'btn-outline-primary'
+            ],
+            6 => [
+                'type' => 'offer_view',
+                'label' => 'View Offer',
+                'class' => 'btn-outline-info'
+            ],
+            7 => [
+                'type' => 'offer_accept',
+                'label' => 'Accept Offer',
+                'class' => 'btn-success'
+            ],
+            default => null
+        };
+
+        $statusConfig = match ($application->status) {
+            1 => [
+                'label' => 'Submitted',
+                'desc'  => 'Your application has been submitted successfully.',
+                'class' => 'primary'
+            ],
+            2 => [
+                'label' => 'Under Review',
+                'desc'  => 'Your application is currently being reviewed.',
+                'class' => 'warning'
+            ],
+            3 => [
+                'label' => 'Shortlisted',
+                'desc'  => 'You have been shortlisted for the next step.',
+                'class' => 'info'
+            ],
+            4 => [
+                'label' => 'Interview Scheduled',
+                'desc'  => 'Interview details have been shared.',
+                'class' => 'primary'
+            ],
+            6 => [
+                'label' => 'Conditional Offer',
+                'desc'  => 'A conditional offer has been issued.',
+                'class' => 'info'
+            ],
+            7 => [
+                'label' => 'Offer',
+                'desc'  => 'Congratulations! You have received an offer.',
+                'class' => 'success'
+            ],
+            default => [
+                'label' => 'Closed',
+                'desc'  => 'This application is no longer active.',
+                'class' => 'secondary'
+            ]
+        };
+
+        return response()->json([
+            'job_title' => $application->job_title,
+            'facility'  => $application->job->facility_name,
+            'timeline'  => $timeline,
+            'action'    => $action,
+            'status'    => $statusConfig
+        ]);
+  
+    }
+
 
     public function application()
     {

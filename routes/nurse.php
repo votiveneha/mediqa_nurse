@@ -253,6 +253,8 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::get('/match_percentage', 'MyCareerController@match_percentage')->name('match_percentage');
   Route::get('matchedJobs', 'MyCareerController@matchedJobs')->name('matchedJobs');
   Route::get('application', 'MyCareerController@application')->name('application');
+  Route::get('application-timeline', 'MyCareerController@applicationTimeline')->name('applicationTimeline');
+
 
 
     /**************[Work Preferences & Flexibility]**************/

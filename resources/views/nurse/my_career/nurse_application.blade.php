@@ -88,9 +88,13 @@
   .status-badge {
     padding: 6px 12px;
     border-radius: 6px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     cursor: pointer;
+    /*white-space: nowrap;*/
+    display: inline-block;
+    text-align: center;
+    min-width: 145px;
   }
   .under-review {
     background: #facc15;
@@ -270,140 +274,580 @@
     height: 8px;
     border-radius: 100%;
   }
-  .status-badge.submitted {color: white; background:#6b7280; }
-  .status-badge.under_review { color: white;background:#facc15; }
-  .status-badge.shortlisted { color: white;background:#f59e0b; }
-  .status-badge.interview_scheduled {color: white; background:#3b82f6; }
-  .status-badge.interview_completed { color: white;background:#60a5fa ; } 
-  .status-badge.conditional_offer {color: white; background:#3b82f6 ; }
-  .status-badge.offer {color: white; background:#22c55e; }
-  .status-badge.hired {color: white; background:#8b5cf6; }
-  .status-badge.withdrawn {color:white; background:#374151; }
+  .status-badge.submitted {
+    color: white;
+    background: #6b7280;
+  }
+  .status-badge.under_review {
+    color: white;
+    background: #facc15;
+  }
+  .status-badge.shortlisted {
+    color: white;
+    background: #f59e0b;
+  }
+  .status-badge.interview_scheduled {
+    color: white;
+    background: #3b82f6;
+  }
+  .status-badge.interview_completed {
+    color: white;
+    background: #60a5fa;
+  }
+  .status-badge.conditional_offer {
+    color: white;
+    background: #3b82f6;
+  }
+  .status-badge.offer {
+    color: white;
+    background: #22c55e;
+  }
+  .status-badge.hired {
+    color: white;
+    background: #8b5cf6;
+  }
+  .status-badge.withdrawn {
+    color: white;
+    background: #374151;
+  }
   .status-badge.rejected,
-  .status-badge.declined { color: white;background:#ef4444; }
-
+  .status-badge.declined {
+    color: white;
+    background: #ef4444;
+  }
   /*10/02 */
-
   .offer-modal {
-  border-radius: 12px;
-}
-
-.accept-box {
-  background: linear-gradient(135deg, #eef8ff, #f9fcff);
-}
-
-.status-box {
-  background: #f5f7f9;
-}
-
-.badge-success {
-  background-color: #22b573;
-}
-
-.modal-footer .btn-success {
-  background-color: #22b573;
-  border: none;
-}
-
-
-/*view interview details */
-.process-modal {
-  border-radius: 12px;
-}
-
-.interview-status {
-  background: #fff3cd;
-  border: none;
-  border-radius: 8px;
-  color: #664d03;
-}
-
-.process {
-  position: relative;
-  padding-left: 30px;
-}
-
-.process::before {
-  content: "";
-  position: absolute;
-  left: 6px;
-  top: 6px;
-  bottom: 0;
-  width: 2px;
-  background: #e9ecef;
-}
-
-.process-item {
-  position: relative;
-  display: flex;
-  margin-bottom: 20px;
-}
-
-.process-item.last {
-  margin-bottom: 0;
-}
-
-.process-item .dot {
-  position: absolute;
-  left: -30px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #ced4da;
-  margin-top: 6px;
-}
-
-.process-item.active .dot {
-  background: #007bff;
-}
-
-.process-item.orange .dot {
-  background: #f0ad4e;
-}
-
-.process-item .content {
-  padding-left: 10px;
-}
-.withdraw-text{
-  font-size: 12px;
-}
-
-/*view details */
-.offer-review-modal {
-  border-radius: 12px;
-}
-
-/* Left card */
-.left-card {
-  background: #f8f9fa;
-  /*border-radius: 10px;*/
-}
-
-/* Status alert */
-.status-alert {
-  background: #fff4da;
-  border-radius: 8px;
-  padding: 14px 16px;
-  color: #6b4e00;
-}
-
-/* Document cards */
-.doc-card {
-  background: #f4f9fd;
-  border-radius: 10px;
-  padding: 14px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-#offerReviewModal small{
-  font-size: 12px;
-}
-
-
- 
-
-  
+    border-radius: 12px;
+  }
+  .accept-box {
+    background: linear-gradient(135deg, #eef8ff, #f9fcff);
+  }
+  .status-box {
+    background: #f5f7f9;
+  }
+  .badge-success {
+    background-color: #22b573;
+  }
+  .modal-footer .btn-success {
+    background-color: #22b573;
+    border: none;
+  }
+  /*view interview details */
+  .process-modal {
+    border-radius: 12px;
+  }
+  .interview-status {
+    background: #fff3cd;
+    border: none;
+    border-radius: 8px;
+    color: #664d03;
+  }
+  .process {
+    position: relative;
+    padding-left: 30px;
+  }
+  .process::before {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 6px;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+  }
+  .process-item {
+    position: relative;
+    display: flex;
+    margin-bottom: 20px;
+  }
+  .process-item.last {
+    margin-bottom: 0;
+  }
+  .process-item .dot {
+    position: absolute;
+    left: -30px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ced4da;
+    margin-top: 6px;
+  }
+  .process-item.active .dot {
+    background: #007bff;
+  }
+  .process-item.orange .dot {
+    background: #f0ad4e;
+  }
+  .process-item .content {
+    padding-left: 10px;
+  }
+  .withdraw-text {
+    font-size: 12px;
+  }
+  /*view details */
+  .offer-review-modal {
+    border-radius: 12px;
+  }
+  /* Left card */
+  .left-card {
+    background: #f8f9fa;
+    /*border-radius: 10px;*/
+  }
+  /* Status alert */
+  .status-alert {
+    background: #fff4da;
+    border-radius: 8px;
+    padding: 14px 16px;
+    color: #6b4e00;
+  }
+  /* Document cards */
+  .doc-card {
+    background: #f4f9fd;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #offerReviewModal small {
+    font-size: 12px;
+  }
+  /*11/02 */
+  /* Modal width like mobile design */
+  .withdrawn-modal .modal-dialog {
+    max-width: 580px;
+  }
+  .withdrawn-modal .modal-content {
+    border-radius: 12px;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  /* Header */
+  .withdrawn-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #212529;
+  }
+  /* Withdrawn pill top */
+  .withdrawn-pill {
+    display: inline-flex;
+    align-items: center;
+    background: #2f3e46;
+    color: #fff;
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-top: 10px;
+    width: fit-content;
+  }
+  .withdrawn-pill::before {
+    content: "−";
+    /*display: inline-block;*/
+    /* font-weight: bold; */
+    margin-right: 6px;
+    background: #ffffff;
+    height: 16px;
+    border-radius: 100%;
+    width: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #000000;
+  }
+  /* Info box */
+  .withdrawn-info {
+    background: #f1f1f1;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    margin-top: 15px;
+    color: #495057;
+  }
+  /* Timeline */
+  .withdrawn-timeline {
+    position: relative;
+    margin-top: 20px;
+    padding-left: 30px;
+  }
+  .withdrawn-timeline::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: #dee2e6;
+  }
+  .withdrawn-step {
+    position: relative;
+    margin-bottom: 22px;
+    font-size: 12px;
+    color: #212529;
+  }
+  .withdrawn-step:last-child {
+    margin-bottom: 0;
+  }
+  .withdrawn-dot {
+    position: absolute;
+    left: -31px;
+    top: 4px;
+    width: 20px;
+    height: 20px;
+    background: #adb5bd;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    font-size: 12px;
+  }
+  .withdrawn-step small {
+    font-size: 12px;
+    color: #6c757d;
+  }
+  .withdrawn-step .withdrawn-date {
+    float: right;
+    font-size: 12px;
+    color: #6c757d;
+  }
+  /* Withdrawn active step */
+  .withdrawn-step.withdrawn-active .withdrawn-dot {
+    background: #2f3e46;
+  }
+  .withdrawn-label {
+    background: #2f3e46;
+    color: #fff;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-right: 8px;
+  }
+  /* Job Card */
+  .withdrawn-card {
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 22px;
+    font-size: 12px;
+  }
+  .withdrawn-card .withdrawn-status {
+    background: #2f3e46;
+    color: #fff;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    margin-left: 10px;
+  }
+  .withdrawn-card hr {
+    margin: 12px 0;
+  }
+  .withdrawn-card a {
+    display: block;
+    text-align: center;
+    color: #007bff;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  /* Footer */
+  .withdrawn-footer {
+    margin-top: 15px;
+    /*display: flex;
+      justify-content: flex-end;*/
+  }
+  .withdrawn-footer .btn {
+    border-radius: 8px;
+    padding: 6px 18px;
+  }
+  /*new */
+  /* Make circle center content */
+  .withdrawn-dot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Hide icon by default */
+  .withdrawn-dot i {
+    display: none;
+    color: #fff;
+    font-size: 8px;
+  }
+  /* Show check for completed steps */
+  .withdrawn-step.completed .withdrawn-dot {
+    background: #6c757d;
+  }
+  .withdrawn-step.completed .withdrawn-dot i {
+    display: block;
+  }
+  /*archived reject modal */
+  /* Modal width like mobile design */
+  .rejected-modal .modal-dialog {
+    max-width: 580px;
+  }
+  .rejected-modal .modal-content {
+    border-radius: 12px;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  /* Header */
+  .rejected-header {
+    text-align: center;
+    font-weight: 600;
+    font-size: 18px;
+    position: relative;
+  }
+  .rejected-header .close {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  /* Title */
+  .rejected-title {
+    font-size: 18px;
+    font-weight: 600;
+    /*margin-top: 15px;*/
+  }
+  /* Status pill */
+  .rejected-pill {
+    display: inline-flex;
+    align-items: center;
+    background: #ef4444;
+    color: #fff;
+    font-size: 12px;
+    padding: 3px 14px;
+    border-radius: 20px;
+    margin-top: 10px;
+    width: fit-content;
+  }
+  .rejected-pill i {
+    margin-right: 6px;
+  }
+  /* Rejected message box */
+  .rejected-alert {
+    background: #fdecea;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+  }
+  .rejected-alert p {
+    font-size: 12px;
+    line-height: normal;
+  }
+  .rejected-alert strong {
+    display: block;
+    margin-bottom: 5px;
+  }
+  /* Timeline */
+  .rejected-timeline {
+    position: relative;
+    margin-top: 20px;
+    padding-left: 30px;
+  }
+  .rejected-timeline::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: #dee2e6;
+  }
+  .rejected-step {
+    position: relative;
+    margin-bottom: 20px;
+    font-size: 12px;
+  }
+  .rejected-step:last-child {
+    margin-bottom: 0;
+  }
+  .rejected-dot {
+    position: absolute;
+    left: -31px;
+    top: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #adb5bd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .rejected-step.completed .rejected-dot {
+    background: #6c757d;
+  }
+  .rejected-step.completed .rejected-dot i {
+    color: #fff;
+    font-size: 10px;
+  }
+  .rejected-step.rejected-active .rejected-dot {
+    background: #ef4444;
+  }
+  .rejected-step.rejected-active .rejected-dot i {
+    color: #fff;
+    font-size: 10px;
+  }
+  .rejected-date {
+    float: right;
+    font-size: 12px;
+    color: #6c757d;
+  }
+  /* Job Card */
+  .rejected-card {
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+    font-size: 12px;
+  }
+  .rejected-status {
+    background: #ef4444;
+    color: #fff;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    margin-left: 6px;
+  }
+  .rejected-card a {
+    display: block;
+    text-align: center;
+    color: #007bff;
+    margin-top: 10px;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  /* Footer */
+  .rejected-footer {
+    margin-top: 15px;
+  }
+  .rejected-footer btn {
+    font-size: 12px;
+  }
+  /*archived hired modal */
+  /* Modal width */
+  .hired-modal .modal-dialog {
+    max-width: 580px;
+  }
+  .hired-modal .modal-content {
+    border-radius: 12px;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  /* Header */
+  .hired-header {
+    text-align: center;
+    font-weight: 600;
+    font-size: 18px;
+    position: relative;
+  }
+  .hired-header .close {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  /* Title */
+  .hired-title {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  /* Purple pill */
+  .hired-pill {
+    display: inline-block;
+    background: #8b5cf6;
+    color: #fff;
+    font-size: 13px;
+    padding: 3px 16px;
+    border-radius: 20px;
+    margin-top: 10px;
+    width: fit-content;
+  }
+  /* Message box */
+  .hired-alert {
+    background: #f2ecfb;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+  }
+  .hired-alert p {
+    font-size: 12px;
+    line-height: normal;
+  }
+  .hired-alert strong {
+    display: block;
+    margin-bottom: 5px;
+  }
+  /* Timeline */
+  .hired-timeline {
+    position: relative;
+    margin-top: 20px;
+    padding-left: 30px;
+  }
+  .hired-timeline::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: #dee2e6;
+  }
+  .hired-step {
+    position: relative;
+    margin-bottom: 18px;
+    font-size: 12px;
+  }
+  .hired-dot {
+    position: absolute;
+    left: -31px;
+    top: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 10px;
+  }
+  .dot-green {
+    background: #22c55e;
+  }
+  .dot-orange {
+    background: #f59e0b;
+  }
+  .dot-blue {
+    background: #2563eb;
+  }
+  .hired-date {
+    float: right;
+    font-size: 12px;
+    color: #6c757d;
+  }
+  /* Job Card */
+  .hired-card {
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+    font-size: 12px;
+  }
+  .hired-status {
+    background: #8b5cf6;
+    color: #fff;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 12px;
+  }
+  /* Buttons */
+  /*.hired-actions {
+      margin-top: 15px;
+    }*/
+  .hired-actions .btn {
+    font-size: 12px !important;
+    padding: 10px 25px;
+  }
+  .hired-actions .btn-primary {
+    background: #2563eb;
+    border: none;
+  }
+  .hired-footer .btn {
+    font-size: 12px;
+    padding: 10px 25px;
   }
 </style>
 @endsection
@@ -500,11 +944,11 @@
                           <th>Actions</th>
                         </tr>
                       </thead>
-                      <tbody class="table-bordered" >
-                        @foreach ($active_list as $list )
+                      <tbody class="table-bordered">
+                        @foreach ($active_list as $list)
                         <tr>
                           <td>
-                            <p class="table-nurse-head"> {{$list->job_title}}</p>
+                            <p class="table-nurse-head"> {{ $list->job_title }}</p>
                           </td>
                           <td>
                             <p class="table-nurse-head"> St.John Hospital</p>
@@ -513,640 +957,418 @@
                             <p class="table-nurse-head"> St.John Hospital</p>
                           </td>
                           <td>
-                              {{-- <span class="status-badge {{ $list->status }}">
-                                  {{ ucwords(str_replace('_', ' ', $list->status)) }}
-                              </span> --}}
-                            {{-- <span class="status-badge {{ $list->status_key }}">
-                                {{ $list->status_label }}
+                            {{-- <span class="status-badge {{ $list->status }}">
+                              {{ ucwords(str_replace('_', ' ', $list->status)) }}
                             </span> --}}
-                          <span
-                              class="status-badge {{ $list->status_key }} open-status-modal"
-                              data-id="{{ $list->id }}"
-                              data-toggle="modal"
-                              data-target="#underReviewModal"
-                          >
+                            {{-- <span class="status-badge {{ $list->status_key }}">
                               {{ $list->status_label }}
-                          </span>
+                            </span> --}}
+                            <span class="status-badge {{ $list->status_key }} active-status-modal"
+                              data-id="{{ $list->id }}" data-toggle="modal" data-target="#underReviewModal">
+                              {{ $list->status_label }}
+                            </span>
                           </td>
-                        <td>
-                            <p>{{ \Carbon\Carbon::parse($list->applied_at)->format('j M Y') }}</p>
-                        </td>
-                        <td>
+                          <td>
+                            <p>{{ \Carbon\Carbon::parse($list->applied_at)->format('j M Y') }}
+                            </p>
+                          </td>
+                          <td>
                             @switch($list->status)
-
-                                @case(1) {{-- submitted --}}
-                                @case(2) {{-- under_review --}}
-                                @case(3) {{-- shortlisted --}}
-                                    <button class="btn btn-outline-danger status-badge" data-toggle="modal" data-target="#withdrawModal">
-                                        Withdraw
-                                    </button>
-                                    @break
-
-                                @case(4) {{-- interview_scheduled --}}
-                                    <button class="btn btn-outline-primary status-badge" data-toggle="modal" 
-                                    data-target="#interviewProcessModal">
-                                        View Interview Details
-                                    </button>
-                                    @break
-
-                                @case(6) {{-- conditional_offer --}}
-                                    <button class="btn btn-outline-info status-badge" data-toggle="modal" data-target="#offerReviewModal">
-                                        View Offer
-                                    </button>
-                                    @break
-
-                                @case(7) {{-- offer --}}
-                                    <button class="btn btn-outline-success status-badge" data-toggle="modal" data-target="#acceptOfferModal">
-                                        Accept Offer
-                                    </button>
-                                    @break
-
-                                @default
-                                    <span class="text-muted">—</span>
+                            @case(1)
+                            {{-- submitted --}}
+                            @case(2)
+                            {{-- under_review --}}
+                            @case(3)
+                            {{-- shortlisted --}}
+                            <button class="btn btn-outline-danger status-badge" data-toggle="modal"
+                              data-target="#withdrawModal">
+                              Withdraw
+                            </button>
+                            @break
+                            @case(4)
+                            {{-- interview_scheduled --}}
+                            <button class="btn btn-outline-primary status-badge" data-toggle="modal"
+                              data-target="#interviewProcessModal">
+                              View Interview Details
+                            </button>
+                            @break
+                            @case(6)
+                            {{-- conditional_offer --}}
+                            <button class="btn btn-outline-info status-badge" data-toggle="modal"
+                              data-target="#offerReviewModal">
+                              View Offer
+                            </button>
+                            @break
+                            @case(7)
+                            {{-- offer --}}
+                            <button class="btn btn-outline-success status-badge" data-toggle="modal"
+                              data-target="#acceptOfferModal">
+                              Accept Offer
+                            </button>
+                            @break
+                            @default
+                            <span class="text-muted">—</span>
                             @endswitch
-                        </td>
+                          </td>
                         </tr>
                         <!-- modal offer  -->
-                        <div class="modal right fade" data-id={{$list->id}} id="underReviewModal" tabindex="-1">
-                          <div class="modal-dialog">
-                            <div class="modal-content">
-                              <div class="modal-header">
-                                <h5 class="modal-title">
-                                  Registered Nurse <br>
-                                  <small class="text-muted">St. John Hospital</small>
-                                </h5>
-                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                          <div class="modal right fade" id="underReviewModal" tabindex="-1">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <!-- Header -->
+                      <div class="modal-header">
+                        <h5 class="modal-title">
+                          <span id="modalTitle"></span><br>
+                          <small class="text-muted" id="modalFacility"></small>
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      </div>
+                      <!-- Body -->
+                      <div class="modal-body">
+                        <!-- Loader -->
+                        <div id="modalLoader" class="text-center my-4" style="display:none;">
+                          <span class="spinner-border spinner-border-sm"></span> Loading...
+                        </div>
+                        <!-- Status Alert (dynamic later if needed) -->
+                        {{-- <div class="alert alert-warning" id="modalStatus">
+                          <strong>Under Review</strong><br>
+                          Your application is currently being reviewed.
+                        </div> --}}
+                    
+                        <div id="modalStatus" >
+                           <span id="modalStatusLabel"></span><br>
+                            <span id="modalStatusDesc"></span>
+                        </div>
+                        <!-- Timeline -->
+                        <div class="timeline" id="modalContent">
+                          <!-- JS injects timeline here -->
+                        </div>
+                      </div>
+                      <!-- Footer -->
+                      <div class="modal-footer" id="modalFooter">
+                        <!-- JS injects action buttons here -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                        <!-- Accept offer modal  -->
+                        <div class="modal fade" id="acceptOfferModal" tabindex="-1">
+                          <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content offer-modal">
+                              <!-- Header -->
+                              <div class="modal-header border-0 flex w-100 justify-content-between flex-column">
+                                <div class="d-flex justify-content-between w-100">
+                                  <h5 class="mb-1 font-weight-bold">Midwife Offer
+                                  </h5>
+                                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                </div>
+                                <div class="d-flex justify-content-between w-100">
+                                  <small class="text-muted">
+                                    Royal Women's Hospital, Full-Time
+                                  </small>
+                                  <small class="text-muted ml-auto mr-3">3 Nov
+                                    2025</small>
+                                </div>
                               </div>
+                              <hr class="my-0">
+                              <!-- Body -->
                               <div class="modal-body">
-                                <div class="alert alert-warning">
-                                  <strong>Under Review</strong><br>
+                                <div class="row">
+                                  <!-- Left Content -->
+                                  <div class="col-md-8">
+                                    <div class="d-flex gap-2 mb-3">
+                                      <!-- <span class="py-2 offer-process"></span> -->
+                                      <span class="pl-2">Offer</span>
+                                    </div>
+                                    <!-- Offer Card -->
+                                    <div class="border rounded p-3">
+                                      <div class="row">
+                                        <div class="col-sm-8">
+                                          <div class="d-flex justify-content-between w-100">
+                                            <div>
+                                              <small class="text-muted">Start date:</small>
+                                              <small>21 Nov
+                                                2025</small>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                          <small>$85,000/year</small>
+                                        </div>
+                                      </div>
+                                      <div class="row">
+                                        <div class="col-sm-8">
+                                          <div class="d-flex justify-content-between w-100">
+                                            <div>
+                                              <small class="text-muted">Shift:</small>
+                                              <small>Days</small>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                          <small>$85,000/year</small>
+                                        </div>
+                                      </div>
+                                      <div class="row">
+                                        <div class="col-sm-8">
+                                          <div class="d-flex justify-content-between w-100">
+                                            <div>
+                                              <small class="text-muted">Shift:</small>
+                                              <small>Days</small>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                          <small>$85,000/year</small>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <!-- Right Status -->
+                                  <div class="col-md-4">
+                                    <div class="border rounded">
+                                      <div class="status-box p-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                          <h6 class="font-weight-bold">
+                                            Status</h6>
+                                          <small>3 kev</small>
+                                        </div>
+                                        <span class="badge badge-success px-3 py-2 d-inline-block">
+                                          Offer
+                                        </span>
+                                      </div>
+                                      <div class="p-3">
+                                        <p class="mb-2">
+                                          <small class="text-muted">Date
+                                            applied</small><br>
+                                          3 Nov 2025
+                                        </p>
+                                        <!--  <p>
+                    <strong> <small>startnine</small> </strong>
+                  </p> -->
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <h6 class="font-weight-bold mb-3 text-center">
+                                      Accept Job Offer?</h6>
+                                    <div class="accept-box p-3 rounded text-center">
+                                      <div>
+                                        <small class="mb-2">
+                                          <strong><small>Starting:</small></strong>
+                                          <span class="text-success ml-1">●</span>
+                                          21 Nov 2025
+                                        </small>
+                                      </div>
+                                      <div>
+                                        <small class="mb-2">
+                                          <strong>Salary:</strong>
+                                          $85,000/year casual rate
+                                        </small>
+                                      </div>
+                                      <div>
+                                        <div class="mb-2 d-flex justify-content-center align-items-center">
+                                          <small> <strong>Shifts:</strong>
+                                          </small>
+                                          <span> <small> Days &
+                                              Evenings</small></span>
+                                          <!-- <span> <small><a href="#" class="text-primary">Sign-on bonus</a></small></span> -->
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <!-- Footer -->
+                                <div class="modal-footer border-0">
+                                  <button class="btn btn-success px-5">
+                                    Accept Offer
+                                  </button>
+                                  <button class="btn btn-outline-secondary" data-dismiss="modal">
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- view interview details modal -->
+                        <div class="modal fade" id="interviewProcessModal" tabindex="-1">
+                          <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content process-modal">
+                              <!-- Header -->
+                              <div class="modal-header border-b d-flex flex-column">
+                                <div class="d-flex justify-content-between w-100">
+                                  <h5 class="mb-1 font-weight-bold">Aged Care
+                                    Nurse Interview</h5>
+                                  <button class="close" data-dismiss="modal">&times;</button>
+                                </div>
+                                <div class="d-flex justify-content-between w-100">
+                                  <small class="text-muted ml-auto mr-3">5 Nov
+                                    2025</small>
+                                  <small class="text-muted">St. John Hospital;
+                                    Casual</small>
+                                </div>
+                              </div>
+                              <!-- <hr class="my-0"> -->
+                              <!-- Body -->
+                              <div class="modal-body">
+                                <!-- Status -->
+                                <div class="alert interview-status mb-4">
+                                  <strong>Interview Scheduled</strong><br>
                                   Your application is currently being reviewed.
                                 </div>
-                                <!-- <p class="mb-2"><strong>Progress (100%)</strong></p> -->
-                                <div class="timeline">
-                                  <div class="timeline-item">
-                                    <span><strong>Progress </strong><small> (100%)</small></span><br>
-                                    <small>Lorem ipsum dolor sit amet</small>
-                                    <p>5 Nov 2025</p>
-                                  </div>
-                                  <div class="timeline-item">
-                                    <small>A SmuRevined</small><br>
-                                    <div class="progress-content">
-                                      <small>test</small>
-                                      <p>5 Nov 2025</p>
+                                <div class="row">
+                                  <!--INTERVIEW LEFT PROCESS -->
+                                  <div class="col-md-6">
+                                    <h6 class="font-weight-bold mb-2">Interview
+                                      Details</h6>
+                                    <div class="process">
+                                      <div class="process-item active">
+                                        <span class="dot"></span>
+                                        <div class="content">
+                                          <small><strong>St. John
+                                              Hospital</strong></small><br>
+                                          <small class="text-muted">AddFres</small>
+                                        </div>
+                                      </div>
+                                      <div class="process-item">
+                                        <span class="dot"></span>
+                                        <div class="content">
+                                          <small> <strong>Date:</strong>
+                                            Monday, 12 November
+                                            2025</small> <br>
+                                          <small> <strong>Time:</strong>
+                                          </small>
+                                        </div>
+                                      </div>
+                                      <div class="process-item last">
+                                        <span class="dot"></span>
+                                        <small class="content">
+                                          Sarah Thompson, Nurse Manager
+                                        </small>
+                                      </div>
                                     </div>
                                   </div>
-                                  <div class="timeline-item">
-                                    <strong class="pending-offer-head">A Offer</strong><br>
-                                    <div class="d-flex">
-                                      <p class="pending-des">Lorem ipsum dolor sit amet,Lorem ipsum dolor
-                                        sit amet,</p>
-                                      <p class="text-dark">18 jan 2025</p>
+                                  <!--INTERVIEW RIGHT PROCESS CARD -->
+                                  <div class="col-md-6">
+                                    <div class="border rounded px-3 py-2">
+                                      <h6 class="font-weight-bold mb-2">
+                                        Interview Details</h6>
+                                      <div class="process">
+                                        <div class="process-item orange">
+                                          <span class="dot"></span>
+                                          <div class="content">
+                                            <small><strong>St. John
+                                                Hospital</strong></small><br>
+                                            <small class="text-muted">
+                                              123 Health Road, Sydney,
+                                              NSW 2000
+                                            </small>
+                                          </div>
+                                        </div>
+                                        <div class="process-item active">
+                                          <span class="dot"></span>
+                                          <small class="content">
+                                            <strong>Time:</strong> 10:00
+                                            AM
+                                          </small>
+                                        </div>
+                                        <div class="process-item last">
+                                          <span class="dot"></span>
+                                          <div class="content">
+                                            <small>
+                                              <strong>Interviewer:</strong><br>
+                                              Sarah Thompson, Nurse
+                                              Manager</small>
+                                          </div>
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                              <div class="modal-footer">
-                                <button class="btn btn-dark btn-block w-100">
+                              <!-- Footer -->
+                              <div class="modal-footer border-t d-flex justify-content-center">
+                                <button class="btn btn-danger px-4">
                                   Withdraw Application
+                                </button>
+                                <button class="btn btn-outline-secondary px-4">
+                                  Message Employer
                                 </button>
                               </div>
                             </div>
                           </div>
                         </div>
-
-
-
-                        <!-- Accept offer modal  -->
-                        <div class="modal fade" id="acceptOfferModal" tabindex="-1">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
-                  <div class="modal-content offer-modal">
-
-                    <!-- Header -->
-                    <div class="modal-header border-0 flex w-100 justify-content-between flex-column">
-                      <div class="d-flex justify-content-between w-100">
-                        <h5 class="mb-1 font-weight-bold">Midwife Offer</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                      
-                      </div> 
-                      <div class="d-flex justify-content-between w-100">
-                          <small class="text-muted">
-                          Royal Women's Hospital, Full-Time
-                        </small>
-                      <small class="text-muted ml-auto mr-3">3 Nov 2025</small>
-                      
-                      </div>
-                    </div>
-
-                    <hr class="my-0">
-
-                    <!-- Body -->
-                    <div class="modal-body">
-                      <div class="row">
-
-                        <!-- Left Content -->
-                        <div class="col-md-8">
-                          <div class="d-flex gap-2 mb-3">
-                          <!-- <span class="py-2 offer-process"></span> -->
-                          <span class="pl-2">Offer</span>
-                          </div>
-
-                          <!-- Offer Card -->
-                          <div class="border rounded p-3">
-                            <div class="row">
-                              <div class="col-sm-8">
+                        <!-- ------ -->
+                        <!-- withdraw  -->
+                        <div class="modal fade" id="withdrawModal" tabindex="-1">
+                          <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content withdraw-modal">
+                              <!-- Header -->
+                              <div class="modal-header border-b d-flex justify-content-between flex-column">
                                 <div class="d-flex justify-content-between w-100">
-                                  <div>
-                                     <small class="text-muted">Start date:</small>
-                                    <small>21 Nov 2025</small>
-                                  </div>
+                                  <h5 class="mb-1 font-weight-bold">Withdraw
+                                    Application</h5>
+                                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                </div>
+                                <div class="d-flex justify-content-between w-100">
+                                  <small class="text-muted ml-auto mr-3">5 Nov
+                                    2025</small>
+                                  <small class="text-muted">St. John Hospital ·
+                                    Casual</small>
                                 </div>
                               </div>
-                              <div class="col-sm-4">
-                                <small>$85,000/year</small>
-                              </div>
-                          </div>
-                              <div class="row">
-                              <div class="col-sm-8">
-                                <div class="d-flex justify-content-between w-100">
-                                  <div>
-                                     <small class="text-muted">Shift:</small>
-                                    <small>Days</small>
-                                  </div>
+                              <!-- <hr class="my-0"> -->
+                              <!-- Body -->
+                              <div class="modal-body">
+                                <h6 class="font-weight-bold mb-2">
+                                  Withdraw This Application?
+                                </h6>
+                                <small class="text-muted mb-4">
+                                  Are you sure you want to withdraw your
+                                  application for the
+                                  Registered Nurse position at St. John Hospital?
+                                  This action
+                                  cannot be undone.
+                                </small>
+                                <div class="form-group">
+                                  <small> <label class="font-weight-bold mt-2">
+                                      Reason for Withdraw <span class="text-muted">(Required):</span>
+                                    </label></small>
+                                  <select class="form-control withdraw-text">
+                                    <option selected disabled class="withdraw-text">Select a reason for withdrawing...
+                                    </option>
+                                    <option class="withdraw-text">Accepted
+                                      another offer</option>
+                                    <option class="withdraw-text">Position no
+                                      longer suitable</option>
+                                    <option class="withdraw-text">Change in
+                                      availability</option>
+                                    <option class="withdraw-text">Other
+                                    </option>
+                                  </select>
                                 </div>
                               </div>
-                              <div class="col-sm-4">
-                                <small>$85,000/year</small>
+                              <!-- Footer -->
+                              <div class="modal-footer border-0 justify-content-start pt-0">
+                                <button class="btn btn-danger px-4">
+                                  Withdraw Application
+                                </button>
+                                <button class="btn btn-outline-secondary px-4" data-dismiss="modal">
+                                  Cancel
+                                </button>
                               </div>
                             </div>
-                             <div class="row">
-                              <div class="col-sm-8">
-                                <div class="d-flex justify-content-between w-100">
-                                  <div>
-                                     <small class="text-muted">Shift:</small>
-                                    <small>Days</small>
-                                  </div>
-                                </div>
-                              </div>
-                              <div class="col-sm-4">
-                                <small>$85,000/year</small>
-                              </div>
-                            </div>
-               </div>
-            </div>
-
-              <!-- Right Status -->
-          <div class="col-md-4">
-            <div class="border rounded">
-              <div class="status-box p-3">
-              <div class="d-flex align-items-center gap-2">
-              <h6 class="font-weight-bold">Status</h6>
-              <small>3 kev</small>
-              </div>
-              <span class="badge badge-success px-3 py-2 d-inline-block">
-                Offer
-              </span>
-              </div>
-              <div class="p-3">
-              <p class="mb-2">
-                <small class="text-muted">Date applied</small><br>
-                3 Nov 2025
-              </p>
-
-             <!--  <p>
-                <strong> <small>startnine</small> </strong>
-              </p> -->
-
-              </div>
-            </div>
-          </div>
-
-            <div>
-            <h6 class="font-weight-bold mb-3 text-center">Accept Job Offer?</h6>
-            <div class="accept-box p-3 rounded text-center">
-              <div>
-              <small class="mb-2">
-               <strong><small>Starting:</small></strong>
-                <span class="text-success ml-1">●</span> 21 Nov 2025
-              </small>
-              </div>
-              <div>
-              <small class="mb-2">
-                <strong>Salary:</strong> $85,000/year casual rate
-              </small>
-              </div>
-              <div>
-              <div class="mb-2 d-flex justify-content-center align-items-center">
-               <small> <strong>Shifts:</strong> </small>
-                <span> <small> Days & Evenings</small></span>
-                <!-- <span> <small><a href="#" class="text-primary">Sign-on bonus</a></small></span> -->
-              </div>
-             
-              </div>
-            </div>
-            </div>
-            </div>
-            <!-- Footer -->
-            <div class="modal-footer border-0">
-              <button class="btn btn-success px-5">
-                Accept Offer
-              </button>
-              <button class="btn btn-outline-secondary" data-dismiss="modal">
-                Cancel
-              </button>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
-
-
-      <!-- view interview details modal -->
-
-   <div class="modal fade" id="interviewProcessModal" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content process-modal">
-
-      <!-- Header -->
-      <div class="modal-header border-b d-flex flex-column">
-        <div class="d-flex justify-content-between w-100">
-          <h5 class="mb-1 font-weight-bold">Aged Care Nurse Interview</h5>
-           <button class="close" data-dismiss="modal">&times;</button>
-        </div>
-        <div class="d-flex justify-content-between w-100">
-        <small class="text-muted ml-auto mr-3">5 Nov 2025</small>
-        <small class="text-muted">St. John Hospital; Casual</small>
-       </div>
-      </div>
-
-      <!-- <hr class="my-0"> -->
-
-      <!-- Body -->
-      <div class="modal-body">
-
-        <!-- Status -->
-        <div class="alert interview-status mb-4">
-          <strong>Interview Scheduled</strong><br>
-          Your application is currently being reviewed.
-        </div>
-
-        <div class="row">
-
-          <!--INTERVIEW LEFT PROCESS -->
-          <div class="col-md-6">
-            <h6 class="font-weight-bold mb-2">Interview Details</h6>
-
-            <div class="process">
-
-              <div class="process-item active">
-                <span class="dot"></span>
-                <div class="content">
-                  <small><strong>St. John Hospital</strong></small><br>
-                  <small class="text-muted">AddFres</small>
-                </div>
-              </div>
-
-              <div class="process-item">
-                <span class="dot"></span>
-                <div class="content">
-                <small> <strong>Date:</strong> Monday, 12 November 2025</small> <br>
-                 <small> <strong>Time:</strong> </small>
-                </div>
-              </div>
-
-              <div class="process-item last">
-                <span class="dot"></span>
-                <small class="content">
-                  Sarah Thompson, Nurse Manager
-                </small>
-              </div>
-
-            </div>
-          </div>
-
-          <!--INTERVIEW RIGHT PROCESS CARD -->
-          <div class="col-md-6">
-            <div class="border rounded px-3 py-2">
-              <h6 class="font-weight-bold mb-2">Interview Details</h6>
-
-              <div class="process">
-
-                <div class="process-item orange">
-                  <span class="dot"></span>
-                  <div class="content">
-                    <small><strong>St. John Hospital</strong></small><br>
-                    <small class="text-muted">
-                      123 Health Road, Sydney, NSW 2000
-                    </small>
-                  </div>
-                </div>
-
-                <div class="process-item active">
-                  <span class="dot"></span>
-                  <small class="content">
-                    <strong>Time:</strong> 10:00 AM
-                  </small>
-                </div>
-
-                <div class="process-item last">
-                  <span class="dot"></span>
-                  <div class="content">
-                  <small>  <strong>Interviewer:</strong><br>
-                    Sarah Thompson, Nurse Manager</small>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="modal-footer border-t d-flex justify-content-center">
-        <button class="btn btn-danger px-4">
-          Withdraw Application
-        </button>
-        <button class="btn btn-outline-secondary px-4">
-          Message Employer
-        </button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-
- <!-- ------ -->
-
- <!-- withdraw  -->
-
- <div class="modal fade" id="withdrawModal" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content withdraw-modal">
-
-      <!-- Header -->
-      <div class="modal-header border-b d-flex justify-content-between flex-column">
-        <div class="d-flex justify-content-between w-100">
-          <h5 class="mb-1 font-weight-bold">Withdraw Application</h5>
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-        </div>
-        <div class="d-flex justify-content-between w-100">
-        <small class="text-muted ml-auto mr-3">5 Nov 2025</small>
-          <small class="text-muted">St. John Hospital · Casual</small>
-        </div>
-      </div>
-
-      <!-- <hr class="my-0"> -->
-
-      <!-- Body -->
-      <div class="modal-body">
-        <h6 class="font-weight-bold mb-2">
-          Withdraw This Application?
-        </h6>
-
-        <small class="text-muted mb-4">
-          Are you sure you want to withdraw your application for the
-          Registered Nurse position at St. John Hospital? This action
-          cannot be undone.
-        </small>
-
-        <div class="form-group">
-         <small> <label class="font-weight-bold mt-2">
-            Reason for Withdraw <span class="text-muted">(Required):</span>
-          </label></small>
-          <select class="form-control withdraw-text">
-            <option selected disabled class="withdraw-text">Select a reason for withdrawing...</option>
-            <option class="withdraw-text">Accepted another offer</option>
-            <option class="withdraw-text">Position no longer suitable</option>
-            <option class="withdraw-text">Change in availability</option>
-            <option class="withdraw-text">Other</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="modal-footer border-0 justify-content-start pt-0">
-        <button class="btn btn-danger px-4">
-          Withdraw Application
-        </button>
-        <button class="btn btn-outline-secondary px-4" data-dismiss="modal">
-          Cancel
-        </button>
-      </div>
-
-    </div>
-  </div>
-</div>
- <!-- ----- -->
-
-
-
-
-                    
-
-
-
+                          </div>
+                        </div>
+                        <!-- ----- -->
                         @endforeach
                       </tbody>
                     </table>
                   </div>
                 </div>
-                
                 <!-- Right Side Modal -->
-                <div class="modal right fade" id="underReviewModal" tabindex="-1">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title">
-                          Registered Nurse <br>
-                          <small class="text-muted">St. John Hospital</small>
-                        </h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                      </div>
-                      <div class="modal-body">
-                        <div class="alert alert-warning">
-                          <strong>Under Review</strong><br>
-                          Your application is currently being reviewed.
-                        </div>
-                        <!-- <p class="mb-2"><strong>Progress (100%)</strong></p> -->
-                        <div class="timeline">
-                          <div class="timeline-item">
-                            <span><strong>Progress </strong><small> (100%)</small></span><br>
-                            <small>Lorem ipsum dolor sit amet</small>
-                            <p>5 Nov 2025</p>
-                          </div>
-                          <div class="timeline-item">
-                            <small>A SmuRevined</small><br>
-                            <div class="progress-content">
-                              <small>test</small>
-                              <p>5 Nov 2025</p>
-                            </div>
-                          </div>
-                          <div class="timeline-item">
-                            <strong class="pending-offer-head">A Offer</strong><br>
-                            <div class="d-flex">
-                              <p class="pending-des">Lorem ipsum dolor sit amet,Lorem ipsum dolor
-                                sit amet,</p>
-                              <p class="text-dark">18 jan 2025</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="modal-footer">
-                        <button class="btn btn-dark btn-block w-100">
-                          Withdraw Application
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Archived Tab -->
-                <div class="tab-pane fade" id="archived">
-                             <div class="d-flex w-100 align-items-center mb-3 gap-4">
-                    <!-- Left Filters -->
-                    <div class="d-flex align-items-center filter-border w-100">
-                      <!-- Status Dropdown -->
-                      <div class="dropdown mr-2 filter-item">
-                        <button class="btn btn-light dropdown-toggle filter-btn" data-toggle="dropdown">
-                          <span class=""><i class="fas fa-search"></span></i> Status
-                        </button>
-                        <div class="dropdown-menu">
-                          <a class="dropdown-item" href="#">Under Review</a>
-                          <a class="dropdown-item" href="#">Offer</a>
-                          <a class="dropdown-item" href="#">Shortlisted</a>
-                          <a class="dropdown-item" href="#">Rejected</a>
-                        </div>
-                      </div>
-                      <!-- Date Dropdown -->
-                      <div class="dropdown mr-2 filter-item">
-                        <button class="btn btn-light dropdown-toggle filter-btn" data-toggle="dropdown">
-                          <i class="far fa-calendar-alt mr-1"></i> Last 30 Days
-                        </button>
-                        <div class="dropdown-menu">
-                          <a class="dropdown-item" href="#">Last 7 Days</a>
-                          <a class="dropdown-item" href="#">Last 30 Days</a>
-                          <a class="dropdown-item" href="#">Last 6 Months</a>
-                        </div>
-                      </div>
-                      <!-- Search -->
-                      <div class="position-relative mr-2 filter-item">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" class="form-control search-input" placeholder="Search..." />
-                      </div>
-                    </div>
-                    <!-- Clear Filters -->
-                    <div class="filter-border pt-7">
-                      <button
-                        class="btn btn-light filter-btn d-flex align-items-center w-100 whitespace-nowrap filter-btn gap-4">
-                        <span class="d-flex gap-2"> <i class="fas fa-sliders-h mr-1"></i> Clear
-                          Filters</span>
-                        <span class="text-muted ml-1">4 results</span>
-                      </button>
-                    </div>
-                  </div>
-                  <!-- Table -->
-                  <div class="application-table table-responsive">
-                    <table class="table bg-white">
-                      <thead>
-                        <tr>
-                          <th>Job Title</th>
-                          <th>Facility</th>
-                          <th>Type</th>
-                          <th>Status</th>
-                          <th>Date Applied </th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                   <tbody class="table-bordered">
-                      @foreach ($archived_list as $list)
-                      <tr>
-                          <td>
-                              <p class="table-nurse-head">{{ $list->job_title }}</p>
-                          </td>
-                          <td>
-                              <p class="table-nurse-head">St. John Hospital</p>
-                          </td>
-                          <td>
-                              <p class="table-nurse-head">St. Archieved Hospital</p>
-                          </td>
-                          <td>
-                            <span
-                                class="status-badge {{ $list->status_key }} open-status-modal"
-                                data-id="{{ $list->id }}"
-                                data-toggle="modal"
-                                data-target="#underArchievedModal"
-                            >
-                                {{ $list->status_label }}
-                            </span>
-                          </td>
-                          <td>
-                              <p>{{ \Carbon\Carbon::parse($list->applied_at)->format('j M Y') }}</p>
-                          </td>
-                          <td>
-                              <button class="btn btn-outline-secondary status-badge">
-                                  View Details
-                              </button>
-                          </td>
-                      </tr>
-
-                      <!-- Right Side Modal -->
-                      <div class="modal right fade" id="underArchievedModal" tabindex="-1">
-                        <div class="modal-dialog">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h5 class="modal-title">
-                                Registered Nurse <br>
-                                <small class="text-muted">St. John Hospital</small>
-                              </h5>
-                              <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            </div>
-                            <div class="modal-body">
-                              <div class="alert alert-warning">
-                                <strong>Under Review</strong><br>
-                                Your application is currently being reviewed.
-                              </div>
-                              <!-- <p class="mb-2"><strong>Progress (100%)</strong></p> -->
-                              <div class="timeline">
-                                <div class="timeline-item">
-                                  <span><strong>Progress </strong><small> (100%)</small></span><br>
-                                  <small>Lorem ipsum dolor sit amet</small>
-                                  <p>5 Nov 2025</p>
-                                </div>
-                                <div class="timeline-item">
-                                  <small>A SmuRevined</small><br>
-                                  <div class="progress-content">
-                                    <small>test</small>
-                                    <p>5 Nov 2025</p>
-                                  </div>
-                                </div>
-                                <div class="timeline-item">
-                                  <strong class="pending-offer-head">A Offer</strong><br>
-                                  <div class="d-flex">
-                                    <p class="pending-des">Lorem ipsum dolor sit amet,Lorem ipsum dolor
-                                      sit amet,</p>
-                                    <p class="text-dark">18 jan 2025</p>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div class="modal-footer">
-                              <button class="btn btn-dark btn-block w-100">
-                                Withdraw Application
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      @endforeach
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
+                <!-- Right Side Modal -->
             </div>
           </div>
           <div class="col-md-4">
@@ -1157,12 +1379,10 @@
     </div>
   </section>
 </main>
-
- <!-- View Details Modal  -->
- <div class="modal fade" id="offerReviewModal" tabindex="-1">
+<!-- View Details Modal  -->
+<div class="modal fade" id="offerReviewModal" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content offer-review-modal">
-
       <!-- Header -->
       <div class="modal-header border-b d-flex justify-content-between flex-column">
         <div class="d-flex justify-content-between w-100">
@@ -1170,53 +1390,44 @@
           <button type="button" class="close" data-dismiss="modal">&times;</button>
         </div>
         <div class="d-flex justify-content-between w-100">
-        <small class="text-muted ml-auto mr-3">5 Nov 2025</small>
-        <small class="text-muted">St. John Hospital; Casual</small>
+          <small class="text-muted ml-auto mr-3">5 Nov 2025</small>
+          <small class="text-muted">St. John Hospital; Casual</small>
         </div>
       </div>
-
       <!-- <hr class="my-0"> -->
-
       <!-- Body -->
       <div class="modal-body">
         <div class="row">
-
           <!-- LEFT PANEL -->
           <div class="col-md-4 mb-3 mb-md-0">
-             <span class="mb-3 px-3 py-2 text-black">
-                Offer Review
-              </span>
+            <span class="mb-3 px-3 py-2 text-black">
+              Offer Review
+            </span>
             <div class="border rounded mt-2">
-             
               <div class="left-card p-3">
-
-              <h6 class="font-weight-bold mb-2">St. John Hospital</h6>
-              <small class="text-muted mb-2">
-                123 Health Road, Sydney, NSW 2000
-              </small>
+                <h6 class="font-weight-bold mb-2">St. John Hospital</h6>
+                <small class="text-muted mb-2">
+                  123 Health Road, Sydney, NSW 2000
+                </small>
               </div>
               <div class="p-3">
-
-            <p>  <small class="mb-1">Casual / Part Time</small></p>
-            <p>  <small class="mb-0 text-muted font-weight-bold">
-                Full-Time ✓
-              </small>
-              </p>
+                <p> <small class="mb-1">Casual / Part Time</small></p>
+                <p> <small class="mb-0 text-muted font-weight-bold">
+                    Full-Time ✓
+                  </small>
+                </p>
               </div>
             </div>
           </div>
-
           <!-- RIGHT PANEL -->
           <div class="col-md-8">
             <div class="status-alert mb-4">
               <strong>Under Review</strong><br>
               Your application is currently being reviewed.
             </div>
-
             <h6 class="font-weight-bold mb-3">
               Document Requirements
             </h6>
-
             <div class="doc-card mb-3">
               <small>
                 <strong>Police Check</strong>
@@ -1225,7 +1436,6 @@
                 No documents requested yet
               </small>
             </div>
-
             <div class="doc-card">
               <small>
                 <strong>Vaccination Record</strong>
@@ -1235,10 +1445,8 @@
               </small>
             </div>
           </div>
-
         </div>
       </div>
-
       <!-- Footer -->
       <div class="modal-footer border-t justify-content-center">
         <button class="btn btn-outline-secondary px-4">
@@ -1248,14 +1456,10 @@
           Withdraw Application
         </button>
       </div>
-
     </div>
   </div>
 </div>
-
-
 <!-- ----- -->
-
 @endsection
 @section('js')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.12/js/intlTelInput.js"></script>
@@ -1266,70 +1470,92 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js"></script>
 
 <script>
-    $(document).on('click', '.open-status-modal', function () {
 
-        var applicationId = $(this).data('id');
+  $(document).on('click', '.active-status-modal', function () {
 
-        $('#modalTitle').html('');
-        $('#modalFacility').html('');
-        $('#modalContent').html('');
-        $('#modalFooter').html('');
-        $('#modalLoader').show();
+    let applicationId = $(this).data('id');
 
-        $.ajax({
-            type: "GET",
-            url: "{{ url('/nurse/application-timeline') }}",
-            data: { application_id: applicationId },
-            cache: false,
-            success: function (data) {
 
-                var res = JSON.parse(data);
-                console.log(res);
+    $('#modalLoader').show();
+    $('#modalTitle, #modalFacility, #modalContent, #modalFooter,#modalStatusLabel').html('');
 
-                $('#modalLoader').hide();
+    $.ajax({
+        url: "{{ url('/nurse/application-timeline') }}",
+        type: "GET",
+        data: { application_id: applicationId },
+        success: function (res) {
 
-                /* -------- Header -------- */
-                $('#modalTitle').html(res.job_title);
-                $('#modalFacility').html(res.facility);
+          console.log(res);
+            $('#modalLoader').hide();
 
-                /* -------- Timeline -------- */
-                var timeline_html = "";
+            $('#modalTitle').text(res.job_title);
+            $('#modalFacility').text(res.facility);
 
-                for (var i = 0; i < res.timeline.length; i++) {
+            if (res.status) {
 
-                    timeline_html +=
-                        "<div class='timeline-item'>" +
-                            "<strong>" + res.timeline[i].title + "</strong>" +
-                            "<p>" + res.timeline[i].desc + "</p>" +
-                            "<small>" + res.timeline[i].date + "</small>" +
-                        "</div>";
-                }
+                $('#modalStatus')
+                    .removeClass('d-none alert-primary alert-warning alert-info alert-success alert-secondary')
+                    .addClass('alert alert-' + res.status.class);
 
-                $('#modalContent').html(timeline_html);
-
-                /* -------- Footer -------- */
-                var footer_html = "";
-
-                if (res.footer_action == 'withdraw') {
-                    footer_html =
-                        "<button class='btn btn-dark btn-block'>Withdraw Application</button>";
-                }
-
-                if (res.footer_action == 'interview') {
-                    footer_html =
-                        "<button class='btn btn-outline-primary btn-block'>View Interview Details</button>";
-                }
-
-                if (res.footer_action == 'offer') {
-                    footer_html =
-                        "<button class='btn btn-success btn-block'>Accept Offer</button>";
-                }
-
-                $('#modalFooter').html(footer_html);
+                $('#modalStatusLabel').text(res.status.label);
+                $('#modalStatusDesc').text(res.status.desc);
             }
-        });
 
+
+
+            /* Timeline */
+            let timeline_html = '';
+            res.timeline.forEach(item => {
+                timeline_html += `
+                    <div class="timeline-item">
+                        <strong>${item.title}</strong>
+                        <p>${item.desc}</p>
+                        <small>${item.date}</small>
+                    </div>
+                `;
+            });
+            $('#modalContent').html(timeline_html);
+
+            /* Footer Action */
+            if (res.action) {
+                $('#modalFooter').html(`
+                    <button 
+                        class="btn ${res.action.class} btn-block modal-action-btn"
+                        data-action="${res.action.type}"
+                        data-id="${applicationId}">
+                        ${res.action.label}
+                    </button>
+                `);
+            }
+        }
     });
-</script>
+});
 
+$(document).on('click', '.modal-action-btn', function () {
+
+    let action = $(this).data('action');
+    let applicationId = $(this).data('id');
+
+    if (action === 'withdraw') {
+        if (!confirm('Are you sure you want to withdraw this application?')) return;
+
+        // AJAX → withdraw endpoint
+        console.log('Withdraw', applicationId);
+    }
+
+    if (action === 'interview') {
+        window.location.href = `/nurse/interview/${applicationId}`;
+    }
+
+    if (action === 'offer_view') {
+        window.location.href = `/nurse/offer/${applicationId}`;
+    }
+
+    if (action === 'offer_accept') {
+        window.location.href = `/nurse/offer/${applicationId}/accept`;
+    }
+});
+
+
+</script>
 @endsection
