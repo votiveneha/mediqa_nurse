@@ -57,6 +57,10 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
     Route::post('/updateBasicJobs', 'JobPostingController@updateBasicJobs')->name('updateBasicJobs');
     Route::get('/change_password', 'JobPostingController@change_password')->name('change_password');
     Route::post('/updateContractPay', 'JobPostingController@updateContractPay')->name('updateContractPay');
+    Route::get('/shift_scheduling', 'JobPostingController@shift_scheduling')->name('shift_scheduling');
+    Route::post('/updateShiftScheduling', 'JobPostingController@updateShiftScheduling')->name('updateShiftScheduling');
+    Route::get('/job_benefits', 'JobPostingController@job_benefits')->name('job_benefits');
+    Route::post('/updateBenefitsPreferences', 'JobPostingController@updateBenefitsPreferences')->name('updateBenefitsPreferences');
   });
 });
 
@@ -254,7 +258,10 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::get('matchedJobs', 'MyCareerController@matchedJobs')->name('matchedJobs');
   Route::get('application', 'MyCareerController@application')->name('application');
   Route::get('application-timeline', 'MyCareerController@applicationTimeline')->name('applicationTimeline');
+  Route::get('action-application', 'MyCareerController@action_application')->name('action_application');
 
+
+  Route::get('interviews', 'MyCareerController@interviews_nurse')->name('interviews');
 
 
     /**************[Work Preferences & Flexibility]**************/

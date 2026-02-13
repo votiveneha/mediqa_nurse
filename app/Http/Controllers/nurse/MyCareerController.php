@@ -21,45 +21,29 @@ class MyCareerController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
 
-    // public function applicationTimeline(Request $request)
-    // {
-    //     // print_r($request->all());die;
-    //     $application = NurseApplication::with('job')->findOrFail($request->application_id);
 
-    //     // print_r($application);die;
+    public function action_application(Request $request)
+    {
+        $modal_no = $request->modal_no;
+        // $application = NurseApplication::with([
+        //     'job',
+        //     'interviews' => function ($q) {
+        //         $q->latest();
+        //     }
+        // ])->findOrFail($request->application_id);
 
-    //     $timeline = [];
+        // $interview = $application->interviews->first();
 
-    //     $timeline[] = [
-    //         'title' => 'Application Submitted',
-    //         'desc'  => 'Your profile has been submitted',
-    //         'date'  => $application->created_at->format('d M Y')
-    //     ];
+        $application = NurseApplication::with('job','health_care','interview')->findOrFail($request->application_id);
 
-    //     if ($application->status >= 2) {
-    //         $timeline[] = [
-    //             'title' => 'Under Review',
-    //             'desc'  => 'HR team is reviewing your application',
-    //             'date'  => now()->format('d M Y')
-    //         ];
-    //     }
+        // echo "<pre>"; print_r($application);die;
+        return view('nurse.my_career.partial_application_modal', compact('application', 'modal_no'));
+    }
 
-    //     if ($application->status >= 4) {
-    //         $timeline[] = [
-    //             'title' => 'Interview Scheduled',
-    //             'desc'  => 'Interview details shared',
-    //             'date'  => now()->format('d M Y')
-    //         ];
-    //     }
-
-    //     return response()->json([
-    //         'job_title' => $application->job_title,
-    //         'facility'  => $application->job->facility_name,
-    //         'timeline'  => $timeline,
-    //         'footer_action' =>
-    //         $application->status == 7 ? 'offer' : ($application->status >= 4 ? 'interview' : 'withdraw')
-    //     ]);
-    // }
+    public function interviews_nurse(){
+        
+       return view('nurse.my_career.interviews_nurse');
+    }
 
     public function applicationTimeline(Request $request)
     {
@@ -154,14 +138,13 @@ class MyCareerController extends Controller
 
         return response()->json([
             'job_title' => $application->job_title,
-            'facility'  => $application->job->facility_name,
+            // 'facility'  => $application->job->facility_name,
             'timeline'  => $timeline,
             'action'    => $action,
             'status'    => $statusConfig
         ]);
   
     }
-
 
     public function application()
     {

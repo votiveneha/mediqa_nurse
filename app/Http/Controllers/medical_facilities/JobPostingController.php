@@ -185,6 +185,7 @@ class JobPostingController extends Controller
 
     public function updateContractPay(Request $request)
     {
+        $emptype_preferences = $request->emptype_preferences;
         $emp_type = json_encode((array)$request->subemptype);
         //print_r($emp_type);
 
@@ -211,7 +212,7 @@ class JobPostingController extends Controller
         $job_id = Session::get('jobId');
 
         $job_post = JobsModel::find($job_id);
-        
+        $job_post->main_emp_type = $emptype_preferences;
         $job_post->emplyeement_type = $emp_type;
 
         $job_post->hours_per_week_permanent = $per_hours_week;
@@ -239,6 +240,170 @@ class JobPostingController extends Controller
             
         } else {
             $json['status'] = 0;
+        }
+
+        echo json_encode($json);
+    }
+
+    public function shift_scheduling()
+    {
+        $data['shift_types_data'] = DB::table("work_shift_preferences")->where("shift_id","1")->get();
+        $data['shift_length_data'] = DB::table("work_shift_preferences")->where("shift_id","2")->get();
+        $data['schedule_model_data'] = DB::table("work_shift_preferences")->where("shift_id","3")->get();
+        $data['weekly_work_patters'] = DB::table("work_shift_preferences")->where("shift_id","4")->get();
+        $data['shift_rotation_data'] = DB::table("work_shift_preferences")->where("shift_id","5")->get();
+        $data['non_trad_shift'] = DB::table("work_shift_preferences")->where("shift_id","6")->get();
+        $data['maternity_shift'] = DB::table("work_shift_preferences")->where("shift_id","7")->get();
+        $data['days_off_data'] = DB::table("work_shift_preferences")->where("shift_id","8")->where("sub_shift_id",NULL)->get();
+        $data['specific_days_off_data'] = DB::table("work_shift_preferences")->where("shift_id","9")->get();
+        $data['specific_days_off_subdata'] = DB::table("work_shift_preferences")->where("shift_id","8")->where("sub_shift_id","61")->get();
+
+        $job_id = Session::get('jobId');
+        $data['job_data'] = DB::table("job_boxes")->where("id",$job_id)->first();
+        //print_r($data['job_data']);die;
+        //print_r($data['job_data']);die;
+
+        return view('healthcare.shift_scheduling')->with($data);
+    }
+
+    public function updateShiftScheduling(Request $request)
+    {
+        $shift_types_data = json_encode($request->shift_types_data);
+        $shift_length_data = json_encode($request->shift_length_data);
+        $schedule_model_data = json_encode($request->schedule_model_data);
+        $weekly_work_patters = json_encode($request->weekly_work_patters);
+        $shift_rotation_data = json_encode($request->shift_rotation_data);
+        $non_trad_shift = json_encode($request->non_trad_shift);
+        $maternity_shift = json_encode($request->maternity_shift);
+        $days_off_data = json_encode($request->days_off_data);
+        $specific_days_off_data = json_encode($request->specific_days_off_data);
+
+        $shift_mode = $request->shift_mode;
+
+        if($shift_mode == 'single'){
+            $temporarysingle_start_date = $request->temporarysingle_start_date;
+            $temporarysingle_end_date = $request->temporarysingle_end_date;
+        }
+
+        if($shift_mode == 'range'){
+            $temporaryrangestart_date = $request->temporaryrangestart_date;
+            $temporaryrangeend_date = $request->temporaryrangeend_date;
+            $temporaryrangenoshifts = $request->temporaryrangenoshifts;
+            $temporaryrangenotes = $request->temporaryrangenotes;
+        }
+
+        $start_date_urgency = $request->start_date_urgency;
+
+        if($start_date_urgency == "immediate"){
+            $start_date_urgency1 =  $start_date_urgency;
+        }
+
+        if($start_date_urgency == "within_weeks"){
+            $start_date_urgency1 =  $request->within_weeks_radio;
+        }
+
+        if($start_date_urgency == "scheduled_date"){
+            $start_date_urgency1 =  $request->scheduled_date;
+        }
+
+        $contract_length_value =  $request->contract_length_value;
+        $contract_length_unit =  $request->contract_length_unit;
+        
+
+        
+        //print_r($schedule_model_data);die;
+
+        $job_id = Session::get('jobId');
+        $job_post = JobsModel::find($job_id);
+        
+        $job_post->shift_type = $shift_types_data;
+        $job_post->shift_length = $shift_length_data;
+        $job_post->schedule_model = $schedule_model_data;
+        $job_post->weekly_work_patterns = $weekly_work_patters;
+        $job_post->shift_rotation = $shift_rotation_data;
+        $job_post->non_trad_shift = $non_trad_shift;
+        $job_post->maternity_shift = $maternity_shift;
+        $job_post->days_off = $days_off_data;
+        $job_post->specific_days_off = $specific_days_off_data;
+
+        if($job_post->main_emp_type == "3"){
+            if($shift_mode == 'single'){
+                $job_post->single_shift_start_datetime = $temporarysingle_start_date;
+                $job_post->single_shift_end_datetime = $temporarysingle_end_date;
+                $job_post->daterange_start_date = '';
+                $job_post->daterange_end_date = '';
+                $job_post->no_of_shifts = '';
+                $job_post->notes = '';
+            }
+
+            if($shift_mode == 'range'){
+                $job_post->single_shift_start_datetime = '';
+                $job_post->single_shift_end_datetime = '';
+                $job_post->daterange_start_date = $temporaryrangestart_date;
+                $job_post->daterange_end_date = $temporaryrangeend_date;
+                $job_post->no_of_shifts = $temporaryrangenoshifts;
+                $job_post->notes = $temporaryrangenotes;
+            }
+        }
+
+        if($job_post->main_emp_type == "2"){
+            $job_post->start_date_urgency_permanent = $start_date_urgency1;
+        }
+
+        if($job_post->main_emp_type == "1"){
+            $job_post->start_date_urgency_permanent = $start_date_urgency1;
+            $job_post->fixed_term_contract_length = $contract_length_value." ".$contract_length_unit;
+        }
+        
+
+        $run = $job_post->save();
+
+        if ($run) {
+            $json['status'] = 1;
+            
+            
+        } else {
+            $json['status'] = 0;
+        }
+
+        echo json_encode($json);
+        
+    }
+
+     public function job_benefits()
+    {
+       
+        $data['benefits_preferences_data'] = DB::table("benefits_preferences")->where("subbenefit_id","0")->get();
+        //print_r($data['benefits_preferences_data']);die;
+        $job_id = Session::get('jobId');
+        $data['job_data'] = DB::table("job_boxes")->where("id",$job_id)->first();
+        //print_r($data['job_data']);die;
+
+        return view('healthcare.job_benefits')->with($data);
+    }
+
+    public function updateBenefitsPreferences(Request $request)
+    {
+        $user_id = $request->user_id;
+        $benefits_preferences = json_encode($request->benefits_preferences);
+        
+        $job_id = Session::get('jobId');
+
+        $work_preferences_data = JobsModel::where("id",$job_id)->first();
+
+        //print_r($work_preferences_data);
+
+        
+            
+        $run = JobsModel::where('id',$job_id)->update(['benefits'=>$benefits_preferences]);
+        
+
+        if ($run) {
+            $json['status'] = 1;
+            
+        } else {
+            $json['status'] = 0;
+            
         }
 
         echo json_encode($json);
