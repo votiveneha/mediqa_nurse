@@ -160,7 +160,7 @@ form#job_posting_form ul.select2-selection__rendered {
                             <div class="form-group level-drp">
                                 <label class="form-label" for="input-1">Hours per week
                                 </label>
-                                <input class="form-control per_hours_per_week" type="text" name="per_hours_week" id="per_hours_week" value="">
+                                <input class="form-control per_hours_per_week" type="number" name="per_hours_week" id="per_hours_week" value="">
                                 <span id='reqhoursweek' class='reqError text-danger valley'></span>
                             </div>
                             <div class="form-group level-drp">
@@ -178,13 +178,13 @@ form#job_posting_form ul.select2-selection__rendered {
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(min)
                                     </label>
-                                    <input class="form-control per_salary_min" type="text" name="per_salary_min" id="per_salary_min" value="">
+                                    <input class="form-control per_salary_min" type="number" name="per_salary_min" id="per_salary_min" value="">
                                     <span id='reqper_salary_min' class='reqError text-danger valley'></span>
                                 </div>
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(max)
                                     </label>
-                                    <input class="form-control per_salary_max" type="text" name="per_salary_max" id="per_salary_max" value="">
+                                    <input class="form-control per_salary_max" type="number" name="per_salary_max" id="per_salary_max" value="">
                                     <span id='reqper_salary_max' class='reqError text-danger valley'></span>
                                 </div>
                             </div>
@@ -195,7 +195,7 @@ form#job_posting_form ul.select2-selection__rendered {
                                 <div style="display:flex; gap:10px;">
                                     <input type="number" name="contract_length_value" min="1" id="contract_length_value" placeholder="e.g. 6">
                                     <span id='reqcontract_length_value' class='reqError text-danger valley'></span>
-                                    <select name="contract_length_unit" id="contract_length_unit">
+                                    <select name="contract_length_unit" class="form-control" id="contract_length_unit" style="border: 1px solid #E5E7EB;border-radius: 8px;height: 48px;">
                                         <option value="months">Months</option>
                                         <option value="years">Years</option>
                                     </select>
@@ -205,7 +205,7 @@ form#job_posting_form ul.select2-selection__rendered {
                             <div class="form-group level-drp">
                                 <label class="form-label" for="input-1">Hours per week
                                 </label>
-                                <input class="form-control fixed_term_hours_per_week" id="fixed_term_hours_week" type="text" name="fixed_term_hours_week" value="">
+                                <input class="form-control fixed_term_hours_per_week" id="fixed_term_hours_week" type="number" name="fixed_term_hours_week" value="">
                                 <span id='reqfixed_term_hours_week' class='reqError text-danger valley'></span>
                             </div>
                             <div class="form-group level-drp">
@@ -223,13 +223,13 @@ form#job_posting_form ul.select2-selection__rendered {
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(min)
                                     </label>
-                                    <input class="form-control fixed_term_salary_min" type="text" name="fixed_term_salary_min" value="" id="fixed_term_salary_min">
+                                    <input class="form-control fixed_term_salary_min" type="number" name="fixed_term_salary_min" value="" id="fixed_term_salary_min">
                                     <span id='reqfixed_term_salary_min' class='reqError text-danger valley'></span>
                                 </div>
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(max)
                                     </label>
-                                    <input class="form-control per_salary_max" type="text" name="fixed_term_salary_max" value="" id="fixed_term_salary_max">
+                                    <input class="form-control per_salary_max" type="number" name="fixed_term_salary_max" value="" id="fixed_term_salary_max">
                                     <span id='reqfixed_term_salary_max' class='reqError text-danger valley'></span>
                                 </div>
                             </div>
@@ -257,13 +257,13 @@ form#job_posting_form ul.select2-selection__rendered {
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(min)
                                     </label>
-                                    <input class="form-control temporary_salary_min" type="text" name="temporary_salary_min" value="" id="temporary_salary_min">
+                                    <input class="form-control temporary_salary_min" type="number" name="temporary_salary_min" value="" id="temporary_salary_min">
                                     <span id='reqtemporary_salary_min' class='reqError text-danger valley'></span>
                                 </div>
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(max)
                                     </label>
-                                    <input class="form-control temporary_salary_max" type="text" name="temporary_salary_max" value="" id="temporary_salary_max">
+                                    <input class="form-control temporary_salary_max" type="number" name="temporary_salary_max" value="" id="temporary_salary_max">
                                     <span id='reqtemporary_salary_max' class='reqError text-danger valley'></span>
                                 </div>
                             </div>

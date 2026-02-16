@@ -197,7 +197,7 @@ form#job_posting_form ul.select2-selection__rendered {
                           
                           <ul id="speciality_preferences-secondary-0" style="display:none;">
                             @php $JobSpecialties = JobSpecialties(); @endphp
-                            <li data-value="">select</li>
+                            
                             <?php
                             $k = 1;
                             ?>
@@ -358,7 +358,7 @@ form#job_posting_form ul.select2-selection__rendered {
                         <div class="form-group">
                           <label class="form-label" for="input-1">Positions Open</label>
                           
-                          <input class="form-control" type="text" name="position_open" value="">
+                          <input class="form-control" type="number" name="position_open" value="">
                           <span id="reqposition_open" class="reqError text-danger valley"></span>
                         </div>
                         
@@ -755,6 +755,12 @@ form#job_posting_form ul.select2-selection__rendered {
               
               var sub = 'sub';
 
+              if(specialities_type == 'primary'){
+                var select_text = '<li data-value="">select</li>';
+              }else{
+                var select_text = '';
+              }
+
 
               if(data1.sub_spciality_data.length > 0){
                 $(".show_specialities-"+specialities_type+"-"+k).append('\<div class="subspec_main_div subspec_main_div-'+data1.main_speciality_id+'">\
@@ -762,7 +768,7 @@ form#job_posting_form ul.select2-selection__rendered {
                               <label class="form-label subspec_label subspec_label-'+data1.main_speciality_id+'" for="input-1">'+data1.main_speciality_name+'</label>\
                               <input type="hidden" name="subspec_list" class="subspec_list-'+specialities_type+' subspec_list-'+specialities_type+"-"+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
                               <ul id="speciality_preferences-'+specialities_type+"-"+data1.main_speciality_id+'" style="display:none;">\
-                              <li data-value="">select</li>\
+                              '+select_text+'\
                               '+speciality_text+'</ul>\
                               <select class="js-example-basic-multiple'+data1.main_speciality_id+' subspec_valid-'+data1.main_speciality_id+' addAll_removeAll_btn" name="subspeciality['+specialities_type+']['+data1.main_speciality_id+'][]" data-list-id="speciality_preferences-'+specialities_type+"-"+data1.main_speciality_id+'" id="subspecialities" onchange="getSecialities(\''+sub+'\',\''+data1.main_speciality_id+'\',\''+specialities_type+'\',\''+multiple+'\')" '+multiple+'></select>\
                               <span id="reqsubspecvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\

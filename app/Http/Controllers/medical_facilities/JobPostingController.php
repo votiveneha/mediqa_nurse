@@ -408,4 +408,98 @@ class JobPostingController extends Controller
 
         echo json_encode($json);
     }
+
+    public function location_work_modal()
+    {
+        
+        
+        return view('healthcare.location_work_modal');
+    }
+
+    public function getStates(Request $request)
+    {
+        
+        
+        $states_data = DB::table("states")->where("country_code",$request->country_code_value)->get();
+        //print_r($states_data);
+        return json_encode($states_data);
+    }
+
+    public function updateLocationModel(Request $request)
+    {
+        $country_code = $request->country_code;
+        $job_state = $request->job_state;
+        $city_suburb = $request->city_suburb;
+        $primary_hiring_site = $request->primary_hiring_site;
+        $site_rotation = $request->has('site_rotation')?1:0;
+        $additional_sites = $request->additional_sites;
+        $work_modal = $request->work_modal;
+        $remote_teleneath_component = $request->has('remote_teleneath_component')?1:0;
+        $remote_teleneath_modal = $request->remote_teleneath_modal;
+        $remote_percent = $request->remote_percent;
+        
+        //echo Session::has('job_id');
+        $job_id = Session::get('jobId');
+
+        $job_post = JobsModel::find(27);
+        $job_post->location_country = $country_code;
+        $job_post->location_state = $job_state;
+        $job_post->location_city = $city_suburb;
+        $job_post->location_primary_hiring_site = $primary_hiring_site;
+        $job_post->multi_site_rotation = $site_rotation;
+        $job_post->additional_sites = $additional_sites;
+        $job_post->work_model = $work_modal;
+        $job_post->remote_teleneath_work = $remote_teleneath_component;
+        $job_post->remote_work_type = $remote_teleneath_modal;
+        $job_post->percent_remote = $remote_percent;
+        
+        $run = $job_post->save();
+
+        if ($run) {
+            $json['status'] = 1;
+            
+            
+        } else {
+            $json['status'] = 0;
+        }
+
+        echo json_encode($json);
+    }
+
+    public function job_description()
+    {
+        
+        return view('healthcare.job_description');
+    }
+
+    public function updateJobDescription(Request $request)
+    {
+        $about_role = $request->about_role;
+        $key_responsiblities = $request->key_responsiblities;
+        $role_specific = $request->role_specific;
+        $contact_person = $request->contact_person;
+        
+        
+        //echo Session::has('job_id');
+        $job_id = Session::get('jobId');
+
+        $job_post = JobsModel::find(27);
+        $job_post->about_role = $about_role;
+        $job_post->key_responsiblities = $key_responsiblities;
+        $job_post->work_environments = $role_specific;
+        $job_post->contact_person_role = $contact_person;
+        
+        
+        $run = $job_post->save();
+
+        if ($run) {
+            $json['status'] = 1;
+            
+            
+        } else {
+            $json['status'] = 0;
+        }
+
+        echo json_encode($json);
+    }
 }

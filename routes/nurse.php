@@ -50,6 +50,7 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
   Route::get('/getWorkplaceData', 'JobPostingController@getWorkplaceData')->name('getWorkplaceData');
   Route::get('/getSubWorkplaceData', 'JobPostingController@getSubWorkplaceData')->name('getSubWorkplaceData');
   Route::get('/getEmpData', 'JobPostingController@getEmpData')->name('getEmpData');
+  Route::get('/getStates', 'JobPostingController@getStates')->name('getStates');
   Route::middleware('healthcare')->group(function () {
     Route::get('/my-profile', 'HomeController@manage_profile')->name('my-profile');
     Route::get('/job_posting', 'JobPostingController@job_posting')->name('job_posting');
@@ -61,6 +62,10 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
     Route::post('/updateShiftScheduling', 'JobPostingController@updateShiftScheduling')->name('updateShiftScheduling');
     Route::get('/job_benefits', 'JobPostingController@job_benefits')->name('job_benefits');
     Route::post('/updateBenefitsPreferences', 'JobPostingController@updateBenefitsPreferences')->name('updateBenefitsPreferences');
+    Route::get('/location_work_modal', 'JobPostingController@location_work_modal')->name('location_work_modal');
+    Route::post('/updateLocationModel', 'JobPostingController@updateLocationModel')->name('updateLocationModel');
+    Route::get('/job_description', 'JobPostingController@job_description')->name('job_description');
+    Route::post('/updateJobDescription', 'JobPostingController@updateJobDescription')->name('updateJobDescription');
   });
 });
 
@@ -259,6 +264,7 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::get('application', 'MyCareerController@application')->name('application');
   Route::get('application-timeline', 'MyCareerController@applicationTimeline')->name('applicationTimeline');
   Route::get('action-application', 'MyCareerController@action_application')->name('action_application');
+  Route::get('nurseMyJobs', 'MyJobController@nurseMyJobs')->name('nurseMyJobs');
 
 
   Route::get('interviews', 'MyCareerController@interviews_nurse')->name('interviews');

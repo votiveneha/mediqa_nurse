@@ -9,6 +9,12 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
 
 <style type="text/css">
+  .add_new_certification_div_2{
+  display:flex;
+  align-items:center;
+  gap:15px; /* space between buttons */
+
+}
 .profession-table-ui {
     padding-left: 0px !important;
     line-height: 23px !important;
@@ -5121,7 +5127,7 @@ p.highlight-text {
                             </a>
                             </div>
                             <div class="duplicate-exp-btn">
-                              <a style="cursor: pointer;margin-top: 20px;" type="button" class="duplicate-exp">
+                              <a style="cursor: pointer;" type="button" class="duplicate-exp">
                               Duplicate
                               </a> 
                             </div>
