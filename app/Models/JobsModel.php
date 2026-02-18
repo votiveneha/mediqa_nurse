@@ -11,5 +11,41 @@ class JobsModel extends Model
     protected $table = 'job_boxes';
     protected $guarded =[];
 
-   
+    protected $casts = [
+        'shift_type' => 'array',
+    ];
+
+    public function getShiftNamesAttribute()
+    {
+        if (!$this->shift_type) {
+            return [];
+        }
+
+        return WorkshiftModel::whereIn('work_shift_id', $this->shift_type)
+            ->pluck('shift_name')
+            ->toArray();
+    }
+
+    public function getEmploymentTypeAttribute()
+    {
+
+        if (!$this->emplyeement_type) {
+            return null;
+        }
+
+        return EmpTypeModel::where('emp_prefer_id', $this->emplyeement_type)
+            ->value('emp_type');
+    } 
+
+    public function getHealthCareNameAttribute()
+    {
+        if (!$this->healthcare_id) {
+            return null;
+        }
+
+        return User::where('id', $this->healthcare_id)
+            ->value('name');
+    }
+
+
 }

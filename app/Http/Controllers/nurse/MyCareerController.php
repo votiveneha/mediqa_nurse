@@ -37,6 +37,8 @@ class MyCareerController extends Controller
         $application = NurseApplication::with('job','health_care','interview')->findOrFail($request->application_id);
 
         // echo "<pre>"; print_r($application);die;
+
+
         return view('nurse.my_career.partial_application_modal', compact('application', 'modal_no'));
     }
 

@@ -131,7 +131,7 @@ class JobPostingController extends Controller
         //print_r($subspeciality['primary']);die;
         $speciality_experience = $request->speciality_experience;
         $willing_upskill = isset($request->willing_upskill)?$request->willing_upskill:0;
-        $speciality = json_encode($request->subspeciality['secondary']);
+        $speciality = isset($request->subspeciality['secondary'])?json_encode($request->subspeciality['secondary']):'';
 
         $job_post = new JobsModel;
         $job_post->job_box_id = $job_id;
@@ -441,7 +441,7 @@ class JobPostingController extends Controller
         //echo Session::has('job_id');
         $job_id = Session::get('jobId');
 
-        $job_post = JobsModel::find(27);
+        $job_post = JobsModel::find($job_id);
         $job_post->location_country = $country_code;
         $job_post->location_state = $job_state;
         $job_post->location_city = $city_suburb;
@@ -483,7 +483,7 @@ class JobPostingController extends Controller
         //echo Session::has('job_id');
         $job_id = Session::get('jobId');
 
-        $job_post = JobsModel::find(27);
+        $job_post = JobsModel::find($job_id);
         $job_post->about_role = $about_role;
         $job_post->key_responsiblities = $key_responsiblities;
         $job_post->work_environments = $role_specific;

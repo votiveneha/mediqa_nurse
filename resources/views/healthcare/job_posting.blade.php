@@ -140,7 +140,7 @@ form#job_posting_form ul.select2-selection__rendered {
                         <div class="form-group level-drp">
                           <label class="form-label" for="input-1">Sector Preferences
                           </label>
-                          <select class="form-input mr-10 select-active" name="sector_preferences">
+                          <select class="form-input mr-10 select-active" name="sector_preferences" id="sector_preferences">
                             <option value="">select</option>
                             <option value="Public & Government">Public & Government</option>
                             <option value="Private" >Private</option>
@@ -155,7 +155,7 @@ form#job_posting_form ul.select2-selection__rendered {
                             <?php
                             $j = 1;
                             ?>
-                            <li data-value="">select</li>
+                            <li data-value="0">select</li>
                             @foreach($specialty as $spl)
                             <li id="nursing_menus-{{ $j }}" data-value="{{ $spl->id }}">{{ $spl->name }}</li>
                             <?php
@@ -173,7 +173,7 @@ form#job_posting_form ul.select2-selection__rendered {
                           
                           <ul id="speciality_preferences-primary-0" style="display:none;">
                             @php $JobSpecialties = JobSpecialties(); @endphp
-                            <li data-value="">select</li>
+                            <li data-value="0">select</li>
                             <?php
                             $k = 1;
                             ?>
@@ -208,11 +208,12 @@ form#job_posting_form ul.select2-selection__rendered {
                             ?>
                             @endforeach
                           </ul>
-                          <select class="js-example-basic-multiple addAll_removeAll_btn speciality_type_field" data-list-id="speciality_preferences-secondary-0" name="nurseType[]" multiple onchange="getSecialities('main',0,'secondary','multiple')"></select>
-                          <span id="reqspecialties" class="reqError text-danger valley"></span>
+                          <select class="js-example-basic-multiple addAll_removeAll_btn secondary_specialities" data-list-id="speciality_preferences-secondary-0" name="nurseType[]" multiple onchange="getSecialities('main',0,'secondary','multiple')"></select>
+                          <span id="reqsecondaryspecialties" class="reqError text-danger valley"></span>
+                          <div class="experience_helper">Secondary specialties are considered a plus, not a requirement.</div>
                         </div>
                         <div class="show_specialities-secondary-0"></div>
-                        <div class="experience_helper">Secondary specialties are considered a plus, not a requirement.</div>
+                        
                         <div class="form-group level-drp">
                           
                             <label class="form-label" for="input-1">Work Environment Preferences</label>
@@ -358,7 +359,7 @@ form#job_posting_form ul.select2-selection__rendered {
                         <div class="form-group">
                           <label class="form-label" for="input-1">Positions Open</label>
                           
-                          <input class="form-control" type="number" name="position_open" value="">
+                          <input class="form-control position_open" type="number" name="position_open" value="">
                           <span id="reqposition_open" class="reqError text-danger valley"></span>
                         </div>
                         
@@ -656,10 +657,10 @@ form#job_posting_form ul.select2-selection__rendered {
                               <label class="form-label subnurse_label subnurse_label-'+data1.main_nurse_id+'" for="input-1">'+data1.main_nurse_name+'</label>\
                               <input type="hidden" name="subnurse_list" class="subnurse_list subnurse_list-'+data1.main_nurse_id+'" value="'+data1.main_nurse_id+'">\
                               <ul id="type-of-nurse-'+data1.main_nurse_id+'" style="display:none;">\
-                              <li data-value="">select</li>\
+                              <li data-value="0">select</li>\
                               '+nurse_text+'</ul>\
-                              <select class="js-example-basic-multiple'+data1.main_nurse_id+' subnurse_valid-'+data1.main_nurse_id+' addAll_removeAll_btn" data-list-id="type-of-nurse-'+data1.main_nurse_id+'" name="subnursetype" id="subnursetype" onchange="getNurseType(\''+sub+'\',\''+data1.main_nurse_id+'\')"></select>\
-                              <span id="reqsubnursevalid-'+data1.main_nurse_id+'" class="reqError text-danger valley"></span>\
+                              <select class="js-example-basic-multiple'+data1.main_nurse_id+' subnurse_valid subnurse_valid-'+data1.main_nurse_id+' addAll_removeAll_btn" data-list-id="type-of-nurse-'+data1.main_nurse_id+'" name="subnursetype" id="subnursetype" onchange="getNurseType(\''+sub+'\',\''+data1.main_nurse_id+'\')"></select>\
+                              <span id="reqsubnursevalid" class="reqError text-danger valley"></span>\
                               </div>\
                               <div class="subnurse_level-'+data1.main_nurse_id+'"></div>\
                               <div class="showNurseType-'+data1.main_nurse_id+'"></div>\
@@ -713,7 +714,7 @@ form#job_posting_form ul.select2-selection__rendered {
           var val1 = $(val).val();
           console.log("subspec_listval",val1);
           if(selectedValues.includes(val1) == false){
-            $(".subspec_main_div-"+val1).remove();
+            $(".subspec_main_div-"+specialities_type+'-'+val1).remove();
               
           }
       });
@@ -733,7 +734,7 @@ form#job_posting_form ul.select2-selection__rendered {
 
       for(var i=0;i<selectedValues.length;i++){
         
-        if($(".show_specialities-"+specialities_type+"-"+k+" .subspec_main_div-"+selectedValues[i]).length < 1){
+        if($(".show_specialities-"+specialities_type+"-"+k+" .subspec_main_div-"+specialities_type+'-'+selectedValues[i]).length < 1){
           
           $.ajax({
             type: "GET",
@@ -755,30 +756,35 @@ form#job_posting_form ul.select2-selection__rendered {
               
               var sub = 'sub';
 
-              if(specialities_type == 'primary'){
-                var select_text = '<li data-value="">select</li>';
-              }else{
-                var select_text = '';
-              }
+              
 
 
               if(data1.sub_spciality_data.length > 0){
-                $(".show_specialities-"+specialities_type+"-"+k).append('\<div class="subspec_main_div subspec_main_div-'+data1.main_speciality_id+'">\
+                if(specialities_type == 'primary'){
+                  var select_text = '<li data-value="0">select</li>';
+                  var valid_text = '<span id="reqsubspecvalid-'+specialities_type+'" class="reqError text-danger valley"></span>';
+                  var class_text = '';  
+                }else{
+                  var select_text = '';
+                  var valid_text = '<span id="reqsubspecvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>';
+                  var class_text = '-'+data1.main_speciality_id;  
+                }
+                $(".show_specialities-"+specialities_type+"-"+k).append('\<div class="subspec_main_div subspec_main_div-'+specialities_type+'-'+data1.main_speciality_id+'">\
                               <div class="subspec_div subspec_div-'+data1.main_speciality_id+' form-group level-drp">\
                               <label class="form-label subspec_label subspec_label-'+data1.main_speciality_id+'" for="input-1">'+data1.main_speciality_name+'</label>\
                               <input type="hidden" name="subspec_list" class="subspec_list-'+specialities_type+' subspec_list-'+specialities_type+"-"+data1.main_speciality_id+'" value="'+data1.main_speciality_id+'">\
                               <ul id="speciality_preferences-'+specialities_type+"-"+data1.main_speciality_id+'" style="display:none;">\
                               '+select_text+'\
                               '+speciality_text+'</ul>\
-                              <select class="js-example-basic-multiple'+data1.main_speciality_id+' subspec_valid-'+data1.main_speciality_id+' addAll_removeAll_btn" name="subspeciality['+specialities_type+']['+data1.main_speciality_id+'][]" data-list-id="speciality_preferences-'+specialities_type+"-"+data1.main_speciality_id+'" id="subspecialities" onchange="getSecialities(\''+sub+'\',\''+data1.main_speciality_id+'\',\''+specialities_type+'\',\''+multiple+'\')" '+multiple+'></select>\
-                              <span id="reqsubspecvalid-'+data1.main_speciality_id+'" class="reqError text-danger valley"></span>\
+                              <select class="js-example-basic-multiple'+specialities_type+"-"+data1.main_speciality_id+' subspec_valid-'+specialities_type+class_text+' subspec_valid-'+data1.main_speciality_id+' addAll_removeAll_btn" name="subspeciality['+specialities_type+']['+data1.main_speciality_id+'][]" data-list-id="speciality_preferences-'+specialities_type+"-"+data1.main_speciality_id+'" id="subspecialities" onchange="getSecialities(\''+sub+'\',\''+data1.main_speciality_id+'\',\''+specialities_type+'\',\''+multiple+'\')" '+multiple+'></select>\
+                              '+valid_text+'\
                               </div>\
                               <div class="subspec_level-'+data1.main_speciality_id+'"></div>\
                               <div class="show_specialities-'+specialities_type+"-"+data1.main_speciality_id+'"></div>\
                               <div class="show_specialities_experience-'+specialities_type+"-"+data1.main_speciality_id+'"></div>\
                               </div>');
 
-                              selectTwoFunction(data1.main_speciality_id);
+                              selectTwoFunction(specialities_type+"-"+data1.main_speciality_id);
               
               }else{
 
@@ -1068,6 +1074,13 @@ form#job_posting_form ul.select2-selection__rendered {
 
       }
 
+      if ($('.subnurse_valid').val() == '0') {
+        
+        document.getElementById("reqsubnursevalid").innerHTML = "* Please select the Type of Nurse?";
+        isValid = false;
+
+      }
+
       if ($('.speciality_type_field').val() == '0') {
         
         document.getElementById("reqspecialties").innerHTML = "* Please select the Primary Specialty";
@@ -1075,12 +1088,31 @@ form#job_posting_form ul.select2-selection__rendered {
 
       }
 
-      if ($('.secondary_specialities').val() == '') {
+      if ($('.subspec_valid-primary').val() == '0') {
         
-        document.getElementById("reqsecondaryspecialties").innerHTML = "* Please select the Secondary Specialties";
+        document.getElementById("reqsubspecvalid-primary").innerHTML = "* Please select the Primary Specialty";
         isValid = false;
 
       }
+
+      // if ($('.secondary_specialities').val() == '') {
+        
+      //   document.getElementById("reqsecondaryspecialties").innerHTML = "* Please select the Secondary Specialties";
+      //   isValid = false;
+
+      // }
+
+      // $(".subspec_list-secondary").each(function(){
+      //   var secondary_val = $(this).val();
+      //   if ($('.subspec_valid-secondary-'+secondary_val).val() == '') {
+        
+      //     document.getElementById("reqsubspecvalid-"+secondary_val).innerHTML = "* Please select the Secondary Specialties";
+      //     isValid = false;
+
+      //   }
+      // });
+
+      
 
       if ($('.facworktype-1').val() == '') {
         
@@ -1091,7 +1123,7 @@ form#job_posting_form ul.select2-selection__rendered {
 
       if ($('.job_title').val() == '') {
         
-        document.getElementById("reqjob_title").innerHTML = "* Please enter the Job Title";
+        document.getElementById("reqotherjob_title").innerHTML = "* Please enter the Job Title";
         isValid = false;
 
       }

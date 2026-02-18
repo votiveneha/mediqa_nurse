@@ -180,11 +180,12 @@ class HomeController extends Controller
 
         $profession_id = isset($_GET['profession_id'])?$_GET['profession_id']:0;
         $profession_data = Profession::where("user_id",$user_id)->get();
+        
         $profession_single_data = Profession::where("profession_id",$profession_id)->first();
         //print_r($profession_single_data);die;
         //print_r($specialities_data);
         $experience_data = DB::table("user_experience")->where("user_id",$user_id)->get();
-
+        
         $emp_prefer_data = DB::table("employeement_type_preferences")->where("sub_prefer_id",1)->get();
         $emp_preferfixterm_data = DB::table("employeement_type_preferences")->where("sub_prefer_id",2)->get();
         $emp_prefertemp_data = DB::table("employeement_type_preferences")->where("sub_prefer_id",3)->get();

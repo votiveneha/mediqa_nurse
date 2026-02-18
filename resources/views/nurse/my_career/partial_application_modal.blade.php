@@ -171,10 +171,9 @@
       </div>
       <div class="d-flex justify-content-between w-100">
         <small class="text-muted">
-          Royal Women's Hospital, Full-Time
+          {{$application->health_care->name}}, {{ implode(', ', $application->job->shift_names) }}
         </small>
-        <small class="text-muted ml-auto mr-3">3 Nov
-          2025</small>
+        <small class="text-muted ml-auto mr-3"> {{ \Carbon\Carbon::parse($application->applied_at)->format('j M Y')}}</small>
       </div>
     </div>
     <hr class="my-0">
@@ -237,7 +236,7 @@
               <div class="d-flex align-items-center gap-2">
                 <h6 class="font-weight-bold">
                   Status</h6>
-                <small>3 kev</small>
+                {{-- <small>3 kev</small> --}}
               </div>
               <span class="badge badge-success px-3 py-2 d-inline-block">
                 Offer
@@ -245,9 +244,8 @@
             </div>
             <div class="p-3">
               <p class="mb-2">
-                <small class="text-muted">Date
-                  applied</small><br>
-                3 Nov 2025
+                <small class="text-muted">Date applied</small><br>
+                 {{ \Carbon\Carbon::parse($application->applied_at)->format('j M Y')}}
               </p>
             </div>
           </div>
@@ -275,7 +273,6 @@
                 </small>
                 <span> <small> Days &
                     Evenings</small></span>
-                <!-- <span> <small><a href="#" class="text-primary">Sign-on bonus</a></small></span> -->
               </div>
             </div>
           </div>
@@ -309,10 +306,9 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="d-flex justify-content-between w-100">
-          <small class="text-muted ml-auto mr-3">5 Nov
-            2025</small>
-          <small class="text-muted">St. John Hospital ·
-            Casual</small>
+          <small class="text-muted ml-auto mr-3">{{ \Carbon\Carbon::parse($application->applied_at)->format('j M Y')}}</small>
+          <small class="text-muted">{{$application->health_care->name}} ·
+            {{ $application->job->employment_type }}</small>
         </div>
       </div>
       <!-- <hr class="my-0"> -->
@@ -368,12 +364,12 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="withdrawn-title">
-        Aged Care Nurse Application
+        {{ $application->job_title }} Application
          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <small class="withdrawn-pill">Withdrawn</small>
       <div class="withdrawn-info">
-        You have withdrawn your application for this position on 8 Nov 2025.
+        You have withdrawn your application for this position on {{ \Carbon\Carbon::parse($application->job->created_at)->format('j M Y')}}.
       </div>
       <!-- Timeline -->
       <!-- Timeline + Job Card Row -->
@@ -386,7 +382,7 @@
                 <i class="fa fa-check"></i>
               </span>
               Application Submitted
-              <span class="withdrawn-date">5 Nov 2025</span>
+              <span class="withdrawn-date">{{ \Carbon\Carbon::parse($application->applied_at)->format('j M Y')}}</span>
             </div>
             <div class="withdrawn-step completed">
               <span class="withdrawn-dot">
@@ -403,9 +399,9 @@
             <div class="withdrawn-step withdrawn-active">
               <span class="withdrawn-dot"></span>
               <span class="withdrawn-label">Withdrawn</span>
-              <small>8 Nov 2025</small>
+              <small>{{ \Carbon\Carbon::parse($application->withdrawn_at)->format('j M Y')}}</small>
               <div>
-                <small>Vincent withdrew - 8 Nov 2025</small>
+                <small>{{Auth::guard("nurse_middle")->user()->name}} - {{ \Carbon\Carbon::parse($application->withdrawn_at)->format('j M Y')}}</small>
               </div>
             </div>
           </div>
@@ -413,10 +409,9 @@
         <!-- Job Card -->
         <div class="col-12 col-md-6 mt-4 mt-md-0">
           <div class="withdrawn-card">
-            <div><strong>Job Title</strong> Aged Car...</div>
+            <div><strong>Job Title</strong> {{ $application->job_title }}</div>
             <div class="mt-2 d-flex justify-content-between">
-              <div>St. John Hospital</div>
-              <div class="text-muted">St. Archeded I</div>
+              <div>{{$application->health_care->name}}</div>
             </div>
             <div class="d-flex justify-content-between align-items-center mt-2">
               <div>
@@ -454,7 +449,7 @@
       </div>
       <!-- Title -->
       <div class="rejected-title">
-        Registered Nurse Application
+        {{ $application->job_title }} Application
       </div>
       <!-- Status Pill -->
       <div class="rejected-pill">
@@ -477,7 +472,7 @@
                 <i class="fa fa-check"></i>
               </span>
               <p>Application Submitted</p>
-              <span class="rejected-date">5 Nov 2025</span>
+              <span class="rejected-date">{{ \Carbon\Carbon::parse($application->applied_at)->format('j M Y')}}</span>
             </div>
             <div class="rejected-step completed">
               <span class="rejected-dot">
@@ -498,9 +493,9 @@
               <span class="text-danger font-weight-bold">
                 Application Rejected
               </span>
-              <span class="rejected-date">9 Nov 2025</span>
+              <span class="rejected-date">{{ \Carbon\Carbon::parse($application->rejected_at)->format('j M Y')}}</span>
               <div>
-                <small class="text-muted">Employer rejection - 9 Nov 2025</small>
+                <small class="text-muted">Employer rejection - {{ \Carbon\Carbon::parse($application->rejected_at)->format('j M Y')}}</small>
               </div>
             </div>
           </div>
@@ -508,10 +503,9 @@
         <!-- Job Card -->
         <div class="col-12 col-md-6 mt-4 mt-md-0">
           <div class="rejected-card">
-            <div><strong>Job Title</strong> Registered Nurse</div>
+            <div><strong>Job Title</strong> {{ $application->job_title }}</div>
             <div class="mt-2 d-flex justify-content-between">
-              <div>St. John Hospital</div>
-              <div class="text-muted">St. Archeded I</div>
+              <div>{{$application->health_care->name}}</div>
             </div>
             <div class="d-flex justify-content-between align-items-center mt-2 mb-3">
               <div>
@@ -528,9 +522,7 @@
         </div>
       </div>
       <div class="rejected-footer d-flex justify-content-end">
-        <button class="btn btn-light border" data-dismiss="modal">
-          Close
-        </button>
+   
       </div>
     </div>
   </div>
@@ -548,7 +540,7 @@
       </div>
       <!-- Title -->
       <div class="hired-title">
-        Midwife Application
+        {{ $application->job_title }} Application
       </div>
       <!-- Status pill -->
       <div class="hired-pill">Hired</div>
@@ -569,7 +561,7 @@
                 <i class="fa fa-check"></i>
               </span>
               Application Submitted
-              <span class="hired-date">3 Nov 2025</span>
+              <span class="hired-date">{{ \Carbon\Carbon::parse($application->applied_at)->format('j M Y')}}</span>
             </div>
             <div class="hired-step">
               <span class="hired-dot dot-orange">
@@ -588,14 +580,14 @@
                 <i class="fa fa-check"></i>
               </span>
               Interview Scheduled
-              <span class="hired-date">8 Nov 2025</span>
+              <span class="hired-date">{{ \Carbon\Carbon::parse()->now()->format('j M Y')}}</span>
             </div>
             <div class="hired-step">
               <span class="hired-dot dot-blue">
                 <i class="fa fa-check"></i>
               </span>
               Offer Extended
-              <small class="text-muted">Offer Details viewed - 8 Nov 2025</small>
+              <small class="text-muted">Offer Details viewed - {{ \Carbon\Carbon::parse()->now()->format('j M Y')}}</small>
             </div>
             <div class="hired-step">
               <span class="hired-dot dot-green">
@@ -608,14 +600,14 @@
         <!-- Job Card -->
         <div class="col-12 col-md-6 mt-4 mt-md-0">
           <div class="hired-card">
-            <div><strong>Job Title</strong> Midwife</div>
+            <div><strong>Job Title</strong> {{ $application->job_title }}</div>
             <div class="d-flex justify-content-between align-items-center mt-2">
               <div>
                 <strong>Status</strong>
                 <span class="hired-status ml-2">Hired</span>
               </div>
               <div class="text-muted">
-                10 Nov 2025
+                {{ \Carbon\Carbon::parse()->now()->format('j M Y')}}
               </div>
             </div>
           </div>
@@ -628,11 +620,6 @@
         </button>
         <button class="btn btn-primary w-100">
           Submit Documents
-        </button>
-      </div>
-      <div class="hired-footer mt-3 d-flex justify-content-end">
-        <button class="btn btn-light border btn-block" data-dismiss="modal">
-          Close
         </button>
       </div>
     </div>

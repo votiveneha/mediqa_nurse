@@ -156,7 +156,7 @@ form#job_posting_form ul.select2-selection__rendered {
                                 <div id="editor_role"></div>
                                 <input type="hidden" name="about_role" id="about_role">
                                 
-                                <span id='reqhoursweek' class='reqError text-danger valley'></span>
+                                <span id='reqabout_role' class='reqError text-danger valley'></span>
                             </div> 
                             <div class="form-group level-drp">
                                 <label class="form-label" for="input-1">Key Responsibilities
@@ -186,7 +186,7 @@ form#job_posting_form ul.select2-selection__rendered {
                                 <label>Attachments</label>
                                 <input type="file"
                                   class="form-control"
-                                  multiple>
+                                  multiple onchange="changeAttachment()">
                             </div>
                             
                             <div class="box-button mt-15">
@@ -338,56 +338,7 @@ form#job_posting_form ul.select2-selection__rendered {
       });
     }
 
-  /* Initialize editors */
-var editor_role = new Quill('#editor_role', {
-    theme: 'snow',
-    placeholder: 'Write about the role...',
-    modules: {
-        toolbar: [
-            ['bold','italic','underline'],
-            [{ list: 'bullet' }, { list: 'ordered' }],
-            ['link']
-        ]
-    }
-});
-
-var editor_responsiblities = new Quill('#editor_responsiblities', {
-    theme: 'snow',
-    placeholder: 'Enter responsibilities...',
-    modules: {
-        toolbar: [
-            ['bold','italic','underline'],
-            [{ list: 'bullet' }, { list: 'ordered' }],
-            ['link']
-        ]
-    }
-});
-
-var editor_role_specific = new Quill('#editor_role_specific', {
-    theme: 'snow',
-    placeholder: 'Write environment notes...',
-    modules: {
-        toolbar: [
-            ['bold','italic','underline'],
-            [{ list: 'bullet' }, { list: 'ordered' }],
-            ['link']
-        ]
-    }
-});
-
-
-/* On form submit store values in hidden inputs */
-document.querySelector("form").onsubmit = function(){
-
-    document.getElementById("about_role").value =
-        editor_role.root.innerHTML;
-
-    document.getElementById("key_responsiblities").value =
-        editor_responsiblities.root.innerHTML;
-
-    document.getElementById("role_specific").value =
-        editor_role_specific.root.innerHTML;
-};
+ 
   </script>
   
   <script>
@@ -503,7 +454,63 @@ document.querySelector("form").onsubmit = function(){
         
     });
     
-    
+     /* Initialize editors */
+    var editor_role = new Quill('#editor_role', {
+        theme: 'snow',
+        placeholder: 'Write about the role...',
+        modules: {
+            toolbar: [
+                ['bold','italic','underline'],
+                [{ list: 'bullet' }, { list: 'ordered' }],
+                ['link']
+            ]
+        }
+    });
+
+    var editor_responsiblities = new Quill('#editor_responsiblities', {
+        theme: 'snow',
+        placeholder: 'Enter responsibilities...',
+        modules: {
+            toolbar: [
+                ['bold','italic','underline'],
+                [{ list: 'bullet' }, { list: 'ordered' }],
+                ['link']
+            ]
+        }
+    });
+
+    var editor_role_specific = new Quill('#editor_role_specific', {
+        theme: 'snow',
+        placeholder: 'Write environment notes...',
+        modules: {
+            toolbar: [
+                ['bold','italic','underline'],
+                [{ list: 'bullet' }, { list: 'ordered' }],
+                ['link']
+            ]
+        }
+    });
+
+    var selectedFiles1 = [];
+
+    function changeAttachment(){
+      if (!selectedFiles1[language_id]) {
+        selectedFiles1[language_id] = [];
+      }
+
+      const newFiles = Array.from($('.upload_evidence-'+language_id)[0].files);
+
+      newFiles.forEach(file => {
+        const exists = selectedFiles1.some(f => f.name === file.name && f.lastModified === file.lastModified);
+        if (!exists) {
+            selectedFiles1[language_id].push(file);
+        }
+      });
+
+      console.log("selectedFiles",selectedFiles1[language_id]);
+    }
+
+
 
 
     function job_description_form() {
@@ -512,18 +519,25 @@ document.querySelector("form").onsubmit = function(){
       document.getElementById("about_role").value =
       editor_role.root.innerHTML;
 
-  document.getElementById("key_responsiblities").value =
-      editor_responsiblities.root.innerHTML;
+      document.getElementById("key_responsiblities").value =
+          editor_responsiblities.root.innerHTML;
 
-  document.getElementById("role_specific").value =
-      editor_role_specific.root.innerHTML;
+      document.getElementById("role_specific").value =
+          editor_role_specific.root.innerHTML;
 
 
-  /* Optional validation */
-  if (editor_role.getText().trim() === "") {
-      $("#reqhoursweek").html("* Please enter About Role");
-      isValid = false;
-  }
+      /* Optional validation */
+      if (editor_role.getText().trim() === "") {
+          
+          document.getElementById("reqabout_role").innerHTML = "* Please enter About Role";
+          isValid = false;
+      }
+
+      if ($("#contact_person").val() === "") {
+          
+          document.getElementById("reqcontact_person").innerHTML = "* Please enter the contact person";
+          isValid = false;
+      }
       
 
 

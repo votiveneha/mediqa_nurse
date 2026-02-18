@@ -3942,7 +3942,7 @@ p.highlight-text {
                           <label class="form-label" for="input-1">Facility / Workplace Name</label>
                           <input type="text" name="facility_workplace_name[{{ $i }}]" class="form-control facworkname facworkname-{{ $i }}" value="{{ $data->facility_workplace_name }}">
                           <span id="reqfaceworkname-{{$i}}" class="reqError text-danger valley"></span>
-                        </div> 
+                        </div>
                         <div class="form-group drp--clr nurse_exp_type nurse_exp_type-{{ $i }}">
                             <label class="form-label" for="input-1">Type of Nurse?</label>
                             @php
@@ -4060,7 +4060,7 @@ p.highlight-text {
                                       <div class="show_specialities-{{ $profession->nurse_data }}-{{ $parents1[$index-1] }}">  
                                       @endif
                                       <div class="subspec_main_div_experience subspec_main_div_experience-{{ $profession->nurse_data }}-{{ $id }}">
-                                        <input type="hidden" name="subspectype" class="subspectype_experience-{{ $i }}-{{ $id }}" value="{{ isset($parents1[$p+1])?json_encode((string)$parents1[$i+1]):$subspecility_json }}">  
+                                        <input type="hidden" name="subspectype" class="subspectype_experience-{{ $i }}-{{ $id }}" value="{{ isset($parents1[$p+1])?json_encode((string)$parents1[$p+1]):$subspecility_json }}">  
                                         <div class="subspec_div_experience form-group level-drp">
                                           <label class="form-label">{{ $sp_data_name->name }}</label>
 

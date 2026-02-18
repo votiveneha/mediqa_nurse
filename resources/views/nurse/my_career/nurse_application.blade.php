@@ -951,10 +951,10 @@
                             <p class="table-nurse-head"> {{ $list->job_title }}</p>
                           </td>
                           <td>
-                            <p class="table-nurse-head"> St.John Hospital</p>
+                            <p class="table-nurse-head"> {{ $list->job->health_careName }}</p>
                           </td>
                           <td>
-                            <p class="table-nurse-head"> St.John Hospital</p>
+                            <p class="table-nurse-head"> {{ implode(', ', $list->job->shift_names) }}</p>
                           </td>
                           <td>
                             <span class="status-badge {{ $list->status_key }} active-status-modal"
@@ -1116,10 +1116,10 @@
                             <p class="table-nurse-head">{{ $list->job_title }}</p>
                           </td>
                           <td>
-                            <p class="table-nurse-head">St. John Hospital</p>
+                            <p class="table-nurse-head"> {{ $list->job->health_careName }}</p>
                           </td>
                           <td>
-                            <p class="table-nurse-head">St. Archieved Hospital</p>
+                            <p class="table-nurse-head"> {{ implode(', ', $list->job->shift_names) }}</p>
                           </td>
                           <td>
                             <span class="status-badge {{ $list->status_key }} open-status-modal"
@@ -1243,6 +1243,36 @@
 <script src="{{ url('/public') }}/nurse/assets/js/jquery.ui.datepicker.monthyearpicker.js"></script>
 {{-- @include('nurse.front_profile_js'); --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js"></script>
+
+
+<script>
+      $(document).on('click', '.archieved-hireed', function () {
+
+        let applicationId = $(this).data('id');
+
+        $.ajax({
+            url: "{{ url('/nurse/action-application') }}",
+            type: "GET",
+            data: { application_id: applicationId ,modal_no:"archieved-timeline" },
+            success: function (response) {
+
+                $('#modalContainer').empty(); 
+                $('#modalContainer').html(response);
+
+                $('#hiredModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+
+                $('#hiredModal').modal('show');
+            }
+        });
+    });
+
+    $(document).on('hidden.bs.modal', '#hiredModal', function () {
+        $(this).remove();
+    });
+</script>
 <script>
   $(document).on('click', '.active-status-modal', function () {
     let applicationId = $(this).data('id');

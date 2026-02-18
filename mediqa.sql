@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 16, 2026 at 07:51 AM
+-- Generation Time: Feb 18, 2026 at 07:46 AM
 -- Server version: 10.6.25-MariaDB
 -- PHP Version: 7.4.33
 
@@ -1487,6 +1487,42 @@ INSERT INTO `imm_status` (`id`, `name`, `status`, `type`, `created_at`, `updated
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `interview_nurses`
+--
+
+CREATE TABLE `interview_nurses` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `application_id` bigint(20) UNSIGNED NOT NULL,
+  `nurse_id` int(11) DEFAULT NULL,
+  `employer_id` bigint(20) UNSIGNED NOT NULL,
+  `scheduled_at` datetime NOT NULL,
+  `interviewer_name` varchar(255) DEFAULT NULL,
+  `duration_minutes` int(11) NOT NULL,
+  `timezone` varchar(100) NOT NULL,
+  `meeting_type` tinyint(3) UNSIGNED NOT NULL COMMENT '1=onsite, 2=zoom, 3=teams, 4=meet, 5=other',
+  `meeting_link` varchar(255) DEFAULT NULL,
+  `location_address` varchar(255) DEFAULT NULL,
+  `status` tinyint(3) UNSIGNED NOT NULL COMMENT '1=scheduled, 2=reschedule_requested, 3=confirmed, 4=completed, 5=no_show, 6=cancelled',
+  `reschedule_meta` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`reschedule_meta`)),
+  `cancel_reason` text DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `created_by` bigint(20) UNSIGNED NOT NULL,
+  `updated_by` bigint(20) UNSIGNED NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `interview_nurses`
+--
+
+INSERT INTO `interview_nurses` (`id`, `application_id`, `nurse_id`, `employer_id`, `scheduled_at`, `interviewer_name`, `duration_minutes`, `timezone`, `meeting_type`, `meeting_link`, `location_address`, `status`, `reschedule_meta`, `cancel_reason`, `notes`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
+(1, 3, 212, 351, '2026-02-13 08:28:02', 'Sarah Thompson, Nurse Manager', 30, '', 2, 'http://mediqa.com', '123 Health Road, Sydney, NSW 2000', 2, '123', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry', 0, 0, '2026-02-13 08:17:53', '2026-02-13 09:21:24'),
+(2, 9, 212, 351, '2026-02-13 08:28:02', 'Sarah Thompson, Nurse Manager', 30, '', 2, 'http://mediqa.com', '123 Health Road, Sydney, NSW 2000', 2, '123', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry', 0, 0, '2026-02-13 08:18:20', '2026-02-13 09:40:28');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `interview_references`
 --
 
@@ -1686,10 +1722,15 @@ CREATE TABLE `job_boxes` (
 
 INSERT INTO `job_boxes` (`id`, `healthcare_id`, `job_box_id`, `location_country`, `location_state`, `location_city`, `location_primary_hiring_site`, `multi_site_rotation`, `additional_sites`, `work_model`, `remote_teleneath_work`, `remote_work_type`, `percent_remote`, `facility_settings_operating_country`, `nurse_type`, `sub_nurse_type`, `nurse_type_id`, `typeofspeciality`, `sub_speciality`, `secondary_speciality`, `departments`, `speciality_units`, `degree`, `sector`, `location_name`, `agency_name`, `job_title`, `position_open`, `experience_level`, `emplyeement_positions`, `mandatory_tarining`, `mandatory_education`, `professional_membership`, `award_recognition`, `language_proficiency`, `language_certification`, `requirements`, `schedule_model`, `weekly_work_patterns`, `shift_rotation`, `non_trad_shift`, `maternity_shift`, `days_off`, `specific_days_off`, `shift_mode`, `main_emp_type`, `emplyeement_type`, `permanent_type`, `fixed_term_type`, `temporary_type`, `hours_per_week_permanent`, `contract_type_permanent`, `salary_permanent`, `per_salary_min`, `per_salary_max`, `hours_per_week_fixed_term`, `contract_length_fixed_term`, `salary_range_fix_term`, `contract_length_unit_fixed_term`, `fixed_term_salary_min`, `fixed_term_salary_max`, `shift_date_time_temporary`, `salary_range_temporary`, `temporary_salary_min`, `temporary_salary_max`, `shift_type`, `work_environment`, `benefits`, `salary`, `urgent_hire`, `application_submission_date`, `willing_to_upskill`, `primary_hiring_site`, `multi_rotation`, `remote_telehealth`, `shift_types`, `shift_length`, `single_shift_start_datetime`, `single_shift_end_datetime`, `daterange_start_date`, `daterange_end_date`, `no_of_shifts`, `notes`, `start_date_urgency_permanent`, `scheduled_date_permanent`, `start_date_urgency_fixedterm`, `fixed_term_contract_length`, `roster_model`, `rotation_rules`, `start_urgency_date`, `registration_licenses`, `required_specialities_skills`, `mandatory_training`, `vaccination_requirements`, `checks_clearances`, `language_requirements`, `benefits_salary`, `multiple_benefits`, `prefered_experience_brands`, `prefered_availability`, `visa_work_eligiblity`, `compliance_docs_required`, `auto_verify_ahpra`, `state_based_compliance`, `default_interview_format`, `prefered_interview_windows`, `trial_shift_offered`, `who_apply`, `publish_to`, `about_role`, `key_responsiblities`, `work_environments`, `contact_person_role`, `attachments`, `visiblity`, `application_deadline`, `priority_tags`, `expiry_date`, `custom_expiry_date`, `channels`, `role_specific_work_environments`, `save_draft`, `created_at`, `updated_at`) VALUES
 (9, 351, 'MQ-AU-2026-50750', 0, 0, 0, '', 0, NULL, 0, 0, 0, NULL, 0, '[\"Enrolled Nurse (Medication Endorsed\\/EEN)\"]', NULL, NULL, '[\"1193\"]', NULL, '{\"3\":[\"887\"]}', NULL, NULL, NULL, 'Private', 'US', NULL, 'dfd', 4, '4', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '0', '0', '0', '0', '0', '0', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '[\"15\"]', '{\"1\":[\"444\"]}', '[\"1\",\"9\",\"11\",\"56\"]', NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-02-10 10:20:06', '2026-02-10 04:50:06'),
-(27, 352, 'MQ-AU-2026-18298', 0, 198, 0, 'd ds', 1, 'd s f', 0, 1, 0, '25', 0, '[\"Enrolled Nurse (Medication Endorsed\\/EEN)\"]', NULL, NULL, '[\"1027\"]', NULL, '{\"\'primary\'\":[\"4\"],\"primary\":{\"4\":[\"1027\"]},\"secondary\":{\"3\":[\"887\"]}}', NULL, NULL, NULL, 'Private', 'AU', NULL, 'Enrolled Nurse â€“ Community Health', 4, '5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '[\"27\"]', '[\"0\"]', '[\"0\"]', 'null', 'null', 'null', 'null', '', 3, '[\"14\"]', NULL, NULL, NULL, 0, NULL, '', 0, 0, 0, '', '', 'months', 0, 0, '2026-02-24 14:20:00', 'Weekly', 1000, 1500, '[\"15\"]', '{\"1\":[\"444\"]}', '[\"1\",\"9\",\"11\",\"56\"]', NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 'null', '2026-02-25 16:30:00', '2026-03-11 16:30:00', '0000-00-00', '0000-00-00', 0, '', 'within_five_week', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-02-12 08:50:12', '2026-02-16 13:48:21'),
+(27, 352, 'MQ-AU-2026-18298', 0, 195, 0, 'testing', 0, NULL, 0, 0, 0, NULL, 0, '[\"Enrolled Nurse (Medication Endorsed\\/EEN)\"]', NULL, NULL, '[\"1027\"]', NULL, '{\"\'primary\'\":[\"4\"],\"primary\":{\"4\":[\"1027\"]},\"secondary\":{\"3\":[\"887\"]}}', NULL, NULL, NULL, 'Private', 'AU', NULL, 'Enrolled Nurse â€“ Community Health', 4, '5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '[\"27\"]', '[\"0\"]', '[\"0\"]', 'null', 'null', 'null', 'null', '', 3, '[\"14\"]', NULL, NULL, NULL, 0, NULL, '', 0, 0, 0, '', '', 'months', 0, 0, '2026-02-24 14:20:00', 'Weekly', 1000, 1500, '[\"15\"]', '{\"1\":[\"444\"]}', '[\"1\",\"9\",\"11\",\"56\"]', NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 'null', '2026-02-25 16:30:00', '2026-03-11 16:30:00', '0000-00-00', '0000-00-00', 0, '', 'within_five_week', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '<p>dfd</p>', '<p>fdsf </p>', '<p>f d f</p>', 'gf g h', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-02-12 08:50:12', '2026-02-18 13:16:36'),
 (28, 330, 'MQ--2026-59540', 0, 0, 0, '', 0, NULL, 0, 0, 0, NULL, 0, '[\"Assistant in Midwifery (AiM)\"]', NULL, NULL, '[\"1125\"]', NULL, '{\"3\":[\"888\"]}', NULL, NULL, NULL, 'Public & Government', 'AU', NULL, 'Assistant in Midwifery – NDIS Midwife', 4, '10', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '', '', 2, '[\"63\"]', NULL, NULL, NULL, 0, NULL, '', 0, 0, 0, '4', 'Weekly', 'months', 1000, 0, '0000-00-00 00:00:00', '', 0, 0, '[\"15\"]', '{\"1\":[\"444\"]}', '[\"1\",\"9\",\"11\",\"56\"]', NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-02-16 08:52:02', '2026-02-16 08:52:28'),
 (29, 330, 'MQ--2026-88861', 0, 0, 0, '', 0, NULL, 0, 0, 0, NULL, 0, '[\"Assistant in Nursing (AIN) (Nurse Aide \\/ Nurse Assistant \\/ Nurse Auxiliary)\"]', NULL, NULL, '[\"676\"]', NULL, '{\"2\":[\"768\"]}', NULL, NULL, NULL, 'Public & Government', NULL, NULL, 'Assistant in Nursing – Sub-Acute Care', 2, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '', '', 1, '[\"4\"]', NULL, NULL, NULL, 74, NULL, 'Annual salary', 15000, 20000, NULL, '', '', 'months', 0, NULL, '0000-00-00 00:00:00', '', 0, 0, NULL, '{\"1\":[\"444\"]}', NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-02-16 13:07:59', '2026-02-16 13:14:37'),
-(30, 330, 'MQ--2026-12005', 0, 0, 0, '', 0, NULL, 0, 0, 0, NULL, 0, '[\"Enrolled Nurse (EN)\"]', NULL, NULL, '[\"97\"]', NULL, '{\"1\":[\"96\"],\"96\":[\"97\"],\"97\":[\"588\"]}', NULL, NULL, NULL, 'Public & Government', NULL, NULL, 'Enrolled Nurse – Perioperative / Operating Theatre / Surgical', 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '{\"1\":{\"199\":{\"240\":[\"441\"]}}}', NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-02-16 13:35:01', '2026-02-16 13:35:01');
+(30, 330, 'MQ--2026-12005', 0, 0, 0, '', 0, NULL, 0, 0, 0, NULL, 0, '[\"Enrolled Nurse (EN)\"]', NULL, NULL, '[\"97\"]', NULL, '{\"1\":[\"96\"],\"96\":[\"97\"],\"97\":[\"588\"]}', NULL, NULL, NULL, 'Public & Government', NULL, NULL, 'Enrolled Nurse – Perioperative / Operating Theatre / Surgical', 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '{\"1\":{\"199\":{\"240\":[\"441\"]}}}', NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-02-16 13:35:01', '2026-02-16 13:35:01'),
+(31, 330, 'MQ--2026-37504', 0, 0, 0, '', 0, NULL, 0, 0, 0, NULL, 0, '[\"Enrolled Nurse (Medication Endorsed\\/EEN)\"]', NULL, NULL, '[\"1192\"]', NULL, '{\"4\":[\"1031\",\"1033\"]}', NULL, NULL, NULL, 'Private', NULL, NULL, 'Enrolled Nurse – Clinical Nurse Specialist – Telehealth', 4, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '{\"1\":[\"444\"]}', NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-02-18 09:10:34', '2026-02-18 09:10:34'),
+(32, 330, 'MQ--2026-71957', 0, 0, 0, '', 0, NULL, 0, 0, 0, NULL, 0, '[\"Staff Registered Midwife (Staff RM)\"]', NULL, NULL, '[\"676\"]', NULL, '{\"2\":[\"770\"]}', NULL, NULL, NULL, 'Private', NULL, NULL, 'Staff Registered Midwife – Sub-Acute Care', 4, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '{\"1\":[\"444\"]}', NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-02-18 09:12:39', '2026-02-18 09:12:39'),
+(33, 330, 'MQ--2026-10117', 0, 0, 0, '', 0, NULL, 0, 0, 0, NULL, 0, '[\"Assistant in Nursing (AIN) (Nurse Aide \\/ Nurse Assistant \\/ Nurse Auxiliary)\"]', NULL, NULL, '[\"677\"]', NULL, '{\"1\":[\"676\"]}', NULL, NULL, NULL, 'Public & Government', NULL, NULL, 'Assistant in Nursing – Acute / Medical–Surgical', 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '[\"26\"]', '[\"31\"]', '[\"37\"]', '[\"43\"]', '[\"53\"]', '[\"58\"]', '[\"69\"]', '', 1, '[\"4\"]', NULL, NULL, NULL, 74, NULL, 'Annual salary', 14000, 15000, NULL, '', '', 'months', 0, NULL, '0000-00-00 00:00:00', '', 0, 0, '[\"12\"]', '{\"1\":[\"444\"]}', NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, '[\"17\"]', NULL, NULL, NULL, NULL, NULL, NULL, 'within_five_week', NULL, NULL, ' ', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-02-18 09:38:39', '2026-02-18 09:40:42'),
+(34, 330, 'MQ--2026-76268', 0, 0, 0, '', 0, NULL, 0, 0, 0, NULL, 0, '[\"Enrolled Nurse (Notation)\"]', NULL, NULL, '[\"887\"]', NULL, '{\"485\":[\"1125\"]}', NULL, NULL, NULL, 'Private', NULL, NULL, 'Enrolled Nurse – Paediatrics & Child Health', 4, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '{\"1\":[\"444\"]}', NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-02-18 09:48:55', '2026-02-18 09:48:55'),
+(35, 330, 'MQ--2026-77661', 0, 0, 0, '', 0, NULL, 0, 0, 0, NULL, 0, '[\"Enrolled Nurse (Medication Endorsed\\/EEN)\"]', NULL, NULL, '[\"771\"]', NULL, '', NULL, NULL, NULL, 'Private', NULL, NULL, 'Enrolled Nurse – Antenatal / Prenatal Care', 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '{\"1\":[\"444\"]}', NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-02-18 10:16:34', '2026-02-18 10:16:34');
 
 -- --------------------------------------------------------
 
@@ -1976,7 +2017,7 @@ INSERT INTO `language_skills` (`language_skills_id`, `user_id`, `langprof_level`
 (5, 202, '{\"5\":{\"72\":\"Basic\"}}', '{\"182\":{\"score_level\":\"ghgffgbfbghfhfghhcggfcgg\",\"expiring_date\":\"1996-12-04\",\"evidence_imgs\":\"[\\\"download.jpeg\\\",\\\"download.png\\\",\\\"hg9xBr1721293815.png\\\",\\\"images (1).jpeg\\\",\\\"images (3).jpeg\\\",\\\"images.jpeg\\\"]\"}}', '{\"188\":{\"score_level\":\"kykiukukuykukukukukuykuikuikkk\",\"expiring_date\":\"1996-12-04\",\"evidence_imgs\":\"[\\\"download.jpeg\\\",\\\"download.png\\\",\\\"hg9xBr1721293815.png\\\",\\\"images (1).jpeg\\\",\\\"images (3).jpeg\\\",\\\"images.jpeg\\\"]\",\"engevimg\":{}}}', '{\"191\":{\"evidence_imgs\":\"[\\\"download.jpeg\\\",\\\"download.png\\\",\\\"hg9xBr1721293815.png\\\",\\\"images (1).jpeg\\\"]\"}}', 1, '2025-04-21 11:05:12', '2025-04-21 11:05:12'),
 (6, 206, '{\"5\":{\"72\":\"Basic\"}}', '{\"182\":{\"score_level\":\"ghgffgbfbghfhfghhcggfcgg\",\"expiring_date\":\"1996-12-04\",\"evidence_imgs\":\"[\\\"download.png\\\"]\"}}', '{\"188\":{\"score_level\":\"kykiukukuykukukukukuykuikuikkk\",\"expiring_date\":\"1996-12-04\",\"evidence_imgs\":\"[\\\"download.png\\\"]\",\"engevimg\":{}}}', '{\"191\":{\"evidence_imgs\":\"[\\\"download.png\\\"]\"}}', 1, '2025-04-22 10:22:11', '2025-04-22 10:22:11'),
 (11, 194, '{\"8\":{\"148\":\"Native\"}}', 'null', 'null', 'null', 1, '2025-05-08 03:06:37', '2025-05-08 03:07:48'),
-(12, 212, '{\"8\":{\"148\":\"Native\",\"147\":\"Fluent\"}}', '{\"182\":{\"score_level\":\"ssss\",\"expiring_date\":\"2025-05-31\",\"evidence_imgs\":\"[\\\"DIPLOMA SAMPLE.docx\\\",\\\"DIPLOMA SAMPLE.pdf\\\",\\\"CERTIFICATIONS SAMPLE.pdf\\\",\\\"intratreetops.sql\\\"]\"}}', '{\"188\":{\"score_level\":\"eqfd\",\"expiring_date\":\"2025-05-09\",\"evidence_imgs\":\"[\\\"TRANSCRIPT SAMPLE.pdf\\\",\\\"CERTIFICATIONS SAMPLE.pdf\\\"]\"}}', '{\"191\":{\"evidence_imgs\":\"[\\\"CERTIFICATIONS SAMPLE.pdf\\\",\\\"DIPLOMA SAMPLE.docx\\\",\\\"TRANSCRIPT SAMPLE.pdf\\\",\\\"DIPLOMA SAMPLE.pdf\\\"]\"}}', 1, '2025-05-08 04:42:24', '2025-12-16 07:13:04'),
+(12, 212, '{\"8\":{\"148\":\"Native\",\"147\":\"Fluent\"}}', '{\"182\":{\"score_level\":\"ssss\",\"expiring_date\":\"2025-05-31\",\"evidence_imgs\":\"[\\\"DIPLOMA SAMPLE.docx\\\",\\\"DIPLOMA SAMPLE.pdf\\\",\\\"CERTIFICATIONS SAMPLE.pdf\\\",\\\"intratreetops.sql\\\",\\\"8VjZEm1717242175 - Copy - Copy - Copy (2).png\\\"]\"}}', '{\"188\":{\"score_level\":\"eqfd\",\"expiring_date\":\"2025-05-09\",\"evidence_imgs\":\"[\\\"TRANSCRIPT SAMPLE.pdf\\\",\\\"CERTIFICATIONS SAMPLE.pdf\\\"]\"}}', '{\"191\":{\"evidence_imgs\":\"[\\\"CERTIFICATIONS SAMPLE.pdf\\\",\\\"DIPLOMA SAMPLE.docx\\\",\\\"TRANSCRIPT SAMPLE.pdf\\\",\\\"DIPLOMA SAMPLE.pdf\\\"]\"}}', 1, '2025-05-08 04:42:24', '2026-02-18 10:37:44'),
 (13, 205, '{\"6\":{\"97\":\"Conversational\"}}', '{\"183\":{\"score_level\":\"erer\",\"expiring_date\":\"2025-05-28\",\"evidence_imgs\":\"[\\\"add-nurse-backup-4-dec.blade.php\\\",\\\"add-nurse-backup-30-sep.blade.php\\\",\\\"awards_list.blade.php\\\",\\\"certification_list.blade.php\\\"]\"}}', '{\"189\":{\"score_level\":\"vbb\",\"expiring_date\":\"2025-05-19\",\"evidence_imgs\":\"[\\\"certification_list.blade.php\\\",\\\"complete-profile-nurse-list.blade.php\\\",\\\"complete-profile-nurse-list-backup-13august.blade.php\\\"]\"}}', '{\"192\":{\"evidence_imgs\":\"[\\\"add-nurse-backup-4-dec.blade.php\\\",\\\"add-nurse-backup-30-sep.blade.php\\\"]\"}}', 1, '2025-05-09 10:52:42', '2025-05-09 10:55:43'),
 (14, 213, '{\"3\":{\"19\":\"Conversational\"},\"1\":{\"ererer e\":\"Conversational\"}}', '{\"183\":{\"score_level\":\"erer\",\"expiring_date\":\"2025-07-22\",\"evidence_imgs\":\"[\\\"awards_list.blade.php\\\",\\\"basic_details.blade.php\\\"]\"}}', '{\"187\":{\"score_level\":\"fdd\",\"expiring_date\":\"2025-07-21\",\"evidence_imgs\":\"[\\\"benefit_preferences.blade.php\\\",\\\"certification_list.blade.php\\\",\\\"check_clearance.blade.php\\\"]\"}}', '{\"192\":{\"evidence_imgs\":\"[\\\"complete-profile-nurse-list-backup-13august.blade.php\\\",\\\"contact-list.blade.php\\\"]\"}}', NULL, '2025-07-24 12:47:10', '2025-07-24 12:52:07'),
 (15, 273, '{\"3\":{\"19\":\"Native\"}}', '{\"183\":{\"score_level\":\"sdf\",\"expiring_date\":\"2026-01-11\",\"evidence_imgs\":\"[\\\"unnamed.webp\\\"]\"}}', 'null', 'null', 1, '2025-12-08 12:36:50', '2025-12-08 12:36:50');
@@ -2517,6 +2558,44 @@ INSERT INTO `newsletter` (`id`, `email`, `status`, `created_at`, `updated_at`, `
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `nurse_applications`
+--
+
+CREATE TABLE `nurse_applications` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `nurse_id` int(10) UNSIGNED NOT NULL,
+  `job_id` int(10) UNSIGNED NOT NULL,
+  `employer_id` int(10) UNSIGNED NOT NULL,
+  `job_title` varchar(255) DEFAULT NULL,
+  `status` int(11) DEFAULT 1 COMMENT '1-submitted/ 2-under_review /3-shortlisted/4-interview_scheduled/5-interview_completed/6-conditional_offer/7-offer/8-hired/9-rejected/10-declined/11-withdrawn',
+  `applied_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `match_percentage` int(11) DEFAULT NULL,
+  `is_archived_by_nurse` tinyint(1) DEFAULT 0,
+  `withdrawn_at` timestamp NULL DEFAULT NULL,
+  `hired_at` timestamp NULL DEFAULT NULL,
+  `rejected_at` datetime DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `nurse_applications`
+--
+
+INSERT INTO `nurse_applications` (`id`, `nurse_id`, `job_id`, `employer_id`, `job_title`, `status`, `applied_at`, `match_percentage`, `is_archived_by_nurse`, `withdrawn_at`, `hired_at`, `rejected_at`, `created_at`, `updated_at`) VALUES
+(1, 212, 3, 351, 'Registered Nurse', 1, '2026-02-20 09:21:49', 53, 0, NULL, NULL, NULL, '2026-02-14 10:11:28', '2026-02-14 10:11:28'),
+(2, 212, 4, 351, 'Midwife', 8, '2026-02-13 09:21:53', 44, 0, NULL, '2026-02-27 10:48:15', NULL, '2026-02-14 10:11:28', '2026-02-14 10:11:28'),
+(3, 212, 5, 351, 'Aged Care Nurse', 4, '2026-02-11 09:21:59', 89, 0, NULL, NULL, NULL, '2026-02-16 10:11:28', '2026-02-16 10:11:28'),
+(4, 212, 6, 351, 'Registered Nurse', 9, '2026-02-18 12:55:43', 78, 0, NULL, NULL, '2026-02-19 18:25:30', '2026-02-15 10:11:28', '2026-02-15 10:11:28'),
+(5, 212, 3, 351, 'Aged Care Nurse', 11, '2026-02-09 09:22:10', 64, 0, '2026-02-28 10:48:33', NULL, NULL, '2026-02-17 10:11:28', '2026-02-17 10:11:28'),
+(6, 212, 6, 351, 'Midwife', 7, '2026-02-18 09:22:15', 94, 0, NULL, NULL, NULL, '2026-02-18 10:42:10', '2026-02-18 10:11:28'),
+(7, 212, 3, 351, 'Nurse Practitioner (NP)', 2, '2026-02-02 09:22:18', 50, 0, NULL, NULL, NULL, '2026-02-02 08:57:52', '2026-02-02 08:58:13'),
+(8, 212, 5, 351, 'Personal Care Assistant (PCA)', 3, '2026-01-22 09:22:21', 66, 0, NULL, NULL, NULL, '2026-01-22 08:58:21', '2026-02-22 08:59:37'),
+(9, 212, 6, 351, 'Leadership & Management', 6, '2026-01-26 09:22:25', 41, 0, NULL, NULL, NULL, '2026-01-26 09:00:31', '2026-01-26 09:00:41');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `other_evidance`
 --
 
@@ -2601,8 +2680,7 @@ INSERT INTO `password_reset_tokens` (`email`, `token`, `created_at`) VALUES
 ('vincentriviera@gmail.com', '5fMC15CxOCmz2fp03QTQuoxoRVHaahJ4OUD3BLIiPaCzDVQDiwhWwXyoCDvxHmhx', '2024-06-30 07:05:10'),
 ('votiveamit.web@gmail.com', 'e62IUez2RDo6Giro1uKcmlLFxR3saFgLS0Jek1fj1GEPkEXJQi9loejHCJvh6ODf', '2026-01-10 12:58:07'),
 ('votivephp.neha@gmail.com', 'Xcr8EDlLHfWHw8IwDmhmVIrrr8tWqBh3VZ1ccMNGqXFDqi4vefyXQ2iA1ZAxq3ph', '2024-09-10 04:00:43'),
-('votivetester.preeti@gmail.com', 'zxnuGh3Lo2PyF6e7XjbXKNeWQizC1spPehrCl5RK9BVdPnPEVuAIbcIocKnimvqs', '2025-03-05 04:58:15'),
-('votivetester.vijendra@gmail.com', 'KUf86NfvommFPlDduagpdwMsLWgIfsmnokb8TJ5A17HWEpqwz4o0sDtke4A5otFr', '2024-12-03 08:42:58');
+('votivetester.preeti@gmail.com', 'zxnuGh3Lo2PyF6e7XjbXKNeWQizC1spPehrCl5RK9BVdPnPEVuAIbcIocKnimvqs', '2025-03-05 04:58:15');
 
 -- --------------------------------------------------------
 
@@ -3621,10 +3699,12 @@ INSERT INTO `profession_data` (`profession_id`, `user_id`, `experience_id`, `mai
 (11, 326, NULL, NULL, '374', '1028', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-16 14:08:27', '2026-01-16 14:08:27'),
 (12, 326, NULL, NULL, '383', '768', NULL, NULL, NULL, NULL, 'select', 'select', NULL, NULL, '1', NULL, '', NULL, NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '2026-01-16 14:12:26', '2026-01-16 14:12:26'),
 (13, 327, NULL, NULL, '616', '679', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-19 04:29:01', '2026-01-19 04:29:01'),
-(21, 212, NULL, NULL, '357', '588', '1', 1, NULL, 'Permanent', '4', 'select', 'select', NULL, '1', 1, '', NULL, NULL, 'test', NULL, 'test', '0', NULL, NULL, NULL, NULL, '2026-01-24 10:24:11', '2026-01-24 10:24:11'),
-(22, 212, NULL, NULL, '357', '588', '1', 1, NULL, 'Permanent', '4', 'select', 'select', NULL, '1', 1, '', NULL, NULL, 'test', NULL, 'test', '0', NULL, NULL, NULL, NULL, '2026-01-24 10:24:53', '2026-01-24 10:24:53'),
 (27, 328, 197, NULL, '620', '771', '3', 11, NULL, 'Fixed-term', 'select', 'select', '64', NULL, '1', 1, '', NULL, NULL, 'xcc', NULL, 'cxx', '0', '2026-01-26', '2026-02-10', 0, 'complete', '2026-01-30 10:49:21', '2026-01-30 10:50:59'),
-(28, 329, NULL, NULL, '620', '1030', '2', 15, NULL, 'Temporary', 'select', '16', 'select', NULL, '1', 1, '', NULL, NULL, 'scx', NULL, 'xcx', '0', NULL, NULL, NULL, NULL, '2026-01-30 13:18:36', '2026-01-30 13:21:45');
+(28, 329, NULL, NULL, '620', '1030', '2', 15, NULL, 'Temporary', 'select', '16', 'select', NULL, '1', 1, '', NULL, NULL, 'scx', NULL, 'xcx', '0', NULL, NULL, NULL, NULL, '2026-01-30 13:18:36', '2026-01-30 13:21:45'),
+(38, 212, 212, NULL, '357', '588', '1', 1, NULL, 'Permanent', '4', 'select', 'select', NULL, '1', 1, '', NULL, NULL, 'test', NULL, 'test', '0', '2020-12-04', NULL, 1, 'complete', '2026-02-18 13:13:53', '2026-02-18 13:27:35'),
+(39, 212, 213, NULL, '616', '764', '1', 2, NULL, 'Permanent', '4', 'select', 'select', NULL, '1', 1, '', NULL, NULL, 'test', NULL, 'test', '0', '2022-12-04', NULL, 1, 'complete', '2026-02-18 13:13:53', '2026-02-18 13:27:35'),
+(40, 212, 214, NULL, '373', '955', '1', 1, NULL, 'Permanent', '4', 'select', 'select', NULL, '1', 1, '', NULL, NULL, 'test', NULL, 'test', '0', '2024-12-04', NULL, 1, 'complete', '2026-02-18 13:13:53', '2026-02-18 13:27:35'),
+(41, 212, 215, NULL, '383', '1026', '1', 2, NULL, 'Permanent', '7', 'select', 'select', NULL, '1', 1, '', NULL, NULL, 'test', NULL, 'test', '0', '2025-12-04', NULL, 1, 'complete', '2026-02-18 13:13:53', '2026-02-18 13:27:35');
 
 -- --------------------------------------------------------
 
@@ -3691,7 +3771,8 @@ INSERT INTO `referee` (`referee_id`, `referee_no`, `user_id`, `experience_id`, `
 (78, 1, 300, 0, 'veer', 'pawar', 'votivetester.vijendra@gmail.com', '', 'I Managed Referee', 'votive', '492', '2021-12-04', NULL, 1, 1, '2025-12-27 11:55:29', '2025-12-30 08:24:07'),
 (80, 1, 306, 0, 'ref1', 'hfh', 'fhg@gmail.com', '', 'Worked Together on Committees', 'ref1', '349', '2025-12-01', NULL, 1, 1, '2025-12-31 10:00:35', '2025-12-31 10:00:35'),
 (81, 2, 306, 185, 'ref link', 'hfh', 'fhg@gmail.com', '', 'I Managed Referee', 'votive', NULL, '2025-12-01', NULL, 1, 1, '2025-12-31 10:04:28', '2025-12-31 10:04:28'),
-(82, 1, 315, 0, 'Belle', 'liu', 'votivetester.vijendra@gmail.com', '', 'Worked in Same Group', 'votive', '492', '2018-04-01', NULL, 1, 1, '2026-01-07 09:49:02', '2026-01-07 09:52:24');
+(82, 1, 315, 0, 'Belle', 'liu', 'votivetester.vijendra@gmail.com', '', 'Worked in Same Group', 'votive', '492', '2018-04-01', NULL, 1, 1, '2026-01-07 09:49:02', '2026-01-07 09:52:24'),
+(83, 1, 212, 0, 'Belle', 'liu', 'votivetester.vijendra@gmail.com', '', 'Advisory Role', 'votive', '523', '2020-12-04', NULL, 1, 1, '2026-02-18 12:52:29', '2026-02-18 12:52:29');
 
 -- --------------------------------------------------------
 
@@ -3721,9 +3802,9 @@ CREATE TABLE `registration_profiles_countries` (
 --
 
 INSERT INTO `registration_profiles_countries` (`id`, `user_id`, `country_code`, `registration_authority_name`, `registration_number`, `mobile_country_code`, `mobile_country_iso`, `mobile_number`, `upload_evidence`, `type`, `status`, `expiry_date`, `created_at`, `updated_at`) VALUES
-(18, 280, 'AI', 'jhkjhk', 'jklkjl', NULL, NULL, NULL, '[\"1767701394_44718_.modell-usb\"]', 1, 7, '2026-01-17 00:00:00', '2026-01-06 12:09:54', '2026-02-16 12:54:48'),
-(19, 307, 'AX', 'R- 848484', 'L- 565656', NULL, NULL, NULL, '[\"1767706470_89667_dummy.png\",\"1767706470_33319_logo.png\"]', 1, 7, '2026-01-16 00:00:00', '2026-01-06 13:34:30', '2026-02-16 12:54:48'),
-(20, 307, 'AQ', NULL, NULL, NULL, NULL, NULL, '[\"1767706644_42787_dummy.png\",\"1767706644_34510_logo.png\"]', 1, 7, '2026-01-06 00:00:00', '2026-01-06 13:35:31', '2026-02-16 12:54:48'),
+(18, 280, 'AI', 'jhkjhk', 'jklkjl', NULL, NULL, NULL, '[\"1767701394_44718_.modell-usb\"]', 1, 7, '2026-01-17 00:00:00', '2026-01-06 12:09:54', '2026-02-18 13:27:40'),
+(19, 307, 'AX', 'R- 848484', 'L- 565656', NULL, NULL, NULL, '[\"1767706470_89667_dummy.png\",\"1767706470_33319_logo.png\"]', 1, 7, '2026-01-16 00:00:00', '2026-01-06 13:34:30', '2026-02-18 13:27:40'),
+(20, 307, 'AQ', NULL, NULL, NULL, NULL, NULL, '[\"1767706644_42787_dummy.png\",\"1767706644_34510_logo.png\"]', 1, 7, '2026-01-06 00:00:00', '2026-01-06 13:35:31', '2026-02-18 13:27:40'),
 (28, 315, 'AX', '+636516546546', '2+3216316216516316', NULL, NULL, NULL, '[\"1767779704_43225_Mediqa 11-12-2025.htm\"]', 1, 2, '2026-12-04 00:00:00', '2026-01-07 09:55:04', '2026-01-07 09:55:04'),
 (29, 315, 'DZ', NULL, NULL, NULL, NULL, NULL, '[]', 1, 2, NULL, '2026-01-07 09:55:54', '2026-01-07 09:55:54'),
 (33, 212, 'AU', 'Australia', '458815165165132', 61, 'au', 2147483647, '[\"1768798737_42522_sample_quiz_questions (1).xlsx\"]', 1, 3, '2028-01-17 00:00:00', '2026-01-10 06:05:29', '2026-01-21 07:17:48'),
@@ -3732,8 +3813,8 @@ INSERT INTO `registration_profiles_countries` (`id`, `user_id`, `country_code`, 
 (39, 327, 'AU', NULL, NULL, 61, 'au', NULL, NULL, 1, 2, NULL, '2026-01-19 04:35:15', '2026-01-19 04:35:15'),
 (42, 300, 'JP', '4545454545454', '45454545454545', 81, 'jp', 1261561621, '[\"1768800525_17467_sample_quiz_questions (1).xlsx\"]', 1, 3, '2028-12-04 00:00:00', '2026-01-19 05:28:45', '2026-01-20 06:35:07'),
 (45, 300, 'IN', '2323232323232', '32323232323232', 91, 'in', 2147483647, '[\"1768890907_87349_sample_quiz_questions (1).xlsx\"]', 1, 3, '2028-12-04 00:00:00', '2026-01-20 06:35:07', '2026-01-21 09:46:56'),
-(46, 212, 'GB', 'Australia', '563563546', 44, 'gb', 2147483647, '[\"1768973854_80339_pexels-open-borders-35308633.jpg\"]', 1, 7, '2026-01-23 00:00:00', '2026-01-20 13:08:39', '2026-02-16 12:54:48'),
-(47, 212, 'US', NULL, NULL, 1, 'us', NULL, '[\"1768986100_70521_explore-ellipse-one.webp\"]', 1, 7, '2026-01-23 00:00:00', '2026-01-21 07:17:48', '2026-02-16 12:54:48');
+(46, 212, 'GB', 'Australia', '563563546', 44, 'gb', 2147483647, '[\"1768973854_80339_pexels-open-borders-35308633.jpg\"]', 1, 7, '2026-01-23 00:00:00', '2026-01-20 13:08:39', '2026-02-18 13:27:40'),
+(47, 212, 'US', NULL, NULL, 1, 'us', NULL, '[\"1768986100_70521_explore-ellipse-one.webp\"]', 1, 7, '2026-01-23 00:00:00', '2026-01-21 07:17:48', '2026-02-18 13:27:40');
 
 -- --------------------------------------------------------
 
@@ -3781,6 +3862,7 @@ CREATE TABLE `saved_searches` (
   `alert` text NOT NULL,
   `delivery` text NOT NULL,
   `location` text DEFAULT NULL,
+  `status_my_preference` int(11) DEFAULT 0 COMMENT '1- when submit the nurse profile\\r\\n0- submit by the nurse',
   `filters` text DEFAULT NULL,
   `filter_sector` varchar(255) DEFAULT NULL COMMENT '1-Public & Government / 2- Private / 3- Public Government & Private',
   `filter_employment_type` varchar(255) DEFAULT NULL,
@@ -3807,26 +3889,26 @@ CREATE TABLE `saved_searches` (
 -- Dumping data for table `saved_searches`
 --
 
-INSERT INTO `saved_searches` (`searches_id`, `user_id`, `name`, `type`, `alert`, `delivery`, `location`, `filters`, `filter_sector`, `filter_employment_type`, `filter_work_shift`, `filter_work_environment`, `filter_employee_positions`, `filter_benefits_preferences`, `filter_nurse_type`, `filter_speciality`, `filter_location_preference`, `filter_experience_years`, `filter_salary_min`, `filter_salary_max`, `daily_cap`, `quite_hours_start`, `quite_hours_end`, `notes`, `last_run_at`, `created_at`, `updated_at`) VALUES
-(15, 210, 'dfd dfd', NULL, 'Realtime', 'In-app', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-29 08:12:17', '2025-10-29 08:12:17'),
-(23, 210, 'cvdert4r', NULL, 'Realtime', 'In-app', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-29 09:48:07', '2025-10-29 09:48:07'),
-(25, 210, 'ds', NULL, 'Realtime', 'Email', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-29 10:10:39', '2025-10-29 10:10:39'),
-(29, 210, 'cvdert4r Copydse', NULL, 'Realtime', 'In-app', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-29 10:59:22', '2025-10-29 10:59:22'),
-(32, 213, 'dsgdgsdg', NULL, 'Realtime', 'SMS', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-30 05:53:22', '2025-10-30 05:53:22'),
-(33, 213, 'dsgdgsdg Copy', NULL, 'Realtime', 'SMS', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-30 06:47:45', '2025-10-30 06:47:45'),
-(34, 213, 'dsgdgsdg Copy', NULL, 'Realtime', 'SMS', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-30 06:47:45', '2025-10-30 06:47:45'),
-(35, 213, 'dsgdgsdg Copy', NULL, 'Realtime', 'SMS', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-30 06:48:42', '2025-10-30 06:48:42'),
-(36, 213, 'new_add', NULL, 'Realtime', 'SMS', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-30 06:49:53', '2025-10-30 06:49:53'),
-(40, 213, 'ss', NULL, 'Daily', 'In-app', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-30 08:54:00', '2025-10-30 08:54:00'),
-(42, 212, 'My Preferences', 'dynamic', 'Realtime', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-30 13:39:19', '2026-01-15 07:01:05'),
-(43, 212, '', NULL, 'Realtime', 'Email', NULL, '{\"employment_type\":[\"4\"],\"salary\":{\"min\":\"0\",\"max\":\"0\"}}', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-30 13:40:24', '2026-01-15 07:01:05'),
-(44, 212, 'Educational & Training', NULL, 'Realtime', 'Email', NULL, '', '1', '[\"6\"]', '[\"12\",\"61\",\"68\",\"71\"]', '[\"163\",\"164\"]', '[\"19\",\"25\"]', '[\"9\"]', '[\"293\",\"298\",\"351\",\"294\",\"299\",\"300\"]', '[\"97\",\"233\",\"590\",\"598\",\"765\"]', NULL, '5', '21000', '73000', NULL, NULL, NULL, NULL, NULL, '2025-10-30 13:43:20', '2026-01-15 07:01:05'),
-(45, 213, 'My Preferences', 'dynamic', 'Off', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-11-01 12:34:54', '2025-11-05 06:29:50'),
-(46, 212, '', 'Dynamic', 'Realtime', 'In-app', NULL, '[\"Full-time (Fixed-term)\",null]', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-11-06 13:30:35', '2025-11-06 13:30:35'),
-(53, 283, 'My Preferences', 'dynamic', 'Off', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-18 07:00:54', '2025-12-18 07:00:54'),
-(55, 303, 'My Preferences', 'dynamic', 'Off', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-30 05:26:16', '2025-12-30 05:26:16'),
-(57, 212, '', 'Dynamic', 'Realtime', 'Email', NULL, '{\"sector\":null,\"employment_type\":[],\"work_shift\":[],\"work_environment\":[],\"employee_positions\":[],\"benefits_preferences\":[],\"nurse_type\":[],\"speciality\":[],\"location_preference\":null,\"experience_years\":null,\"salary\":{\"min\":null,\"max\":null}}', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-14 07:24:00', '2026-01-14 07:24:00'),
-(58, 328, 'My Preferences', 'dynamic', 'Off', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-23 10:10:33', '2026-01-23 10:10:33');
+INSERT INTO `saved_searches` (`searches_id`, `user_id`, `name`, `type`, `alert`, `delivery`, `location`, `status_my_preference`, `filters`, `filter_sector`, `filter_employment_type`, `filter_work_shift`, `filter_work_environment`, `filter_employee_positions`, `filter_benefits_preferences`, `filter_nurse_type`, `filter_speciality`, `filter_location_preference`, `filter_experience_years`, `filter_salary_min`, `filter_salary_max`, `daily_cap`, `quite_hours_start`, `quite_hours_end`, `notes`, `last_run_at`, `created_at`, `updated_at`) VALUES
+(15, 210, 'dfd dfd', NULL, 'Realtime', 'In-app', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-29 08:12:17', '2025-10-29 08:12:17'),
+(23, 210, 'cvdert4r', NULL, 'Realtime', 'In-app', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-29 09:48:07', '2025-10-29 09:48:07'),
+(25, 210, 'ds', NULL, 'Realtime', 'Email', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-29 10:10:39', '2025-10-29 10:10:39'),
+(29, 210, 'cvdert4r Copydse', NULL, 'Realtime', 'In-app', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-29 10:59:22', '2025-10-29 10:59:22'),
+(32, 213, 'dsgdgsdg', NULL, 'Realtime', 'SMS', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-30 05:53:22', '2025-10-30 05:53:22'),
+(33, 213, 'dsgdgsdg Copy', NULL, 'Realtime', 'SMS', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-30 06:47:45', '2025-10-30 06:47:45'),
+(34, 213, 'dsgdgsdg Copy', NULL, 'Realtime', 'SMS', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-30 06:47:45', '2025-10-30 06:47:45'),
+(35, 213, 'dsgdgsdg Copy', NULL, 'Realtime', 'SMS', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-30 06:48:42', '2025-10-30 06:48:42'),
+(36, 213, 'new_add', NULL, 'Realtime', 'SMS', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-30 06:49:53', '2025-10-30 06:49:53'),
+(40, 213, 'ss', NULL, 'Daily', 'In-app', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-30 08:54:00', '2025-10-30 08:54:00'),
+(42, 212, 'My Preferences', 'dynamic', 'Realtime', '', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-30 13:39:19', '2026-01-15 07:01:05'),
+(43, 212, '', NULL, 'Realtime', 'Email', NULL, 0, '{\"employment_type\":[\"4\"],\"salary\":{\"min\":\"0\",\"max\":\"0\"}}', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-30 13:40:24', '2026-01-15 07:01:05'),
+(44, 212, 'Educational & Training', NULL, 'Realtime', 'Email', NULL, 0, '', '1', '[\"6\"]', '[\"12\",\"61\",\"68\",\"71\"]', '[\"163\",\"164\"]', '[\"19\",\"25\"]', '[\"9\"]', '[\"293\",\"298\",\"351\",\"294\",\"299\",\"300\"]', '[\"97\",\"233\",\"590\",\"598\",\"765\"]', NULL, '5', '21000', '73000', NULL, NULL, NULL, NULL, NULL, '2025-10-30 13:43:20', '2026-01-15 07:01:05'),
+(45, 213, 'My Preferences', 'dynamic', 'Off', '', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-11-01 12:34:54', '2025-11-05 06:29:50'),
+(46, 212, '', 'Dynamic', 'Realtime', 'In-app', NULL, 0, '[\"Full-time (Fixed-term)\",null]', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-11-06 13:30:35', '2025-11-06 13:30:35'),
+(53, 283, 'My Preferences', 'dynamic', 'Off', '', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-18 07:00:54', '2025-12-18 07:00:54'),
+(55, 303, 'My Preferences', 'dynamic', 'Off', '', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-30 05:26:16', '2025-12-30 05:26:16'),
+(57, 212, '', 'Dynamic', 'Realtime', 'Email', NULL, 0, '{\"sector\":null,\"employment_type\":[],\"work_shift\":[],\"work_environment\":[],\"employee_positions\":[],\"benefits_preferences\":[],\"nurse_type\":[],\"speciality\":[],\"location_preference\":null,\"experience_years\":null,\"salary\":{\"min\":null,\"max\":null}}', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-14 07:24:00', '2026-01-14 07:24:00'),
+(58, 328, 'My Preferences', 'dynamic', 'Off', '', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-23 10:10:33', '2026-01-23 10:10:33');
 
 -- --------------------------------------------------------
 
@@ -9926,7 +10008,7 @@ INSERT INTO `users` (`id`, `name`, `lastname`, `email`, `role`, `profile_img`, `
 (197, 'satyajeet', 'kasariya', 'votivephp.satyajeet@gmail.com', 1, 'nurse/assets/imgs/nurse06.png', NULL, '$2y$10$NbuXXJaRXtubliNsdq.sI.5hvhy1leVzMehbuNDMoIgyLqtfyGSOy', NULL, '', 0, '1', '1', '1', '[\"1\"]', '[\"2\"]', NULL, 'null', 'null', '2', 'null', 'null', 'null', '[\"7\"]', '465201', NULL, NULL, '2025-03-20 12:45:49', '2025-03-20 13:52:48', '5', '1', 'Yes', 'No', 'No', 'No', 'No', '61', 'au', NULL, '1234567895', '7089@Veer', 'IN', 1599, 'Indore', NULL, 'https://mediqa.com.au/nurse/my-profile?page=my_profile', NULL, 'Male', '1996-12-04', 'hhuvuhvvuh', '5464951495', '61', 'au', 'nick@heymobie.com', '[\"252\"]', 'null', 'null', 'null', '[\"7\"]', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', NULL, NULL, NULL, 1, NULL, '1', 1, NULL, NULL, NULL, NULL, NULL, 'Within 2 weeks', '[\"Updating my resume \\/ CV\"]', NULL, NULL, NULL, NULL),
 (205, 'fdf1', 'Mandloi', 'votivephp.neha234@gmail.com', 1, 'nurse/assets/imgs/nurse06.png', NULL, '$2y$10$QF8yxQcrn5av5PFL1DXpQeajPJ.RIVQGLeZcwRI8r.IBzaXJkgnDq', NULL, '', 0, '1', '1', '1', '[\"2\"]', '[\"1\"]', NULL, 'null', 'null', '1', 'null', 'null', 'null', '[\"11\"]', '452001', NULL, NULL, '2025-04-15 18:37:41', '2025-04-23 05:46:52', '2', '1', 'No', 'Yes', 'No', 'No', 'No', '61', 'au', NULL, '3454233435', 'Neha@1234', 'AZ', 226, 'Indore', 'cxc weew', 'http://localhost/mediqa', NULL, 'Female', '2025-04-29', 'dfdf', '3434343546', '61', 'au', 'sdsd@gmail.com', 'null', '[\"21\"]', 'null', 'null', 'null', '[\"202\"]', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'Permanent', 'Part-time (Permanent)', '', 1, 1, '12', 1, NULL, 1, NULL, NULL, NULL, 'Within 2 weeks', '[\"Preparing for interviews\"]', 'd fd', NULL, NULL, NULL),
 (207, 'carry', 'sim', 'votivemobile.ankit@gmail.com', 1, 'nurse/assets/imgs/nurse06.png', NULL, '$2y$10$oUe4i3ssoBsdSGj/FHdRxu2.CqOFUA4QKmuw6X23K5WF5FfrC0jti', NULL, 'eyJpdiI6IkxiV1BBYk16cnQ0ajhNNDZ2UWFFZUE9PSIsInZhbHVlIjoiQkNJcm8zWU9VQXV6c0lMcG0wczJFV0RyZjRMREVpM0UxSTdoUHpyZWhVVT0iLCJtYWMiOiJjZWExNzI4NGM0Njg4YThhYWQzY2Y4ZTU2NTFmYWMyMTk4NThlMmIzOGM4YTNkOTFiZDUxNzAyNjZiZjE3NzQwIiwidGFnIjoiIn0=', 0, '0', '1', '1', '[\"1\"]', '[\"2\"]', NULL, 'null', 'null', '1', 'null', 'null', 'null', '[\"10\"]', '452010', NULL, NULL, '2025-04-22 16:30:11', NULL, '0', '1', 'No', 'No', 'No', 'No', 'No', '61', 'au', NULL, '1234567891', '7089@Veer', 'AU', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '[\"252\"]', 'null', 'null', 'null', '[\"6\"]', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(208, 'Kate', 'DEMO', 'votivetester.vijendra@gmail.com', 1, 'nurse/assets/imgs/nurse06.png', NULL, '$2y$10$RK0vnCyp0JORafcXB.og4..DY5qpFPP1lhlytq/yqXuC7ikHSecF.', NULL, '', 0, '1', '1', '1', '[\"1\"]', '[\"2\"]', NULL, 'null', 'null', '2', 'null', 'null', 'null', '[\"1\"]', '77070', NULL, NULL, '2025-04-22 17:24:43', '2025-04-22 11:58:20', '1', '1', 'No', 'No', 'No', 'No', 'No', '61', 'au', NULL, '1234567891', '7089@Veer', 'AU', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '[\"252\"]', 'null', 'null', 'null', '[\"6\"]', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(208, 'Kate', 'DEMO', 'votivetester.vijendra@gmail.com', 1, 'nurse/assets/imgs/nurse06.png', NULL, '$2y$10$Mk5ggAio0rdY12YPQgPIXuxXRG.YYIR/2S99BMexJIX/QyAsnHNCO', NULL, '', 0, '1', '1', '1', '[\"1\"]', '[\"2\"]', NULL, 'null', 'null', '2', 'null', 'null', 'null', '[\"1\"]', '77070', NULL, NULL, '2025-04-22 17:24:43', '2026-02-17 05:46:35', '1', '1', 'No', 'No', 'No', 'No', 'No', '61', 'au', NULL, '1234567891', 'Test@123', 'AU', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '[\"252\"]', 'null', 'null', 'null', '[\"6\"]', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (209, 'Nurse', 'Apl', 'vijehndraparmar1789@gmail.com', 1, 'nurse/assets/imgs/nurse06.png', NULL, '$2y$10$XjgLRe5hQMeoz1.z/pkTteUK/DI2eD3NQQWcY7Kq.RPkja3J5P6y.', NULL, '', 0, '1', '1', '1', '[\"1\"]', '[\"2\"]', NULL, 'null', 'null', '1', 'null', 'null', 'null', '[\"7\"]', '452001', NULL, NULL, '2025-04-25 16:25:06', '2025-04-25 10:56:07', '1', '1', 'No', 'No', 'No', 'No', 'No', '61', 'au', NULL, '1234567891', '7089@Veer', 'AU', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '[\"253\"]', 'null', 'null', 'null', '[\"6\"]', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (211, 'Vincent', 'Boueshaghi', 'admin@gmail.com', 1, 'nurse/assets/imgs/nurse06.png', NULL, '$2y$10$L.0etECOEfDNtLDH4iKKKO25mUQ6nUL5eA53g314RUcxJcx8iFLyS', NULL, 'eyJpdiI6Im4yZ0oySURzL0NZL0NMMTFYVk1oOGc9PSIsInZhbHVlIjoiV0IvTFVIRmQzSU5mMUhuM3N4cEZKQT09IiwibWFjIjoiOGNkYmVmMzc1ZTlhOTYxMDMwNWYyMmU1N2I4ZWJkYzNlMmFjMzgwYTA3YzRlNWZkNmI5NjI0ZmRhODBmOGI1NiIsInRhZyI6IiJ9', 0, '0', '1', '1', '[\"1\"]', '[\"2\"]', NULL, 'null', 'null', '5', 'null', 'null', 'null', '[\"1\"]', '6009', NULL, NULL, '2025-05-08 09:28:02', '2025-05-08 04:00:17', '0', '1', 'No', 'No', 'No', 'No', 'No', '61', 'au', NULL, '0426923779', 'Mediqa2025', 'AU', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '[\"252\"]', 'null', 'null', 'null', '[\"8\"]', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (212, 'Vincent', 'Boueshaghi', 'vincent.boueshaghi@gmail.com', 1, 'nurse/assets/imgs/nurse06.png', NULL, '$2y$10$bR6A9krdSYEVUNa5Z9Ca5e5x8chJDXHmMF1oG3AwGmuap2Y8hKuF.', NULL, '', 0, '1', '1', '1', '{\"type_0\":[\"1\"],\"type_1\":[\"702\",\"704\",\"707\"],\"speciality_status\":{\"type_702\":{\"status\":\"Principal\"},\"type_704\":{\"status\":\"First\"},\"type_707\":{\"status\":\"Former\"}}}', '', '{\"type_0\":[\"1\"],\"type_1\":[\"616\"]}', 'null', 'null', '5', 'null', 'null', 'null', '[\"2\"]', '6009', NULL, NULL, '2025-05-08 09:34:16', '2026-01-29 12:35:22', '2', '1', 'Yes', 'No', 'No', 'No', 'No', '1', 'us', 'AU', '7878787878', 'Mediqa2025', 'AU', 196, 'Crawley', 'No', NULL, NULL, 'Male', '2013-05-14', NULL, NULL, '61', 'au', NULL, 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'Unemployed', '', '', 1, 1, NULL, 1, NULL, 1, 'Recently graduated', NULL, 'Less than 1 month', 'Immediately', '[\"Updating my resume \\/ CV\"]', 'No', '[\"AU\",\"GB\",\"US\"]', '[\"AU\"]', 0),
@@ -10204,7 +10286,11 @@ INSERT INTO `user_experience` (`experience_id`, `user_id`, `facility_workplace_t
 (189, 307, '{\"215\":[\"319\"]}', 'qwsdeee', '', NULL, '2026-01-04', '0000-00-00', '{\"2\":[\"67\"]}', NULL, 'wdsd', 'scfdf', '[\"9\"]', NULL, 1, '[\"Statutory Declaration\"]', NULL, 'null', '{\"type_0\":[\"345\"],\"type_345\":[\"377\"]}', 'null', '{\"type_0\":[\"1\"],\"type_1\":[\"96\"],\"speciality_status\":{\"type_630\":{\"status\":\"Current\",\"is_current\":\"0\",\"is_principal\":\"0\",\"is_first\":\"0\",\"is_former\":\"0\",\"is_upskilling\":\"0\"}}}', 'null', 'null', 'null', 'null', 'null', 'null', '2026-01-07 05:02:15', '2026-01-07 05:02:15', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', NULL, 'select', 'select', 1, '[]', 'null', '1', 'null', '[\"22\"]', 'null', 'null', 1, NULL),
 (190, 300, '{\"199\":{\"240\":[\"441\"]}}', 'votive', '', NULL, '2018-12-04', '0000-00-00', '{\"1\":[\"4\"]}', NULL, 'fghjgjcgfhjcfghcf', 'hgchgfchfcghhcfgh', '[\"8\"]', NULL, 1, '[\"Statement of Service\"]', '[\"Mediqa 11-12-2025.htm\"]', 'null', '{\"type_0\":[\"2\",\"1\",\"345\"],\"type_1\":[\"616\"],\"type_2\":[\"357\"],\"type_345\":[\"376\"]}', 'null', '{\"type_0\":[\"1\",\"485\",\"491\"],\"speciality_status\":{\"type_676\":{\"status\":\"Current\",\"is_current\":\"0\",\"is_principal\":\"0\",\"is_first\":\"0\",\"is_former\":\"0\",\"is_upskilling\":\"0\"},\"type_1123\":{\"status\":\"Current\",\"is_current\":\"0\",\"is_principal\":\"0\",\"is_first\":\"0\",\"is_former\":\"0\",\"is_upskilling\":\"0\"},\"type_1218\":{\"status\":\"Current\",\"is_current\":\"0\",\"is_principal\":\"0\",\"is_first\":\"0\",\"is_former\":\"0\",\"is_upskilling\":\"0\"}},\"type_491\":[\"1218\"],\"type_485\":[\"1123\"]}', 'null', 'null', 'null', 'null', 'null', 'null', '2026-01-08 07:23:36', '2026-01-08 07:23:36', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', NULL, 'select', 'select', 1, '{\"1\":[\"12\"]}', 'null', '5', '[\"12\"]', 'null', 'null', 'null', 1, NULL),
 (191, 280, '{\"215\":[\"318\"]}', 'ddff', '', NULL, '2026-01-28', '2026-02-04', '{\"2\":[\"67\"]}', NULL, 'd f', 'd fd', '[\"9\"]', NULL, 1, '[\"Transcript\"]', '[\"robots.txt\"]', 'null', '{\"type_0\":[\"345\"],\"type_345\":[\"377\"]}', 'null', '{\"type_0\":[\"2\",\"4\"],\"type_2\":[\"769\"],\"speciality_status\":{\"type_769\":{\"status\":\"Upskilling \\/ Transitioning \\/ Training\"},\"type_1028\":{\"status\":\"First\"}},\"type_4\":[\"1028\"]}', 'null', 'null', 'null', 'null', 'null', 'null', '2026-01-08 13:23:25', '2026-01-08 13:23:25', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', NULL, 'select', 'select', 0, '[]', 'null', '2', 'null', '[\"26\"]', 'null', 'null', 1, NULL),
-(197, 328, '{\"215\":[\"318\"]}', 'qwsdeee', '', NULL, '0000-00-00', '0000-00-00', NULL, NULL, 'dv', 'xcvcv', '[\"9\"]', NULL, 1, '[\"Award\"]', '[\"contact-list.blade.php\"]', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-30 10:50:59', '2026-01-30 10:50:59', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, '[]', NULL, NULL, 'null', '[\"26\"]', 'null', 'null', 1, NULL);
+(197, 328, '{\"215\":[\"318\"]}', 'qwsdeee', '', NULL, '0000-00-00', '0000-00-00', NULL, NULL, 'dv', 'xcvcv', '[\"9\"]', NULL, 1, '[\"Award\"]', '[\"contact-list.blade.php\"]', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-01-30 10:50:59', '2026-01-30 10:50:59', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, '[]', NULL, NULL, 'null', '[\"26\"]', 'null', 'null', 1, NULL),
+(212, 212, '{\"199\":{\"240\":[\"441\"]}}', 'votive', '', NULL, '0000-00-00', '0000-00-00', NULL, NULL, 'test', 'test', '[\"8\"]', NULL, 1, '[\"Award\"]', '[\"2nd Lecture of the human resources diploma progeam.pdf\"]', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-02-18 13:27:35', '2026-02-18 13:27:35', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, '[]', NULL, NULL, 'null', 'null', '[\"28\",\"30\"]', 'null', 1, NULL),
+(213, 212, '{\"199\":{\"237\":[\"423\"]}}', 'votive', '', NULL, '0000-00-00', '0000-00-00', NULL, NULL, 'test', 'test', '[\"8\"]', NULL, 1, '[\"Statutory Declaration\"]', '[\"signup.pdf\"]', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-02-18 13:27:35', '2026-02-18 13:27:35', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, '[]', NULL, NULL, 'null', 'null', 'null', 'null', 1, NULL),
+(214, 212, '{\"215\":[\"319\"]}', 'dewdwdeqwd', '', NULL, '0000-00-00', '0000-00-00', NULL, NULL, 'test', 'test', '[\"8\"]', NULL, 1, '[\"Statement of Service\"]', '[\"signup.pdf\"]', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-02-18 13:27:35', '2026-02-18 13:27:35', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, '[]', NULL, NULL, 'null', 'null', 'null', 'null', 1, NULL),
+(215, 212, '{\"205\":[\"292\"]}', 'test', '', NULL, '0000-00-00', '0000-00-00', NULL, NULL, 'tst', 'test', '[\"10\"]', NULL, 1, '[\"Certificate\"]', '[\"2nd Lecture of the human resources diploma progeam.pdf\"]', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-02-18 13:27:35', '2026-02-18 13:27:35', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, '[]', NULL, NULL, 'null', 'null', 'null', 'null', 1, NULL);
 
 -- --------------------------------------------------------
 
@@ -11546,6 +11632,12 @@ ALTER TABLE `imm_status`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `interview_nurses`
+--
+ALTER TABLE `interview_nurses`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `interview_references`
 --
 ALTER TABLE `interview_references`
@@ -11634,6 +11726,17 @@ ALTER TABLE `ndis_screening_check`
 --
 ALTER TABLE `newsletter`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `nurse_applications`
+--
+ALTER TABLE `nurse_applications`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_nurse` (`nurse_id`),
+  ADD KEY `idx_job` (`job_id`),
+  ADD KEY `idx_employer` (`employer_id`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_applied_at` (`applied_at`);
 
 --
 -- Indexes for table `other_evidance`
@@ -12009,6 +12112,12 @@ ALTER TABLE `imm_status`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
+-- AUTO_INCREMENT for table `interview_nurses`
+--
+ALTER TABLE `interview_nurses`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `interview_references`
 --
 ALTER TABLE `interview_references`
@@ -12024,7 +12133,7 @@ ALTER TABLE `job_apply`
 -- AUTO_INCREMENT for table `job_boxes`
 --
 ALTER TABLE `job_boxes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `job_boxes0`
@@ -12099,6 +12208,12 @@ ALTER TABLE `newsletter`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
+-- AUTO_INCREMENT for table `nurse_applications`
+--
+ALTER TABLE `nurse_applications`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
 -- AUTO_INCREMENT for table `other_evidance`
 --
 ALTER TABLE `other_evidance`
@@ -12168,13 +12283,13 @@ ALTER TABLE `professional_organization`
 -- AUTO_INCREMENT for table `profession_data`
 --
 ALTER TABLE `profession_data`
-  MODIFY `profession_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `profession_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `referee`
 --
 ALTER TABLE `referee`
-  MODIFY `referee_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
+  MODIFY `referee_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
 
 --
 -- AUTO_INCREMENT for table `registration_profiles_countries`
@@ -12258,7 +12373,7 @@ ALTER TABLE `user_education_cerification`
 -- AUTO_INCREMENT for table `user_experience`
 --
 ALTER TABLE `user_experience`
-  MODIFY `experience_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=198;
+  MODIFY `experience_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=216;
 
 --
 -- AUTO_INCREMENT for table `user_licenses_details`
