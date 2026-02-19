@@ -25,21 +25,91 @@ class MyCareerController extends Controller
     public function action_application(Request $request)
     {
         $modal_no = $request->modal_no;
-        // $application = NurseApplication::with([
-        //     'job',
-        //     'interviews' => function ($q) {
-        //         $q->latest();
-        //     }
-        // ])->findOrFail($request->application_id);
-
-        // $interview = $application->interviews->first();
 
         $application = NurseApplication::with('job','health_care','interview')->findOrFail($request->application_id);
 
         // echo "<pre>"; print_r($application);die;
 
-
         return view('nurse.my_career.partial_application_modal', compact('application', 'modal_no'));
+    }
+
+    public function archivedTimeline(Request $request)
+    {
+        $application = NurseApplication::with('job')
+            ->findOrFail($request->application_id);
+
+        $timeline = [];
+
+        /* 1️⃣ Application Submitted */
+        $timeline[] = [
+            'title' => 'Application Submitted',
+            'desc'  => 'Your profile has been submitted',
+            'date'  => $application->created_at->format('d M Y'),
+        ];
+
+        /* 2️⃣ Under Review */
+        if ($application->status >= 2) {
+            $timeline[] = [
+                'title' => 'Under Review',
+                'desc'  => 'HR team reviewed your application',
+                'date'  => $application->updated_at->format('d M Y'),
+            ];
+        }
+
+        /* 3️⃣ Interview */
+        if ($application->status >= 4) {
+            $timeline[] = [
+                'title' => 'Interview Stage',
+                'desc'  => 'Interview process completed',
+                'date'  => $application->updated_at->format('d M Y'),
+            ];
+        }
+
+        /* 4️⃣ Final Status (Archived reason) */
+        $finalStatus = match ($application->status) {
+
+            8 => [ // Hired
+                'label' => 'Hired',
+                'desc'  => 'Congratulations! You have been hired.',
+                'class' => 'success'
+            ],
+
+            9 => [ // Rejected (if you have)
+                'label' => 'Rejected',
+                'desc'  => 'Unfortunately, your application was rejected.',
+                'class' => 'danger'
+            ],
+
+            11 => [ // Withdrawn (if you use 8)
+                'label' => 'Withdrawn',
+                'desc'  => 'You have withdrawn this application.',
+                'class' => 'dark'
+            ],
+
+
+
+            default => [
+                'label' => 'Closed',
+                'desc'  => 'This application is now closed.',
+                'class' => 'secondary'
+            ]
+        };
+
+        $timeline[] = [
+            'title' => $finalStatus['label'],
+            'desc'  => $finalStatus['desc'],
+            'date'  => $application->updated_at->format('d M Y'),
+        ];
+
+        return response()->json([
+            'job_title' => $application->job_title ?? $application->job->title ?? '',
+
+            'status' => $finalStatus,
+
+            'timeline' => $timeline,
+
+            'action' => null // archived has no action
+        ]);
     }
 
     public function interviews_nurse(){

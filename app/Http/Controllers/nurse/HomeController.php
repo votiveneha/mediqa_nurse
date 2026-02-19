@@ -1279,6 +1279,12 @@ public function ResetPassword(Request $request)
         return view('nurse.dashboard', compact('countries'));
     }
 
+    public function dashboard1()
+    {
+        $countries = DB::table('country')->where('status', 1)->get();
+        return view('nurse.dashboard1', compact('countries'));
+    }
+
     public function save_registration_country(Request $request)
     {
         $user = auth('nurse_middle')->user();
@@ -2824,12 +2830,15 @@ public function ResetPassword(Request $request)
     }
 
 
+   
+
     // public function updateExperience(Request $request)
     // {
     //     $userId = $request->user_id;
         
     //     $facility_workplace_name = $request->facility_workplace_name;
     //     $nurseTypes = $request->input('nurseType', []);
+    //     //print_r($nurseTypes);
     //     $nursingType1 = $request->input('nursing_type_1', []);
     //     $nursingType2 = $request->input('nursing_type_2', []);
     //     $nursingType3 = $request->input('nursing_type_3', []);
@@ -2877,10 +2886,12 @@ public function ResetPassword(Request $request)
     //     $oldfile = $request->input('old_file');
     //     // print_r($oldfile);
     //     // die;
-
+        
+    //     $loopCount = 0;
     //     // Loop through nurse types and process them
     //     foreach ($nurseTypes as $key => $nurseType) {
     //         // $getexperiencedata = DB::table("user_experience")->where("user_id", $userId)->where("experience_id", $exp_id[$key])->get();
+    //        $loopCount++;
     //         $evi1 = $evdience[$key] ?? null;
     //         $oldfile1 = $oldfile[$key] ?? null;
     //         $present_box1 = $present_box[$key] ?? null;
@@ -2893,96 +2904,105 @@ public function ResetPassword(Request $request)
     //             $p_box = 0;
     //         }
     //         $facility_workplace_name1 = $facility_workplace_name[$key] ?? null;
-    //         $entryLevel = $nursingType1[$key] ?? null;
-    //         $registered = $nursingType2[$key] ?? null;
-    //         $advanced = $nursingType3[$key] ?? null;
-    //         $specialties1 = $specialties[$key] ?? null;
-    //         $nurse_practitioner_menu1 = $nurse_practitioner_menu[$key] ?? null;
-    //         $speciality_entry_adult = $speciality_entry_1[$key] ?? null;
-    //         $speciality_entry_maternity = $speciality_entry_2[$key] ?? null;
-    //         $speciality_entry_paediatrics = $speciality_entry_3[$key] ?? null;
-    //         $speciality_entry_community = $speciality_entry_4[$key] ?? null;
-    //         $surgical_row_box1 = $surgical_row_box[$key] ?? null;
-    //         $surgical_operative_care_1_1 = $surgical_operative_care_1[$key] ?? null;
-    //         $surgical_operative_care_2_1 = $surgical_operative_care_2[$key] ?? null;
-    //         $surgical_operative_care_3_1 = $surgical_operative_care_3[$key] ?? null;
-    //         $surgical_obs_care_1 = $surgical_obs_care[$key] ?? null;
-    //         $neonatal_care_1 = $neonatal_care[$key] ?? null;
-    //         $surgical_rowpad_box_1 = $surgical_rowpad_box[$key] ?? null;
-    //         $surgical_operative_carep_1_1 = $surgical_operative_carep_1[$key] ?? null;
-    //         $surgical_operative_carep_2_1 = $surgical_operative_carep_2[$key] ?? null;
-    //         $surgical_operative_carep_3_1 = $surgical_operative_carep_3[$key] ?? null;
-    //         //$positions_held1 = json_encode($positions_held[$key]) ?? null;
+            
     //         $subpwork1 = json_encode($subpwork[$key]) ?? null;
-    //         $start_date1 = $start_date[$key] ?? '0000-00-00';
-    //         $end_date1 = $end_date[$key] ?? '0000-00-00';
+            
     //         $job_responeblities1 = $job_responeblities[$key] ?? null;
     //         $achievements1 = $achievements[$key] ?? null;
-    //         $employeement_type1 = $employeement_type[$key] ?? null;
+            
     //         $skills_compantancies1 = $skills_compantancies[$key] ?? null;
     //         $type_of_evidence1 = $type_of_evidence[$key] ?? null;
     //         $level_of_exp1 = $level_of_exp[$key] ?? null;
     //         $emptypelevel1 = $emptypelevel[$key] ?? null;
-    //         $permanent_status1 = $permanent_status[$key] ?? null;
-    //         $temporary_status1 = $temporary_status[$key] ?? null;
+            
     //         $sub_skills_compantancies1_1 = $sub_skills_compantancies1[$key] ?? null;
     //         $sub_skills_compantancies2_1 = $sub_skills_compantancies2[$key] ?? null;
     //         $sub_skills_compantancies3_1 = $sub_skills_compantancies3[$key] ?? null;
     //         $sub_skills_compantancies4_1 = $sub_skills_compantancies4[$key] ?? null;
     //         $exp_id_1 = $exp_id[$key] ?? null;
-
+    //         echo $key."<br>";
     //         if ($exp_id_1) {
     //             // echo "test";
     //             // die;
     //             $oldfile2 = json_decode($oldfile1, true);
 
-    //             // if(!empty($evi1)){
-                    
-    //             //     $expimgs = Helpers::multipleFileUpload($evi1, $oldfile2);
-    //             // }else{
-    //             //     $expimgs = Helpers::multipleFileUpload('', $oldfile2);
-    //             // }
 
-    //             // print_r($dtran);
-    //             // die;
+    //             $profession_experience_id = $request->profession_experience_id;
+    //             $post = Profession::find($profession_experience_id[$key]);
+                
+    //             foreach($nurseType as $key1=>$nurse_type){
+    //                 if(str_contains($key1, 'type') && $key1 !== 'type_0'){
+    //                     foreach($nurse_type as $ntype){
+    //                         //echo $ntype;
+    //                         $specialities = $nurseType[$ntype];
+    //                         //print_r($specialities);
+    //                         $new_specialities = $specialities;   // make a copy
+    //                         unset($new_specialities["speciality_status"]);
+
+    //                         $levelKeys = array_filter(array_keys($new_specialities), function($key) {
+    //                             return str_contains($key, 'type') && $key !== 'type_0';
+    //                         });
+
+    //                         $lastLevelKey = end($levelKeys);   // Example: "type_30"
+
+    //                         $lastLevelId = str_replace('type_', '', $lastLevelKey); // 30
+
+    //                         $lastLevelValues = $new_specialities[$lastLevelKey] ?? [];
+
+    //                         //print_r($lastLevelValues);die;
+    //                         //print_r($levelKeys);die;
+    //                         //print_r($specialities);
+                            
+                            
+                            
+    //                         foreach($lastLevelValues as $spe){
+    //                             $spec_arr_id = "type_".$spe;
+    //                             if(isset($specialities['speciality_status'][$spec_arr_id]['present_status'])){
+    //                                 $present_status = 1;
+    //                             }else{
+    //                                 $present_status = 0;
+    //                             }
+                               
+    //                             $post->user_id = $userId;
+    //                             $post->experience_id = $exp_id_1;
+    //                             $post->nurse_data = $ntype;
+    //                             $post->specialties = $spe;
+    //                             $post->speciality_status = $specialities['speciality_status'][$spec_arr_id]['status'];
+    //                             $post->assistent_level = $specialities['speciality_status'][$spec_arr_id]['assistent_level'];
+                                
+    //                             $post->current_employee_status = $specialities['speciality_status'][$spec_arr_id]['employee_status'];
+    //                             $post->permanent_status = $specialities['speciality_status'][$spec_arr_id]['permanent_status'];
+    //                             $post->temporary_status = $specialities['speciality_status'][$spec_arr_id]['temporary_status'];
+    //                             $post->fixed_term_status = $specialities['speciality_status'][$spec_arr_id]['fixterm_status'];
+    //                             $post->unemployeed_status = '';
+    //                             $post->unemployeed_reason = $specialities['speciality_status'][$spec_arr_id]['unemployeement_reason'];
+    //                             $post->long_unemplyeed = $specialities['speciality_status'][$spec_arr_id]['long_unemployeed'];
+    //                             $post->emp_start_date = $specialities['speciality_status'][$spec_arr_id]['emp_start_date'];
+    //                             $post->emp_end_date = $specialities['speciality_status'][$spec_arr_id]['emp_end_date'];
+    //                             $post->present_status = $present_status;
+    //                             $post->row_status = "complete";
+    //                             $run = $post->save();
+    //                         }
+                               
+                            
+    //                     }
+    //                 }
+    //             }
 
     //             $run = ExperienceModel::where('experience_id', $exp_id_1)->update([
     //                 'facility_workplace_name' => $facility_workplace_name1,
     //                 'nurseType' => json_encode($nurseType),
-    //                 'entry_level_nursing' => json_encode($entryLevel),
-    //                 'registered_nurses' => json_encode($registered),
-    //                 'advanced_practioner' => json_encode($advanced),
-    //                 'nurse_prac' => json_encode($nurse_practitioner_menu1),
-    //                 'specialties' => json_encode($specialties1),
-    //                 'adults' => json_encode($speciality_entry_adult),
-    //                 'maternity' => json_encode($speciality_entry_maternity),
-    //                 'paediatrics_neonatal' => json_encode($speciality_entry_paediatrics),
-    //                 'community' => json_encode($speciality_entry_community),
-    //                 'surgical_preoperative' => json_encode($surgical_row_box1),
-    //                 'operating_room' => json_encode($surgical_operative_care_1_1),
-    //                 'operating_room_scout' => json_encode($surgical_operative_care_2_1),
-    //                 'operating_room_scrub' => json_encode($surgical_operative_care_3_1),
-    //                 'surgical_obstrics_gynacology' => json_encode($surgical_obs_care_1),
-    //                 'pad_op_room' => json_encode($surgical_operative_carep_1_1),
-    //                 'pad_qr_scout' => json_encode($surgical_operative_carep_2_1),
-    //                 'pad_qr_scrub' => json_encode($surgical_operative_carep_3_1),
-    //                 'neonatal_care' => json_encode($neonatal_care_1),
-    //                 'paedia_surgical_preoperative' => json_encode($surgical_rowpad_box_1),
-    //                 //'position_held' => $positions_held1,
-    //                 'facility_workplace_type' => $subpwork1,
-    //                 'employeement_start_date' => $start_date1,
-    //                 'employeement_end_date' => $end_date1,
+                    
     //                 'responsiblities' => $job_responeblities1,
     //                 'achievements' => $achievements1,
-    //                 'employeement_type' => json_encode($emptypelevel1),
+                    
     //                 'skills_compantancies' => json_encode($skills_compantancies1),
     //                 'evidence_type' => json_encode($type_of_evidence1),
-    //                 'permanent_status' => $permanent_status1,
-    //                 'temporary_status' => $temporary_status1,
+                    
     //                 'upload_evidence' => $evi1,
     //                 'sub_skills_compantancies' => json_encode($sub_skills_compantancies1),
-    //                 'assistent_level' => $level_of_exp1,
-    //                 'pre_box_status' => $p_box,
+                    
+                    
     //                 'inter_and_em_skill' => json_encode($sub_skills_compantancies1_1),
     //                 'lead_and_ment_skill' => json_encode($sub_skills_compantancies3_1),
     //                 'org_and_any_skill' => json_encode($sub_skills_compantancies2_1),
@@ -2991,57 +3011,172 @@ public function ResetPassword(Request $request)
     //             ]);
     //             $experi_id = "";
     //         } else {
-    //             $user_stage = update_user_stage($userId,"Experience");
+    //             //echo "hello";
+    //             // $newExperience = new ExperienceModel();
+    //             // $newExperience->user_id = $userId;
                 
-    //             $newExperience = new ExperienceModel();
-    //             $newExperience->user_id = $userId;
-    //             $newExperience->facility_workplace_name = $facility_workplace_name1;
-    //             $newExperience->nurseType = json_encode($nurseType);
-    //             $newExperience->entry_level_nursing = json_encode($entryLevel);
-    //             $newExperience->registered_nurses = json_encode($registered);
-    //             $newExperience->advanced_practioner = json_encode($advanced);
-    //             $newExperience->nurse_prac = json_encode($nurse_practitioner_menu1);
-    //             $newExperience->specialties = json_encode($specialties1);
-    //             $newExperience->adults = json_encode($speciality_entry_adult);
-    //             $newExperience->maternity = json_encode($speciality_entry_maternity);
-    //             $newExperience->paediatrics_neonatal = json_encode($speciality_entry_paediatrics);
-    //             $newExperience->community = json_encode($speciality_entry_community);
-    //             $newExperience->surgical_preoperative = json_encode($surgical_row_box1);
-    //             $newExperience->operating_room = json_encode($surgical_operative_care_1_1);
-    //             $newExperience->operating_room_scout = json_encode($surgical_operative_care_2_1);
-    //             $newExperience->operating_room_scrub = json_encode($surgical_operative_care_3_1);
-    //             $newExperience->surgical_obstrics_gynacology = json_encode($surgical_obs_care_1);
-    //             $newExperience->pad_op_room = json_encode($surgical_operative_carep_1_1);
-    //             $newExperience->pad_qr_scout = json_encode($surgical_operative_carep_2_1);
-    //             $newExperience->pad_qr_scrub = json_encode($surgical_operative_carep_3_1);
-    //             $newExperience->neonatal_care = json_encode($neonatal_care_1);
-    //             $newExperience->paedia_surgical_preoperative = json_encode($surgical_rowpad_box_1);
-    //             //$newExperience->position_held = $positions_held1;
-    //             $newExperience->facility_workplace_type = $subpwork1;
-    //             $newExperience->employeement_start_date = $start_date1;
-    //             $newExperience->employeement_end_date = $end_date1;
-    //             $newExperience->responsiblities = $job_responeblities1;
-    //             $newExperience->achievements = $achievements1;
-    //             $newExperience->employeement_type = json_encode($emptypelevel1);
-    //             $newExperience->skills_compantancies = json_encode($skills_compantancies1);
-    //             $newExperience->evidence_type =  json_encode($type_of_evidence1);
-    //             $newExperience->permanent_status = $permanent_status1;
-    //             $newExperience->temporary_status = $temporary_status1;
-    //             $newExperience->upload_evidence  = $evi1;
-    //             $newExperience->sub_skills_compantancies = json_encode($sub_skills_compantancies1);
-    //             $newExperience->assistent_level = $level_of_exp1;
-    //             $newExperience->pre_box_status = $p_box;
-    //             $newExperience->complete_status = 1;
-    //             $newExperience->inter_and_em_skill = json_encode($sub_skills_compantancies1_1);
-    //             $newExperience->org_and_any_skill = json_encode($sub_skills_compantancies2_1);
-    //             $newExperience->lead_and_ment_skill = json_encode($sub_skills_compantancies3_1);
-    //             $newExperience->tech_and_soft_pro = json_encode($sub_skills_compantancies4_1);
-    //             $newExperience->declaration_status = $dec_status;
+    //             // $newExperience->facility_workplace_name = $facility_workplace_name1;
+                
+    //             // $newExperience->facility_workplace_type = $subpwork1;
+                
+    //             // $newExperience->responsiblities = $job_responeblities1;
+    //             // $newExperience->achievements = $achievements1;
+                
+    //             // $newExperience->skills_compantancies = json_encode($skills_compantancies1);
+    //             // $newExperience->evidence_type =  json_encode($type_of_evidence1);
+               
+    //             // $newExperience->upload_evidence  = $evi1;
+    //             // $newExperience->sub_skills_compantancies = json_encode($sub_skills_compantancies1);
+    //             // $newExperience->assistent_level = $level_of_exp1;
+    //             // $newExperience->pre_box_status = $p_box;
+    //             // $newExperience->complete_status = 1;
+    //             // $newExperience->inter_and_em_skill = json_encode($sub_skills_compantancies1_1);
+    //             // $newExperience->org_and_any_skill = json_encode($sub_skills_compantancies2_1);
+    //             // $newExperience->lead_and_ment_skill = json_encode($sub_skills_compantancies3_1);
+    //             // $newExperience->tech_and_soft_pro = json_encode($sub_skills_compantancies4_1);
+    //             // $newExperience->declaration_status = $dec_status;
 
-    //             $run = $newExperience->save();
-    //             $experi_id = $newExperience->id;
+    //             // $run = $newExperience->save();
+                
+    //             // $experi_id = $newExperience->id;
+    //             // die;
+    //             // $user_stage = update_user_stage($userId,"Experience");
+    //             // $profession_experience_id = $request->profession_experience_id;
+    //             // $level_name = $request->level_name;
+
+    //             // if($level_name[$key] == 'add'){
+                    
+    //             //     foreach($nurseType as $key1=>$nurse_type){
+                
+    //             //             if(str_contains($key1, 'type') && $key1 !== 'type_0'){
+    //             //             // contains 'word'
+    //             //             //print_r($nurse_type);
+    //             //                 foreach($nurse_type as $ntype){
+    //             //                     //echo $ntype;
+    //             //                     $specialities = $nurseType[$ntype];
+
+    //             //                     $new_specialities = $specialities;   // make a copy
+    //             //                     unset($new_specialities["speciality_status"]);
+
+    //             //                     $levelKeys = array_filter(array_keys($new_specialities), function($key) {
+    //             //                         return str_contains($key, 'type') && $key !== 'type_0';
+    //             //                     });
+
+    //             //                     $lastLevelKey = end($levelKeys);   // Example: "type_30"
+
+    //             //                     $lastLevelId = str_replace('type_', '', $lastLevelKey); // 30
+
+    //             //                     $lastLevelValues = $new_specialities[$lastLevelKey] ?? [];
+
+    //             //                     //print_r($lastLevelValues);die;
+    //             //                     //print_r($levelKeys);die;
+    //             //                     //print_r($specialities);
+                                    
+    //             //                     foreach($lastLevelValues as $spe){
+    //             //                         $spec_arr_id = "type_".$spe;
+    //             //                         if(isset($specialities['speciality_status'][$spec_arr_id]['present_status'])){
+    //             //                             $present_status = 1;
+    //             //                         }else{
+    //             //                             $present_status = 0;
+    //             //                         }
+    //             //                         $post = new Profession;
+                                        
+    //             //                         $post->user_id = $userId;
+    //             //                         $post->experience_id = $experi_id;
+    //             //                         $post->nurse_data = $ntype;
+    //             //                         $post->specialties = $spe;
+    //             //                         $post->speciality_status = $specialities['speciality_status'][$spec_arr_id]['status'];
+    //             //                         $post->assistent_level = $specialities['speciality_status'][$spec_arr_id]['assistent_level'];
+    //             //                         //$post->declaration_status = $declare_information;
+    //             //                         //$post->bio = $bio;
+    //             //                         $post->current_employee_status = $specialities['speciality_status'][$spec_arr_id]['employee_status'];
+    //             //                         $post->permanent_status = $specialities['speciality_status'][$spec_arr_id]['permanent_status'];
+    //             //                         $post->temporary_status = $specialities['speciality_status'][$spec_arr_id]['temporary_status'];
+    //             //                         $post->fixed_term_status = $specialities['speciality_status'][$spec_arr_id]['fixterm_status'];
+    //             //                         $post->unemployeed_status = '';
+    //             //                         $post->unemployeed_reason = $specialities['speciality_status'][$spec_arr_id]['unemployeement_reason'];
+    //             //                         $post->long_unemplyeed = $specialities['speciality_status'][$spec_arr_id]['long_unemployeed'];
+    //             //                         $post->emp_start_date = $specialities['speciality_status'][$spec_arr_id]['emp_start_date'];
+    //             //                         $post->emp_end_date = $specialities['speciality_status'][$spec_arr_id]['emp_end_date'];
+    //             //                         $post->present_status = $present_status;
+    //             //                         $post->row_status = "complete";
+    //             //                         $run = $post->save();
+    //             //                     }
+                                    
+                                    
+    //             //                 }
+    //             //             }
+    //             //     }
+    //             // }else{
+
+                
+    //             //     $post = Profession::find($profession_experience_id[$key]);
+
+                    
+    //             //     //print_r();
+    //             //     foreach($nurseType as $key1=>$nurse_type){
+    //             //         if(str_contains($key1, 'type') && $key1 !== 'type_0'){
+    //             //             foreach($nurse_type as $ntype){
+    //             //                 //echo $ntype;
+    //             //                 $specialities = $nurseType[$ntype];
+    //             //                 //print_r($specialities);
+    //             //                 $new_specialities = $specialities;   // make a copy
+    //             //                 unset($new_specialities["speciality_status"]);
+
+    //             //                 $levelKeys = array_filter(array_keys($new_specialities), function($key) {
+    //             //                     return str_contains($key, 'type') && $key !== 'type_0';
+    //             //                 });
+
+    //             //                 $lastLevelKey = end($levelKeys);   // Example: "type_30"
+
+    //             //                 $lastLevelId = str_replace('type_', '', $lastLevelKey); // 30
+
+    //             //                 $lastLevelValues = $new_specialities[$lastLevelKey] ?? [];
+
+    //             //                 //print_r($lastLevelValues);die;
+    //             //                 //print_r($levelKeys);die;
+    //             //                 //print_r($specialities);
+                                
+                                
+    //             //                 foreach($lastLevelValues as $spe){
+    //             //                     $spec_arr_id = "type_".$spe;
+    //             //                     if(isset($specialities['speciality_status'][$spec_arr_id]['present_status'])){
+    //             //                         $present_status = 1;
+    //             //                     }else{
+    //             //                         $present_status = 0;
+    //             //                     }
+                                
+    //             //                     $post->user_id = $userId;
+    //             //                     $post->experience_id = $experi_id;
+    //             //                     $post->nurse_data = $ntype;
+    //             //                     $post->specialties = $spe;
+    //             //                     $post->speciality_status = $specialities['speciality_status'][$spec_arr_id]['status'];
+    //             //                     $post->assistent_level = $specialities['speciality_status'][$spec_arr_id]['assistent_level'];
+                                    
+    //             //                     $post->current_employee_status = $specialities['speciality_status'][$spec_arr_id]['employee_status'];
+    //             //                     $post->permanent_status = $specialities['speciality_status'][$spec_arr_id]['permanent_status'];
+    //             //                     $post->temporary_status = $specialities['speciality_status'][$spec_arr_id]['temporary_status'];
+    //             //                     $post->fixed_term_status = $specialities['speciality_status'][$spec_arr_id]['fixterm_status'];
+    //             //                     $post->unemployeed_status = '';
+    //             //                     $post->unemployeed_reason = $specialities['speciality_status'][$spec_arr_id]['unemployeement_reason'];
+    //             //                     $post->long_unemplyeed = $specialities['speciality_status'][$spec_arr_id]['long_unemployeed'];
+    //             //                     $post->emp_start_date = $specialities['speciality_status'][$spec_arr_id]['emp_start_date'];
+    //             //                     $post->emp_end_date = $specialities['speciality_status'][$spec_arr_id]['emp_end_date'];
+    //             //                     $post->present_status = $present_status;
+    //             //                     $post->row_status = "complete";
+    //             //                     $run = $post->save();
+    //             //                 }
+                                
+                                
+    //             //             }
+    //             //         }
+    //             //     }
+    //             // }
+                
     //         }
     //     }
+    //     echo $loopCount;
+    //     die;
 
         
     //     // echo $experi_id;die;
@@ -3055,7 +3190,6 @@ public function ResetPassword(Request $request)
 
     //     echo json_encode($json);
     // }
-
     public function updateExperience(Request $request)
     {
         $userId = $request->user_id;
@@ -3126,17 +3260,38 @@ public function ResetPassword(Request $request)
                 $p_box = 0;
             }
             $facility_workplace_name1 = $facility_workplace_name[$key] ?? null;
-            
+            // $entryLevel = $nursingType1[$key] ?? null;
+            // $registered = $nursingType2[$key] ?? null;
+            // $advanced = $nursingType3[$key] ?? null;
+            // $specialties1 = $specialties[$key] ?? null;
+            // $nurse_practitioner_menu1 = $nurse_practitioner_menu[$key] ?? null;
+            // $speciality_entry_adult = $speciality_entry_1[$key] ?? null;
+            // $speciality_entry_maternity = $speciality_entry_2[$key] ?? null;
+            // $speciality_entry_paediatrics = $speciality_entry_3[$key] ?? null;
+            // $speciality_entry_community = $speciality_entry_4[$key] ?? null;
+            // $surgical_row_box1 = $surgical_row_box[$key] ?? null;
+            // $surgical_operative_care_1_1 = $surgical_operative_care_1[$key] ?? null;
+            // $surgical_operative_care_2_1 = $surgical_operative_care_2[$key] ?? null;
+            // $surgical_operative_care_3_1 = $surgical_operative_care_3[$key] ?? null;
+            // $surgical_obs_care_1 = $surgical_obs_care[$key] ?? null;
+            // $neonatal_care_1 = $neonatal_care[$key] ?? null;
+            // $surgical_rowpad_box_1 = $surgical_rowpad_box[$key] ?? null;
+            // $surgical_operative_carep_1_1 = $surgical_operative_carep_1[$key] ?? null;
+            // $surgical_operative_carep_2_1 = $surgical_operative_carep_2[$key] ?? null;
+            // $surgical_operative_carep_3_1 = $surgical_operative_carep_3[$key] ?? null;
+            // $positions_held1 = json_encode($positions_held[$key]) ?? null;
             $subpwork1 = json_encode($subpwork[$key]) ?? null;
-            
+            // $start_date1 = $start_date[$key] ?? '0000-00-00';
+            // $end_date1 = $end_date[$key] ?? '0000-00-00';
             $job_responeblities1 = $job_responeblities[$key] ?? null;
             $achievements1 = $achievements[$key] ?? null;
-            
+            //$employeement_type1 = $employeement_type[$key] ?? null;
             $skills_compantancies1 = $skills_compantancies[$key] ?? null;
             $type_of_evidence1 = $type_of_evidence[$key] ?? null;
             $level_of_exp1 = $level_of_exp[$key] ?? null;
             $emptypelevel1 = $emptypelevel[$key] ?? null;
-            
+            // $permanent_status1 = $permanent_status[$key] ?? null;
+            // $temporary_status1 = $temporary_status[$key] ?? null;
             $sub_skills_compantancies1_1 = $sub_skills_compantancies1[$key] ?? null;
             $sub_skills_compantancies2_1 = $sub_skills_compantancies2[$key] ?? null;
             $sub_skills_compantancies3_1 = $sub_skills_compantancies3[$key] ?? null;
@@ -3148,6 +3303,15 @@ public function ResetPassword(Request $request)
                 // die;
                 $oldfile2 = json_decode($oldfile1, true);
 
+                // if(!empty($evi1)){
+                    
+                //     $expimgs = Helpers::multipleFileUpload($evi1, $oldfile2);
+                // }else{
+                //     $expimgs = Helpers::multipleFileUpload('', $oldfile2);
+                // }
+
+                // print_r($dtran);
+                // die;
 
                 $profession_experience_id = $request->profession_experience_id;
                 $post = Profession::find($profession_experience_id[$key]);
@@ -3186,7 +3350,6 @@ public function ResetPassword(Request $request)
                                 }
                                
                                 $post->user_id = $userId;
-                                $post->experience_id = $exp_id_1;
                                 $post->nurse_data = $ntype;
                                 $post->specialties = $spe;
                                 $post->speciality_status = $specialities['speciality_status'][$spec_arr_id]['status'];
@@ -3295,6 +3458,12 @@ public function ResetPassword(Request $request)
                                     
                                     foreach($lastLevelValues as $spe){
                                         $spec_arr_id = "type_".$spe;
+                                        if(isset($specialities['speciality_status'][$spec_arr_id]['present_status'])){
+                                            $present_status = 1;
+                                        }else{
+                                            $present_status = 0;
+                                        }
+                                        
                                         $post = new Profession;
                                         
                                         $post->user_id = $userId;
@@ -3329,7 +3498,7 @@ public function ResetPassword(Request $request)
                     $post = Profession::find($profession_experience_id[$key]);
 
                     
-                    //print_r();
+                    //print_r($nurseType);
                     foreach($nurseType as $key1=>$nurse_type){
                         if(str_contains($key1, 'type') && $key1 !== 'type_0'){
                             foreach($nurse_type as $ntype){

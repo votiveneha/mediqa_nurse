@@ -129,6 +129,7 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::middleware('nurse_middle')->group(function () {
     Route::get('/my-profile', 'HomeController@manage_profile')->name('my-profile');
     Route::get('/dashboard', 'HomeController@dashboard')->name('dashboard');
+    Route::get('/dashboard1', 'HomeController@dashboard1')->name('dashboard1');
     Route::post('/changepassword', 'HomeController@changepassword')->name('changepassword');
     Route::any('/updateProfile', 'HomeController@updateProfile')->name('updateProfile');
     Route::post('/user-upload-image', 'HomeController@upload_profile_image')->name('user-upload-image');
@@ -263,6 +264,7 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::get('matchedJobs', 'MyCareerController@matchedJobs')->name('matchedJobs');
   Route::get('application', 'MyCareerController@application')->name('application');
   Route::get('application-timeline', 'MyCareerController@applicationTimeline')->name('applicationTimeline');
+  Route::get('application-archived-timeline', 'MyCareerController@archivedTimeline')->name('archivedTimeline');
   Route::get('action-application', 'MyCareerController@action_application')->name('action_application');
   Route::get('nurseMyJobs', 'MyJobController@nurseMyJobs')->name('nurseMyJobs');
 

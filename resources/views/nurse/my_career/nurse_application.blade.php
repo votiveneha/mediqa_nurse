@@ -898,42 +898,52 @@
                           <span class=""><i class="fas fa-search"></span></i> Status
                         </button>
                         <div class="dropdown-menu">
-                          <a class="dropdown-item" href="#">Under Review</a>
-                          <a class="dropdown-item" href="#">Offer</a>
-                          <a class="dropdown-item" href="#">Shortlisted</a>
-                          <a class="dropdown-item" href="#">Rejected</a>
+                          <a class="dropdown-item status-filter" data-value="Under Review">Under Review</a>
+                          <a class="dropdown-item status-filter" data-value="Interview Scheduled">Interview Scheduled</a>
+                          <a class="dropdown-item status-filter" data-value="Offer">Offer
+                          </a>
+                          <a class="dropdown-item status-filter" data-value="Conditional Offer">Conditional Offer</a>
+                          <a class="dropdown-item status-filter" data-value="Shortlisted">Shortlisted</a>
+                          <a class="dropdown-item status-filter" data-value="Submitted">Submitted</a>
+                          <a class="dropdown-item status-filter" data-value="">All</a>
                         </div>
                       </div>
                       <!-- Date Dropdown -->
-                      <div class="dropdown mr-2 filter-item">
-                        <button class="btn btn-light dropdown-toggle filter-btn" data-toggle="dropdown">
-                          <i class="far fa-calendar-alt mr-1"></i> Last 30 Days
-                        </button>
-                        <div class="dropdown-menu">
-                          <a class="dropdown-item" href="#">Last 7 Days</a>
-                          <a class="dropdown-item" href="#">Last 30 Days</a>
-                          <a class="dropdown-item" href="#">Last 6 Months</a>
-                        </div>
-                      </div>
+                    <div class="mr-2 filter-item">
+                        {{-- <label for="dateFilter"><i class="far fa-calendar-alt mr-1"></i> Date Filter:</label> --}}
+                        <select id="dateFilter" class="form-control filter-btn">
+                            <option value="">All</option>
+                            <option value="7">Last 7 Days</option>
+                            <option value="30">Last 30 Days</option>
+                            <option value="180">Last 6 Months</option>
+                        </select>
+                    </div>
+
+
                       <!-- Search -->
                       <div class="position-relative mr-2 filter-item">
                         <i class="fas fa-search search-icon"></i>
-                        <input type="text" class="form-control search-input" placeholder="Search..." />
+                       {{-- <input type="text" id="customSearch" class="form-control search-input" placeholder="Search..." /> --}}
+                       <input type="text" id="customSearch" placeholder="Search...">
+
                       </div>
                     </div>
                     <!-- Clear Filters -->
                     <div class="filter-border pt-7">
-                      <button
+                      <button id="clearFilters"
                         class="btn btn-light filter-btn d-flex align-items-center w-100 whitespace-nowrap filter-btn gap-4">
                         <span class="d-flex gap-2"> <i class="fas fa-sliders-h mr-1"></i> Clear
                           Filters</span>
-                        <span class="text-muted ml-1">4 results</span>
+                     
                       </button>
                     </div>
                   </div>
                   <!-- Table -->
                   <div class="application-table">
-                    <table class="table  bg-white">
+                    {{-- <table class="table  bg-white"> --}}
+                      {{-- <table id="applicationsTable" class="table bg-white"> --}}
+                        <table id="applicationsTable" class="table table-bordered bg-white">
+
                       <thead>
                         <tr>
                           <th>Job Title</th>
@@ -944,7 +954,7 @@
                           <th>Actions</th>
                         </tr>
                       </thead>
-                      <tbody class="table-bordered">
+                      <tbody >
                         @foreach ($active_list as $list)
                         <tr>
                           <td>
@@ -1083,7 +1093,7 @@
                       <!-- Search -->
                       <div class="position-relative mr-2 filter-item">
                         <i class="fas fa-search search-icon"></i>
-                        <input type="text" class="form-control search-input" placeholder="Search..." />
+                          <input type="text" id="customSearch" placeholder="Search...">
                       </div>
                     </div>
                     <!-- Clear Filters -->
@@ -1098,7 +1108,8 @@
                   </div>
                   <!-- Table -->
                   <div class="application-table table-responsive">
-                    <table class="table bg-white">
+                    {{-- <table class="table bg-white"> --}}
+                    <table id="applicationsTable" class="table table-bordered bg-white">
                       <thead>
                         <tr>
                           <th>Job Title</th>
@@ -1122,7 +1133,7 @@
                             <p class="table-nurse-head"> {{ implode(', ', $list->job->shift_names) }}</p>
                           </td>
                           <td>
-                            <span class="status-badge {{ $list->status_key }} open-status-modal"
+                            <span class="status-badge {{ $list->status_key }} open-status-modal archieved-modal archived-status-modal"
                               data-id="{{ $list->id }}" data-toggle="modal" data-target="#underArchievedModal">
                               {{ $list->status_label }}
                             </span>
@@ -1182,6 +1193,34 @@
                 <div class="modal right fade" id="underArchievedModal" tabindex="-1">
                   <div class="modal-dialog">
                     <div class="modal-content">
+
+                      <div class="modal-header">
+                        <h5 class="modal-title">
+                          <span id="archJobTitle"></span><br>
+                          <small class="text-muted" id="archFacility"></small>
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      </div>
+
+                      <div class="modal-body">
+
+                        <!-- Status Alert -->
+                        <div id="archStatusBox"></div>
+
+                        <!-- Timeline -->
+                        <div class="timeline" id="archTimeline"></div>
+
+                      </div>
+
+                      <div class="modal-footer" id="archFooter"></div>
+
+                    </div>
+                  </div>
+                </div>
+
+                {{-- <div class="modal right fade" id="underArchievedModal" tabindex="-1">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title">
                           Registered Nurse <br>
@@ -1225,7 +1264,7 @@
                       </div>
                     </div>
                   </div>
-                </div>
+                </div>   --}}
               </div>
             </div>
         </section>
@@ -1237,41 +1276,165 @@
 <!-- ----- -->
 @endsection
 @section('js')
+
+<!-- DataTables CSS (put in your layout head if possible) -->
+<link rel="stylesheet"
+ href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<!-- jQuery (ONLY if not already loaded in layout) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.12/js/intlTelInput.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.11/jquery.mask.js"></script>
 <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.js"></script>
 <script src="{{ url('/public') }}/nurse/assets/js/jquery.ui.datepicker.monthyearpicker.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+
 {{-- @include('nurse.front_profile_js'); --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js"></script>
 
-
 <script>
-      $(document).on('click', '.archieved-hireed', function () {
+    var table; // 👈 Declare globally
 
-        let applicationId = $(this).data('id');
+    $(document).ready(function () {
 
-        $.ajax({
-            url: "{{ url('/nurse/action-application') }}",
-            type: "GET",
-            data: { application_id: applicationId ,modal_no:"archieved-timeline" },
-            success: function (response) {
-
-                $('#modalContainer').empty(); 
-                $('#modalContainer').html(response);
-
-                $('#hiredModal').modal({
-                    backdrop: 'static',
-                    keyboard: false
-                });
-
-                $('#hiredModal').modal('show');
-            }
+        table = $('#applicationsTable').DataTable({
+            pageLength: 10,
+            pagingType: "simple",
+            ordering: true,
+            searching: true,
+            info: true,
+            lengthChange: false,
+            dom: 'rtip',
+            responsive: true
         });
+
+        // 👇 Move this INSIDE ready
+        $('#customSearch').on('keyup', function () {
+            table.search(this.value).draw();
+        });
+
     });
 
-    $(document).on('hidden.bs.modal', '#hiredModal', function () {
-        $(this).remove();
+    $('.status-filter').on('click', function () {
+        var status = $(this).data('value');
+        table.column(3).search(status).draw();
     });
+
+    $.fn.dataTable.ext.search.push(
+        function(settings, data, dataIndex) {
+
+            var selectedRange = $('#dateFilter').val();
+            if (!selectedRange) return true;
+
+            var appliedDate = moment(data[4], "D MMM YYYY");
+            var today = moment();
+
+            if (selectedRange === '7') {
+                return appliedDate.isAfter(today.clone().subtract(7, 'days'));
+            }
+
+            if (selectedRange === '30') {
+                return appliedDate.isAfter(today.clone().subtract(30, 'days'));
+            }
+
+            if (selectedRange === '180') {
+                return appliedDate.isAfter(today.clone().subtract(6, 'months'));
+            }
+
+            return true;
+        }
+    );
+
+    $('#dateFilter').on('change', function () {
+        table.draw();
+    });
+    
+    $('#clearFilters').on('click', function () {
+
+        $('#customSearch').val('');
+        $('#dateFilter').val('');
+
+        table.search('');
+        table.columns().search('');
+        table.draw();
+
+    });
+
+</script>
+<script>
+  $(document).on('click', '.archived-status-modal', function () {
+
+    let applicationId = $(this).data('id');
+
+    $('#archJobTitle, #archFacility').html('');
+    $('#archStatusBox').html('');
+    $('#archTimeline').html('');
+    $('#archFooter').html('');
+
+    $.ajax({
+        url: "{{ url('/nurse/application-archived-timeline') }}",
+        type: "GET",
+        data: { application_id: applicationId },
+
+        success: function (res) {
+
+            // Title
+            $('#archJobTitle').text(res.job_title);
+            $('#archFacility').text(res.facility);
+
+            // Status Alert
+            let statusHtml = `
+                <div class="alert alert-${res.status.class}">
+                    <strong>${res.status.label}</strong><br>
+                    ${res.status.desc}
+                </div>
+            `;
+            $('#archStatusBox').html(statusHtml);
+
+            // Timeline
+            let timelineHtml = '';
+
+            res.timeline.forEach(item => {
+
+                timelineHtml += `
+                    <div class="timeline-item">
+                        <span>
+                            <strong>${item.title}</strong>
+                            ${item.progress ? `<small>(${item.progress})</small>` : ''}
+                        </span><br>
+
+                        ${item.highlight ? `
+                            <div class="progress-content">
+                                <small>${item.desc}</small>
+                                <p>${item.date}</p>
+                            </div>
+                        ` : `
+                            <small>${item.desc}</small>
+                            <p>${item.date}</p>
+                        `}
+                    </div>
+                `;
+            });
+
+            $('#archTimeline').html(timelineHtml);
+
+            // Footer Action (only if needed)
+            if (res.action) {
+                $('#archFooter').html(`
+                    <button class="btn ${res.action.class} btn-block">
+                        ${res.action.label}
+                    </button>
+                `);
+            }
+
+            $('#underArchievedModal').modal('show');
+        }
+    });
+});
+
 </script>
 <script>
   $(document).on('click', '.active-status-modal', function () {
@@ -1538,5 +1701,32 @@
         $(this).remove();
     });
 </script>
+<script>
+      $(document).on('click', '.archieved-hireed', function () {
 
+        let applicationId = $(this).data('id');
+
+        $.ajax({
+            url: "{{ url('/nurse/action-application') }}",
+            type: "GET",
+            data: { application_id: applicationId ,modal_no:"7" },
+            success: function (response) {
+
+                $('#modalContainer').empty(); 
+                $('#modalContainer').html(response);
+
+                $('#hiredModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+
+                $('#hiredModal').modal('show');
+            }
+        });
+    });
+
+    $(document).on('hidden.bs.modal', '#hiredModal', function () {
+        $(this).remove();
+    });
+</script>
 @endsection
