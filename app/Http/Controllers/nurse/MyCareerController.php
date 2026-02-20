@@ -7,6 +7,7 @@ use App\Helpers\MatchHelper;
 use App\Models\User;
 use App\Models\JobsModel;
 use App\Models\NurseApplication;
+use App\Models\InterviewsNurse;
 use App\Models\SpecialityModel;
 use Illuminate\Support\Facades\Auth;
 use DB;
@@ -22,19 +23,45 @@ class MyCareerController extends Controller
      */
 
 
+    public function interviews_nurse()
+    {
+        $nurseId = Auth::guard("nurse_middle")->user()->id;
+
+        // echo $nurseId;die;
+        // ACTIVE APPLICATIONS
+        $upcoming_list = InterviewsNurse::with('job', 'health_care')->where('nurse_id', $nurseId)
+            ->whereNotIn('status', [2,4,5,6]) 
+            // ->where('is_archived_by_nurse', 0)
+            ->latest('scheduled_at')
+            ->get();
+
+        //   echo "<pre>";  print_r($upcoming_list);die;
+        // ARCHIVED APPLICATIONS
+        $past_list = InterviewsNurse::with('job', 'health_care')->where('nurse_id', $nurseId)
+            ->whereNotIn('status', [1, 3, 5])
+            // ->where('is_archived_by_nurse', 0)
+            ->latest('scheduled_at')
+            ->get();
+
+
+        return view(
+            'nurse.my_career.interviews_nurse',
+            compact('upcoming_list', 'past_list')
+        );
+    }
+
     public function action_application(Request $request)
     {
         $modal_no = $request->modal_no;
 
         $application = NurseApplication::with('job','health_care','interview')->findOrFail($request->application_id);
 
-        // echo "<pre>"; print_r($application);die;
-
         return view('nurse.my_career.partial_application_modal', compact('application', 'modal_no'));
     }
 
     public function archivedTimeline(Request $request)
     {
+        // print_r($request->all());die;
         $application = NurseApplication::with('job')
             ->findOrFail($request->application_id);
 
@@ -86,7 +113,7 @@ class MyCareerController extends Controller
                 'class' => 'dark'
             ],
 
-
+     
 
             default => [
                 'label' => 'Closed',
@@ -112,13 +139,9 @@ class MyCareerController extends Controller
         ]);
     }
 
-    public function interviews_nurse(){
-        
-       return view('nurse.my_career.interviews_nurse');
-    }
-
     public function applicationTimeline(Request $request)
     {
+
         $application = NurseApplication::with('job')->findOrFail($request->application_id);
 
         $timeline = [];
@@ -229,11 +252,6 @@ class MyCareerController extends Controller
             ->where('is_archived_by_nurse', 0)
             ->latest('applied_at')
             ->get();
-
-
-        // echo "<pre>";
-        // print_r($active_list);
-        // die;
 
         // ARCHIVED APPLICATIONS
         $archived_list = NurseApplication::with('job','health_care')->where('nurse_id', $nurseId)

@@ -66,6 +66,8 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
     Route::post('/updateLocationModel', 'JobPostingController@updateLocationModel')->name('updateLocationModel');
     Route::get('/job_description', 'JobPostingController@job_description')->name('job_description');
     Route::post('/updateJobDescription', 'JobPostingController@updateJobDescription')->name('updateJobDescription');
+    Route::get('/review_publish', 'JobPostingController@reviewPublish')->name('reviewPublish');
+    Route::post('/saveDraft', 'JobPostingController@saveDraft')->name('saveDraft');
   });
 });
 

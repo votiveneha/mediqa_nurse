@@ -502,4 +502,41 @@ class JobPostingController extends Controller
 
         echo json_encode($json);
     }
+
+    public function reviewPublish()
+    {
+        $job_id = Session::get('jobId');
+        $data['job_post'] = JobsModel::where("id",27)->first();
+        return view('healthcare.review_publish')->with($data);
+    }
+
+    public function saveDraft(Request $request)
+    {
+        $job_id = Session::get('jobId');
+        $job_post = JobsModel::find(27);
+
+        if(!$job_post){
+            return response()->json(['status'=>0,'message'=>'Job not found']);
+        }
+
+        // already same state
+        if($job_post->save_draft == $request->save){
+            return response()->json(['status'=>2]);
+        }
+
+        // update state
+        $job_post->save_draft = $request->save;
+        $job_post->save();
+
+        // return based on action
+        if($request->save == 1){
+            return response()->json(['status'=>1]); // draft saved
+        }
+
+        if($request->save == 2){
+            return response()->json(['status'=>3]); // published
+        }
+
+        return response()->json(['status'=>0]);
+    }
 }

@@ -73,7 +73,7 @@
       <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs {{ request()->routeIs('medical-facilities.job_benefits') ? 'active' : '' }}" href="{{ route('medical-facilities.job_benefits') }}" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-gift"></i> Benefits</a></li>
       <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="#" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-eye"></i> Visibility & Apply Settings</a></li>
       <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs {{ request()->routeIs('medical-facilities.job_description') ? 'active' : '' }}" href="{{ route('medical-facilities.job_description') }}" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-align-left"></i> Job Description</a></li>
-      <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="#" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-paper-plane"></i> Review & Publish</a></li>
+      <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs {{ request()->routeIs('medical-facilities.reviewPublish') ? 'active' : '' }}" href="{{ route('medical-facilities.reviewPublish') }}" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-paper-plane"></i> Review & Publish</a></li>
       <div class="mt-0 mb-20 logout-line">
         <a class="link-red font-md" href="{{ route('nurse.logout') }}"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Log Out</a>
         

@@ -1265,6 +1265,8 @@
                                       $benefits_arr_string = implode(",",$benefits_arr);
                                       
                                       $specialityies = json_decode($job->typeofspeciality);
+
+                                      $speciality_name = DB::table("speciality")->where("id",$specialityies[0])->first();
                                       
                                       $speciality_arr = array();  
                                       if(!empty($specialityies)){
@@ -1279,7 +1281,7 @@
                                       ?>
                                   <div>
                                     {{-- <strong class="fs-5">{{ $nurse_arr_string }}</strong> --}}
-                                    <strong class="fs-5">{{ implode(', ', (array) json_decode($job->nurse_type, true)) }}</strong>
+                                    <strong class="fs-5">{{ $job->job_title }}</strong>
                                   </div>
                                   <div>
                                     <div class="heart-toggle" data-active="0">
@@ -1314,7 +1316,7 @@
                           <!-- Expanded Job Details -->
                           <div class="job-info-details col-12 d-flex">
                             <div class="col-4">
-                              {{-- <div class="job-role">{{ $job->agency_name }}</div> --}}
+                              {{-- <div class="job-role">{{ $job->job_title }}</div> --}}
                               <div class="location d-flex align-items-center"><i data-lucide="map-pin" width="18" height="18"></i> {{ country_name($job->location_name) }}</div>
                             </div>
                             <div class="col-4">
@@ -1411,7 +1413,7 @@
                           <div class="job-info-details col-12 d-flex">
                             <div class="col-4">
                               <div><strong>Employment Type:</strong> </div>
-                              <div><strong>Shift Type:</strong> </div>
+                              <div style="line-height:4.0"><strong>Shift Type:</strong> </div>
                               <div><strong>Sector:</strong></div>
                               <div><strong>Work Environment:</strong> </div>
                               <!--<div><strong>Benefits:</strong> </div>-->
@@ -1428,11 +1430,11 @@
                               <div> {{ $job->sector ?? "N/A" }}</div>
                               <div>{{ $work_environment_arr_string ?? "N/A"}}</div>
                               <!--<div>{{ $benefits_arr_string }}</div>-->
-                              <div>{{ $speciality_arr_string ?? "N/A" }} </div>
+                              <div>{{ $speciality_name->name ?? "N/A" }} </div>
                               <div>{{ $job->experience_level }}{{ $job->experience_level == 1 ? 'st' : ($job->experience_level == 2 ? 'nd' : ($job->experience_level == 3 ? 'rd' : 'th')) }} Year</div>
-                              <div>${{ $job->salary }}/hr</div>
+                              <div>${{ $job->per_salary_min }}/hr</div>
                               <div><?php
-                                    echo $formattedDate = date("d M Y", strtotime($job->application_submission_date));
+                                    echo $formattedDate = date("d M Y", strtotime($job->application_deadline));
                                   ?></div>
                             </div>
                             <div class="col-4 job-right-col">

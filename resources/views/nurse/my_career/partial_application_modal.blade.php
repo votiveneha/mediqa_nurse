@@ -16,6 +16,9 @@
       <!-- <hr class="my-0"> -->
       <!-- Body -->
       <div class="modal-body">
+            <div class="modal-loader text-center my-4" style="display:none;">
+        <span class="spinner-border spinner-border-sm"></span> Loading...
+    </div>
         <!-- Status -->
         <div class="alert interview-status mb-4">
           <strong>Interview Scheduled</strong><br>

@@ -75,6 +75,17 @@ img, iframe, video {
   cursor: not-allowed;
   text-decoration: none;
 }
+/* 20/02  */
+.nurse-header-menu  .main-menu li{
+   padding: 10px !important;
+}
+.nurse-header{
+  display: flex !important;
+  align-items: center !important;
+}
+.nurse-notification .btn-notify{
+  width: auto !important;
+}
 
  </style>
 
@@ -474,14 +485,14 @@ img, iframe, video {
   @else
 
   @if (Auth::guard('healthcare_facilities')->check())
-  <header class="header sticky-bar  border-bottom">
+  <header class="header sticky-bar  border-bottom nurse-header-menu">
     <div class="container">
-      <div class="main-header">
+      <div class="main-header nurse-header">
         <div class="header-left">
           <div class="header-logo"><a class='d-flex' href='{{ route("home_main") }}'><img alt="jobBox" src="{{ asset(env('LOGO_PATH'))}}"></a></div>
         </div>
-        <div class="header-nav">
-          <nav class="nav-main-menu" style="display:block;">
+        <div class="header-nav nurse-header">
+          <nav class="nav-main-menu w-100" style="display:block;">
             <ul class="main-menu">
               <li>
                 <a class="hover-up " href='#'>Settings</a>
@@ -508,9 +519,9 @@ img, iframe, video {
             </ul>
           </nav>
           <div class="header-right">
-          <div class="block-signin d-flex align-items-center gap-3 justify-content-end">
+          <div class="block-signin d-flex align-items-center gap-2 justify-content-end">
             <!-- <a class='text-link-bd-btom hover-up' href='nurse_signup.php'>Become a Nurse</a> -->
-            <div class="dropdown d-inline-block">
+            <div class="dropdown d-inline-block nurse-notification">
               <a class="btn btn-notify" id="dropdownNotify" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-display="static">
                 <i class="fa-regular fa-bell"></i>
               </a>

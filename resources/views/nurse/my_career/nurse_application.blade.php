@@ -933,8 +933,7 @@
                       <button id="clearFilters"
                         class="btn btn-light filter-btn d-flex align-items-center w-100 whitespace-nowrap filter-btn gap-4">
                         <span class="d-flex gap-2"> <i class="fas fa-sliders-h mr-1"></i> Clear
-                          Filters</span>
-                     
+                          Filters</span>                 
                       </button>
                     </div>
                   </div>
@@ -1073,43 +1072,41 @@
                           <span class=""><i class="fas fa-search"></span></i> Status
                         </button>
                         <div class="dropdown-menu">
-                          <a class="dropdown-item" href="#">Under Review</a>
-                          <a class="dropdown-item" href="#">Offer</a>
-                          <a class="dropdown-item" href="#">Shortlisted</a>
-                          <a class="dropdown-item" href="#">Rejected</a>
+                          <a class="dropdown-item archieved-status-filter" data-value="Withdrawn">Withdrawn</a>
+                          <a class="dropdown-item archieved-status-filter" data-value="Hired">Hired</a>
+                          <a class="dropdown-item archieved-status-filter" data-value="Rejected">Rejected
+                          </a>
+                          <a class="dropdown-item archieved-status-filter" data-value="">All</a>
                         </div>
                       </div>
                       <!-- Date Dropdown -->
-                      <div class="dropdown mr-2 filter-item">
-                        <button class="btn btn-light dropdown-toggle filter-btn" data-toggle="dropdown">
-                          <i class="far fa-calendar-alt mr-1"></i> Last 30 Days
-                        </button>
-                        <div class="dropdown-menu">
-                          <a class="dropdown-item" href="#">Last 7 Days</a>
-                          <a class="dropdown-item" href="#">Last 30 Days</a>
-                          <a class="dropdown-item" href="#">Last 6 Months</a>
-                        </div>
+                      <div class="mr-2 filter-item">
+                          <select id="archieved-dateFilter" class="form-control filter-btn">
+                              <option value="">All</option>
+                              <option value="7">Last 7 Days</option>
+                              <option value="30">Last 30 Days</option>
+                              <option value="180">Last 6 Months</option>
+                          </select>
                       </div>
                       <!-- Search -->
                       <div class="position-relative mr-2 filter-item">
                         <i class="fas fa-search search-icon"></i>
-                          <input type="text" id="customSearch" placeholder="Search...">
+                          <input type="text" id="arhcustomSearch" placeholder="Search...">
                       </div>
                     </div>
                     <!-- Clear Filters -->
                     <div class="filter-border pt-7">
-                      <button
+                      <button id="arch-clearFilters"
                         class="btn btn-light filter-btn d-flex align-items-center w-100 whitespace-nowrap filter-btn gap-4">
                         <span class="d-flex gap-2"> <i class="fas fa-sliders-h mr-1"></i> Clear
                           Filters</span>
-                        <span class="text-muted ml-1">4 results</span>
                       </button>
                     </div>
                   </div>
                   <!-- Table -->
                   <div class="application-table table-responsive">
                     {{-- <table class="table bg-white"> --}}
-                    <table id="applicationsTable" class="table table-bordered bg-white">
+                    <table id="archievedTable" class="table table-bordered bg-white">
                       <thead>
                         <tr>
                           <th>Job Title</th>
@@ -1204,6 +1201,11 @@
 
                       <div class="modal-body">
 
+                        <!-- Loader INSIDE modal -->
+                        <div id="archModalLoader" class="text-center my-4" style="display:none;">
+                          <span class="spinner-border spinner-border-sm"></span> Loading...
+                        </div>
+
                         <!-- Status Alert -->
                         <div id="archStatusBox"></div>
 
@@ -1217,54 +1219,7 @@
                     </div>
                   </div>
                 </div>
-
-                {{-- <div class="modal right fade" id="underArchievedModal" tabindex="-1">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title">
-                          Registered Nurse <br>
-                          <small class="text-muted">St. John Hospital</small>
-                        </h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                      </div>
-                      <div class="modal-body">
-                        <div class="alert alert-warning">
-                          <strong>Under Review</strong><br>
-                          Your application is currently being reviewed.
-                        </div>
-                        <!-- <p class="mb-2"><strong>Progress (100%)</strong></p> -->
-                        <div class="timeline">
-                          <div class="timeline-item">
-                            <span><strong>Progress </strong><small> (100%)</small></span><br>
-                            <small>Lorem ipsum dolor sit amet</small>
-                            <p>5 Nov 2025</p>
-                          </div>
-                          <div class="timeline-item">
-                            <small>A SmuRevined</small><br>
-                            <div class="progress-content">
-                              <small>test</small>
-                              <p>5 Nov 2025</p>
-                            </div>
-                          </div>
-                          <div class="timeline-item">
-                            <strong class="pending-offer-head">A Offer</strong><br>
-                            <div class="d-flex">
-                              <p class="pending-des">Lorem ipsum dolor sit amet,Lorem ipsum dolor
-                                sit amet,</p>
-                              <p class="text-dark">18 jan 2025</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="modal-footer">
-                        <button class="btn btn-dark btn-block w-100">
-                          Withdraw Application
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>   --}}
+    
               </div>
             </div>
         </section>
@@ -1296,6 +1251,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js"></script>
 
 <script>
+
+
     var table; // 👈 Declare globally
 
     $(document).ready(function () {
@@ -1363,24 +1320,93 @@
 
     });
 
+
+    var table1; // 👈 Declare globally
+
+    $(document).ready(function () {
+
+        table1 = $('#archievedTable').DataTable({
+            pageLength: 10,
+            pagingType: "simple",
+            ordering: true,
+            searching: true,
+            info: true,
+            lengthChange: false,
+            dom: 'rtip',
+            responsive: true
+        });
+
+        // 👇 Move this INSIDE ready
+        $('#arhcustomSearch').on('keyup', function () {
+            table1.search(this.value).draw();
+        });
+
+    });
+
+    $('.archieved-status-filter').on('click', function () {
+        var status1 = $(this).data('value');
+        table1.column(3).search(status1).draw();
+    });
+
+    $.fn.dataTable.ext.search.push(
+        function(settings, data, dataIndex) {
+
+            var selectedRange = $('#archieved-dateFilter').val();
+            if (!selectedRange) return true;
+
+            var appliedDate = moment(data[4], "D MMM YYYY");
+            var today = moment();
+
+            if (selectedRange === '7') {
+                return appliedDate.isAfter(today.clone().subtract(7, 'days'));
+            }
+
+            if (selectedRange === '30') {
+                return appliedDate.isAfter(today.clone().subtract(30, 'days'));
+            }
+
+            if (selectedRange === '180') {
+                return appliedDate.isAfter(today.clone().subtract(6, 'months'));
+            }
+
+            return true;
+        }
+    );
+
+    $('#archieved-dateFilter').on('change', function () {
+        table1.draw();
+    });
+    
+    $('#arch-clearFilters').on('click', function () {
+
+        $('#arhcustomSearch').val('');
+        $('#archieved-dateFilter').val('');
+
+        table1.search('');
+        table1.columns().search('');
+        table1.draw();
+
+    });
 </script>
 <script>
   $(document).on('click', '.archived-status-modal', function () {
 
     let applicationId = $(this).data('id');
-
+ 
     $('#archJobTitle, #archFacility').html('');
     $('#archStatusBox').html('');
     $('#archTimeline').html('');
     $('#archFooter').html('');
 
+    
+    $('#archModalLoader').show(); 
     $.ajax({
         url: "{{ url('/nurse/application-archived-timeline') }}",
         type: "GET",
         data: { application_id: applicationId },
 
         success: function (res) {
-
+            $('#archModalLoader').hide(); 
             // Title
             $('#archJobTitle').text(res.job_title);
             $('#archFacility').text(res.facility);
@@ -1430,7 +1456,6 @@
                 `);
             }
 
-            $('#underArchievedModal').modal('show');
         }
     });
 });
@@ -1502,11 +1527,32 @@
       }
   });
 </script>
+
 <script>
+
+      function showModalLoader(modalId) {
+          $(modalId).find('.modal-loader').show();
+          $(modalId).find('.modal-content-data').hide();
+      }
+
+      function hideModalLoader(modalId) {
+          $(modalId).find('.modal-loader').hide();
+          $(modalId).find('.modal-content-data').show();
+      }
       $(document).on('click', '.view-interview-details', function () {
 
+        let $btn = $(this); 
+        $btn.prop('disabled', true);
+        $('#view-interview-details').empty();
         $('#modalContainer').empty();
         let applicationId = $(this).data('id');
+
+        let modal = '#interviewProcessModal';
+
+         $('#globalLoader').show();
+        // $(modal).modal('show');
+        // showModalLoader(modal);
+   
 
         $.ajax({
             url: "{{ url('/nurse/action-application') }}",
@@ -1521,8 +1567,15 @@
                     backdrop: 'static',
                     keyboard: false
                 });
+            $(modal).modal('show');
+            $btn.prop('disabled', false);
+            // Now loader exists in DOM
+            showModalLoader(modal);
 
-                $('#interviewProcessModal').modal('show');
+            // Hide loader after slight delay (simulate processing)
+            setTimeout(function () {
+                hideModalLoader(modal);
+            }, 300);
             }
         });
     });
@@ -1534,8 +1587,12 @@
 </script>
 <script>
       $(document).on('click', '.view-offer', function () {
-
+        let $btn = $(this); 
+        $btn.prop('disabled', true);
         let applicationId = $(this).data('id');
+
+        let modal = '#offerReviewModal';
+        $('#globalLoader').show();
 
         $.ajax({
             url: "{{ url('/nurse/action-application') }}",
@@ -1551,7 +1608,16 @@
                     keyboard: false
                 });
 
-                $('#offerReviewModal').modal('show');
+            $(modal).modal('show');
+            $btn.prop('disabled', false);
+            // Now loader exists in DOM
+            showModalLoader(modal);
+
+            // Hide loader after slight delay (simulate processing)
+            setTimeout(function () {
+                hideModalLoader(modal);
+            }, 300);
+                // $('#offerReviewModal').modal('show');
             }
         });
     });
@@ -1563,8 +1629,12 @@
 </script>
 <script>
       $(document).on('click', '.accept-offer', function () {
-
+        let $btn = $(this); 
+        $btn.prop('disabled', true);
         let applicationId = $(this).data('id');
+
+        let modal = '#acceptOfferModal';
+        $('#globalLoader').show();
 
         $.ajax({
             url: "{{ url('/nurse/action-application') }}",
@@ -1580,7 +1650,16 @@
                     keyboard: false
                 });
 
-                $('#acceptOfferModal').modal('show');
+                $(modal).modal('show');
+                $btn.prop('disabled', false);
+                // Now loader exists in DOM
+                showModalLoader(modal);
+
+                // Hide loader after slight delay (simulate processing)
+                setTimeout(function () {
+                    hideModalLoader(modal);
+                }, 300);
+                // $('#acceptOfferModal').modal('show');
             }
         });
     });
@@ -1591,8 +1670,12 @@
 </script>
 <script>
       $(document).on('click', '.active-withdrawModal', function () {
-
         let applicationId = $(this).data('id');
+         let $btn = $(this); 
+        $btn.prop('disabled', true);
+
+        let modal = '#withdrawModal';
+        $('#globalLoader').show();
 
         $.ajax({
             url: "{{ url('/nurse/action-application') }}",
@@ -1608,7 +1691,16 @@
                     keyboard: false
                 });
 
-                $('#withdrawModal').modal('show');
+                $(modal).modal('show');
+                $btn.prop('disabled', false);
+                // Now loader exists in DOM
+                showModalLoader(modal);
+
+                // Hide loader after slight delay (simulate processing)
+                setTimeout(function () {
+                    hideModalLoader(modal);
+                }, 300);
+                // $('#withdrawModal').modal('show');
             }
         });
     });
@@ -1620,7 +1712,12 @@
 <script>
       $(document).on('click', '.archieved-withdrawn', function () {
 
+        let $btn = $(this); 
+        $btn.prop('disabled', true);
         let applicationId = $(this).data('id');
+
+        let modal = '#withdrawnStatusModal';
+        $('#globalLoader').show();
 
         $.ajax({
             url: "{{ url('/nurse/action-application') }}",
@@ -1636,7 +1733,16 @@
                     keyboard: false
                 });
 
-                $('#withdrawnStatusModal').modal('show');
+                $(modal).modal('show');
+                $btn.prop('disabled', false);
+                // Now loader exists in DOM
+                showModalLoader(modal);
+
+                // Hide loader after slight delay (simulate processing)
+                setTimeout(function () {
+                    hideModalLoader(modal);
+                }, 300);
+                // $('#withdrawnStatusModal').modal('show');
             }
         });
     });
@@ -1649,6 +1755,11 @@
       $(document).on('click', '.archieved-rejected', function () {
 
         let applicationId = $(this).data('id');
+        let $btn = $(this); 
+        $btn.prop('disabled', true);
+
+        let modal = '#rejectedModal';
+        $('#globalLoader').show();
 
         $.ajax({
             url: "{{ url('/nurse/action-application') }}",
@@ -1664,7 +1775,16 @@
                     keyboard: false
                 });
 
-                $('#rejectedModal').modal('show');
+                $(modal).modal('show');
+                $btn.prop('disabled', false);
+                // Now loader exists in DOM
+                showModalLoader(modal);
+
+                // Hide loader after slight delay (simulate processing)
+                setTimeout(function () {
+                    hideModalLoader(modal);
+                }, 300);
+                // $('#rejectedModal').modal('show');
             }
         });
     });
@@ -1677,6 +1797,11 @@
       $(document).on('click', '.archieved-hireed', function () {
 
         let applicationId = $(this).data('id');
+        let $btn = $(this); 
+        $btn.prop('disabled', true);
+
+        let modal = '#hiredModal';
+        $('#globalLoader').show();
 
         $.ajax({
             url: "{{ url('/nurse/action-application') }}",
@@ -1692,35 +1817,16 @@
                     keyboard: false
                 });
 
-                $('#hiredModal').modal('show');
-            }
-        });
-    });
+                $(modal).modal('show');
+                $btn.prop('disabled', false);
+                // Now loader exists in DOM
+                showModalLoader(modal);
 
-    $(document).on('hidden.bs.modal', '#hiredModal', function () {
-        $(this).remove();
-    });
-</script>
-<script>
-      $(document).on('click', '.archieved-hireed', function () {
-
-        let applicationId = $(this).data('id');
-
-        $.ajax({
-            url: "{{ url('/nurse/action-application') }}",
-            type: "GET",
-            data: { application_id: applicationId ,modal_no:"7" },
-            success: function (response) {
-
-                $('#modalContainer').empty(); 
-                $('#modalContainer').html(response);
-
-                $('#hiredModal').modal({
-                    backdrop: 'static',
-                    keyboard: false
-                });
-
-                $('#hiredModal').modal('show');
+                // Hide loader after slight delay (simulate processing)
+                setTimeout(function () {
+                    hideModalLoader(modal);
+                }, 300);
+                // $('#hiredModal').modal('show');
             }
         });
     });
