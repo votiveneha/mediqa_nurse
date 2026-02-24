@@ -1055,6 +1055,7 @@ form#job_requirements_form ul.select2-selection__rendered {
               text: 'Job Post Successfully',
             }).then(function() {
               window.location.href = "{{ route('medical-facilities.requirements') }}";
+              sessionStorage.setItem("tab-one","requirements");
             });
           } else {
             Swal.fire({

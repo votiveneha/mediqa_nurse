@@ -273,10 +273,17 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::get('application-timeline', 'MyCareerController@applicationTimeline')->name('applicationTimeline');
   Route::get('application-archived-timeline', 'MyCareerController@archivedTimeline')->name('archivedTimeline');
   Route::get('action-application', 'MyCareerController@action_application')->name('action_application');
-  Route::get('nurseMyJobs', 'MyJobController@nurseMyJobs')->name('nurseMyJobs');
+
+  
+  Route::get('nurseMyJobs', 'MyCareerController@nurseMyJobs')->name('nurseMyJobs');
 
 
+  Route::get('action-interview', 'MyCareerController@action_interview')->name('action_interview');
   Route::get('interviews', 'MyCareerController@interviews_nurse')->name('interviews');
+  Route::get('interviews-events', 'MyCareerController@interviews_events')->name('calendar.events');
+  Route::post('action-needed-document', 'MyCareerController@action_needed_document')->name('action_needed.upload');
+  Route::get('document/delete/{id}', 'MyCareerController@needed_document_delete')->name('action_needed.delete_document');
+
 
 
     /**************[Work Preferences & Flexibility]**************/

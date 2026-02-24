@@ -11,6 +11,7 @@ class InterviewsNurse extends Model
     protected $table = 'interview_nurses';
     protected $guarded = [];
 
+   
     public function job()
     {
         return $this->belongsTo(JobsModel::class, 'job_id', 'id');
@@ -33,4 +34,5 @@ class InterviewsNurse extends Model
 
         return $types[$this->meeting_type] ?? 'Unknown';
     }
+  
 }

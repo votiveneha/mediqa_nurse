@@ -6,11 +6,14 @@ use Illuminate\Http\Request;
 use App\Helpers\MatchHelper;
 use App\Models\User;
 use App\Models\JobsModel;
+use App\Models\NurseNeededDocument;
 use App\Models\NurseApplication;
 use App\Models\InterviewsNurse;
 use App\Models\SpecialityModel;
 use Illuminate\Support\Facades\Auth;
 use DB;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class MyCareerController extends Controller
 {
@@ -22,34 +25,180 @@ class MyCareerController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
 
+    public function nurseMyJobs()
+    {
+        return view('nurse.my_career.nurseMyJobs');
+    }
 
+    public function needed_document_delete($id = null){
+
+        $nurseId = Auth::guard("nurse_middle")->user()->id;
+        $document = NurseNeededDocument::where('id', $id)
+            ->where('nurse_id', $nurseId)
+            ->firstOrFail();
+
+        $document->delete();
+
+        return response()->json(['success' => true]);
+    }
+    public function action_needed_document(Request $request)
+    {
+
+        $file = $request->file('document_file');
+        // Generate unique filename
+        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        // Store file inside public/uploads/needed_document
+        $file->move(public_path('uploads/needed_document'), $filename);
+        // Save in database (secure nurse_id)
+        NurseNeededDocument::create([
+            'nurse_id' => Auth::guard("nurse_middle")->user()->id, // DO NOT trust request nurse_id
+            'name' => $request->document_name,
+            'document_path' => $filename,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Document uploaded successfully'
+        ]);
+  
+    }
+    
+    public function action_needed_document_old(Request $request){
+        // print_r($request->all());die;
+        // $request->validate([
+        //     'document_name' => 'required|string|max:255',
+        //     'document_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        // ]);
+
+        if ($request->hasFile('document_file')) {
+
+            $file = $request->file('document_file');
+            if ($file->isValid()) {
+                $name = time() . '_' . rand(10000, 99999) . '_' . $file->getClientOriginalName();
+                $file->move(public_path('uploads/needed_document'), $name);
+                // $newFiles[] = $name;
+            }
+      
+            // Save in database
+            NurseNeededDocument::create([
+                'nurse_id' => $request->nurse_id,
+                'name' => $request->document_name,
+                'file_path' => $name,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Document uploaded successfully'
+        ]);
+    }
     public function interviews_nurse()
     {
         $nurseId = Auth::guard("nurse_middle")->user()->id;
 
         // echo $nurseId;die;
         // ACTIVE APPLICATIONS
-        $upcoming_list = InterviewsNurse::with('job', 'health_care')->where('nurse_id', $nurseId)
-            ->whereNotIn('status', [2,4,5,6]) 
-            // ->where('is_archived_by_nurse', 0)
-            ->latest('scheduled_at')
+        $upcoming_list = InterviewsNurse::with('job', 'health_care')
+            ->where('nurse_id', $nurseId)
+            ->whereNot('status', 5)
+            ->where('scheduled_at', '>=', Carbon::now())
+            ->orderBy('scheduled_at', 'asc')
             ->get();
-
+        $upcoming_count = InterviewsNurse::where('nurse_id', $nurseId)
+            ->whereNot('status', 5)
+            ->where('scheduled_at', '>=', Carbon::now())
+            ->count();
         //   echo "<pre>";  print_r($upcoming_list);die;
         // ARCHIVED APPLICATIONS
-        $past_list = InterviewsNurse::with('job', 'health_care')->where('nurse_id', $nurseId)
-            ->whereNotIn('status', [1, 3, 5])
-            // ->where('is_archived_by_nurse', 0)
-            ->latest('scheduled_at')
+        $past_list = InterviewsNurse::with('job', 'health_care')
+                    ->where('nurse_id', $nurseId)
+                    ->whereNot('status', 5)
+                    ->where('scheduled_at', '<', Carbon::now())
+                    ->orderBy('scheduled_at', 'desc')
+                    ->get();
+
+        $interviews_list = InterviewsNurse::with('job', 'health_care')->where('nurse_id', $nurseId)->get();
+
+        $action_count = InterviewsNurse::where('nurse_id', $nurseId)
+            ->whereIn('status', [1, 2])
+            ->where('scheduled_at', '>=', Carbon::now())
+            ->count();
+
+      
+
+        $action_needed = InterviewsNurse::with('job', 'health_care')
+            ->where('nurse_id', $nurseId)
+            ->whereIn('status', [1, 2]) // scheduled + reschedule requested
+            ->where('scheduled_at', '>=', Carbon::now()) // still upcoming
+            ->orderBy('scheduled_at', 'asc')
             ->get();
+
+        $document_list = NurseNeededDocument::where('nurse_id', $nurseId)->get();
 
 
         return view(
             'nurse.my_career.interviews_nurse',
-            compact('upcoming_list', 'past_list')
+            compact('upcoming_list', 'past_list', 'action_needed', 'action_count','upcoming_count', 'document_list')
         );
     }
 
+    public function action_interview(Request $request){
+        $modal_no = $request->modal_no;
+
+        $interviews = InterviewsNurse::with('job', 'health_care')->findOrFail($request->interview_id);
+
+        // echo "<pre>"; print_r($interviews);die;
+        return view('nurse.my_career.partial_interview_modal', compact('interviews','modal_no'));
+    }
+
+    public function interviews_events()
+    {
+        $nurseId = Auth::guard("nurse_middle")->user()->id;
+        $statusMap = [
+            1 => 'scheduled',
+            2 => 'reschedule_requested',
+            3 => 'confirmed',
+            4 => 'completed',
+            5 => 'no_show',
+            6 => 'cancelled',
+        ];
+
+        // IMPORTANT: add ->get()
+        $interviews = InterviewsNurse::with('job','health_care')->where('nurse_id', $nurseId)->whereNot('status', 5)->get();
+
+        $events = $interviews->map(function ($item) use ($statusMap) {
+
+            return [
+                'id' => $item->id,
+                'title' => $item->job->job_title,
+                'start' => Carbon::parse($item->scheduled_at)->toIso8601String(),
+                'backgroundColor' => $this->getColor($item->status),
+                'borderColor' => $this->getColor($item->status),
+                'extendedProps' => [
+                    'status' => $statusMap[$item->status] ?? 'scheduled',
+                    'meeting_link' => $item->meeting_link,
+                    'location' => $item->location_address,
+                    'notes' => $item->notes,
+                    'duration' => $item->duration_minutes,
+                ]
+            ];
+        });
+
+        return response()->json($events);
+    }
+
+    private function getColor($status)
+    {
+        return match ($status) {
+            1 => '#DB6E00', // scheduled
+            2 => '#FFC107', // reschedule
+            3 => '#00A81C', // confirmed
+            4 => '#009BFA', // completed
+            5 => '#6c757d', // no show
+            6 => '#DC3545', // cancelled
+            default => '#6c757d'
+        };
+    }
     public function action_application(Request $request)
     {
         $modal_no = $request->modal_no;
