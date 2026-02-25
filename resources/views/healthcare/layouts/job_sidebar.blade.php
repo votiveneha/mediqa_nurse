@@ -149,4 +149,24 @@
     $(".job_description").removeClass("disabled-tab");
     $(".review_publish").removeClass("disabled-tab");
   }
+
+  const params = new URLSearchParams(window.location.search);
+  const jobId = params.get("job_id");
+
+  console.log(jobId); // 25
+  if(jobId){
+    $(".role_basic_tab").removeClass("disabled-tab");
+    $(".requirement_tab").removeClass("disabled-tab");
+    $(".contarct_pay").removeClass("disabled-tab");
+    $(".shift_scheduling").removeClass("disabled-tab");
+    $(".visiblity_apply_settings").removeClass("disabled-tab");
+    $(".job_description").removeClass("disabled-tab");
+    $(".review_publish").removeClass("disabled-tab");
+
+    document.querySelectorAll(".profile_tabs").forEach(link => {
+      let url = new URL(link.href);
+      url.searchParams.set("job_id", jobId);
+      link.href = url.toString();
+    });
+  }
 </script>

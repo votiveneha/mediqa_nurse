@@ -18,6 +18,7 @@ use App\Models\ProfessionalCer;
 use App\Models\TrainingModel;
 use App\Models\SkillModel;
 use App\Models\VaccinationModel;
+use App\Models\JobsModel;
 
 function specialty()
 {
@@ -671,4 +672,58 @@ function getParentSpecialityId(array $tree, int|string $childId): ?int
     }
 
     return null;
+}
+
+function expire_jobs($user_id)
+{
+        $job_box_data = JobsModel::where("healthcare_id",$user_id)->where("save_draft",2)->get();
+        
+        foreach($job_box_data as $job_box){
+            $custom_expiry_date = $job_box->custom_expiry_date;
+            $today_date = date('Y-m-d');
+
+            $expiry_date = $job_box->expiry_date;
+            if($expiry_date == 1){
+                $date = $job_box->created_at;
+
+                $newDate = date('Y-m-d', strtotime($date . ' +1 days'));
+
+            }
+
+            if($expiry_date == 2){
+                $date = $job_box->created_at;
+
+                $newDate = date('Y-m-d', strtotime($date . ' +14 days'));
+
+            }
+
+            if($expiry_date == 3){
+                $date = $job_box->created_at;
+
+                $newDate = date('Y-m-d', strtotime($date . ' +30 days'));
+
+            }
+
+            if($expiry_date == 4){
+                $date = $job_box->created_at;
+
+                $newDate = date('Y-m-d', strtotime($date . ' +60 days'));
+
+            }
+
+            if($expiry_date != 5 && $today_date >= $newDate){
+                $status_change = JobsModel::find($job_box->id);
+                $status_change->save_draft = 3;
+                $status_change->save();
+            }
+
+
+            if($expiry_date == 5 && $today_date > $custom_expiry_date){
+                $status_change = JobsModel::find($job_box->id);
+                $status_change->save_draft = 3;
+                $status_change->save();
+            }
+
+
+        }
 }

@@ -136,6 +136,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
 
                     
                     <div class="card shadow-sm border-0 p-4 mt-30">
+                      @include('healthcare.layouts.top_links')
                       <h3 class="mt-0 color-brand-1 mb-2">Shifts & Scheduling</h3>
     
                       <form id="shift_scheduling_form" method="POST" onsubmit="return shift_scheduling_form()">
@@ -143,6 +144,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                         <input type="hidden" name="user_id" value="{{ Auth::guard('healthcare_facilities')->user()->id }}">
                         <div class="form-group drp--clr">
                           <label class="form-label" for="input-1">Shift Types</label>
+                          <input type="hidden" name="shift_types_field" class="shift_types_field" value='@if(!empty($job_data)){{ $job_data->shift_type }}@endif'>
                           <ul id="shift_types_data" style="display:none;">
                             
                             <?php
@@ -157,11 +159,12 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                             @endforeach
                           </ul>
 
-                          <select class="js-example-basic-multiple addAll_removeAll_btn nurse_type_field" data-list-id="shift_types_data" name="shift_types_data[]" multiple id="nurse_type" onchange="getNurseType('main',0)"></select>
+                          <select class="js-example-basic-multiple addAll_removeAll_btn nurse_type_field" data-list-id="shift_types_data" name="shift_types_data[]" multiple id="nurse_type"></select>
                           <span id="reqshift_types_data" class="reqError text-danger valley"></span>    
                         </div> 
                         <div class="form-group drp--clr">
                           <label class="form-label" for="input-1">Shift Length</label>
+                          <input type="hidden" name="shift_types_field" class="shift_length_field" value='@if(!empty($job_data)){{ $job_data->shift_length }}@endif'>
                           <ul id="shift_length_data" style="display:none;">
                             
                             <?php
@@ -181,6 +184,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                         </div> 
                         <div class="form-group drp--clr">
                           <label class="form-label" for="input-1">Schedule Model</label>
+                          <input type="hidden" name="schedule_model" class="schedule_model" value='@if(!empty($job_data)){{ $job_data->schedule_model }}@endif'>
                           <ul id="schedule_model_data" style="display:none;">
                             
                             <?php
@@ -200,6 +204,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                         </div> 
                         <div class="form-group drp--clr">
                           <label class="form-label" for="input-1">Weekly Work Patterns</label>
+                          <input type="hidden" name="weekly_work_patterns" class="weekly_work_patterns" value='@if(!empty($job_data)){{ $job_data->weekly_work_patterns }}@endif'>
                           <ul id="weekly_work_patters" style="display:none;">
                             
                             <?php
@@ -219,6 +224,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                         </div> 
                         <div class="form-group drp--clr">
                           <label class="form-label" for="input-1">Shift Rotation & Cycle</label>
+                          <input type="hidden" name="shift_rotation" class="shift_rotation" value='@if(!empty($job_data)){{ $job_data->shift_rotation }}@endif'>
                           <ul id="shift_rotation_data" style="display:none;">
                             
                             <?php
@@ -238,6 +244,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                         </div> 
                         <div class="form-group drp--clr">
                           <label class="form-label" for="input-1">Specialty & Non-Traditional Shift</label>
+                          <input type="hidden" name="non_trad_shift" class="non_trad_shift" value='@if(!empty($job_data)){{ $job_data->non_trad_shift }}@endif'>
                           <ul id="non_trad_shift" style="display:none;">
                             
                             <?php
@@ -257,6 +264,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                         </div> 
                         <div class="form-group drp--clr">
                           <label class="form-label" for="input-1">Maternity & Midwifery Shift</label>
+                          <input type="hidden" name="maternity_shift" class="maternity_shift" value='@if(!empty($job_data)){{ $job_data->maternity_shift }}@endif'>
                           <ul id="maternity_shift" style="display:none;">
                             
                             <?php
@@ -276,6 +284,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                         </div> 
                         <div class="form-group drp--clr">
                           <label class="form-label" for="input-1">Days Off</label>
+                          <input type="hidden" name="days_off" class="days_off" value='@if(!empty($job_data)){{ $job_data->days_off }}@endif'>
                           <ul id="days_off_data" style="display:none;">
                             
                             <?php
@@ -296,6 +305,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                         
                         <div class="form-group drp--clr specific_days_off_subdata d-none">
                           <label class="form-label" for="input-1">Specific Days Off(Days Off)</label>
+                          <input type="hidden" name="perticular_days_off" class="perticular_days_off" value='@if(!empty($job_data)){{ $job_data->perticular_days_off }}@endif'>
                           <ul id="specific_days_off_subdata" style="display:none;">
                             
                             <?php
@@ -315,13 +325,14 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                         </div> 
                         <div class="form-group drp--clr">
                           <label class="form-label" for="input-1">Specific Days Off</label>
+                          <input type="hidden" name="specific_days_off" class="specific_days_off" value='@if(!empty($job_data)){{ $job_data->specific_days_off }}@endif'>
                           <ul id="specific_days_off_data" style="display:none;">
                             
                             <?php
                             $j = 1;
                             ?>
                             <li data-value="0">select</li>
-                            @foreach($specific_days_off_subdata as $shift_types)
+                            @foreach($specific_days_off_data as $shift_types)
                             <li id="nursing_menus-{{ $j }}" data-value="{{ $shift_types->work_shift_id }}">{{ $shift_types->shift_name }}</li>
                             <?php
                             $j++;
@@ -329,7 +340,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                             @endforeach
                           </ul>
 
-                          <select class="js-example-basic-multiple addAll_removeAll_btn nurse_type_field" data-list-id="specific_days_off_subdata" name="specific_days_off_data[]" multiple id="nurse_type" onchange="getNurseType('main',0)"></select>
+                          <select class="js-example-basic-multiple addAll_removeAll_btn nurse_type_field" data-list-id="specific_days_off_data" name="specific_days_off_data[]" multiple id="nurse_type" onchange="getNurseType('main',0)"></select>
                           <span id="reqspecific_days_off_data" class="reqError text-danger valley"></span>    
                         </div> 
                         <h6 class="emergency_text">
@@ -350,13 +361,13 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                               <div class="form-group level-drp col-md-6">
                                 <label class="form-label" for="input-1">Start date & time
                                 </label>
-                                <input class="form-control temporary_hours_per_week" type="datetime-local" name="temporarysingle_start_date" value="" id="temporary_hours_week">
+                                <input class="form-control temporarysingle_start_date" type="datetime-local" name="temporarysingle_start_date" value="{{ $job_data->single_shift_start_datetime }}" id="temporary_hours_week">
                                 <span id='reqtemporarysingle_start_date' class='reqError text-danger valley'></span>
                               </div>
                               <div class="form-group level-drp col-md-6">
                                 <label class="form-label" for="input-1">End date & time
                                 </label>
-                                <input class="form-control temporary_hours_per_week" type="datetime-local" name="temporarysingle_end_date" value="" id="temporary_hours_week">
+                                <input class="form-control temporarysingle_end_date" type="datetime-local" name="temporarysingle_end_date" value="{{ $job_data->single_shift_end_datetime }}" id="temporary_hours_week">
                                 <span id='reqtemporarysingle_end_date' class='reqError text-danger valley'></span>
                               </div>
                             </div>
@@ -366,13 +377,13 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                               <div class="form-group level-drp col-md-6">
                                 <label class="form-label" for="input-1">Start date
                                 </label>
-                                <input class="form-control temporary_hours_per_week" type="date" name="temporaryrangestart_date" value="" id="temporary_hours_week">
+                                <input class="form-control temporaryrangestart_date" type="date" name="temporaryrangestart_date" value="{{ $job_data->daterange_start_date }}" id="temporary_hours_week">
                                 <span id='reqtemporaryrangestart_date' class='reqError text-danger valley'></span>
                               </div>
                               <div class="form-group level-drp col-md-6">
                                 <label class="form-label" for="input-1">End date
                                 </label>
-                                <input class="form-control temporary_hours_per_week" type="date" name="temporaryrangeend_date" value="" id="temporary_hours_week">
+                                <input class="form-control temporaryrangeend_date" type="date" name="temporaryrangeend_date" value="{{ $job_data->daterange_end_date }}" id="temporary_hours_week">
                                 <span id='reqtemporaryrangeend_date' class='reqError text-danger valley'></span>
                               </div>
                               
@@ -380,13 +391,13 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                             <div class="form-group level-drp">
                               <label class="form-label" for="input-1">Number of shifts
                               </label>
-                              <input class="form-control temporary_hours_per_week" type="number" name="temporaryrangenoshifts" value="" id="temporary_hours_week">
+                              <input class="form-control temporaryrangenoshifts" type="number" name="temporaryrangenoshifts" value="{{ $job_data->no_of_shifts }}" id="temporary_hours_week">
                               <span id='reqtemporaryrangenoshifts' class='reqError text-danger valley'></span>
                             </div>
                             <div class="form-group level-drp">
                               <label class="form-label" for="input-1">Notes
                               </label>
-                              <textarea rows="5" class="form-control" name="temporaryrangenotes" style="min-height:100px"></textarea>
+                              <textarea rows="5" class="form-control temporaryrangenotes" name="temporaryrangenotes" style="min-height:100px">{{ $job_data->notes }}</textarea>
                               <span id='reqtemporaryrangenotes' class='reqError text-danger valley'></span>
                             </div>
                           </div>
@@ -400,14 +411,14 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                             <div class="start_date_urgency_div">
 
                               <div class="form-check">
-                                <input class="form-check-input start_date_urgency" type="radio" name="start_date_urgency" id="urgency_immediate" value="immediate">
+                                <input @if($job_data->start_date_urgency_permanent == "immediate") checked @endif class="form-check-input start_date_urgency" type="radio" name="start_date_urgency" id="urgency_immediate" value="immediate">
                                 <label class="form-check-label" for="urgency_immediate">
                                   Immediate (as soon as possible)
                                 </label>
                               </div>
 
                               <div class="form-check">
-                                <input class="form-check-input start_date_urgency" type="radio" name="start_date_urgency" id="urgency_within_weeks" value="within_weeks">
+                                <input @if($job_data->start_date_urgency_permanent == "within_seven_week" || $job_data->start_date_urgency_permanent == "within_five_week" || $job_data->start_date_urgency_permanent == "within_two_week") checked @endif class="form-check-input start_date_urgency" type="radio" name="start_date_urgency" id="urgency_within_weeks" value="within_weeks">
                                 <label class="form-check-label" for="urgency_within_weeks">
                                   Within weeks
                                 </label>
@@ -416,17 +427,17 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                               <div class="permanent_shift_div within_weeks_div d-none ms-4">
 
                                 <div class="form-check">
-                                  <input class="form-check-input within_weeks_radio" type="radio" name="within_weeks_radio" id="within_two_week" value="within_two_week">
+                                  <input @if($job_data->start_date_urgency_permanent == "within_two_week") checked @endif class="form-check-input within_weeks_radio" type="radio" name="within_weeks_radio" id="within_two_week" value="within_two_week">
                                   <label class="form-check-label" for="within_two_week">Within 2 weeks</label>
                                 </div>
 
                                 <div class="form-check">
-                                  <input class="form-check-input within_weeks_radio" type="radio" name="within_weeks_radio" id="within_five_week" value="within_five_week">
+                                  <input @if($job_data->start_date_urgency_permanent == "within_five_week") checked @endif class="form-check-input within_weeks_radio" type="radio" name="within_weeks_radio" id="within_five_week" value="within_five_week">
                                   <label class="form-check-label" for="within_five_week">Within 5 weeks</label>
                                 </div>
 
                                 <div class="form-check">
-                                  <input class="form-check-input within_weeks_radio" type="radio" name="within_weeks_radio" id="within_seven_week" value="within_seven_week">
+                                  <input @if($job_data->start_date_urgency_permanent == "within_seven_week") checked @endif class="form-check-input within_weeks_radio" type="radio" name="within_weeks_radio" id="within_seven_week" value="within_seven_week">
                                   <label class="form-check-label" for="within_seven_week">Within 7 weeks</label>
                                 </div>
 
@@ -441,7 +452,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                               <span id='reqstart_date_urgency' class='reqError text-danger valley'></span>
                               <div class="permanent_shift_div form-group level-drp scheduled_date_field d-none">
                                 
-                                <input class="form-control scheduled_date" type="date" name="scheduled_date" value="" id="scheduled_date">
+                                <input class="form-control scheduled_date" type="date" name="scheduled_date" value="{{ $job_data->start_date_urgency_permanent }}" id="scheduled_date">
                                 <span id='reqscheduled_date' class='reqError text-danger valley'></span>
                               </div>
                             </div>
@@ -459,14 +470,14 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                             <div class="start_date_urgency_div">
 
                               <div class="form-check">
-                                <input class="form-check-input start_date_urgency" type="radio" name="start_date_urgency" id="urgency_immediate" value="immediate">
+                                <input @if($job_data->start_date_urgency_fixedterm == "immediate") checked @endif class="form-check-input start_date_urgency" type="radio" name="start_date_urgency" id="urgency_immediate" value="immediate">
                                 <label class="form-check-label" for="urgency_immediate">
                                   Immediate (as soon as possible)
                                 </label>
                               </div>
 
                               <div class="form-check">
-                                <input class="form-check-input start_date_urgency" type="radio" name="start_date_urgency" id="urgency_within_weeks" value="within_weeks">
+                                <input @if($job_data->start_date_urgency_fixedterm == "within_seven_week" || $job_data->start_date_urgency_fixedterm == "within_five_week" || $job_data->start_date_urgency_fixedterm == "within_two_week") checked @endif class="form-check-input start_date_urgency" type="radio" name="start_date_urgency" id="urgency_within_weeks" value="within_weeks">
                                 <label class="form-check-label" for="urgency_within_weeks">
                                   Within weeks
                                 </label>
@@ -475,17 +486,17 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                               <div class="permanent_shift_div within_weeks_div d-none ms-4">
 
                                 <div class="form-check">
-                                  <input class="form-check-input within_weeks_radio" type="radio" name="within_weeks_radio" id="within_two_week" value="within_two_week">
+                                  <input @if($job_data->start_date_urgency_fixedterm == "within_two_week") checked @endif class="form-check-input within_weeks_radio" type="radio" name="within_weeks_radio" id="within_two_week" value="within_two_week">
                                   <label class="form-check-label" for="within_two_week">Within 2 weeks</label>
                                 </div>
 
                                 <div class="form-check">
-                                  <input class="form-check-input within_weeks_radio" type="radio" name="within_weeks_radio" id="within_five_week" value="within_five_week">
+                                  <input @if($job_data->start_date_urgency_fixedterm == "within_five_week") checked @endif class="form-check-input within_weeks_radio" type="radio" name="within_weeks_radio" id="within_five_week" value="within_five_week">
                                   <label class="form-check-label" for="within_five_week">Within 5 weeks</label>
                                 </div>
 
                                 <div class="form-check">
-                                  <input class="form-check-input within_weeks_radio" type="radio" name="within_weeks_radio" id="within_seven_week" value="within_seven_week">
+                                  <input @if($job_data->start_date_urgency_fixedterm == "within_seven_week") checked @endif class="form-check-input within_weeks_radio" type="radio" name="within_weeks_radio" id="within_seven_week" value="within_seven_week">
                                   <label class="form-check-label" for="within_seven_week">Within 7 weeks</label>
                                 </div>
 
@@ -500,18 +511,21 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                               <span id='reqstart_date_urgency' class='reqError text-danger valley'></span>
                               <div class="permanent_shift_div form-group level-drp scheduled_date_field d-none">
                                 
-                                <input class="form-control scheduled_date" type="date" name="scheduled_date" value="" id="scheduled_date">
+                                <input class="form-control scheduled_date" type="date" name="scheduled_date" value="{{ $job_data->start_date_urgency_fixedterm }}" id="scheduled_date">
                                 <span id='reqscheduled_date' class='reqError text-danger valley'></span>
                               </div>
                             </div>
                             <div class="form-group">
                                 <label>Contract length <span class="required">*</span></label>
+                                @php
+                                  $result = explode(" ", $job_data->fixed_term_contract_length);
+                                @endphp
                                 <div style="display:flex; gap:10px;">
-                                    <input type="number" name="contract_length_value" min="1" id="contract_length_value" placeholder="e.g. 6">
+                                    <input type="number" name="contract_length_value" value="{{ $result[0] }}" min="1" id="contract_length_value" placeholder="e.g. 6">
                                     <span id='reqcontract_length_value' class='reqError text-danger valley'></span>
                                     <select name="contract_length_unit" id="contract_length_unit">
-                                        <option value="months">Months</option>
-                                        <option value="years">Years</option>
+                                        <option value="months" @if(isset($result[1]) && $result[1] == "months") selected @endif>Months</option>
+                                        <option value="years" @if(isset($result[1]) && $result[1] == "years") selected @endif>Years</option>
                                     </select>
                                     <span id='reqcontract_length_unit' class='reqError text-danger valley'></span>
                                 </div>
@@ -1449,7 +1463,11 @@ form#shift_scheduling_form ul.select2-selection__rendered {
               text: 'Shifts & Scheduling form added Successfully',
             }).then(function() {
               window.location.href = "{{ route('medical-facilities.shift_scheduling') }}";
-              sessionStorage.setItem("tab-one","shift_scheduling");
+              
+              var tab_name = sessionStorage.getItem("tab-one");
+              if(tab_name != "job_description"){
+                sessionStorage.setItem("tab-one","shift_scheduling");
+              }
             });
           } else {
             Swal.fire({
@@ -1471,5 +1489,81 @@ form#shift_scheduling_form ul.select2-selection__rendered {
 
       return false;
     }  
+
+    if ($(".shift_types_field").val() != "") {
+      var shift_types_field = JSON.parse($(".shift_types_field").val());
+      console.log("shift_types_field", shift_types_field);
+      $('.js-example-basic-multiple[data-list-id="shift_types_data"]').select2().val(shift_types_field).trigger('change');
+    }
+
+    if ($(".shift_length_field").val() != "") {
+      var shift_length_field = JSON.parse($(".shift_length_field").val());
+      $('.js-example-basic-multiple[data-list-id="shift_length_data"]').select2().val(shift_length_field).trigger('change');
+    }
+
+    if ($(".schedule_model").val() != "") {
+      var schedule_model = JSON.parse($(".schedule_model").val());
+      $('.js-example-basic-multiple[data-list-id="schedule_model_data"]').select2().val(schedule_model).trigger('change');
+    }
+
+    if ($(".weekly_work_patterns").val() != "") {
+      var weekly_work_patterns = JSON.parse($(".weekly_work_patterns").val());
+      $('.js-example-basic-multiple[data-list-id="weekly_work_patters"]').select2().val(weekly_work_patterns).trigger('change');
+    }
+
+    if ($(".shift_rotation").val() != "") {
+      var shift_rotation = JSON.parse($(".shift_rotation").val());
+      $('.js-example-basic-multiple[data-list-id="shift_rotation_data"]').select2().val(shift_rotation).trigger('change');
+    }
+
+    if ($(".non_trad_shift").val() != "") {
+      var non_trad_shift = JSON.parse($(".non_trad_shift").val());
+      $('.js-example-basic-multiple[data-list-id="non_trad_shift"]').select2().val(non_trad_shift).trigger('change');
+    }
+
+    if ($(".maternity_shift").val() != "") {
+      var maternity_shift = JSON.parse($(".maternity_shift").val());
+      $('.js-example-basic-multiple[data-list-id="maternity_shift"]').select2().val(maternity_shift).trigger('change');
+    }
+
+    if ($(".days_off").val() != "") {
+      var days_off = JSON.parse($(".days_off").val());
+      $('.js-example-basic-multiple[data-list-id="days_off_data"]').select2().val(days_off).trigger('change');
+    }
+
+    if ($(".perticular_days_off").val() != "") {
+      var perticular_days_off = JSON.parse($(".perticular_days_off").val());
+      $('.js-example-basic-multiple[data-list-id="specific_days_off_subdata"]').select2().val(perticular_days_off).trigger('change');
+    }
+
+    if ($(".specific_days_off").val() != "") {
+      var specific_days_off = JSON.parse($(".specific_days_off").val());
+      $('.js-example-basic-multiple[data-list-id="specific_days_off_data"]').select2().val(specific_days_off).trigger('change');
+    }
+    var schedule_date = $("#scheduled_date").val();
+    if(schedule_date !=""){
+      $('.scheduled_date_field').removeClass('d-none');
+      $('#urgency_scheduled').prop('checked', true);
+    }
+
+    if ($('#urgency_within_weeks').is(':checked')) {
+        $('.within_weeks_div').removeClass('d-none');
+    }
+
+    var temporarysingle_start_date = $(".temporarysingle_start_date").val();
+    var temporarysingle_end_date = $(".temporarysingle_end_date").val();
+
+    if (temporarysingle_start_date != "" && temporarysingle_end_date != "") {
+      $('.single_shift_content').removeClass('d-none');
+      $('input[name="shift_mode"][value="single"]').prop('checked', true);
+    }
+
+    var temporaryrangestart_date = $(".temporaryrangestart_date").val();
+    var temporaryrangeend_date = $(".temporaryrangeend_date").val();
+
+    if (temporaryrangestart_date != "" && temporaryrangeend_date != "") {
+      $('.date_range_content').removeClass('d-none');
+      $('input[name="shift_mode"][value="range"]').prop('checked', true);
+    }
   </script>
 @endsection

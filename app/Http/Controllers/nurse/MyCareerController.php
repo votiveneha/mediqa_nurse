@@ -412,6 +412,7 @@ class MyCareerController extends Controller
             ->get();
 
 
+            // echo "<pre>";print_r($active_list);die;
         return view(
             'nurse.my_career.nurse_application',
             compact('active_list', 'archived_list')

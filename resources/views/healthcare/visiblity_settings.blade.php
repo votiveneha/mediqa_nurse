@@ -136,6 +136,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
 
                     
                     <div class="card shadow-sm border-0 p-4 mt-30">
+                      @include('healthcare.layouts.top_links')
                       <h3 class="mt-0 color-brand-1 mb-2">Visibility & Settings</h3>
     
                       <form id="visiblity_settings_form" method="POST" onsubmit="return visiblity_settings_form()">
@@ -146,25 +147,25 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                                 <label class="form-label" for="input-1">Visibility</label>
                                 <div class="visiblity_input">
                                     <div class="form-check">
-                                        <input type="radio" name="visiblity_mode" value="1" checked>
+                                        <input @if($job_data->visiblity == "1") checked @endif type="radio" name="visiblity_mode" value="1" checked>
                                         <label class="form-check-label" for="urgency_immediate">
                                         Nurses & Agencies
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input type="radio" name="visiblity_mode" value="2">
+                                        <input @if($job_data->visiblity == "2") checked @endif type="radio" name="visiblity_mode" value="2">
                                         <label class="form-check-label" for="Nurse-only">
                                         Nurse-only
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input type="radio" name="visiblity_mode" value="3">
+                                        <input @if($job_data->visiblity == "3") checked @endif type="radio" name="visiblity_mode" value="3">
                                         <label class="form-check-label" for="Agency-only">
                                         Agency-only
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input type="radio" name="visiblity_mode" value="4">
+                                        <input @if($job_data->visiblity == "4") checked @endif type="radio" name="visiblity_mode" value="4">
                                         <label class="form-check-label" for="Invite-only">
                                         Invite-only
                                         </label>
@@ -176,47 +177,47 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                             <div class="form-group level-drp">
                               <label class="form-label" for="input-1">Application deadline (optional)
                               </label>
-                              <input class="form-control temporary_hours_per_week" type="date" name="application_deadline" value="" id="application_deadline">
+                              <input class="form-control temporary_hours_per_week" type="date" name="application_deadline" value="{{ $job_data->application_deadline }}" id="application_deadline">
                               <span id='reqtemporaryrangenotes' class='reqError text-danger valley'></span>
                             </div>
                             <div class=" drp--clr">
                                 <label class="form-label" for="input-1">Listing expiry</label>
                                 <div class="visiblity_input">
                                     <div class="form-check">
-                                        <input type="radio" name="listing_expiry" value="1" @if($job_data->main_emp_type == "3") checked @endif>
+                                        <input type="radio" name="listing_expiry" value="1" @if($job_data->main_emp_type == "3" || $job_data->expiry_date == "1") checked @endif>
                                         <label class="form-check-label" for="7 days">
                                         7 days (default 7 days for Temporary employment)
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input type="radio" name="listing_expiry" value="2">
+                                        <input @if($job_data->expiry_date == "2") checked @endif type="radio" name="listing_expiry" value="2">
                                         <label class="form-check-label" for="14 days">
                                         14 days
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input type="radio" name="listing_expiry" value="3" @if($job_data->main_emp_type == "1" || $job_data->main_emp_type == "2") checked @endif>
+                                        <input @if($job_data->expiry_date == "3") checked @endif type="radio" name="listing_expiry" value="3" @if($job_data->main_emp_type == "1" || $job_data->main_emp_type == "2" || $job_data->expiry_date == "3") checked @endif>
                                         <label class="form-check-label" for="Agency-only">
                                         30 days (default 30 days for Permanent and fixed-Term employment)
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input type="radio" name="listing_expiry" value="4">
+                                        <input @if($job_data->expiry_date == "4") checked @endif type="radio" name="listing_expiry" value="4">
                                         <label class="form-check-label" for="60 days">
                                         60 days 
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input type="radio" name="listing_expiry" value="5">
+                                        <input @if($job_data->expiry_date == "5") checked @endif type="radio" name="listing_expiry" value="5">
                                         <label class="form-check-label" for="Custom date">
                                         Custom date
                                         </label>
                                     </div>
                                 </div>
-                                <div class="form-group level-drp custom_date_box d-none">
+                                <div class="form-group level-drp custom_date_box @if($job_data->expiry_date != '5') d-none @endif">
                                     <label class="form-label" for="input-1">Custom date
                                     </label>
-                                    <input class="form-control temporary_hours_per_week" type="date" name="custom_date" value="" id="custom_date">
+                                    <input class="form-control temporary_hours_per_week" type="date" name="custom_date" value="{{ $job_data->custom_expiry_date }}" id="custom_date">
                                     <span id='reqcustom_date' class='reqError text-danger valley'></span>
                                 </div>
                                 
@@ -481,7 +482,11 @@ form#shift_scheduling_form ul.select2-selection__rendered {
               text: 'Visiblity & Settings updated Successfully',
             }).then(function() {
               window.location.href = "{{ route('medical-facilities.visiblity_settings') }}";
-              sessionStorage.setItem("tab-one","visiblity_apply_settings");
+              
+              var tab_name = sessionStorage.getItem("tab-one");
+              if(tab_name != "job_description"){
+                sessionStorage.setItem("tab-one","visiblity_apply_settings");
+              }
             });
           } else {
             Swal.fire({

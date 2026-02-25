@@ -146,6 +146,7 @@ form#job_requirements_form ul.select2-selection__rendered {
 
                     
                     <div class="card shadow-sm border-0 p-4 mt-30">
+                      @include('healthcare.layouts.top_links')  
                       <h3 class="mt-0 color-brand-1 mb-2">Requirements</h3>
                       <form id="job_requirements_form" method="POST" onsubmit="return job_requirements_form()">
                         @csrf    
@@ -1055,7 +1056,11 @@ form#job_requirements_form ul.select2-selection__rendered {
               text: 'Job Post Successfully',
             }).then(function() {
               window.location.href = "{{ route('medical-facilities.requirements') }}";
-              sessionStorage.setItem("tab-one","requirements");
+              var tab_name = sessionStorage.getItem("tab-one");
+              if(tab_name != "job_description"){
+                sessionStorage.setItem("tab-one","requirements");
+              }
+             
             });
           } else {
             Swal.fire({

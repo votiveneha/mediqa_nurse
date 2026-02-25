@@ -617,7 +617,7 @@ img, iframe, video {
                 <a class='@if(count($all_tabs) < 15) disabled-link @endif menu-link hover-up' href='#'>Saved Jobs</a>
               </li>
               <li class="@if(count($all_tabs) < 15) tooltip-link @endif" @if(count($all_tabs) < 15) data-tooltip="Please complete the profile first" @endif>
-                <a class='@if(count($all_tabs) < 15) disabled-link @endif menu-link hover-up {{ request()->is('nurse/match_percentage') ?'active':'' }} {{ request()->is('nurse/application') ?'active':'' }} {{ request()->is('nurse/interviews') ?'active':'' }}' href='{{ route("nurse.application") }} '>My Career</i></a>
+                <a class='@if(count($all_tabs) < 15) disabled-link @endif menu-link hover-up {{ request()->is('nurse/match_percentage') ?'active':'' }} {{ request()->is('nurse/application') ?'active':'' }} {{ request()->is('nurse/interviews') ?'active':'' }} {{ request()->is('nurse/MyJobs') ?'active':'' }}' href='{{ route("nurse.application") }} '>My Career</i></a>
                 
               </li>
               <!-- <li class="">

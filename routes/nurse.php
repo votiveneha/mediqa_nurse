@@ -73,6 +73,13 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
     Route::post('/updateVisiblitySettings', 'JobPostingController@updateVisiblitySettings')->name('updateVisiblitySettings');
     Route::get('/review_publish', 'JobPostingController@reviewPublish')->name('reviewPublish');
     Route::post('/saveDraft', 'JobPostingController@saveDraft')->name('saveDraft');
+    Route::get('/active_jobs', 'JobPostingController@active_jobs')->name('active_jobs');
+    Route::get('/draft_jobs', 'JobPostingController@draft_jobs')->name('draft_jobs');
+    Route::post('/closeExpireJobs', 'JobPostingController@close_expire_jobs')->name('closeExpireJobs');
+    Route::get('/expired_jobs', 'JobPostingController@expired_jobs')->name('expired_jobs');
+    Route::post('/delete_jobs', 'JobPostingController@delete_jobs')->name('deleteJobs');
+    Route::post('/publishJobs', 'JobPostingController@publish_jobs')->name('publishJobs');
+    Route::post('/duplicateJobs', 'JobPostingController@duplicateJobs')->name('duplicateJobs');
   });
 });
 
@@ -275,7 +282,7 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::get('action-application', 'MyCareerController@action_application')->name('action_application');
 
   
-  Route::get('nurseMyJobs', 'MyCareerController@nurseMyJobs')->name('nurseMyJobs');
+  Route::get('MyJobs', 'MyCareerController@nurseMyJobs')->name('MyJobs');
 
 
   Route::get('action-interview', 'MyCareerController@action_interview')->name('action_interview');

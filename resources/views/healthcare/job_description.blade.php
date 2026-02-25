@@ -146,6 +146,7 @@ form#job_posting_form ul.select2-selection__rendered {
 
                     
                     <div class="card shadow-sm border-0 p-4 mt-30">
+                      @include('healthcare.layouts.top_links')
                       <h3 class="mt-0 color-brand-1 mb-2">Job Description</h3>
     
                         <form id="job_description_form" method="POST" onsubmit="return job_description_form()">
@@ -178,7 +179,7 @@ form#job_posting_form ul.select2-selection__rendered {
                                 <label class="form-label" for="input-1">Contact Person
                                 </label>
                                 
-                                <input class="form-control contact_person" type="text" name="contact_person" id="contact_person">
+                                <input class="form-control contact_person" type="text" name="contact_person" value="{{ $job_data->contact_person_role }}" id="contact_person">
                                 <span id='reqcontact_person' class='reqError text-danger valley'></span>
                             </div>  
 
@@ -467,6 +468,9 @@ form#job_posting_form ul.select2-selection__rendered {
         }
     });
 
+    editor_role.root.innerHTML = `{!! $job_data->about_role !!}`;
+    $('#about_role').val(editor_role.root.innerHTML);
+
     var editor_responsiblities = new Quill('#editor_responsiblities', {
         theme: 'snow',
         placeholder: 'Enter responsibilities...',
@@ -479,6 +483,9 @@ form#job_posting_form ul.select2-selection__rendered {
         }
     });
 
+    editor_responsiblities.root.innerHTML = `{!! $job_data->key_responsiblities !!}`;
+    $('#key_responsiblities').val(editor_responsiblities.root.innerHTML);
+
     var editor_role_specific = new Quill('#editor_role_specific', {
         theme: 'snow',
         placeholder: 'Write environment notes...',
@@ -490,6 +497,9 @@ form#job_posting_form ul.select2-selection__rendered {
             ]
         }
     });
+
+    editor_role_specific.root.innerHTML = `{!! $job_data->role_specific_work_environments !!}`;
+    $('#role_specific').val(editor_role_specific.root.innerHTML);
 
     var selectedFiles1 = [];
 

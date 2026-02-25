@@ -136,6 +136,7 @@ form#benefits_preferences_form ul.select2-selection__rendered {
 
                     
                     <div class="card shadow-sm border-0 p-4 mt-30">
+                      @include('healthcare.layouts.top_links')
                       <h3 class="mt-0 color-brand-1 mb-2">Benefits</h3>
     
                       <form id="benefits_preferences_form" method="POST" onsubmit="return benefits_preferences_form()">
@@ -149,9 +150,21 @@ form#benefits_preferences_form ul.select2-selection__rendered {
                           <?php
                             $subbenefits_preferences_data = DB::table("benefits_preferences")->where("subbenefit_id",$benefits_data->benefits_id)->get();
                             
+                            if(!empty($job_data) && $job_data->benefits != NULL){
+                                $benefitspreferences = (array)json_decode($job_data->benefits);
+                            }else{
+                                $benefitspreferences = array();
+                            }
+                            
+                            $benefitsprefer_data = '';
+                            if(!empty($benefitspreferences) && isset($benefitspreferences[$benefits_data->benefits_id])){
+                                $benefitsprefer_data = json_encode($benefitspreferences[$benefits_data->benefits_id]);
+                            }else{
+                                $benefitsprefer_data = '';
+                            }
                           ?>
                           <input type="hidden" name="benefits_input" class="benefits_input benefits_input-{{ $benefits_data->benefits_id }}" value="{{ $benefits_data->benefits_id }}">
-                          
+                          <input type="hidden" name="benefits_data" class="benefits_data benefits_data-{{ $benefits_data->benefits_id }}" value="{{ $benefitsprefer_data }}">
                           <ul id="benefits_preferences-{{ $benefits_data->benefits_id }}" style="display:none;">
                              
                             @if(!empty($subbenefits_preferences_data))
@@ -895,7 +908,11 @@ form#benefits_preferences_form ul.select2-selection__rendered {
                 text: 'Benefits Updated Successfully',
                 }).then(function() {
                 window.location.href = "{{ route('medical-facilities.job_benefits') }}";
-                sessionStorage.setItem("tab-one","benefits");
+                var tab_name = sessionStorage.getItem("tab-one");
+                if(tab_name != "job_description"){
+                  sessionStorage.setItem("tab-one","benefits");
+                }
+                
                 });
             } else {
                 Swal.fire({
@@ -919,5 +936,18 @@ form#benefits_preferences_form ul.select2-selection__rendered {
 
         return false;
     }
+
+    $(".benefits_input").each(function(){
+      var val = $(this).val();
+      if ($(".benefits_data-"+val).val() != "") {
+          var benefits_data = JSON.parse($(".benefits_data-"+val).val());
+          console.log("benefits_data",benefits_data);
+          
+          $('.js-example-basic-multiple[data-list-id="benefits_preferences-'+val+'"]').select2().val(benefits_data).trigger('change');
+          
+      
+      }
+        
+    });
   </script>
 @endsection

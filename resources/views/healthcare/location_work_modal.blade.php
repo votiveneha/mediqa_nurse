@@ -220,6 +220,7 @@ input:checked + .slider_remote:before {
 
                     
                     <div class="card shadow-sm border-0 p-4 mt-30">
+                      @include('healthcare.layouts.top_links')
                       <h3 class="mt-0 color-brand-1 mb-2">Location & Work Model</h3>
     
                         <form id="location_model_form" method="POST" onsubmit="return location_model_form()">
@@ -244,29 +245,29 @@ input:checked + .slider_remote:before {
                                 <label class="form-label" for="input-1">City / Suburb
                                 </label>
                                 
-                                <input class="form-control city_suburb" type="text" name="city_suburb" id="city_suburb">
+                                <input class="form-control city_suburb" type="text" name="city_suburb" id="city_suburb" value="@if(!empty($job_data)){{ $job_data->location_city }}@endif">
                                 <span id='reqcity_suburb' class='reqError text-danger valley'></span>
                             </div>   
                             <div class="form-group level-drp">
                                 <label class="form-label" for="input-1">Primary Hiring Site
                                 </label>
                                 
-                                <input class="form-control primary_hiring_site" type="text" name="primary_hiring_site" id="primary_hiring_site">
+                                <input class="form-control primary_hiring_site" type="text" name="primary_hiring_site" id="primary_hiring_site" value="@if(!empty($job_data)){{ $job_data->location_primary_hiring_site }}@endif">
                                 <span id='reqprimary_hiring_site' class='reqError text-danger valley'></span>
                             </div>   
                             <div class="toggle-group">
                                 <label for="site_rotation">Multi-site / Rotation</label>
 
                                 <label class="switch">
-                                    <input type="checkbox" id="site_rotation" name="site_rotation">
+                                    <input type="checkbox" id="site_rotation" name="site_rotation" @if(!empty($job_data) && $job_data->multi_site_rotation == 1) checked @endif>
                                     <span class="slider"></span>
                                 </label>
                             </div>
-                            <div class="form-group level-drp additional_site_box d-none">
+                            <div class="form-group level-drp additional_site_box @if(empty($job_data)) d-none @else @if($job_data->multi_site_rotation == 0) d-none @endif @endif">
                                 <label class="form-label" for="input-1">Additional Sites
                                 </label>
                                 
-                                <input class="form-control additional_sites" type="text" name="additional_sites" id="additional_sites">
+                                <input class="form-control additional_sites" type="text" name="additional_sites" id="additional_sites" value="@if(!empty($job_data)){{ $job_data->additional_sites }}@endif">
                                 <span id='reqhoursweek' class='reqError text-danger valley'></span>
                             </div>
                             <div class="form-group level-drp">
@@ -274,9 +275,9 @@ input:checked + .slider_remote:before {
                                 </label>
                                 <select class="form-control form-select" name="work_modal" id="work_modal">
                                     <option value="">select</option>
-                                    <option value="On-site">On-site</option>
-                                    <option value="Hybrid">Hybrid</option>
-                                    <option value="Remote">Remote</option>
+                                    <option value="On-site" @if(!empty($job_data) && $job_data->work_model == "On-site") selected @endif>On-site</option>
+                                    <option value="Hybrid" @if(!empty($job_data) && $job_data->work_model == "Hybrid") selected @endif>Hybrid</option>
+                                    <option value="Remote" @if(!empty($job_data) && $job_data->work_model == "Remote") selected @endif>Remote</option>
                                 </select>
                                 <span id='reqwork_modal' class='reqError text-danger valley'></span>
                             </div>   
@@ -284,30 +285,30 @@ input:checked + .slider_remote:before {
                                 <label for="site_rotation">Remote/Telehealth component</label>
 
                                 <label class="switch_remote">
-                                    <input type="checkbox" id="remote_teleneath_component" name="remote_teleneath_component">
+                                    <input type="checkbox" id="remote_teleneath_component" name="remote_teleneath_component" @if(!empty($job_data) && $job_data->remote_teleneath_work == 1) checked @endif>
                                     <span class="slider_remote"></span>
                                 </label>
                             </div>
-                            <div class="form-group level-drp d-none remote_teleneath_work">
+                            <div class="form-group level-drp @if(empty($job_data)) d-none @else @if($job_data->remote_teleneath_work == 0) d-none @endif @endif remote_teleneath_work">
                                 <label class="form-label" for="input-1">Remote/Telehealth work
                                 </label>
                                 <select class="form-control form-select" name="remote_teleneath_modal" id="remote_teleneath_modal">
                                     <option value="">select</option>
-                                    <option value="Hybrid">Hybrid</option>
-                                    <option value="Fully remote">Fully remote</option>
+                                    <option value="Hybrid" @if(!empty($job_data) && $job_data->remote_work_type == "Hybrid") selected @endif>Hybrid</option>
+                                    <option value="Fully remote" @if(!empty($job_data) && $job_data->remote_work_type == "Fully remote") selected @endif>Fully remote</option>
                                     
                                 </select>
                                 
                             </div>   
-                            <div class="form-group level-drp d-none remote_percent_box">
+                            <div class="form-group level-drp @if(empty($job_data)) d-none @else @if($job_data->remote_teleneath_work == 0 || $job_data->remote_work_type != 'Hybrid') d-none @endif @endif remote_percent_box">
                                 <label class="form-label" for="input-1">Remote(in %)
                                 </label>
                                 <select class="form-control form-select" name="remote_percent" id="remote_percent">
                                     <option value="">select</option>
-                                    <option value="10">10</option>
-                                    <option value="25">25</option>
-                                    <option value="50">50</option>
-                                    <option value="75">75</option>
+                                    <option value="10" @if(!empty($job_data) && $job_data->percent_remote == "10") selected @endif>10</option>
+                                    <option value="25" @if(!empty($job_data) && $job_data->percent_remote == "25") selected @endif>25</option>
+                                    <option value="50" @if(!empty($job_data) && $job_data->percent_remote == "50") selected @endif>50</option>
+                                    <option value="75" @if(!empty($job_data) && $job_data->percent_remote == "75") selected @endif>75</option>
                                 </select>
                                 
                             </div>   
@@ -534,8 +535,15 @@ input:checked + .slider_remote:before {
                 if(data != ""){
                     var state_data = JSON.parse(data);
                     var job_state = '';
+                    var job_selected_state = "<?php echo (!empty($job_data))?$job_data->location_state:0; ?>";
+                    console.log("job_selected_state",job_selected_state);
                     for(var i = 0;i<state_data.length;i++){
-                        job_state += '<option value='+state_data[i].id+'>'+state_data[i].name+'</option>';
+                        if(state_data[i].id == job_selected_state){
+                          var selected_text = 'selected';
+                        }else{
+                          var selected_text = '';
+                        }
+                        job_state += '<option value='+state_data[i].id+' '+selected_text+'>'+state_data[i].name+'</option>';
                         
                     }
                     $("#job_state").append('<option value="">Select</option>'+job_state);

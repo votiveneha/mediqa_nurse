@@ -132,6 +132,7 @@ form#job_posting_form ul.select2-selection__rendered {
 
                     
                     <div class="card shadow-sm border-0 p-4 mt-30">
+                      @include('healthcare.layouts.top_links')
                       <h3 class="mt-0 color-brand-1 mb-2">Post a Job</h3>
     
                       <form id="job_posting_form" method="POST" onsubmit="return job_posting_form()">
@@ -142,14 +143,30 @@ form#job_posting_form ul.select2-selection__rendered {
                           </label>
                           <select class="form-input mr-10 select-active" name="sector_preferences" id="sector_preferences">
                             <option value="">select</option>
-                            <option value="Public & Government">Public & Government</option>
-                            <option value="Private" >Private</option>
-                            <option value="Public Government & Private">Public Government & Private</option>
+                            <option value="Public & Government" @if(!empty($job_data) && $job_data->sector == "Public & Government") selected @endif>Public & Government</option>
+                            <option value="Private" @if(!empty($job_data) && $job_data->sector == "Private") selected @endif>Private</option>
+                            <option value="Public Government & Private" @if(!empty($job_data) && $job_data->sector == "Public Government & Private") selected @endif>Public Government & Private</option>
                           </select>
                           <span id='reqsector_preferences' class='reqError text-danger valley'></span>
                         </div>
                         <div class="form-group drp--clr">
                           <label class="form-label" for="input-1">Type of Nurse?</label>
+                          @php
+                            $profession_nurse_id = (!empty($job_data))?(array)json_decode($job_data->nurse_type_id):[];
+                            $practitioner_data = DB::table("practitioner_type")->where("id",isset($profession_nurse_id[0])?$profession_nurse_id[0]:0)->first();
+                            $mainnurse_json = (!empty($practitioner_data))?json_encode($practitioner_data->parent):'';
+                            $subnurse_json = (!empty($job_data))?$job_data->nurse_type_id:'';
+
+                            $profession_speciality_id = (!empty($job_data))?(array)json_decode($job_data->typeofspeciality):[];
+                            $speciality_data = DB::table("speciality")->where("id",isset($profession_speciality_id[0])?$profession_speciality_id[0]:0)->first();
+                            $mainspeciality_json = (!empty($speciality_data))?json_encode((string)$speciality_data->parent):'';
+                            
+                            $subspeciality_json = (!empty($job_data))?$job_data->typeofspeciality:'';
+
+                            $typeofspeciality = (array)$subspeciality_json;
+                            
+                          @endphp
+                          <input type="hidden" name="nurse_type" class="nurse_type" value='@if(!empty($job_data)){{ $mainnurse_json }}@endif'>
                           <ul id="type-of-nurse-0" style="display:none;">
                             @php $specialty = specialty();$spcl=$specialty[0]->id;@endphp
                             <?php
@@ -167,10 +184,35 @@ form#job_posting_form ul.select2-selection__rendered {
                           <select class="js-example-basic-multiple addAll_removeAll_btn nurse_type_field" data-list-id="type-of-nurse-0" name="nurseType[type_0][]" id="nurse_type" onchange="getNurseType('main',0)"></select>
                           <span id="reqnurseTypeId" class="reqError text-danger valley"></span>    
                         </div>    
-                        <div class="showNurseType-0"></div>
+                        <div class="showNurseType-0">
+
+                      
+                          @if(!empty($job_data) && $job_data->nurse_type_id != NULL) 
+                          <div class="subnurse_main_div subnurse_main_div-{{ $practitioner_data->parent }}">
+                              <?php
+                                $np_data_name = DB::table("practitioner_type")->where('id', $practitioner_data->parent)->first();
+                                $np_data = DB::table("practitioner_type")->where('parent', $practitioner_data->parent)->get();
+                              ?>
+                              <input type="hidden" name="subnursetype" class="subnursetype-{{ $practitioner_data->parent }}" value="{{ $subnurse_json }}">
+                              <div class="subnurse_div subnurse_div-{{ $practitioner_data->parent }} form-group level-drp">
+                              <label class="form-label subnurse_label subnurse_label-{{ $practitioner_data->parent }}" for="input-1">{{ $np_data_name->name }}</label>
+                              <input type="hidden" name="subnurse_list" class="subnurse_list subnurse_list-{{ $practitioner_data->parent }}" value="{{ $practitioner_data->parent }}">
+                              <ul id="type-of-nurse-{{ $practitioner_data->parent }}" style="display:none;">
+                                @foreach($np_data as $nd)
+                                <li data-value="{{ $nd->id }}">{{ $nd->name }}</li>
+                                @endforeach
+                              </ul>
+                              <select class="js-example-basic-multiple subnurse_valid-{{ $practitioner_data->parent }} addAll_removeAll_btn" data-list-id="type-of-nurse-{{ $practitioner_data->parent }}" name="subnursetype" onchange="getNurseType('main',{{ $practitioner_data->parent }})"></select>
+                              <span id="reqsubnursevalid-{{ $practitioner_data->parent }}" class="reqError text-danger valley"></span>
+                              </div>
+                              
+                          </div>   
+                          @endif      
+                        
+                        </div>
                         <div class="form-group drp--clr">
                           <label class="form-label" for="input-1">Primary Specialty</label>
-                          
+                          <input type="hidden" name="speciality_type" class="speciality_type" value='@if(!empty($job_data)){{ $mainspeciality_json }}@endif'>
                           <ul id="speciality_preferences-primary-0" style="display:none;">
                             @php $JobSpecialties = JobSpecialties(); @endphp
                             <li data-value="0">select</li>
@@ -187,14 +229,73 @@ form#job_posting_form ul.select2-selection__rendered {
                           <select class="js-example-basic-multiple addAll_removeAll_btn speciality_type_field" data-list-id="speciality_preferences-primary-0" name="nurseType[]" onchange="getSecialities('main',0,'primary','')"></select>
                           <span id="reqspecialties" class="reqError text-danger valley"></span>
                         </div>
-                        <div class="show_specialities-primary-0"></div>
+                        
+                        <div class="show_specialities-primary-0">
+                          @if(!empty($job_data) && $job_data->typeofspeciality != NULL) 
+                          <?php
+                            $sp_data_name = DB::table("speciality")->where('id', $speciality_data->parent)->first();
+                            $sp_data = DB::table("speciality")->where('parent', $speciality_data->parent)->get();
+                          ?>
+                          <div class="subspec_main_div subspec_main_div-primary-{{ $speciality_data->parent }}">
+                            <div class="subspec_div subspec_div-{{ $speciality_data->parent }} form-group level-drp">
+                              <input type="hidden" name="subspecialitytype" class="subspecialitytype-{{ $speciality_data->parent }}" value="{{ $subspeciality_json }}">
+                              <label class="form-label subspec_label subspec_label-{{ $speciality_data->parent }}" for="input-1">{{ $sp_data_name->name }}</label>
+                              <input type="hidden" name="subspec_list" class="subspec_list-primary subspec_list-primary-{{ $speciality_data->parent }}" value="{{ $speciality_data->parent }}">
+                              <ul id="speciality_preferences-primary-{{ $speciality_data->parent }}" style="display:none;">
+                                <li data-value="0">select</li>
+                                <?php
+                                $k = 1;
+                                ?>
+                                @foreach($sp_data as $ptl)
+                                <li id="nursing_menus-{{ $k }}" data-value="{{ $ptl->id }}">{{ $ptl->name }}</li>
+                                <?php
+                                $k++;
+                                ?>
+                                @endforeach
+                              </ul>
+                              <select class="js-example-basic-multiple subspec_valid-primary' subspec_valid-{{ $speciality_data->parent }} addAll_removeAll_btn" name="subspeciality[primary][{{ $speciality_data->parent }}][]" data-list-id="speciality_preferences-primary-{{ $speciality_data->parent }}" id="subspecialities" onchange="getSecialities('main',{{ $speciality_data->parent }},'primary','')"></select>
+                              <span id="reqsubspecvalid-primary" class="reqError text-danger valley"></span>
+                            </div>
+                            <div class="subspec_level-{{ $speciality_data->parent }}"></div>
+                            <div class="show_specialities-primary-{{ $speciality_data->parent }}"></div>
+                            <div class="show_specialities_experience-primary-{{ $typeofspeciality[0] }}">
+                              <div class="subexper_div subexper_div-{{ $typeofspeciality[0] }}">
+                                <div class="custom-select-wrapper form-group level-drp">
+                                  <label class="form-label" for="input-1">Minimum Specialty Experience
+                                  </label>
+                                  <input type="hidden" name="subspecprof_list" class="subspecprof_list  subspecprof_listProfession subspecprof_listProfession-{{ $typeofspeciality[0] }} subspecprof_list-'+k+'" value="{{ $typeofspeciality[0] }}">
+                                  <select class="custom-select experience_level-{{ $typeofspeciality[0] }}" name="speciality_experience">
+                                    <option value="">Please Select</option>
+                                    @for($i = 1; $i <= 30; $i++) <option value="{{ $i }}" @if($job_data->experience_level == $i) selected @endif>{{ $i }}{{ $i == 1 ? 'st' : ($i == 2 ? 'nd' : ($i == 3 ? 'rd' : 'th')) }} Year</option>
+                                                @endfor
+                                  </select>
+                                  <span id="reqassistentlevel{{ $typeofspeciality[0] }} class="reqError text-danger valley"></span>
+                                  <div class="experience_helper">Set 0 for Graduate or Transition roles.Tick “Willing to upskill” if you’ll consider near-fit candidates.</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          @endif
+                        </div>
                         <div class="declaration_box mt-2 mb-2">
-                          <input class="currently_position currently_position" name="willing_upskill" type="checkbox">Willing to Upskill
+                          <input class="currently_position currently_position" name="willing_upskill" type="checkbox" @if(!empty($job_data) && $job_data->willing_to_upskill == 1) checked @endif>Willing to Upskill
                         </div>
                         <div class="experience_helper">Facility is open to candidates who do not yet meet the minimum specialty experience and can provide orientation or training.</div>
                         <div class="form-group drp--clr">
                           <label class="form-label" for="input-1">Secondary Specialty</label>
-                          
+                          @php
+                            $secondary_speciality = (!empty($job_data))?(array)json_decode($job_data->secondary_speciality):[];
+
+                            $sec_spec_arr = [];
+                            foreach($secondary_speciality as $index=>$sec_speciality){
+                              $sec_spec_arr[] = $index;
+                            }
+                            //print_r($sec_spec_arr);
+
+
+                          @endphp
+                          <input type="hidden" name="sec_spec" class="sec_spec" value="{{ json_encode($sec_spec_arr) }}">
                           <ul id="speciality_preferences-secondary-0" style="display:none;">
                             @php $JobSpecialties = JobSpecialties(); @endphp
                             
@@ -212,7 +313,40 @@ form#job_posting_form ul.select2-selection__rendered {
                           <span id="reqsecondaryspecialties" class="reqError text-danger valley"></span>
                           <div class="experience_helper">Secondary specialties are considered a plus, not a requirement.</div>
                         </div>
-                        <div class="show_specialities-secondary-0"></div>
+                        <div class="show_specialities-secondary-0">
+                          @foreach($sec_spec_arr as $sec_arr)
+                          <?php
+                            $sp_data_name = DB::table("speciality")->where('id', $sec_arr)->first();
+                            $sp_data = DB::table("speciality")->where('parent', $sec_arr)->get();
+                            $sec_spec = json_encode($secondary_speciality[$sec_arr]);
+                            //print_r($sec_spec);
+                          ?>
+                          <div class="subspec_main_div subspec_main_div-secondary-{{ $sec_arr }}">
+                            <div class="subspec_div subspec_div-{{ $sec_arr }} form-group level-drp">
+                            <label class="form-label subspec_label subspec_label-{{ $sec_arr }}" for="input-1">{{ $sp_data_name->name }}</label>
+                            <input type="hidden" name="subspec_list" class="subspec_list-secondary subspec_list-secondary-{{ $sec_arr }}" value="{{ $sec_arr }}">
+                            <input type="hidden" name="subspecialitytype" class="subspecialitysecondarytype-{{ $sec_arr }}" value="{{ $sec_spec }}">
+                            <ul id="speciality_preferences-secondary-{{ $sec_arr }}" style="display:none;">
+                              <?php
+                              $k = 1;
+                              ?>
+                              @foreach($sp_data as $ptl)
+                              <li id="nursing_menus-{{ $k }}" data-value="{{ $ptl->id }}">{{ $ptl->name }}</li>
+                              <?php
+                              $k++;
+                              ?>
+                              @endforeach
+
+                            </ul>
+                            <select class="js-example-basic-multiple subspec_valid-secondary-{{ $sec_arr }}' subspec_valid-{{ $index }} addAll_removeAll_btn" name="subspeciality[secondary][{{ $sec_arr }}][]" data-list-id="speciality_preferences-secondary-{{ $sec_arr }}" id="subspecialities" onchange="getSecialities('main',{{ $sec_arr }},'secondary','multiple')" multiple></select>
+                            <span id="reqsubspecvalid-{{ $sec_arr }}" class="reqError text-danger valley"></span>
+                            </div>
+                            <div class="subspec_level-{{ $sec_arr }}"></div>
+                            <div class="show_specialities-secondary-{{ $sec_arr }}"></div>
+                            
+                          </div>
+                          @endforeach
+                        </div>
                         
                         <div class="form-group level-drp">
                           
@@ -221,14 +355,14 @@ form#job_posting_form ul.select2-selection__rendered {
                                 
                                 $workplace_data = DB::table('work_enviornment_preferences')->where("sub_env_id",0)->orderBy("env_name","asc")->get();
                                 
-                                if(!empty($work_preferences_data)){
-                                  $facility_type = (array)json_decode($work_preferences_data->work_environment_preferences);
+                                if(!empty($job_data)){
+                                  $facility_type = (array)json_decode($job_data->work_environment);
                                 }else{
                                   $facility_type = array();
                                 }
                                 
                                 
-
+                                
                                 $p_memb_arr = array();
 
                                 if(!empty($facility_type) && !in_array("444", (array)$facility_type[1])){
@@ -244,8 +378,8 @@ form#job_posting_form ul.select2-selection__rendered {
                                   }
                                   
                                 }
-
-                                $p_memb_json = json_encode($p_memb_arr);
+                                
+                                $p_memb_json = json_encode(isset($p_memb_arr[0])?$p_memb_arr[0]:[]);
                             ?>
                             <input type="hidden" name="mainfactype" class="mainfactype mainfactype-1" value="{{ $p_memb_json }}">
                             <ul id="wp_data-1" style="display:none;">
@@ -353,13 +487,13 @@ form#job_posting_form ul.select2-selection__rendered {
                         <div class="form-group">
                           <label class="form-label" for="input-1">Job Title</label>
                           
-                          <input class="form-control job_title" type="text" name="job_title" value="">
+                          <input class="form-control job_title" type="text" name="job_title"  value="@if(!empty($job_data)){{ $job_data->job_title }}@endif">
                           <span id="reqotherjob_title" class="reqError text-danger valley"></span>
                         </div>
                         <div class="form-group">
                           <label class="form-label" for="input-1">Positions Open</label>
                           
-                          <input class="form-control position_open" type="number" name="position_open" value="">
+                          <input class="form-control position_open" type="number" name="position_open" value="@if(!empty($job_data)){{ $job_data->position_open }}@endif">
                           <span id="reqposition_open" class="reqError text-danger valley"></span>
                         </div>
                         
@@ -500,6 +634,9 @@ form#job_posting_form ul.select2-selection__rendered {
             data: items
         });
     });
+
+    
+    
 </script>
 <script>
 
@@ -702,7 +839,7 @@ form#job_posting_form ul.select2-selection__rendered {
       if(level == "main"){
         var selectedValues1 = $('.js-example-basic-multiple[data-list-id="speciality_preferences-'+specialities_type+"-"+k+'"]').val();
       }else{
-        var selectedValues1 = $('.js-example-basic-multiple'+k+'[data-list-id="speciality_preferences-'+specialities_type+"-"+k+'"]').val();
+        var selectedValues1 = $('.js-example-basic-multiple'+specialities_type+'-'+k+'[data-list-id="speciality_preferences-'+specialities_type+"-"+k+'"]').val();
         updateJobTitle();
       }
       
@@ -1156,7 +1293,12 @@ form#job_posting_form ul.select2-selection__rendered {
               text: 'Job Post Successfully',
             }).then(function() {
               window.location.href = "{{ route('medical-facilities.job_posting') }}";
-              sessionStorage.setItem("tab-one","role_basics");
+
+              var tab_name = sessionStorage.getItem("tab-one");
+              if(tab_name != "job_description"){
+                sessionStorage.setItem("tab-one","role_basics");
+              }
+              
             });
           } else {
             Swal.fire({
@@ -1178,5 +1320,83 @@ form#job_posting_form ul.select2-selection__rendered {
 
       return false;
     }  
+
+    if ($(".nurse_type").val() != "") {
+      var nurse_type = JSON.parse($(".nurse_type").val());
+      $('#nurse_type').select2().val(nurse_type).trigger('change');
+    }
+
+    $(".subnurse_list").each(function(){
+      var subnurse_val = $(this).val();
+      if ($(".subnursetype-"+subnurse_val).val() != "") {
+        var nurse_type = JSON.parse($(".subnursetype-"+subnurse_val).val());
+        console.log("nurse_type",nurse_type);
+        $('.js-example-basic-multiple[data-list-id="type-of-nurse-'+subnurse_val+'"]').select2().val(nurse_type).trigger('change');
+      }
+    });
+
+    if ($(".speciality_type").val() != "") {
+      var speciality_type = JSON.parse($(".speciality_type").val());
+      $('.speciality_type_field').select2().val(speciality_type).trigger('change');
+    }
+
+    $(".subspec_list-primary").each(function(){
+      var subspec_list_primary = $(this).val();
+      if ($(".subspecialitytype-"+subspec_list_primary).val() != "") {
+        var subspecialitytype = JSON.parse($(".subspecialitytype-"+subspec_list_primary).val());
+        console.log("subspecialitytype",subspecialitytype);
+        $('.js-example-basic-multiple[data-list-id="speciality_preferences-primary-'+subspec_list_primary+'"]').select2().val(subspecialitytype).trigger('change');
+      }
+    });
+
+    if ($(".mainfactype-1").val() != "") {
+      var mainfactype = JSON.parse($(".mainfactype-1").val());
+      
+      console.log("mainfactype",mainfactype);
+      $('.js-example-basic-multiple[data-list-id="wp_data-1"]').select2().val(mainfactype).trigger('change');
+      $(".subwork_list-1").each(function(){
+        var subwork_list_val = $(this).val();
+        if ($(".subworkjs-1"+subwork_list_val).val() != "") {
+          
+          var subfactype = JSON.parse($(".subworkjs-1"+subwork_list_val).val());
+          
+          console.log("subfactype",subfactype);
+          $('.js-example-basic-multiple[data-list-id="subwork_field-1'+subwork_list_val+'"]').select2().val(subfactype).trigger('change');
+          $(".subpwork_list-1").each(function(){
+            var subwork_list_val = $(this).val();
+            
+            if ($(".subworkjs1-1"+subwork_list_val).val() != "") {
+                
+              var subfactype = JSON.parse($(".subworkjs1-1"+subwork_list_val).val());
+              
+              console.log("subfactype1",subfactype);
+              $('.js-example-basic-multiple[data-list-id="subpwork_field-1'+subwork_list_val+'"]').select2().val(subfactype).trigger('change');
+              
+            }
+            
+          });
+        }
+
+        
+        
+      });  
+    } 
+
+    if ($(".sec_spec").val() != "") {
+      var sec_spec = JSON.parse($(".sec_spec").val());
+      $('.secondary_specialities').select2().val(sec_spec).trigger('change');
+    }
+
+    $(".subspec_list-secondary").each(function(){
+      var secondary_speciality_val = $(this).val();
+
+      if ($(".subspecialitysecondarytype-"+secondary_speciality_val).val() != "") {
+        var sec_spec_secondary = JSON.parse($(".subspecialitysecondarytype-"+secondary_speciality_val).val());
+        console.log("secondary_speciality_val",sec_spec_secondary);
+        $('.js-example-basic-multiple[data-list-id="speciality_preferences-secondary-'+secondary_speciality_val+'"]').select2().val(sec_spec_secondary).trigger('change');
+      }
+
+    });
+    
   </script>
 @endsection

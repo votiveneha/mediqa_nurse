@@ -136,6 +136,7 @@ form#job_posting_form ul.select2-selection__rendered {
 
                     
                     <div class="card shadow-sm border-0 p-4 mt-30">
+                      @include('healthcare.layouts.top_links')
                       <h3 class="mt-0 color-brand-1 mb-2">Contract & Pay</h3>
     
                       <form id="contract_pay_form" method="POST" onsubmit="return contract_pay_form()">
@@ -143,7 +144,7 @@ form#job_posting_form ul.select2-selection__rendered {
                         <input type="hidden" name="user_id" value="{{ Auth::guard('healthcare_facilities')->user()->id }}">
                         <div class="emptypediv form-group level-drp">
                             <label class="form-label emptype_label" for="input-1">Employment type</label>
-                            
+                            <input type="hidden" name="emptypemain" class="emptypemain" value="@if(!empty($job_data)){{ json_encode((string)$job_data->main_emp_type) }}@endif">
                             <ul id="mainemptype_field" style="display:none;">
                                 @if(!empty($employeement_type_preferences))
                                 <li data-value="0">select</li>
@@ -155,12 +156,40 @@ form#job_posting_form ul.select2-selection__rendered {
                             <select class="js-example-basic-multiple addAll_removeAll_btn emptype_valid-1" id="mainemptype_fields" data-list-id="mainemptype_field" name="emptype_preferences" onchange="empType(this.value)"></select>
                             <span id="reqemptype_prefer" class="reqError text-danger valley"></span>
                         </div>
-                        <div class="emp_data"></div>
-                        <div class="emp_type_fields permanent_fields d-none">
+                        <div class="emp_data">
+                          @if(!empty($job_data) && $job_data->main_emp_type != NULL)
+                          @php
+                            $sumemptype = (array)json_decode($job_data->emplyeement_type);
+                            $emp_data_id = isset($sumemptype[0])?($sumemptype[0]):0;
+
+                            $emp_type_list = DB::table("employeement_type_preferences")->where("sub_prefer_id",$job_data->main_emp_type)->get();
+                            $emp_type_name = DB::table("employeement_type_preferences")->where("emp_prefer_id",$job_data->main_emp_type)->first();
+                          @endphp
+                          <div class="emptype_main_div emptype_main_div-{{ $job_data->main_emp_type }}">
+                            <div class="emptypediv emptypediv-{{ $job_data->main_emp_type }} form-group level-drp">
+                              <label class="form-label emptype_label emptype_label-{{ $job_data->main_emp_type }}" for="input-1">{{ $emp_type_name->emp_type }}</label>
+                              <input type="hidden" name="emptypesub" class="emptypesub" value="{{ $job_data->emplyeement_type }}">
+                              <input type="hidden" name="subrefer_list" class="subrefer_list" value="{{ $job_data->main_emp_type }}">
+                              <ul id="emptype_field-{{ $job_data->main_emp_type }}" style="display:none;">
+                              @if(!empty($emp_type_list))
+                                <li data-value="0">select</li>
+                                @foreach($emp_type_list as $emptype_data)
+                                <li data-value="{{ $emptype_data->emp_prefer_id }}">{{ $emptype_data->emp_type }}</li>  
+                                @endforeach
+                                @endif
+
+                              </ul>
+                              <select class="js-example-basic-multiple addAll_removeAll_btn emptype_valid-1" data-list-id="emptype_field-{{ $job_data->main_emp_type }}" id="subemptypefield" name="subemptype" onchange="open_emp_type({{ $job_data->main_emp_type }})"></select>
+                              <span id="reqsubemptype" class="reqError text-danger valley"></span>
+                            </div>
+                          </div>
+                          @endif
+                        </div>
+                        <div class="emp_type_fields permanent_fields @if(!empty($job_data->main_emp_type != 1)) d-none @endif">
                             <div class="form-group level-drp">
                                 <label class="form-label" for="input-1">Hours per week
                                 </label>
-                                <input class="form-control per_hours_per_week" type="number" name="per_hours_week" id="per_hours_week" value="">
+                                <input class="form-control per_hours_per_week" type="number" name="per_hours_week" id="per_hours_week" value="{{ $job_data->hours_per_week_permanent }}">
                                 <span id='reqhoursweek' class='reqError text-danger valley'></span>
                             </div>
                             <div class="form-group level-drp">
@@ -168,8 +197,8 @@ form#job_posting_form ul.select2-selection__rendered {
                                 </label>
                                 <select class="form-input mr-10 select-active" name="per_salary_format" id="per_salary_format">
                                     <option value="">select</option>
-                                    <option value="Annual salary">Annual salary</option>
-                                    <option value="Annual salary range" >Annual salary range</option>
+                                    <option value="Annual salary" @if($job_data->salary_permanent == "Annual salary") selected @endif>Annual salary</option>
+                                    <option value="Annual salary range" @if($job_data->salary_permanent == "Annual salary range") selected @endif>Annual salary range</option>
                                     
                                 </select>
                                 <span id='reqper_salary_format' class='reqError text-danger valley'></span>
@@ -178,13 +207,13 @@ form#job_posting_form ul.select2-selection__rendered {
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(min)
                                     </label>
-                                    <input class="form-control per_salary_min" type="number" name="per_salary_min" id="per_salary_min" value="">
+                                    <input class="form-control per_salary_min" type="number" name="per_salary_min" id="per_salary_min" value="{{ $job_data->per_salary_min }}">
                                     <span id='reqper_salary_min' class='reqError text-danger valley'></span>
                                 </div>
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(max)
                                     </label>
-                                    <input class="form-control per_salary_max" type="number" name="per_salary_max" id="per_salary_max" value="">
+                                    <input class="form-control per_salary_max" type="number" name="per_salary_max" id="per_salary_max" value="{{ $job_data->per_salary_max }}">
                                     <span id='reqper_salary_max' class='reqError text-danger valley'></span>
                                 </div>
                             </div>
@@ -193,11 +222,11 @@ form#job_posting_form ul.select2-selection__rendered {
                             <div class="form-group">
                                 <label>Contract length <span class="required">*</span></label>
                                 <div style="display:flex; gap:10px;">
-                                    <input type="number" name="contract_length_value" min="1" id="contract_length_value" placeholder="e.g. 6">
+                                    <input type="number" name="contract_length_value" min="1" id="contract_length_value" placeholder="e.g. 6" value="{{ $job_data->contract_length_fixed_term }}">
                                     <span id='reqcontract_length_value' class='reqError text-danger valley'></span>
-                                    <select name="contract_length_unit" class="form-control" id="contract_length_unit" style="border: 1px solid #E5E7EB;border-radius: 8px;height: 48px;">
-                                        <option value="months">Months</option>
-                                        <option value="years">Years</option>
+                                    <select name="contract_length_unit" id="contract_length_unit">
+                                        <option value="months" @if($job_data->contract_length_unit_fixed_term == 'months') selected @endif>Months</option>
+                                        <option value="years" @if($job_data->contract_length_unit_fixed_term == 'years') selected @endif>Years</option>
                                     </select>
                                     <span id='reqcontract_length_unit' class='reqError text-danger valley'></span>
                                 </div>
@@ -205,7 +234,7 @@ form#job_posting_form ul.select2-selection__rendered {
                             <div class="form-group level-drp">
                                 <label class="form-label" for="input-1">Hours per week
                                 </label>
-                                <input class="form-control fixed_term_hours_per_week" id="fixed_term_hours_week" type="number" name="fixed_term_hours_week" value="">
+                                <input class="form-control fixed_term_hours_per_week" id="fixed_term_hours_week" type="text" name="fixed_term_hours_week" value="{{ $job_data->hours_per_week_fixed_term }}">
                                 <span id='reqfixed_term_hours_week' class='reqError text-danger valley'></span>
                             </div>
                             <div class="form-group level-drp">
@@ -213,9 +242,9 @@ form#job_posting_form ul.select2-selection__rendered {
                                 </label>
                                 <select class="form-input mr-10 select-active" name="fixed_term_salary_format" id="fixed_term_salary_format">
                                     <option value="">select</option>
-                                    <option value="Annual">Annual</option>
-                                    <option value="Weekly">Weekly</option>
-                                    <option value="Hourly">Hourly</option>
+                                    <option value="Annual" @if($job_data->salary_range_fix_term == 'Annual') selected @endif>Annual</option>
+                                    <option value="Weekly" @if($job_data->salary_range_fix_term == 'Weekly') selected @endif>Weekly</option>
+                                    <option value="Hourly" @if($job_data->salary_range_fix_term == 'Hourly') selected @endif>Hourly</option>
                                 </select>
                                 <span id='reqfixed_term_salary_format' class='reqError text-danger valley'></span>
                             </div>
@@ -223,13 +252,13 @@ form#job_posting_form ul.select2-selection__rendered {
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(min)
                                     </label>
-                                    <input class="form-control fixed_term_salary_min" type="number" name="fixed_term_salary_min" value="" id="fixed_term_salary_min">
+                                    <input class="form-control fixed_term_salary_min" type="text" name="fixed_term_salary_min" id="fixed_term_salary_min" value="{{ $job_data->fixed_term_salary_min }}">
                                     <span id='reqfixed_term_salary_min' class='reqError text-danger valley'></span>
                                 </div>
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(max)
                                     </label>
-                                    <input class="form-control per_salary_max" type="number" name="fixed_term_salary_max" value="" id="fixed_term_salary_max">
+                                    <input class="form-control per_salary_max" type="text" name="fixed_term_salary_max" id="fixed_term_salary_max" value="{{ $job_data->fixed_term_salary_max }}">
                                     <span id='reqfixed_term_salary_max' class='reqError text-danger valley'></span>
                                 </div>
                             </div>
@@ -239,7 +268,7 @@ form#job_posting_form ul.select2-selection__rendered {
                             <div class="form-group level-drp">
                                 <label class="form-label" for="input-1">Shift dates & times
                                 </label>
-                                <input class="form-control temporary_hours_per_week" type="datetime-local" name="temporary_hours_week" value="" id="temporary_hours_week">
+                                <input class="form-control temporary_hours_per_week" type="datetime-local" name="temporary_hours_week" value="{{ $job_data->shift_date_time_temporary }}" id="temporary_hours_week">
                                 <span id='reqtemporary_hours_per_week' class='reqError text-danger valley'></span>
                             </div>
                             <div class="form-group level-drp">
@@ -247,8 +276,8 @@ form#job_posting_form ul.select2-selection__rendered {
                                 </label>
                                 <select class="form-input mr-10 select-active" name="temporary_salary_format" id="temporary_salary_format">
                                     <option value="">select</option>
-                                    <option value="Hourly">Hourly (recommended)</option>
-                                    <option value="Weekly">Weekly</option>
+                                    <option value="Hourly" @if($job_data->salary_range_temporary == 'Hourly') selected @endif>Hourly (recommended)</option>
+                                    <option value="Weekly" @if($job_data->salary_range_temporary == 'Weekly') selected @endif>Weekly</option>
                                     
                                 </select>
                                 <span id='reqtemporary_salary_format' class='reqError text-danger valley'></span>
@@ -257,13 +286,13 @@ form#job_posting_form ul.select2-selection__rendered {
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(min)
                                     </label>
-                                    <input class="form-control temporary_salary_min" type="number" name="temporary_salary_min" value="" id="temporary_salary_min">
+                                    <input class="form-control temporary_salary_min" type="text" name="temporary_salary_min" value="{{ $job_data->temporary_salary_min }}" id="temporary_salary_min">
                                     <span id='reqtemporary_salary_min' class='reqError text-danger valley'></span>
                                 </div>
                                 <div class="form-group level-drp col-md-6">
                                     <label class="form-label" for="input-1">Salary(max)
                                     </label>
-                                    <input class="form-control temporary_salary_max" type="number" name="temporary_salary_max" value="" id="temporary_salary_max">
+                                    <input class="form-control temporary_salary_max" type="text" name="temporary_salary_max" value="{{ $job_data->temporary_salary_max }}" id="temporary_salary_max">
                                     <span id='reqtemporary_salary_max' class='reqError text-danger valley'></span>
                                 </div>
                             </div>
@@ -1164,7 +1193,11 @@ form#job_posting_form ul.select2-selection__rendered {
               text: 'Contract & Pay added Successfully',
             }).then(function() {
               window.location.href = "{{ route('medical-facilities.contract_pay') }}";
-              sessionStorage.setItem("tab-one","contarct_pay");
+              var tab_name = sessionStorage.getItem("tab-one");
+              if(tab_name != "job_description"){
+                sessionStorage.setItem("tab-one","contarct_pay");
+              }
+              
             });
           } else {
             Swal.fire({
@@ -1186,5 +1219,15 @@ form#job_posting_form ul.select2-selection__rendered {
 
       return false;
     }  
+
+    if ($(".emptypemain").val() != "") {
+      var emptypemain = JSON.parse($(".emptypemain").val());
+      $('#mainemptype_fields').select2().val(emptypemain).trigger('change');
+    }
+
+    if ($(".emptypesub").val() != "") {
+      var emptypesub = JSON.parse($(".emptypesub").val());
+      $('#subemptypefield').select2().val(emptypesub).trigger('change');
+    }
   </script>
 @endsection

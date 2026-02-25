@@ -314,14 +314,58 @@ form#shift_scheduling_form ul.select2-selection__rendered {
     font-weight:600;
     color:#111827;
 }
-/* 20/2  */
-.review-sub-card{
-  background: #f1f1f1;
+
+.job-menu{
+    position:relative;
+}
+
+.menu-btn{
+    background:none;
+    border:none;
+    font-size:22px;
+    cursor:pointer;
+    padding:5px 10px;
+}
+
+.menu-dropdown{
+    display:none;
+    position:absolute;
+    right:0;
+    top:35px;
+    background:#fff;
+    border-radius:8px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.15);
+    min-width:160px;
+    z-index:10;
+}
+
+.menu-dropdown a{
+    display:block;
+    padding:10px 15px;
+    text-decoration:none;
+    color:#333;
+}
+
+.menu-dropdown a:hover{
+    background:#f3f3f3;
+}
+
+.job-menu.active .menu-dropdown{
+    display:block;
 }
 @media(max-width:768px){
     .job-attributes{
         grid-template-columns: repeat(2,1fr);
     }
+}
+
+.job-title{
+  font-size:16px;
+}
+
+.no-jobs-box h3{
+  font-size:18px;
+  text-align:center;
 }
 </style>
 @endsection
@@ -347,10 +391,12 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                     
                     <div class="card shadow-sm border-0 p-4 mt-30">
                       @include('healthcare.layouts.top_links')
-                      <h3 class="mt-0 color-brand-1 mb-2">Review & Publish</h3>
+                      <h3 class="mt-0 color-brand-1 mb-2 job-title">Active Jobs</h3>
                       <div class="preview-wrapper">
 
                             <!-- Card -->
+                            @if(count($job_post_data)>0) 
+                            @foreach($job_post_data as $job_post) 
                             <div class="job-preview-card">
 
                                 <div class="job-top">
@@ -358,19 +404,24 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                                         
 
                                         <div>
-                                            <h3 class="job-title my-0">{{ $job_post->job_title }}</h3>
-                                            @php
-                                            $user = Auth::guard("healthcare_facilities")->user();
-                                            @endphp
-                                            <p class="job-company mb-0">{{ $user->name }}</p>
+                                            <h3 class="job-title">{{ $job_post->job_title }}</h3>
+                                            
                                         </div>
                                     </div>
-
+                                    <div class="job-menu">
+                                        <button class="menu-btn">⋮</button>
+                                        <div class="menu-dropdown">
+                                            <a href="{{ route('medical-facilities.location_work_modal') }}?job_id={{ $job_post->id }}">View</a>
+                                            <a href="{{ route('medical-facilities.location_work_modal') }}?job_id={{ $job_post->id }}">Edit</a>
+                                            <a href="#" onclick="duplicateJobs({{ $job_post->id }})">Duplicate</a>
+                                            <a href="#" onclick="close_expire({{ $job_post->id }})">Close / Expire</a>
+                                        </div>
+                                    </div>
                                     
                                 </div>
                                 <div class="job-attributes">
 
-                                    <div class="attr review-sub-card">
+                                    <div class="attr">
                                         <span class="label">Type of Nurse</span>
                                         <span class="value">
                                         @php
@@ -380,7 +431,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                                         </span>
                                     </div>
 
-                                    <div class="attr review-sub-card">
+                                    <div class="attr">
                                         <span class="label">Specialty</span>
                                         @php
                                             $speciality_type = json_decode($job_post->typeofspeciality);
@@ -389,34 +440,38 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                                         <span class="value">{{ $speciality_data->name ?? '—' }}</span>
                                     </div>
 
-                                    <div class="attr review-sub-card">
+                                    <div class="attr">
                                         <span class="label">Sector</span>
                                         <span class="value">{{ $job_post->sector ?? '—' }}</span>
                                     </div>
 
-                                    <div class="attr review-sub-card">
+                                    <div class="attr">
                                         <span class="label">No of Position</span>
                                         <span class="value">{{ $job_post->position_open ?? '—' }}</span>
                                     </div>
 
                                 </div>
-                                <div class="job-footer">
-                                    
-                                    <button class="btn-dark">View</button>
-                                </div>
+                                
 
                             </div>
+                            @endforeach
+                            @else
+                            
+                            <div class="no-jobs-box">
+                                
+
+                                <h3>No Active Jobs Found</h3>
+
+
+                                <!-- <a href="/create-job" class="create-job-btn">Create Job</a> -->
+                            </div>
+                            @endif
+                            
 
                         </div>  
     
-                       <div class="button-row">
-
-                            <a class="btn-draft" onclick="saveDraft(1,{{ $job_id }})">Save as Draft</a>
-
-                            <a class="btn-publish" onclick="saveDraft(2,{{ $job_id }})">Publish</a>
-
-                        </div>
-                    </div>
+                       
+                      </div>
     
                 </div>
             </div>
@@ -549,6 +604,23 @@ form#shift_scheduling_form ul.select2-selection__rendered {
     });
 </script>
 <script>
+  document.querySelectorAll('.menu-btn').forEach(btn=>{
+      btn.addEventListener('click', function(e){
+          e.stopPropagation();
+
+          document.querySelectorAll('.job-menu')
+              .forEach(m => m.classList.remove('active'));
+
+          this.parentElement.classList.toggle('active');
+      });
+  });
+
+  document.addEventListener('click', ()=>{
+      document.querySelectorAll('.job-menu')
+          .forEach(m => m.classList.remove('active'));
+  });
+</script>
+<script>
 
     $(document).on('change', 'input[name="listing_expiry"]', function () {
       $('input[name="listing_expiry"]').removeAttr("checked");
@@ -568,6 +640,36 @@ form#shift_scheduling_form ul.select2-selection__rendered {
         $('#district_id').after('<span class="error">' + value + '</span>');
         $(".print-error-msg").find("ul").append('<li>' + value + '</li>');
       });
+    }
+
+    function close_expire(job_id){
+      $.ajax({
+        url: "{{ route('medical-facilities.closeExpireJobs') }}",
+        type: "POST",
+        dataType: "json",
+        data: {
+            job_id:job_id,
+            _token:"{{ csrf_token() }}"
+        },
+        success: function(res){
+          if (res.status == '1') {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'Job Expire/Close Successfully',
+            }).then(function() {
+              window.location.href = "{{ route('medical-facilities.active_jobs') }}";
+              
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: res.message,
+            })
+          }
+        }
+      });      
     }
   </script>
   
@@ -631,7 +733,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
       drawNewGraph('graph1');
     });
 
-    function saveDraft(save,job_id){
+    function saveDraft(save){
 
         $.ajax({
             url: "{{ route('medical-facilities.saveDraft') }}",
@@ -639,7 +741,6 @@ form#shift_scheduling_form ul.select2-selection__rendered {
             dataType: "json",
             data: {
                 save:save,
-                job_id:job_id,
                 _token:"{{ csrf_token() }}"
             },
 
@@ -647,15 +748,11 @@ form#shift_scheduling_form ul.select2-selection__rendered {
 
                 if(res.status == 1){
                     Swal.fire('Success','Job saved as Draft','success');
-                    sessionStorage.removeItem("tab-one");
-                    window.location.href = "{{ route('medical-facilities.draft_jobs') }}";
                 }
 
                 else if(res.status == 3){
                     Swal.fire('Success','Job Published Successfully','success')
                     .then(()=> window.location.href="{{ route('medical-facilities.reviewPublish') }}");
-                    sessionStorage.removeItem("tab-one");
-                    window.location.href = "{{ route('medical-facilities.active_jobs') }}";
                 }
 
                 else if(res.status == 2){
@@ -671,5 +768,37 @@ form#shift_scheduling_form ul.select2-selection__rendered {
     }
 
    
+
+   
+
+    function duplicateJobs(job_id){
+      $.ajax({
+        url: "{{ route('medical-facilities.duplicateJobs') }}",
+        type: "POST",
+        dataType: "json",
+        data: {
+            job_id:job_id,
+            _token:"{{ csrf_token() }}"
+        },
+        success: function(res){
+          if (res.status == '1') {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'Job Duplicate Successfully',
+            }).then(function() {
+              window.location.href = "{{ route('medical-facilities.active_jobs') }}";
+              
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: res.message,
+            })
+          }
+        }
+      });
+    }
   </script>
 @endsection

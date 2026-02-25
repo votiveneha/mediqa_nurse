@@ -960,10 +960,10 @@
                             <p class="table-nurse-head"> {{ $list->job_title }}</p>
                           </td>
                           <td>
-                            <p class="table-nurse-head"> {{ $list->job->health_careName }}</p>
+                            {{-- <p class="table-nurse-head"> {{ $list->job->health_careName ?? "N/A"}}</p> --}}
                           </td>
                           <td>
-                            <p class="table-nurse-head"> {{ implode(', ', $list->job->shift_names) }}</p>
+                            {{-- <p class="table-nurse-head"> {{ implode(', ', $list->job->shift_names ?? "N/A") }}</p> --}}
                           </td>
                           <td>
                             <span class="status-badge {{ $list->status_key }} active-status-modal"
@@ -1124,10 +1124,10 @@
                             <p class="table-nurse-head">{{ $list->job_title }}</p>
                           </td>
                           <td>
-                            <p class="table-nurse-head"> {{ $list->job->health_careName }}</p>
+                            {{-- <p class="table-nurse-head"> {{ $list->job->health_careName ?? "N/A"}}</p> --}}
                           </td>
                           <td>
-                            <p class="table-nurse-head"> {{ implode(', ', $list->job->shift_names) }}</p>
+                            {{-- <p class="table-nurse-head"> {{ implode(', ', $list->job->shift_names) ?? "N/A" }}</p> --}}
                           </td>
                           <td>
                             <span class="status-badge {{ $list->status_key }} open-status-modal archieved-modal archived-status-modal"
