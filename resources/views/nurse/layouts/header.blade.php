@@ -492,7 +492,7 @@ img, iframe, video {
           <div class="header-logo"><a class='d-flex' href='{{ route("home_main") }}'><img alt="jobBox" src="{{ asset(env('LOGO_PATH'))}}"></a></div>
         </div>
         <div class="header-nav nurse-header">
-          <nav class="nav-main-menu w-100" style="display:block;">
+          <nav class="nav-main-menu w-100">
             <ul class="main-menu">
               <li>
                 <a class="hover-up " href='#'>Settings</a>
@@ -501,19 +501,13 @@ img, iframe, video {
                 <a class="{{ request()->is('healthcare-facilities/job_posting') ?'active':'' }} hover-up " href="{{ route('medical-facilities.job_posting') }}">Job Postings</a>
               </li>
               <li>
-                <a class="hover-up " href='#'>Talent Search</a>
+                <a class="hover-up" href="#">Find Nurse</a>
               </li>
               <li>
-                <a class="hover-up {{ request()->is('healthcare-facilities/nurse_applicants') ?'active':'' }}" href="{{ route('medical-facilities.nurse_applicants') }}">Applicants</a>
+                <a class="hover-up " href='#'>Saved Candidates</a>
               </li>
               <li>
-                <a class="hover-up " href='#'>Interviews</a>
-              </li>
-              <li>
-                <a class="hover-up " href='#'>Compliance</a>
-              </li>
-              <li>
-                <a class="hover-up " href='#'>Reports & Analytics</a>
+                <a class="hover-up " href='#'>Hiring</a>
               </li>
               
             </ul>

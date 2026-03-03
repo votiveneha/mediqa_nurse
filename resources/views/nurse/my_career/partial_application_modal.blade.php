@@ -1,4 +1,5 @@
 @if($modal_no == 1)
+
 <div class="modal fade" id="interviewProcessModal" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content process-modal">
@@ -75,6 +76,7 @@
     </div>
   </div>
 </div>
+
 @endif
 
 @if($modal_no == 2)
@@ -298,6 +300,9 @@
 
 @if($modal_no == 4)
 <!-- withdraw  -->
+<form id="withdrawn-application">
+@csrf
+<input type="hidden" value="{{$application->id}}" name="application_id">
 <div class="modal fade" id="withdrawModal" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content withdraw-modal">
@@ -347,7 +352,7 @@
       </div>
       <!-- Footer -->
       <div class="modal-footer border-0 justify-content-start pt-0">
-        <button class="btn btn-danger px-4">
+        <button type="button" id="withdrawBtn"  class="btn btn-danger px-4">
           Withdraw Application
         </button>
         <button class="btn btn-outline-secondary px-4" data-dismiss="modal">
@@ -357,6 +362,7 @@
     </div>
   </div>
 </div>
+</form>
 @endif
 
 {{-- Archieved Modal --}}
@@ -621,12 +627,79 @@
         <button class="btn btn-light border w-100">
           Message Employer
         </button>
-        {{-- <button class="btn btn-primary w-100">
+        <button class="btn btn-primary w-100">
           Submit Documents
-        </button> --}}
+        </button>
       </div>
     </div>
   </div>
 </div>
   
 @endif
+
+<script>
+  $(document).on('click', '#withdrawBtn', function () {
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You want to withdraw this application.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, withdraw it!'
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+
+            let formData = $('#withdrawn-application').serialize();
+
+            $.ajax({
+                url: "{{ route('nurse.application.withdraw') }}",
+                type: "POST",
+                data: formData,
+                beforeSend: function () {
+                    $('.modal-loader').show();
+                },
+                success: function (response) {
+                    $('.modal-loader').hide();
+
+                    if (response.success) {
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Withdrawn!',
+                            text: response.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+
+                        $('#interviewProcessModal').modal('hide');
+
+                        setTimeout(function () {
+                            location.reload();
+                        }, 2000);
+
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            response.message,
+                            'error'
+                        );
+                    }
+                },
+                error: function () {
+                    $('.modal-loader').hide();
+
+                    Swal.fire(
+                        'Error!',
+                        'Something went wrong.',
+                        'error'
+                    );
+                }
+            });
+
+        }
+    });
+});
+</script>

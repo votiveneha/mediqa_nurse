@@ -286,9 +286,11 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::get('application-timeline', 'MyCareerController@applicationTimeline')->name('applicationTimeline');
   Route::get('application-archived-timeline', 'MyCareerController@archivedTimeline')->name('archivedTimeline');
   Route::get('action-application', 'MyCareerController@action_application')->name('action_application');
+  Route::post('application/withdraw', 'MyCareerController@withdrawApplication')->name('application.withdraw');
 
-  
-  Route::get('MyJobs', 'MyCareerController@MyJobs')->name('MyJobs');
+
+
+    Route::get('MyJobs', 'MyCareerController@MyJobs')->name('MyJobs');
   Route::post('job/change-status', 'MyCareerController@changeStatus')->name('job.changeStatus');
   Route::post('interview/updateStatus', 'MyCareerController@updateInterviewStatus')->name('interview.updateStatus');
   Route::post('interview-cancel', 'MyCareerController@cancelInterview')->name('interview.cancel');

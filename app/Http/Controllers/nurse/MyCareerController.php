@@ -47,6 +47,29 @@ class MyCareerController extends Controller
             'label' => $status['label'],
         ]);
     }
+    public function withdrawApplication(Request $request)
+    {
+        // print_r($request->all());die;
+        $nurseId = Auth::guard("nurse_middle")->user()->id;
+        $application = NurseApplication::where('id', $request->application_id)
+            ->where('nurse_id', $nurseId) // security check
+            ->first();
+
+        if (!$application) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Application not found.'
+            ]);
+        }
+
+        $application->status = 11;
+        $application->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Application withdrawn successfully.'
+        ]);
+    }
     public function MyJobs()
     {
         $nurseId = Auth::guard("nurse_middle")->user()->id;
