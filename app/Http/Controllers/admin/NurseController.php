@@ -27,6 +27,7 @@ use App\Models\NdisWorker;
 use App\Models\SpecializedClearance;
 use App\Models\SubClassModel;
 use App\Models\PoliceCheckModel;
+use App\Models\NurseApplication;
 
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
@@ -49,6 +50,13 @@ class NurseController extends Controller
         $this->nurseRepository = $nurseRepository;
         $this->nurseServices = $nurseServices;
         $this->verificationRepository = $verificationRepository;
+    }
+
+
+    public function nurse_application($id = null)
+    {
+        $nurse_application = NurseApplication::with('health_care')->where('nurse_id', $id)->get();
+        return view('admin.nurse_appliction_list', compact('nurse_application'));
     }
 
     public function incommingNurseList()

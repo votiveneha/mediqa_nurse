@@ -48,7 +48,7 @@ class JobsController extends Controller
 
     public function jobList()
     {
-        $data['job_list'] = DB::table("job_boxes")->get();
+        $data['job_list'] = DB::table("job_boxes")->Where("save_draft",2)->orWhere("save_draft",1)->orWhere("save_draft",3)->get();
         return view("admin.job_list")->with($data);
     }
 
@@ -133,5 +133,13 @@ class JobsController extends Controller
         
 
         
+    }
+
+    public function job_details(Request $request){
+        $job_id = $request->id;
+        $data['jobs'] = DB::table("job_boxes")->where("id", $job_id)->first();
+        $data['healthcare_data'] = DB::table("users")->where("id",$data['jobs']->healthcare_id)->first();
+        $data['state_data'] = DB::table("states")->where("id",$data['jobs']->location_state)->first();
+        return view('admin.view_job')->with($data);
     }
 }

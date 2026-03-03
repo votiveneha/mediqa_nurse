@@ -9,6 +9,7 @@ use App\Models\JobsModel;
 use App\Models\NurseNeededDocument;
 use App\Models\NurseApplication;
 use App\Models\InterviewsNurse;
+use App\Models\NurseMyJobs;
 use App\Models\SpecialityModel;
 use Illuminate\Support\Facades\Auth;
 use DB;
@@ -25,9 +26,240 @@ class MyCareerController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
 
-    public function nurseMyJobs()
+    public function changeStatus(Request $request)
     {
-        return view('nurse.my_career.nurseMyJobs');
+        $job = NurseMyJobs::findOrFail($request->job_id);
+        $job->status = $request->status;
+        $job->save();
+
+        $statusMap = [
+            1 => ['label' => 'Accepted', 'class' => 'btn-success'],
+            2 => ['label' => 'Onboarding', 'class' => 'btn-info'],
+            3 => ['label' => 'Active', 'class' => 'btn-primary'],
+            4 => ['label' => 'Completed', 'class' => 'btn-dark'],
+            5 => ['label' => 'Terminated', 'class' => 'btn-danger'],
+        ];
+
+        $status = $statusMap[$job->status];
+
+        return response()->json([
+            'success' => true,
+            'label' => $status['label'],
+        ]);
+    }
+    public function MyJobs()
+    {
+        $nurseId = Auth::guard("nurse_middle")->user()->id;
+
+        /*
+    |--------------------------------------------------------------------------
+    | Sync hired jobs into nurse_my_jobs
+    |--------------------------------------------------------------------------
+    */
+        $hiredApplications = NurseApplication::with('job')
+            ->where('nurse_id', $nurseId)
+            ->where('status', 8)
+            ->get();
+
+        foreach ($hiredApplications as $application) {
+
+            if (!$application->job) continue;
+
+            NurseMyJobs::updateOrCreate(
+                ['application_id' => $application->id],
+                [
+                    'nurse_id'         => $application->nurse_id,
+                    'employer_id'      => $application->employer_id,
+                    'job_id'           => $application->job_id,
+                    'job_title'        => $application->job->job_title ?? null,
+                    'location_state_id' => $application->job->location_state ?? null,
+                    'specialty'        => $application->job->typeofspeciality,
+                    'employment_type'  => $application->job->emplyeement_type,
+                    'shift_type'       => $application->job->shift_type,
+                ]
+            );
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Get My Jobs
+    |--------------------------------------------------------------------------
+    */
+        $my_job_list = NurseMyJobs::with('health_care', 'application')
+            ->where('nurse_id', $nurseId)
+            ->get();
+
+        /*
+    |--------------------------------------------------------------------------
+    | Get Related Job Data
+    |--------------------------------------------------------------------------
+    */
+        $jobs = JobsModel::whereIn(
+            'id',
+            NurseApplication::where('nurse_id', $nurseId)
+                ->pluck('job_id')
+                ->unique()
+        )
+            ->get(['shift_type', 'typeofspeciality', 'nurse_type_id', 'location_state', 'healthcare_id']);
+
+        /*
+    |--------------------------------------------------------------------------
+    | Collect All IDs (Clean Way)
+    |--------------------------------------------------------------------------
+    */
+        $shiftIds        = $jobs->pluck('shift_type')->flatten()->unique()->filter()->values();
+        $specialityIds   = $jobs->pluck('typeofspeciality')->flatten()->unique()->filter()->values();
+        $nurseTypeIds    = $jobs->pluck('nurse_type_id')->flatten()->unique()->filter()->values();
+        $locationState   = $jobs->pluck('location_state')->unique()->filter()->values();
+        $healthCareId    = $jobs->pluck('healthcare_id')->unique()->filter()->values();
+
+        /*
+    |--------------------------------------------------------------------------
+    | Fetch Names
+    |--------------------------------------------------------------------------
+    */
+        $shift_type_list = DB::table('work_shift_preferences')
+            ->whereIn('work_shift_id', $shiftIds)
+            ->pluck('shift_name', 'work_shift_id');
+
+        $specialities_list = DB::table('speciality')
+            ->whereIn('id', $specialityIds)
+            ->pluck('name', 'id');
+
+        $nurse_type_list = DB::table('practitioner_type')
+            ->whereIn('id', $nurseTypeIds)
+            ->pluck('name', 'id');
+
+        $location_state_list = DB::table('states')
+            ->whereIn('id', $locationState)
+            ->pluck('name', 'id');
+
+        $health_care_list = DB::table('users')
+            ->whereIn('id', $healthCareId)
+            ->pluck('name', 'id');
+
+        return view('nurse.my_career.nurseMyJobs', compact(
+            'shift_type_list',
+            'specialities_list',
+            'nurse_type_list',
+            'location_state_list',
+            'health_care_list',
+            'my_job_list'
+        ));
+    }
+    public function MyJobs_old()
+    {
+        // echo "test";die;
+        $nurseId = Auth::guard("nurse_middle")->user()->id;
+        // echo $nurseId;die;
+
+        /* Get job ids */
+        $hired_applictions = NurseApplication::with('job', 'health_care')
+            ->where('nurse_id', $nurseId)
+            ->where('status', 8)
+            ->get();
+
+        // echo "<pre>"; print_r($hired_applictions);die;
+        foreach ($hired_applictions as $application) {
+            if ($application->job) {
+                NurseMyJobs::updateOrCreate(
+                    // 🔎 Condition to check existing record
+                    [
+                        'application_id' => $application->id
+                    ],
+                    // 📝 Data to insert OR update
+                    [
+                        'nurse_id'        => $application->nurse_id,
+                        'employer_id'     => $application->employer_id,
+                        'job_id'          => $application->job_id,
+                        'job_title'       => $application->job_title ?? null,
+                        'location_state_id'=> $application->job->location_state ?? null,
+                        'specialty'       => !empty($application->job->typeofspeciality)
+                            ? json_encode($application->job->typeofspeciality)
+                            : null,
+                        'employment_type' => !empty($application->job->emplyeement_type)
+                            ? json_encode($application->job->emplyeement_type)
+                            : null,
+                        'shift_type'      => !empty($application->job->shift_type)
+                            ? json_encode($application->job->shift_type)
+                            : null,
+                   
+                    ]
+                );
+            }
+        }
+
+
+        $my_job_list = NurseMyJobs::with('health_care', 'application')->where('nurse_id', $nurseId)->get();
+
+        // echo "<pre>";
+        // print_r($my_job_list);
+        // die;
+        $jobIds = NurseApplication::where('nurse_id', $nurseId)->pluck('job_id')->unique()->toArray();
+        /* Get job records */
+        $jobs = JobsModel::whereIn('id', $jobIds)
+            ->select('shift_type', 'typeofspeciality', 'nurse_type_id', 'location_state', 'healthcare_id')
+            ->get();
+ 
+        /* Prepare arrays */
+        $shiftIds = [];
+        $specialityIds = [];
+        $nurseTypeIds = [];
+        $location_state = [];
+
+        /* Collect all IDs */
+        foreach ($jobs as $job) {
+
+            $shiftIds = array_merge($shiftIds, $job->shift_type ?? []);
+            $specialityIds = array_merge($specialityIds, $job->typeofspeciality ?? []);
+            $nurseTypeIds = array_merge($nurseTypeIds, $job->nurse_type_id ?? []);
+            if (!empty($job->location_state)) {
+                $locationState[] = $job->location_state; 
+            }
+            if (!empty($job->healthcare_id)) {
+                $healthCareId[] = $job->healthcare_id;
+            }
+        }
+
+        // echo "<pre>"; print_r($locationState);die;
+
+        /* Remove duplicates */
+        $shiftIds = array_unique($shiftIds);
+        $specialityIds = array_unique($specialityIds);
+        $nurseTypeIds = array_unique($nurseTypeIds);
+
+        /* Fetch names */
+        $shift_type_list = DB::table('work_shift_preferences')
+            ->whereIn('work_shift_id', $shiftIds)
+            ->pluck('shift_name', 'work_shift_id');
+
+        $specialities_list = DB::table('speciality')
+            ->whereIn('id', $specialityIds)
+            ->pluck('name', 'id');
+
+        $nurse_type_list = DB::table('practitioner_type')
+            ->whereIn('id', $nurseTypeIds)
+            ->pluck('name', 'id');
+
+        $location_state_list = DB::table('states')
+            ->whereIn('id', $locationState)
+            ->pluck('name', 'id');
+
+        $health_care_list = DB::table('users')
+            ->whereIn('id', $healthCareId)
+            ->pluck('name', 'id');
+
+        echo "<pre>";
+        print_r([
+            'Shift Types' => $shift_type_list,
+            'Specialities' => $specialities_list,
+            'Nurse Types' => $nurse_type_list,
+            'Location Types' => $locationState,
+            'Nurse Types' => $health_care_list
+        ]);
+        die;
+      
+        return view('nurse.my_career.nurseMyJobs',compact('shift_type_list', 'specialities_list', 'nurse_type_list', 'location_state_list', 'health_care_list', 'my_job_list'));
     }
 
     public function needed_document_delete($id = null){
@@ -43,71 +275,147 @@ class MyCareerController extends Controller
     }
     public function action_needed_document(Request $request)
     {
-
+        // print_r($request->all()); die;
+        $nurseId = Auth::guard("nurse_middle")->user()->id;
+        // Upload file
         $file = $request->file('document_file');
-        // Generate unique filename
         $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        // Store file inside public/uploads/needed_document
         $file->move(public_path('uploads/needed_document'), $filename);
-        // Save in database (secure nurse_id)
-        NurseNeededDocument::create([
-            'nurse_id' => Auth::guard("nurse_middle")->user()->id, // DO NOT trust request nurse_id
-            'name' => $request->document_name,
-            'document_path' => $filename,
-        ]);
+
+        // Update ONLY document_path
+        NurseNeededDocument::where('nurse_id', $nurseId)
+            ->where('employer_id', $request->employer_id)
+            ->where('name', $request->document_name)
+            ->update([
+                'document_path' => $filename
+            ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Document uploaded successfully'
         ]);
-  
     }
+    // public function action_needed_document(Request $request)
+    // {
+
+    //    print_r($request->all());die;
+    //     $file = $request->file('document_file');
+    //     // Generate unique filename
+    //     $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+    //     // Store file inside public/uploads/needed_document
+    //     $file->move(public_path('uploads/needed_document'), $filename);
+    //     // Save in database (secure nurse_id)
+    //     NurseNeededDocument::create([
+    //         'nurse_id' => Auth::guard("nurse_middle")->user()->id, // DO NOT trust request nurse_id
+    //         'name' => $request->document_name,
+    //         'document_path' => $filename,
+    //     ]);
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Document uploaded successfully'
+    //     ]);
+  
+    // }
     
-    public function action_needed_document_old(Request $request){
-        // print_r($request->all());die;
-        // $request->validate([
-        //     'document_name' => 'required|string|max:255',
-        //     'document_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        // ]);
+    public function updateInterviewStatus(Request $request)
+    {
+        // Validate request
+        $request->validate([
+            'interview_id' => 'required|integer',
+            'status'       => 'required|integer|in:1,2,3,4,5,6',
+        ]);
 
-        if ($request->hasFile('document_file')) {
+        // Make sure interview belongs to logged in nurse
+        $interview = InterviewsNurse::where('id', $request->interview_id)
+            ->where('nurse_id', auth()->guard('nurse_middle')->id())
+            ->first();
 
-            $file = $request->file('document_file');
-            if ($file->isValid()) {
-                $name = time() . '_' . rand(10000, 99999) . '_' . $file->getClientOriginalName();
-                $file->move(public_path('uploads/needed_document'), $name);
-                // $newFiles[] = $name;
-            }
-      
-            // Save in database
-            NurseNeededDocument::create([
-                'nurse_id' => $request->nurse_id,
-                'name' => $request->document_name,
-                'file_path' => $name,
+        if (!$interview) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Interview not found.'
+            ]);
+        }
+
+        // Prevent updating finalized interviews
+        if (in_array($interview->status, [4, 5, 6])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Interview already finalized.'
+            ]);
+        }
+
+        // Update status
+        $interview->status = (int) $request->status;
+        $saved = $interview->save();
+
+        if (!$saved) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update status.'
             ]);
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'Document uploaded successfully'
+            'message' => 'Interview status updated successfully.'
         ]);
+    }
+    public function cancelInterview(Request $request)
+    {
+        $interview = InterviewsNurse::find($request->interview_id);
+
+        if (!$interview) {
+            return response()->json(['status' => false]);
+        }
+
+        $interview->status = 6; // Cancelled
+        $interview->save();
+
+        return response()->json(['status' => true]);
     }
     public function interviews_nurse()
     {
         $nurseId = Auth::guard("nurse_middle")->user()->id;
 
         // echo $nurseId;die;
+        $interviewApplications = NurseApplication::with('job')
+            ->where('nurse_id', $nurseId)
+            ->whereIn('status', [4, 5])
+            ->get();
+
+        foreach ($interviewApplications as $application) {
+
+            InterviewsNurse::firstOrCreate(
+                [
+                    'application_id' => $application->id
+                ],
+                [
+                    'nurse_id'    => $application->nurse_id,
+                    'employer_id' => $application->employer_id,
+                    'job_id'      => $application->job_id,
+                    'scheduled_at' => $application->applied_at,
+                    'status'       => $application->status == 4 ? 1 : 4,
+                    // 1 = scheduled
+                    // 4 = completed
+                ]
+            );
+        }
+        // echo $nurseId;die;
         // ACTIVE APPLICATIONS
+        $upcoming_count = InterviewsNurse::where('nurse_id', $nurseId)
+            ->whereNot('status', 5)
+            ->where('scheduled_at', '>=', Carbon::now())
+            ->count();
+
         $upcoming_list = InterviewsNurse::with('job', 'health_care')
             ->where('nurse_id', $nurseId)
             ->whereNot('status', 5)
             ->where('scheduled_at', '>=', Carbon::now())
             ->orderBy('scheduled_at', 'asc')
             ->get();
-        $upcoming_count = InterviewsNurse::where('nurse_id', $nurseId)
-            ->whereNot('status', 5)
-            ->where('scheduled_at', '>=', Carbon::now())
-            ->count();
+    
         //   echo "<pre>";  print_r($upcoming_list);die;
         // ARCHIVED APPLICATIONS
         $past_list = InterviewsNurse::with('job', 'health_care')
@@ -132,6 +440,27 @@ class MyCareerController extends Controller
             ->where('scheduled_at', '>=', Carbon::now()) // still upcoming
             ->orderBy('scheduled_at', 'asc')
             ->get();
+
+        // echo "<pre>";
+        // print_r($action_needed);
+        // die;
+        foreach ($action_needed as $action) {
+            if (!empty($action->job->documents_required)) {
+                $requiredDocs = json_decode($action->job->documents_required, true);
+                foreach ($requiredDocs as $docName) {
+                    NurseNeededDocument::firstOrCreate(
+                        [
+                            'nurse_id'    => $action->nurse_id,
+                            'employer_id' => $action->employer_id,
+                            'name'        => $docName,
+                        ],
+                        [
+                            'document_path' => null, // upload later
+                        ]
+                    );
+                }
+            }
+        }
 
         $document_list = NurseNeededDocument::where('nurse_id', $nurseId)->get();
 
@@ -412,7 +741,6 @@ class MyCareerController extends Controller
             ->get();
 
 
-            // echo "<pre>";print_r($active_list);die;
         return view(
             'nurse.my_career.nurse_application',
             compact('active_list', 'archived_list')

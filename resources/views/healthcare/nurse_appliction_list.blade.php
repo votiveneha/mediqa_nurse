@@ -7,6 +7,8 @@
 <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.5.1/uicons-regular-rounded/css/uicons-regular-rounded.css'>
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+
 
 <style type="text/css">
   .hide_profile_image {
@@ -314,14 +316,58 @@ form#shift_scheduling_form ul.select2-selection__rendered {
     font-weight:600;
     color:#111827;
 }
-/* 20/2  */
-.review-sub-card{
-  background: #f1f1f1;
+
+.job-menu{
+    position:relative;
+}
+
+.menu-btn{
+    background:none;
+    border:none;
+    font-size:22px;
+    cursor:pointer;
+    padding:5px 10px;
+}
+
+.menu-dropdown{
+    display:none;
+    position:absolute;
+    right:0;
+    top:35px;
+    background:#fff;
+    border-radius:8px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.15);
+    min-width:160px;
+    z-index:10;
+}
+
+.menu-dropdown a{
+    display:block;
+    padding:10px 15px;
+    text-decoration:none;
+    color:#333;
+}
+
+.menu-dropdown a:hover{
+    background:#f3f3f3;
+}
+
+.job-menu.active .menu-dropdown{
+    display:block;
 }
 @media(max-width:768px){
     .job-attributes{
         grid-template-columns: repeat(2,1fr);
     }
+}
+
+.job-title{
+  font-size:16px;
+}
+
+.no-jobs-box h3{
+  font-size:18px;
+  text-align:center;
 }
 </style>
 @endsection
@@ -331,11 +377,8 @@ form#shift_scheduling_form ul.select2-selection__rendered {
   <section class="section-box mt-0">
     <div class="">
       <div class="row m-0 profile-wrapper">
-        <div class="col-lg-3 col-md-4 col-sm-12 p-0 left_menu">
-
-        @include('healthcare.layouts.job_sidebar')
-        </div>
-        <div class="col-lg-9 col-md-8 col-sm-12 col-12 right_content">
+        
+        <div class="col-lg-12 col-md-8 col-sm-12 col-12 right_content">
           <div class="content-single content_profile">
             
 
@@ -346,77 +389,68 @@ form#shift_scheduling_form ul.select2-selection__rendered {
 
                     
                     <div class="card shadow-sm border-0 p-4 mt-30">
-                      @include('healthcare.layouts.top_links')
-                      <h3 class="mt-0 color-brand-1 mb-2">Review & Publish</h3>
-                      <div class="preview-wrapper">
+                      
+                      <h3 class="mt-0 color-brand-1 mb-2 job-title">Applicants</h3>
+                      
+                      <div class="application-table-section">
+                        <div class="table-responsive">
+                            <table class="application-table">
+                                <thead>
+                                    <tr>
+                                        <th>Sno</th>
+                                        <th>Job Title</th>
+                                        <th>HealthCare Name</th>
+                                        <th>Date Applied</th>
+                                        <th>Applied Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php $i=1 @endphp
+                                    @if ($nurse_application)
+                                    @foreach ($nurse_application as $key => $item)
+                                    <tr>
+                                        <td>{{ $i }}</td>
 
-                            <!-- Card -->
-                            <div class="job-preview-card">
-
-                                <div class="job-top">
-                                    <div class="job-left">
-                                        
-
-                                        <div>
-                                            <h3 class="job-title my-0">{{ $job_post->job_title }}</h3>
-                                            @php
-                                            $user = Auth::guard("healthcare_facilities")->user();
-                                            @endphp
-                                            <p class="job-company mb-0">{{ $user->name }}</p>
-                                        </div>
-                                    </div>
-
-                                    
-                                </div>
-                                <div class="job-attributes">
-
-                                    <div class="attr review-sub-card">
-                                        <span class="label">Type of Nurse</span>
-                                        <span class="value">
-                                        @php
-                                            $nurse_type = json_decode($job_post->nurse_type);
-                                        @endphp
-                                        {{ $nurse_type[0] ?? '—' }}
-                                        </span>
-                                    </div>
-
-                                    <div class="attr review-sub-card">
-                                        <span class="label">Specialty</span>
-                                        @php
-                                            $speciality_type = json_decode($job_post->typeofspeciality);
-                                            $speciality_data = DB::table("speciality")->where("id",$speciality_type[0])->first();
-                                        @endphp
-                                        <span class="value">{{ $speciality_data->name ?? '—' }}</span>
-                                    </div>
-
-                                    <div class="attr review-sub-card">
-                                        <span class="label">Sector</span>
-                                        <span class="value">{{ $job_post->sector ?? '—' }}</span>
-                                    </div>
-
-                                    <div class="attr review-sub-card">
-                                        <span class="label">No of Position</span>
-                                        <span class="value">{{ $job_post->position_open ?? '—' }}</span>
-                                    </div>
-
-                                </div>
-                                <!-- <div class="job-footer">
-                                    
-                                    <button class="btn-dark">View</button>
-                                </div> -->
-
+                                        <td>
+                                            <div class="">
+                                                <span class="">{{ ucwords($item->job_title) }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="">
+                                                <span class="">{{ ucwords($item->health_care->name) }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="">
+                                                <span class=""> {{ \Carbon\Carbon::parse($item->created_at)->format('d-m-Y') }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                          <select class="status-dropdown" onchange="changeStatus(this.value,'{{ $item->id }}')">
+                                            <option value="1" @if($item->status == 1) selected @endif>submitted</option>
+                                            <option value="2" @if($item->status == 2) selected @endif>under_review</option>
+                                            <option value="3" @if($item->status == 3) selected @endif>shortlisted</option>
+                                            <option value="4" @if($item->status == 4) selected @endif>interview_scheduled</option>
+                                            <option value="5" @if($item->status == 5) selected @endif>conditional_offer</option>
+                                            <option value="6" @if($item->status == 6) selected @endif>offer</option>
+                                            <option value="7" @if($item->status == 7) selected @endif>hired</option>
+                                            <option value="8" @if($item->status == 8) selected @endif>rejected</option>
+                                            <option value="9" @if($item->status == 9) selected @endif>declined</option>
+                                            <option value="10" @if($item->status == 10) selected @endif>withdrawn</option>
+                                          </select>
+                                        </td>             
+                                        @php $i++ @endphp
+                                    </tr>
+                                    @endforeach
+                                    @else
+                                    {{ 'No Data Found' }}
+                                    @endif
+                                </tbody>
+                              </table>  
                             </div>
-
-                        </div>  
-    
-                       <div class="button-row">
-
-                            <a class="btn-draft" onclick="saveDraft(1,{{ $job_id }})">Save as Draft</a>
-
-                            <a class="btn-publish" onclick="saveDraft(2,{{ $job_id }})">Publish</a>
-
                         </div>
-                    </div>
+                      </div>
     
                 </div>
             </div>
@@ -430,14 +464,25 @@ form#shift_scheduling_form ul.select2-selection__rendered {
 
 @endsection
 @section('js')
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.12/js/intlTelInput.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.11/jquery.mask.js"></script>
 <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.js"></script>
 <script src="{{ url('/public') }}/nurse/assets/js/jquery.ui.datepicker.monthyearpicker.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js"></script>
+
+
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 </script>
+
 <script>
+    $(document).ready( function () {
+        $('.application-table').DataTable({
+    pagingType: "simple_numbers"
+});
+    } )
     $('.addAll_removeAll_btn').on('select2:open', function() {
         var $dropdown = $(this);
         var searchBoxHtml = `
@@ -549,6 +594,23 @@ form#shift_scheduling_form ul.select2-selection__rendered {
     });
 </script>
 <script>
+  document.querySelectorAll('.menu-btn').forEach(btn=>{
+      btn.addEventListener('click', function(e){
+          e.stopPropagation();
+
+          document.querySelectorAll('.job-menu')
+              .forEach(m => m.classList.remove('active'));
+
+          this.parentElement.classList.toggle('active');
+      });
+  });
+
+  document.addEventListener('click', ()=>{
+      document.querySelectorAll('.job-menu')
+          .forEach(m => m.classList.remove('active'));
+  });
+</script>
+<script>
 
     $(document).on('change', 'input[name="listing_expiry"]', function () {
       $('input[name="listing_expiry"]').removeAttr("checked");
@@ -568,6 +630,36 @@ form#shift_scheduling_form ul.select2-selection__rendered {
         $('#district_id').after('<span class="error">' + value + '</span>');
         $(".print-error-msg").find("ul").append('<li>' + value + '</li>');
       });
+    }
+
+    function close_expire(job_id){
+      $.ajax({
+        url: "{{ route('medical-facilities.closeExpireJobs') }}",
+        type: "POST",
+        dataType: "json",
+        data: {
+            job_id:job_id,
+            _token:"{{ csrf_token() }}"
+        },
+        success: function(res){
+          if (res.status == '1') {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'Job Expire/Close Successfully',
+            }).then(function() {
+              window.location.href = "{{ route('medical-facilities.active_jobs') }}";
+              
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: res.message,
+            })
+          }
+        }
+      });      
     }
   </script>
   
@@ -631,7 +723,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
       drawNewGraph('graph1');
     });
 
-    function saveDraft(save,job_id){
+    function saveDraft(save){
 
         $.ajax({
             url: "{{ route('medical-facilities.saveDraft') }}",
@@ -639,7 +731,6 @@ form#shift_scheduling_form ul.select2-selection__rendered {
             dataType: "json",
             data: {
                 save:save,
-                job_id:job_id,
                 _token:"{{ csrf_token() }}"
             },
 
@@ -647,15 +738,11 @@ form#shift_scheduling_form ul.select2-selection__rendered {
 
                 if(res.status == 1){
                     Swal.fire('Success','Job saved as Draft','success');
-                    sessionStorage.removeItem("tab-one");
-                    window.location.href = "{{ route('medical-facilities.draft_jobs') }}";
                 }
 
                 else if(res.status == 3){
                     Swal.fire('Success','Job Published Successfully','success')
                     .then(()=> window.location.href="{{ route('medical-facilities.reviewPublish') }}");
-                    sessionStorage.removeItem("tab-one");
-                    window.location.href = "{{ route('medical-facilities.active_jobs') }}";
                 }
 
                 else if(res.status == 2){
@@ -670,6 +757,63 @@ form#shift_scheduling_form ul.select2-selection__rendered {
         });  
     }
 
+    function changeStatus(value,application_id){
+      $.ajax({
+        url: "{{ route('medical-facilities.change_application_status') }}",
+        type: "POST",
+        dataType: "json",
+        data: {
+            value:value,
+            application_id:application_id,
+            _token:"{{ csrf_token() }}"
+        },
+        success: function(res){
+          if (res.status == '1') {
+
+          }
+        }
+      });    
+    }
+
    
+
+   
+
+    function duplicateJobs(job_id){
+      $.ajax({
+        url: "{{ route('medical-facilities.duplicateJobs') }}",
+        type: "POST",
+        dataType: "json",
+        data: {
+            job_id:job_id,
+            _token:"{{ csrf_token() }}"
+        },
+        success: function(res){
+          if (res.status == '1') {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'Job Duplicate Successfully',
+            }).then(function() {
+              window.location.href = "{{ route('medical-facilities.active_jobs') }}";
+              
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: res.message,
+            })
+          }
+        }
+      });
+    }
   </script>
+  <script>
+$(document).ready(function() {
+
+
+
+});
+</script>
 @endsection

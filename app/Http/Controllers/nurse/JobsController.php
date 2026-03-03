@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\SavedSearches;
 use App\Models\JobsModel;
 use App\Models\RegisteredProfile;
+use App\Models\User;
 
 class JobsController extends Controller{
 
@@ -126,8 +127,16 @@ class JobsController extends Controller{
         // $data['country_name'] = $country_merge;
         $data['user_data'] = DB::table("users")->where("id", $user_id)->first();
 
-        $data['jobs'] = DB::table("job_boxes")->orderBy('created_at','asc')->paginate(2);
+        $data['jobs'] = DB::table("job_boxes")->where("save_draft", 2)->orderBy('created_at','desc')->paginate(2);
         return view('nurse.find_jobs')->with($data);
+    }
+
+    public function job_details(Request $request){
+        $job_id = $request->job_id;
+        $data['jobs'] = DB::table("job_boxes")->where("id", $job_id)->first();
+        $data['healthcare_data'] = User::where("id",$data['jobs']->healthcare_id)->first();
+        $data['state_data'] = DB::table("states")->where("id",$data['jobs']->location_state)->first();
+        return view('nurse.job_details')->with($data);
     }
     // public function index()
     // {
@@ -553,7 +562,7 @@ class JobsController extends Controller{
             $query->orderBy('created_at', 'desc');
         }
 
-        $jobs = $query->paginate(2);
+        $jobs = $query->where("save_draft", 2)->paginate(2);
         // $jobs = $query->get();
         // print_r($jobs);die;
         if ($jobs->count() == 0) {
@@ -730,15 +739,78 @@ class JobsController extends Controller{
         $updateWorkPreferencesFlexiblity = DB::table("work_preferences")->where("user_id",$user_id)->update(['sector_preferences'=>$sector_data]);
     }
 
-    public function applyJobs(Request $request){
+    // public function applyJobs(Request $request){
+    //     $user_id = $request->user_id;
+    //     $job_id = $request->job_id; 
+
+    //     $applyJobs = DB::table("job_apply")->insert(["user_id"=>$user_id,"job_id"=>$job_id]);
+
+    //     if($applyJobs == 1){
+    //         return $applyJobs;
+    //     }
+    // }
+
+    public function applyJobs(Request $request)
+    {
+        // print_r($request->all());
+        // die;
+        // $request->validate([
+        //     'user_id' => 'required',
+        //     'job_id'  => 'required'
+        // ]);
+
         $user_id = $request->user_id;
-        $job_id = $request->job_id; 
+        $job_id  = $request->job_id;
 
-        $applyJobs = DB::table("job_apply")->insert(["user_id"=>$user_id,"job_id"=>$job_id]);
+        // 🔹 Check if already applied
+        $alreadyApplied = DB::table('nurse_applications')
+            ->where('nurse_id', $user_id)
+            ->where('job_id', $job_id)
+            ->exists();
 
-        if($applyJobs == 1){
-            return $applyJobs;
+
+        if ($alreadyApplied) {
+            return response()->json([
+                'status' => false,
+                'message' => 'You have already applied for this job.'
+            ]);
         }
+
+        // 🔹 Get job details from job_boxes table
+        $job = DB::table('job_boxes')->where('id', $job_id)->first();
+
+        // print_r($job);die;
+
+        if (!$job) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Job not found.'
+            ]);
+        }
+
+        // 🔹 Insert into nurse_applications table
+        $apply = DB::table('nurse_applications')->insert([
+            'nurse_id'     => $user_id,
+            'job_id'       => $job->id,
+            'employer_id'  => $job->healthcare_id ?? null,
+            'job_title'    => $job->job_title ?? null, // change if you have title column
+            'status'       => 1, // 1 = submitted
+            'applied_at'   => now(),
+            'created_at'   => now(),
+            'updated_at'   => now(),
+        ]);
+
+        if ($apply) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Job applied successfully.'
+            ]);
+        }
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Something went wrong.'
+        ]);
     }
 
     // public function addSavedSearches(Request $request){

@@ -3,8 +3,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.12/css/intlTelInput.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.3/themes/base/jquery-ui.css">
 <link rel="stylesheet" href="{{ url('/public') }}/nurse/assets/css/jquery.ui.datepicker.monthyearpicker.css">
-<link rel='stylesheet'
-    href='https://cdn-uicons.flaticon.com/2.5.1/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+<link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.5.1/uicons-regular-rounded/css/uicons-regular-rounded.css'>
 <!-- FullCalendar CSS -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
@@ -1652,6 +1651,7 @@
     .dot-dark {
         background-color: #343a40;
     }
+
 </style>
 @endsection
 @section('content')
@@ -1685,30 +1685,17 @@
                     </ul>
                     <div class="tab-content mt-4">
                         <div class="tab-pane fade show active" id="actionTab">
-                            <!-- <p>action content goes here...</p> -->
-                            {{-- <div class="row">
-                                <div class="col-12 col-lg-6">
-                                    <div class="alert-success p-4 rounded">
-                                        <p class="font-weight-bold color-black text-14 color-black">Complete Your
-                                            Profile</p>
-                                        <p class="text-12 lhn mt-2">Vincent uploading your resume makes you 3x more
-                                            likely to get an
-                                            interview request</p>
-                                        <button class="btn btn-xs status-badge offer mt-3">upload my resume</button>
-                                    </div>
-                                </div>
-                            </div> --}}
                             <div class="row">
                                 <div class="req-wrapper">
                                     <div class="mt-4">
                                         <!-- SECTION 1 -->
                                         <div class="req-alert mb-3">
                                             <strong>You have items requiring action.</strong><br>
-                                            <small class="text-12">Complete the required tasks before your interview or
-                                                offer can
-                                                proceed.</small>
+                                            <small class="text-12">Complete the required tasks before your interview or offer can proceed.</small>
                                         </div>
                                         <!-- SECTION 2 : DOCUMENTS -->
+                                        @foreach ($action_needed as $action_list)
+                                        @if($action_list->job->documents_required != null)                        
                                         <div class="req-box-height">
                                             <div class="req-box p-4">
                                                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -1722,36 +1709,32 @@
                                                     </span>
                                                 </div>
                                                 <p class="text-dark">
-                                                    <strong class="font-weight-bold"></strong>
+                                                    <strong class="font-weight-bold">{{$action_list->health_care->name}}</strong>
                                                     requires you to provide these documents.
                                                 </p>
                                                 <div class="p-3 border rounded mt-4">
                                                     <div class="row">
                                                         @foreach ($document_list as $action_document_list )
-                                               
+
                                                         <div class="col-md-8">
                                                             <a href="{{ url('public/uploads/needed_document/'.$action_document_list->document_path) }}" target="_blank" class="req-doc-name">
                                                                 {{ $action_document_list->name }}
-                                                            </a>              
+                                                            </a>
                                                             <!-- Delete File -->
-                                                            <a href="javascript:void(0);" class="req-doc-delete text-danger" data-id="{{$action_document_list->id}}">
-                                                                <i class="fa fa-trash" aria-hidden="true"></i>
-                                                            </a>                                   
+                                                        <a href="javascript:void(0);" class="req-doc-edit text-danger" data-docname="{{ $action_document_list->name }}"
+                                                            data-employer="{{ $action_list->employer_id }}" data-name="{{ $action_list->name }}"
+                                                            data-toggle="modal" data-target="#reqUploadModal">
+                                                            <i class="fa fa-edit"></i>
+                                                        </a>
                                                         </div>
                                                         @endforeach
-                                                        <div class="col-md-4 text-md-right mt-3 mt-md-0">
-                                                            <div class="d-flex justify-content-end">
-                                                                <button class="btn req-btn-green text-12"
-                                                                    data-toggle="modal" data-target="#reqUploadModal">
-                                                                    Upload Documents
-                                                                </button>
-                                                            </div>
-                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                            
+                                  
                                             <!-- SECTION 3 : INTERVIEW -->
-                                            @foreach ($action_needed as $action_list)
+                                    
                                             <div class="req-box">
                                                 <div class="req-interview-flex">
                                                     @php
@@ -1782,8 +1765,7 @@
                                                         ->addMinutes($action_list->duration_minutes);
                                                         @endphp
                                                         <small class="text-muted d-block text-12 d-flex gap-1">
-                                                            <span class="mr-2"><i class="fa fa-calendar-o"
-                                                                    aria-hidden="true"></i></span>
+                                                            <span class="mr-2"><i class="fa fa-calendar-o" aria-hidden="true"></i></span>
                                                             {{-- 23 Feb • 11:24 AM --}}
                                                             <span>{{
                                                                 \Carbon\Carbon::parse($action_list->scheduled_at)->format('d
@@ -1792,8 +1774,7 @@
                                                                 {{ $end->format('h:i A') }}</span>
                                                         </small>
                                                         <small class="text-muted d-block text-12 d-flex gap-1">
-                                                            <span><i class="fa fa-map-marker"
-                                                                    aria-hidden="true"></i></span>
+                                                            <span><i class="fa fa-map-marker" aria-hidden="true"></i></span>
                                                             {{ $action_list->location_address }}
                                                         </small>
                                                         <small class="text-muted d-block mb-2 text-12 d-flex gap-1">
@@ -1803,14 +1784,13 @@
                                                     </div>
                                                     <div class="d-flex flex-column gap-2">
                                                         <a href="#" class="req-badge-warning ml-3 d-flex gap-3">
-                                                           <span data-schedule="{{ \Carbon\Carbon::parse($action_list->scheduled_at)->timezone(config('app.timezone'))->format('Y-m-d\TH:i:s') }}" class="countdown"></span>
+                                                            <span data-schedule="{{ \Carbon\Carbon::parse($action_list->scheduled_at)->timezone(config('app.timezone'))->format('Y-m-d\TH:i:s') }}" class="countdown"></span>
                                                             {{-- <span>
                                                                 Starts in <span class="text-black text-12">3 Days
                                                                     17h
                                                                     16m</span>
                                                             </span> --}}
-                                                            <span class="text-black"><i class="fa fa-angle-right"
-                                                                    aria-hidden="true"></i></span>
+                                                            <span class="text-black"><i class="fa fa-angle-right" aria-hidden="true"></i></span>
                                                         </a>
                                                         <button class="btn btn-primary btn-sm-space">
                                                             Confirm Attendance
@@ -1821,45 +1801,42 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="modal fade uploas-docs" id="reqUploadModal" tabindex="-1">
-                                                <div class="modal-dialog modal-dialog-centered">
-                                                    <form id="upload-document" enctype="multipart/form-data">
-                                                        @csrf
-                                                        <input type="hidden" name="nurse_id"
-                                                            value="{{ $action_list->nurse_id }}">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h5 class="modal-title">Upload Documents</h5>
-                                                                <button type="button" class="close"
-                                                                    data-dismiss="modal">&times;</button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                <div class="form-group">
-                                                                    <label>Name of Document</label>
-                                                                    <input type="text" name="document_name"
-                                                                        placeholder="Resume,Police Clearance,NDIS Check "
-                                                                        id="">
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <label>Upload Documents</label>
-                                                                    <input type="file" name="document_file"
-                                                                        class="form-control">
-                                                                </div>
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button class="btn btn-sm btn-secondary"
-                                                                    data-dismiss="modal">Cancel</button>
-                                                                <button class="btn btn-sm btn-success">Upload
-                                                                    Documents</button>
-                                                            </div>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                            @endforeach
                                         </div>
+                                        @endif
+                                        @endforeach
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade uploas-docs" id="reqUploadModal" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <form id="upload-document" enctype="multipart/form-data">
+                                    @csrf     
+                                    <input type="hidden" name="employer_id" id="modal_employer_id">
+                                    <input type="hidden" name="document_name" id="modal_document_name">                  
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Upload Documents</h5>
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        </div>
+                                        <div class="modal-body">
+                                            {{-- <div class="form-group">
+                                                <label>Name of Document</label>
+                                                <input type="text" name="document_name" placeholder="Resume,Police Clearance,NDIS Check " id="">
+                                            </div> --}}
+                                            <div class="form-group">
+                                                <label>Upload Documents</label>
+                                                <input type="file" name="document_file" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+                                            <button class="btn btn-sm btn-success">Upload
+                                                Documents</button>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                         <!-- upcoming tab  -->
@@ -1869,21 +1846,15 @@
                                 <div class="col-12 col-lg-9 mb-3 mb-lg-0">
                                     <div class="d-flex flex-column filter-border flex-md-row">
                                         <div class="dropdown mb-md-0 mr-md-2 filter-item">
-                                            <button class="btn dropdown-toggle w-100 filter-btn pt-7"
-                                                data-toggle="dropdown">
+                                            <button class="btn dropdown-toggle w-100 filter-btn pt-7" data-toggle="dropdown">
                                                 <i class="fas fa-search mr-1"></i> Status
                                             </button>
                                             <div class="dropdown-menu">
-                                                <a class="dropdown-item status-filter"
-                                                    data-value="Confirmed">Confirmed</a>
-                                                <a class="dropdown-item status-filter"
-                                                    data-value="Scheduled">Scheduled</a>
-                                                <a class="dropdown-item status-filter"
-                                                    data-value="Reschedule Requested">Reschedule Requested</a>
-                                                <a class="dropdown-item status-filter"
-                                                    data-value="Cancelled">Cancelled</a>
-                                                <a class="dropdown-item status-filter"
-                                                    data-value="Completed">Completed</a>
+                                                <a class="dropdown-item status-filter" data-value="Confirmed">Confirmed</a>
+                                                <a class="dropdown-item status-filter" data-value="Scheduled">Scheduled</a>
+                                                <a class="dropdown-item status-filter" data-value="Reschedule Requested">Reschedule Requested</a>
+                                                <a class="dropdown-item status-filter" data-value="Cancelled">Cancelled</a>
+                                                <a class="dropdown-item status-filter" data-value="Completed">Completed</a>
                                                 <a class="dropdown-item status-filter" data-value="">All</a>
                                             </div>
                                         </div>
@@ -1897,14 +1868,12 @@
                                         </div>
                                         <div class="position-relative flex-fill filter-item">
                                             <i class="fas fa-search position-absolute search-icon"></i>
-                                            <input type="text" id="customSearch" class="form-control pl-4"
-                                                placeholder="Search..." />
+                                            <input type="text" id="customSearch" class="form-control pl-4" placeholder="Search..." />
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-lg-3 filter-border pt-7">
-                                    <button id="clearFilters"
-                                        class="btn btn-light d-flex justify-content-between align-items-center w-100 filter-btn">
+                                    <button id="clearFilters" class="btn btn-light d-flex justify-content-between align-items-center w-100 filter-btn">
                                         <span>
                                             <i class="fas fa-sliders-h mr-1"></i> Clear Filters
                                         </span>
@@ -1971,10 +1940,8 @@
                                                     </p>
                                                     <p class="color-black">
                                                         {{ $current_list->meeting_type_label }}
-                                                        <span><i class="fa fa-file-text pl-1"
-                                                                aria-hidden="true"></i></span>
-                                                        <span><i class="fa fa-file-o pl-1"
-                                                                aria-hidden="true"></i></span>
+                                                        <span><i class="fa fa-file-text pl-1" aria-hidden="true"></i></span>
+                                                        <span><i class="fa fa-file-o pl-1" aria-hidden="true"></i></span>
                                                     </p>
                                                 </td>
                                                 @php
@@ -1995,22 +1962,52 @@
                                                 ];
                                                 @endphp
                                                 <td>
-                                                    <button
-                                                        class="btn btn-xs text-white rounded  cursor-pointer active-status-moda {{ $status['class'] }}">
+                                                    <button class="btn btn-xs text-white rounded  cursor-pointer active-status-moda {{ $status['class'] }}">
                                                         {{ $status['label'] }}
                                                     </button>
                                                 </td>
                                                 <td>
                                                     <div class="d-flex flex-column">
-                                                        <button class="btn btn-xs mb-1 btn-blue text-white action-modal"
-                                                            data-id="{{ $current_list->id }}" data-toggle="modal"
-                                                            data-target="#schedModal_1">Confirm Attendance</button>
-                                                        <button
-                                                            class="btn btn-xs btn-outline-secondary mb-1 action-modal"
-                                                            data-id="{{ $current_list->id }}">Request
-                                                            Reschedule</button>
-                                                        <button class="btn btn-xs btn-outline-danger">Cancel
-                                                            Interview</button>
+
+                                                        @if($current_list->status == 1)
+                                                        {{-- Scheduled --}}
+                                                        <button class="btn btn-xs mb-1 btn-blue text-white action-modal" data-id="{{ $current_list->id }}">
+                                                            Confirm Attendance
+                                                        </button>
+
+                                                        <button class="btn btn-xs btn-outline-secondary mb-1 action-modal" data-id="{{ $current_list->id }}">
+                                                            Request Reschedule
+                                                        </button>
+
+                                                        <button class="btn btn-xs btn-outline-danger cancel-interview" data-id="{{ $current_list->id }}">
+                                                            Cancel Interview
+                                                        </button>
+
+                                                        @elseif($current_list->status == 2)
+                                                        {{-- Reschedule Requested --}}
+                                                        <button class="btn btn-xs mb-1 btn-warning text-white" disabled>
+                                                            Reschedule Requested
+                                                        </button>
+
+                                                        <button class="btn btn-xs btn-outline-danger cancel-interview" data-id="{{ $current_list->id }}">
+                                                            Cancel Interview
+                                                        </button>
+
+                                                        @elseif($current_list->status == 3)
+                                                        {{-- Confirmed --}}
+                                                        <span class="badge bg-success mb-1">Confirmed</span>
+
+                                                        <button class="btn btn-xs btn-outline-danger cancel-interview" data-id="{{$current_list->id }}"> Cancel Interview</button>
+                                                        @elseif($current_list->status == 4)
+                                                        <span class="badge bg-primary">Completed</span>
+
+                                                        @elseif($current_list->status == 5)
+                                                        <span class="badge bg-danger">No Show</span>
+
+                                                        @elseif($current_list->status == 6)
+                                                        <span class="badge bg-secondary">Cancelled</span>
+                                                        @endif
+
                                                     </div>
                                                 </td>
                                             </tr>
@@ -2029,21 +2026,15 @@
                                 <div class="col-12 col-lg-9 mb-3 mb-lg-0">
                                     <div class="d-flex flex-column filter-border flex-md-row">
                                         <div class="dropdown mb-md-0 mr-md-2 filter-item">
-                                            <button class="btn dropdown-toggle w-100 filter-btn pt-7"
-                                                data-toggle="dropdown">
+                                            <button class="btn dropdown-toggle w-100 filter-btn pt-7" data-toggle="dropdown">
                                                 <i class="fas fa-search mr-1"></i> Status
                                             </button>
                                             <div class="dropdown-menu">
-                                                <a class="dropdown-item past-status-filter"
-                                                    data-value="Confirmed">Confirmed</a>
-                                                <a class="dropdown-item past-status-filter"
-                                                    data-value="Scheduled">Scheduled</a>
-                                                <a class="dropdown-item past-status-filter"
-                                                    data-value="Reschedule Requested">Reschedule Requested</a>
-                                                <a class="dropdown-item past-status-filter"
-                                                    data-value="Cancelled">Cancelled</a>
-                                                <a class="dropdown-item past-status-filter"
-                                                    data-value="Completed">Completed</a>
+                                                <a class="dropdown-item past-status-filter" data-value="Confirmed">Confirmed</a>
+                                                <a class="dropdown-item past-status-filter" data-value="Scheduled">Scheduled</a>
+                                                <a class="dropdown-item past-status-filter" data-value="Reschedule Requested">Reschedule Requested</a>
+                                                <a class="dropdown-item past-status-filter" data-value="Cancelled">Cancelled</a>
+                                                <a class="dropdown-item past-status-filter" data-value="Completed">Completed</a>
                                                 <a class="dropdown-item past-status-filter" data-value="">All</a>
                                             </div>
                                         </div>
@@ -2057,14 +2048,12 @@
                                         </div>
                                         <div class="position-relative flex-fill filter-item">
                                             <i class="fas fa-search position-absolute search-icon"></i>
-                                            <input type="text" id="pastCustomSearch" class="form-control pl-4"
-                                                placeholder="Search..." />
+                                            <input type="text" id="pastCustomSearch" class="form-control pl-4" placeholder="Search..." />
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-lg-3 filter-border pt-7">
-                                    <button id="pastclearFilters"
-                                        class="btn btn-light d-flex justify-content-between align-items-center w-100 filter-btn">
+                                    <button id="pastclearFilters" class="btn btn-light d-flex justify-content-between align-items-center w-100 filter-btn">
                                         <span>
                                             <i class="fas fa-sliders-h mr-1"></i> Clear Filters
                                         </span>
@@ -2087,7 +2076,7 @@
                                             <tr>
                                                 <td>
                                                     <div>
-                                                        <p class="color-black">{{ $current_list->job->job_title }}
+                                                        <p class="color-black">{{ $past_show->job->job_title }}
                                                         </p>
                                                     </div>
                                                 </td>
@@ -2120,10 +2109,8 @@
                                                     <p class="color-black">{{ $past_show->location_address }}</p>
                                                     <p class="color-black">
                                                         {{ $past_show->meeting_type_label }}
-                                                        <span><i class="fa fa-file-text pl-1"
-                                                                aria-hidden="true"></i></span>
-                                                        <span><i class="fa fa-file-o pl-1"
-                                                                aria-hidden="true"></i></span>
+                                                        <span><i class="fa fa-file-text pl-1" aria-hidden="true"></i></span>
+                                                        <span><i class="fa fa-file-o pl-1" aria-hidden="true"></i></span>
                                                     </p>
                                                 </td>
                                                 <td>
@@ -2160,12 +2147,10 @@
                                                         'class' => 'dot-dark',
                                                         ];
                                                         @endphp
-                                                        <button
-                                                            class="btn btn-xs text-white rounded  cursor-pointer active-status-moda {{ $status['class'] }}">
+                                                        <button class="btn btn-xs text-white rounded  cursor-pointer active-status-moda {{ $status['class'] }}">
                                                             {{ $status['label'] }}
                                                         </button>
-                                                        <button
-                                                            class="btn btn-xs btn-light text-12 rounded cursor-pointer active-status-moda">
+                                                        <button class="btn btn-xs btn-light text-12 rounded cursor-pointer active-status-moda">
                                                             Add Note
                                                         </button>
                                                     </div>
@@ -2255,359 +2240,452 @@
 <script src="{{ url('/public') }}/nurse/assets/js/jquery.ui.datepicker.monthyearpicker.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    function updateCountdowns() {
-        document.querySelectorAll(".countdown").forEach(function (el) {
-
-            let scheduleAt = new Date(el.dataset.schedule);
-            let now = new Date();
-            let diff = scheduleAt - now;
-
-            if (diff <= 0) {
-                el.innerText = "Interview Started";
-                return;
-            }
-
-            let days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            let hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-            let minutes = Math.floor((diff / (1000 * 60)) % 60);
-
-            el.innerText =
-                `Interview starts in: ${days} Days ${hours}h ${minutes}m`;
-        });
-    }
-
-    updateCountdowns();
-    setInterval(updateCountdowns, 60000);
-});
-</script>
-<script>
-$(document).ready(function () {
-    $('#upload-document').on('submit', function (e) {
-        e.preventDefault();
-
-        let formData = new FormData(this);
-
-        $.ajax({
-            url: "{{ route('nurse.action_needed.upload') }}",
-            type: "POST",
-            data: formData,
-            processData: false,
-            contentType: false,
-
-            success: function (response) {
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Uploaded!',
-                    text: response.message ?? 'Document uploaded successfully!',
-                    confirmButtonColor: '#28a745',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-
-                $('#upload-document')[0].reset();
-                window.location.reload();
-
-            },
-
-            error: function (xhr) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Something went wrong!',
-                    confirmButtonColor: '#dc3545'
-                });
-            }
-        });
-    });
-});
-
-$(document).on('click', '.req-doc-delete', function () {
-
-    let docId = $(this).data('id');
+    $(document).on('click', '.cancel-interview', function () {
+    let interviewId = $(this).data('id');
 
     Swal.fire({
-        title: 'Are you sure?',
-        text: "This document will be permanently deleted!",
-        icon: 'warning',
+        title: "Are you sure?",
+        text: "You want to cancel this interview?",
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Yes, delete it!'
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, Cancel it!"
     }).then((result) => {
 
         if (result.isConfirmed) {
 
             $.ajax({
-                url: "{{ url('nurse/document/delete/') }}"+"/"+docId,
-                type: "GET",
+                url: "{{ route('nurse.interview.cancel') }}",
+                type: "POST",
                 data: {
-                    _token: "{{ csrf_token() }}"
+                    _token: "{{ csrf_token() }}",
+                    interview_id: interviewId
                 },
-
                 success: function (response) {
 
-                    // Remove row without reload
-                    $('#doc-row-' + docId).fadeOut(500, function () {
-                        $(this).remove();
-                    });
-                    window.location.reload();
-
-                },
-
-                error: function () {
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Something went wrong!'
+                        title: "Cancelled!",
+                        text: "Interview has been cancelled successfully.",
+                        icon: "success"
+                    }).then(() => {
+                        location.reload();
                     });
+
                 }
             });
+
         }
+
     });
 
 });
-// $(document).on('click', '.req-doc-delete', function () {
+</script>
+<script>
+    $(document).on('click', '#submitAttendanceBtn', function() {
 
-//     let docId = $(this).data('id');
+        let interviewId = $('#interview_id').val();
+        let selectedStatus = $('input[name="processStep"]:checked').val();
 
-//     Swal.fire({
-//         title: 'Are you sure?',
-//         text: "This document will be permanently deleted!",
-//         icon: 'warning',
-//         showCancelButton: true,
-//         confirmButtonColor: '#d33',
-//         cancelButtonColor: '#6c757d',
-//         confirmButtonText: 'Yes, delete it!'
-//     }).then((result) => {
+        if (!selectedStatus) {
+            Swal.fire({
+                icon: 'warning'
+                , title: 'No Status Selected'
+                , text: 'Please select a status before submitting.'
+                , confirmButtonColor: '#3085d6'
+            });
+            return;
+        }
 
-//         if (result.isConfirmed) {
+        $.ajax({
+            url: "{{ route('nurse.interview.updateStatus') }}"
+            , type: "POST"
+            , data: {
+                _token: "{{ csrf_token() }}"
+                , interview_id: interviewId
+                , status: selectedStatus
+            }
+            , beforeSend: function() {
+                Swal.fire({
+                    title: 'Updating...'
+                    , text: 'Please wait'
+                    , allowOutsideClick: false
+                    , didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            }
+            , success: function(response) {
 
-//             $.ajax({
-//                 url: "{{ url('nurse/document/delete/') }}"+"/"+docId,
-//                 type: "GET",
+                if (response.success) {
 
-//                 success: function (response) {
+                    Swal.fire({
+                        icon: 'success'
+                        , title: 'Success!'
+                        , text: response.message
+                        , confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        window.location.reload();
+                    });
 
-//                     Swal.fire({
-//                         icon: 'success',
-//                         title: 'Deleted!',
-//                         text: 'Document deleted successfully.',
-//                         timer: 2000,
-//                         showConfirmButton: false
-//                     });
+                } else {
 
-//                     $('#doc-row-' + docId).fadeOut(500, function () {
-//                         $(this).remove();
-//                     });
+                    Swal.fire({
+                        icon: 'error'
+                        , title: 'Failed'
+                        , text: response.message ? ? 'Something went wrong.'
+                        , confirmButtonColor: '#d33'
+                    });
 
-//                 },
+                }
 
-//                 error: function (xhr) {
-//                     Swal.fire({
-//                         icon: 'error',
-//                         title: 'Error!',
-//                         text: 'Delete failed (404 or server error).'
-//                     });
-//                 }
-//             });
-//         }
-//     });
+            }
+            , error: function() {
+                Swal.fire({
+                    icon: 'error'
+                    , title: 'Server Error'
+                    , text: 'Something went wrong. Please try again.'
+                    , confirmButtonColor: '#d33'
+                });
+            }
+        });
 
-// });
+    });
+
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        function updateCountdowns() {
+            document.querySelectorAll(".countdown").forEach(function(el) {
+
+                let scheduleAt = new Date(el.dataset.schedule);
+                let now = new Date();
+                let diff = scheduleAt - now;
+
+                if (diff <= 0) {
+                    el.innerText = "Interview Started";
+                    return;
+                }
+
+                let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                let hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                let minutes = Math.floor((diff / (1000 * 60)) % 60);
+
+                el.innerText =
+                    `Interview starts in: ${days} Days ${hours}h ${minutes}m`;
+            });
+        }
+
+        updateCountdowns();
+        setInterval(updateCountdowns, 60000);
+    });
+
+</script>
+<script>
+    $(document).ready(function () {
+        // When upload icon is clicked → set hidden values
+        $(document).on('click', '.req-doc-edit', function () {
+
+            let docName = $(this).data('docname');
+            let employerId = $(this).data('employer');
+            let name = $(this).data('name');
+
+            $('#modal_document_name').val(docName);
+            $('#modal_employer_id').val(employerId);
+            $('#modal_name').val(name);
+        });
+
+
+        // Form Submit (AJAX)
+        $('#upload-document').on('submit', function (e) {
+
+            e.preventDefault();
+
+            let formData = new FormData(this); // ✅ FIXED
+
+            $.ajax({
+                url: "{{ route('nurse.action_needed.upload') }}",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+
+                success: function (response) {
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Uploaded!',
+                        text: response.message ? response.message : 'Document uploaded successfully!',
+                        confirmButtonColor: '#28a745',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    $('#upload-document')[0].reset();
+                    $('#reqUploadModal').modal('hide');
+
+                    // Reload to show updated document
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1500);
+                },
+
+                error: function (xhr) {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Something went wrong!',
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            });
+        });
+
+    });
+
+    $(document).on('click', '.req-doc-delete', function() {
+
+        let docId = $(this).data('id');
+
+        Swal.fire({
+            title: 'Are you sure?'
+            , text: "This document will be permanently deleted!"
+            , icon: 'warning'
+            , showCancelButton: true
+            , confirmButtonColor: '#d33'
+            , cancelButtonColor: '#6c757d'
+            , confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                $.ajax({
+                    url: "{{ url('nurse/document/delete/') }}" + "/" + docId
+                    , type: "GET"
+                    , data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+
+                    success: function(response) {
+
+                        // Remove row without reload
+                        $('#doc-row-' + docId).fadeOut(500, function() {
+                            $(this).remove();
+                        });
+                        window.location.reload();
+
+                    },
+
+                    error: function() {
+                        Swal.fire({
+                            icon: 'error'
+                            , title: 'Oops...'
+                            , text: 'Something went wrong!'
+                        });
+                    }
+                });
+            }
+        });
+
+    });
+
 </script>
 <script>
     let table;
-        $(document).ready(function() {
-            table = $('#upComingTable').DataTable({
-                pageLength: 10,
-                pagingType: "simple",
-                ordering: true,
-                searching: true,
-                info: true,
-                lengthChange: false,
-                dom: 'rtip',
-                responsive: true
-            });
-            // Custom search
-            $('#customSearch').on('keyup', function() {
-                table.search(this.value).draw();
-            });
-            // Status filter
-            $('.status-filter').on('click', function() {
-                var status = $(this).data('value');
-                table.column(3).search(status).draw();
-            });
-            // Date range filter
-            $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-                var selectedRange = $('#dateFilter').val();
-                if (!selectedRange) return true;
-                var appliedDate = moment(data[1], "DD MMM YYYY");
-                var today = moment();
-                if (selectedRange === '7') {
-                    return appliedDate.isAfter(today.clone().subtract(7, 'days'));
-                }
-                if (selectedRange === '30') {
-                    return appliedDate.isAfter(today.clone().subtract(30, 'days'));
-                }
-                if (selectedRange === '180') {
-                    return appliedDate.isAfter(today.clone().subtract(6, 'months'));
-                }
-                return true;
-            });
-            $('#dateFilter').on('change', function() {
-                table.draw();
-            });
-            $('#clearFilters').on('click', function() {
-                $('#customSearch').val('');
-                $('#dateFilter').val('');
-                table.search('');
-                table.columns().search('');
-                table.draw();
-            });
+    $(document).ready(function() {
+        table = $('#upComingTable').DataTable({
+            pageLength: 10
+            , pagingType: "simple"
+            , ordering: true
+            , searching: true
+            , info: true
+            , lengthChange: false
+            , dom: 'rtip'
+            , responsive: true
         });
-        let table1;
-        $(document).ready(function() {
-            table1 = $('#pastTable').DataTable({
-                pageLength: 10,
-                pagingType: "simple",
-                ordering: true,
-                searching: true,
-                info: true,
-                lengthChange: false,
-                dom: 'rtip',
-                responsive: true
-            });
-            // Custom search
-            $('#pastCustomSearch').on('keyup', function() {
-                table1.search(this.value).draw();
-            });
-            // Status filter
-            $('.past-status-filter').on('click', function() {
-                var status = $(this).data('value');
-                table1.column(3).search(status).draw();
-            });
-            // // Date range filter
-            $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-                var selectedRange = $('#pastdateFilter').val();
-                if (!selectedRange) return true;
-                var appliedDate = moment(data[1], "DD MMM YYYY");
-                var today = moment();
-                if (selectedRange === '7') {
-                    return appliedDate.isAfter(today.clone().subtract(7, 'days'));
-                }
-                if (selectedRange === '30') {
-                    return appliedDate.isAfter(today.clone().subtract(30, 'days'));
-                }
-                if (selectedRange === '180') {
-                    return appliedDate.isAfter(today.clone().subtract(6, 'months'));
-                }
-                return true;
-            });
-            $('#pastdateFilter').on('change', function() {
-                table1.draw();
-            });
-            $('#pastclearFilters').on('click', function() {
-                $('#customSearch').val('');
-                $('#pastdateFilter').val('');
-                table1.search('');
-                table1.columns().search('');
-                table1.draw();
-            });
+        // Custom search
+        $('#customSearch').on('keyup', function() {
+            table.search(this.value).draw();
         });
+        // Status filter
+        $('.status-filter').on('click', function() {
+            var status = $(this).data('value');
+            table.column(3).search(status).draw();
+        });
+        // Date range filter
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            var selectedRange = $('#dateFilter').val();
+            if (!selectedRange) return true;
+            var appliedDate = moment(data[1], "DD MMM YYYY");
+            var today = moment();
+            if (selectedRange === '7') {
+                return appliedDate.isAfter(today.clone().subtract(7, 'days'));
+            }
+            if (selectedRange === '30') {
+                return appliedDate.isAfter(today.clone().subtract(30, 'days'));
+            }
+            if (selectedRange === '180') {
+                return appliedDate.isAfter(today.clone().subtract(6, 'months'));
+            }
+            return true;
+        });
+        $('#dateFilter').on('change', function() {
+            table.draw();
+        });
+        $('#clearFilters').on('click', function() {
+            $('#customSearch').val('');
+            $('#dateFilter').val('');
+            table.search('');
+            table.columns().search('');
+            table.draw();
+        });
+    });
+    let table1;
+    $(document).ready(function() {
+        table1 = $('#pastTable').DataTable({
+            pageLength: 10
+            , pagingType: "simple"
+            , ordering: true
+            , searching: true
+            , info: true
+            , lengthChange: false
+            , dom: 'rtip'
+            , responsive: true
+        });
+        // Custom search
+        $('#pastCustomSearch').on('keyup', function() {
+            table1.search(this.value).draw();
+        });
+        // Status filter
+        $('.past-status-filter').on('click', function() {
+            var status = $(this).data('value');
+            table1.column(3).search(status).draw();
+        });
+        // // Date range filter
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            var selectedRange = $('#pastdateFilter').val();
+            if (!selectedRange) return true;
+            var appliedDate = moment(data[1], "DD MMM YYYY");
+            var today = moment();
+            if (selectedRange === '7') {
+                return appliedDate.isAfter(today.clone().subtract(7, 'days'));
+            }
+            if (selectedRange === '30') {
+                return appliedDate.isAfter(today.clone().subtract(30, 'days'));
+            }
+            if (selectedRange === '180') {
+                return appliedDate.isAfter(today.clone().subtract(6, 'months'));
+            }
+            return true;
+        });
+        $('#pastdateFilter').on('change', function() {
+            table1.draw();
+        });
+        $('#pastclearFilters').on('click', function() {
+            $('#customSearch').val('');
+            $('#pastdateFilter').val('');
+            table1.search('');
+            table1.columns().search('');
+            table1.draw();
+        });
+    });
+
 </script>
 <script>
     $(document).on('click', '.action-modal', function() {
-            let $btn = $(this);
-            $btn.prop('disabled', true);
-            let interviewId = $(this).data('id');
-            let modal = '#schedModal_1';
-            $('#globalLoader').show();
-            $.ajax({
-                url: "{{ url('/nurse/action-interview') }}",
-                type: "GET",
-                data: {
-                    interview_id: interviewId,
-                    modal_no: "1"
-                },
-                success: function(response) {
-                    $('#modalContainer').empty();
-                    $('#modalContainer').html(response);
-                    $('#schedModal_1').modal({
-                        backdrop: 'static',
-                        keyboard: false
-                    });
-                    $(modal).modal('show');
-                    $btn.prop('disabled', false);
-                    // Now loader exists in DOM
-                    showModalLoader(modal);
-                    // Hide loader after slight delay (simulate processing)
-                    setTimeout(function() {
-                        hideModalLoader(modal);
-                    }, 300);
-                    // $('#schedModal_1').modal('show');
-                }
-            });
+        let $btn = $(this);
+        $btn.prop('disabled', true);
+        let interviewId = $(this).data('id');
+        let modal = '#schedModal_1';
+        $('#globalLoader').show();
+        $.ajax({
+            url: "{{ url('/nurse/action-interview') }}"
+            , type: "GET"
+            , data: {
+                interview_id: interviewId
+                , modal_no: "1"
+            }
+            , success: function(response) {
+                $('#modalContainer').empty();
+                $('#modalContainer').html(response);
+                $('#schedModal_1').modal({
+                    backdrop: 'static'
+                    , keyboard: false
+                });
+                $(modal).modal('show');
+                $btn.prop('disabled', false);
+                // Now loader exists in DOM
+                showModalLoader(modal);
+                // Hide loader after slight delay (simulate processing)
+                setTimeout(function() {
+                    hideModalLoader(modal);
+                }, 300);
+                // $('#schedModal_1').modal('show');
+            }
         });
-        $(document).on('hidden.bs.modal', '#schedModal_1', function() {
-            $(this).remove();
-        });
+    });
+    $(document).on('hidden.bs.modal', '#schedModal_1', function() {
+        $(this).remove();
+    });
+
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-            var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-                initialView: window.innerWidth < 768 ? 'listWeek' : 'dayGridMonth',
-                height: 'auto',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-                },
-                events: {
-                    url: "{{ route('nurse.calendar.events') }}",
-                    method: 'GET'
-                },
-                eventClick: function(info) {
-                    document.getElementById('modalTitle').innerText = info.event.title;
-                    document.getElementById('modalDate').innerText =
-                        info.event.start.toLocaleDateString();
-                    document.getElementById('modalTime').innerText =
-                        info.event.start.toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        });
-                    document.getElementById('modalStatus').innerText =
-                        info.event.extendedProps.status.toUpperCase();
-                    $('#calenderModal').modal('show');
-                }
-            });
-            calendar.render();
+        var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+            initialView: window.innerWidth < 768 ? 'listWeek' : 'dayGridMonth'
+            , height: 'auto'
+            , headerToolbar: {
+                left: 'prev,next today'
+                , center: 'title'
+                , right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+            }
+            , events: {
+                url: "{{ route('nurse.calendar.events') }}"
+                , method: 'GET'
+            }
+            , eventClick: function(info) {
+                document.getElementById('modalTitle').innerText = info.event.title;
+                document.getElementById('modalDate').innerText =
+                    info.event.start.toLocaleDateString();
+                document.getElementById('modalTime').innerText =
+                    info.event.start.toLocaleTimeString([], {
+                        hour: '2-digit'
+                        , minute: '2-digit'
+                    });
+                document.getElementById('modalStatus').innerText =
+                    info.event.extendedProps.status.toUpperCase();
+                $('#calenderModal').modal('show');
+            }
         });
-        calendar.on('eventsSet', function(events) {
-            let counts = {
-                scheduled: 0,
-                confirmed: 0,
-                completed: 0,
-                cancelled: 0,
-                reschedule_requested: 0,
-                no_show: 0
-            };
-            events.forEach(event => {
-                counts[event.extendedProps.status]++;
-            });
-            document.getElementById('scheduledCount').innerText = counts.confirmed;
-            document.getElementById('pendingCount').innerText = counts.scheduled;
-            document.getElementById('completedCount').innerText = counts.completed;
-            document.getElementById('selectedCount').innerText = counts.reschedule_requested;
-            document.getElementById('rejectedCount').innerText = counts.cancelled;
+        calendar.render();
+    });
+    calendar.on('eventsSet', function(events) {
+        let counts = {
+            scheduled: 0
+            , confirmed: 0
+            , completed: 0
+            , cancelled: 0
+            , reschedule_requested: 0
+            , no_show: 0
+        };
+        events.forEach(event => {
+            counts[event.extendedProps.status]++;
         });
+        document.getElementById('scheduledCount').innerText = counts.confirmed;
+        document.getElementById('pendingCount').innerText = counts.scheduled;
+        document.getElementById('completedCount').innerText = counts.completed;
+        document.getElementById('selectedCount').innerText = counts.reschedule_requested;
+        document.getElementById('rejectedCount').innerText = counts.cancelled;
+    });
+
 </script>
 <script>
     document.querySelector('.booking-toggle-wrapper')
-            .addEventListener('click', function() {
-                const toggle = this.querySelector('input');
-                toggle.checked = !toggle.checked;
-            });
+        .addEventListener('click', function() {
+            const toggle = this.querySelector('input');
+            toggle.checked = !toggle.checked;
+        });
+
 </script>
 @endsection

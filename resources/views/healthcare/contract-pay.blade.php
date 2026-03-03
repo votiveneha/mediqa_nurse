@@ -142,9 +142,10 @@ form#job_posting_form ul.select2-selection__rendered {
                       <form id="contract_pay_form" method="POST" onsubmit="return contract_pay_form()">
                         @csrf
                         <input type="hidden" name="user_id" value="{{ Auth::guard('healthcare_facilities')->user()->id }}">
+                        <input type="hidden" name="job_id" value="{{ $job_id }}">
                         <div class="emptypediv form-group level-drp">
                             <label class="form-label emptype_label" for="input-1">Employment type</label>
-                            <input type="hidden" name="emptypemain" class="emptypemain" value="@if(!empty($job_data)){{ json_encode((string)$job_data->main_emp_type) }}@endif">
+                            <input type="hidden" name="emptypemain" class="emptypemain" value="@if(!empty($job_data) && $job_data->main_emp_type != NULL){{ json_encode((string)$job_data->main_emp_type) }}@endif">
                             <ul id="mainemptype_field" style="display:none;">
                                 @if(!empty($employeement_type_preferences))
                                 <li data-value="0">select</li>
@@ -1192,9 +1193,20 @@ form#job_posting_form ul.select2-selection__rendered {
               title: 'Success',
               text: 'Contract & Pay added Successfully',
             }).then(function() {
-              window.location.href = "{{ route('medical-facilities.contract_pay') }}";
+
+              const params = new URLSearchParams(window.location.search);
+              const jobId = params.get("job_id");
+
+              if(jobId){
+                window.location.href = "{{ route('medical-facilities.contract_pay') }}?job_id="+jobId;
+              }else{
+                window.location.href = "{{ route('medical-facilities.contract_pay') }}";
+              }
+              
               var tab_name = sessionStorage.getItem("tab-one");
               if(tab_name != "job_description"){
+
+                
                 sessionStorage.setItem("tab-one","contarct_pay");
               }
               

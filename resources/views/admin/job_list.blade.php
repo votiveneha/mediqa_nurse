@@ -68,6 +68,11 @@
                                 <h6 class="fs-4 fw-semibold mb-0">Positions Open</h6>
 
                             </th>
+                            <th>
+
+                                <h6 class="fs-4 fw-semibold mb-0">Job Status</h6>
+
+                            </th>
 
                             <th>
 
@@ -135,15 +140,40 @@
                                     </td>
                                     <td>
 
+                                        <div class="">
+
+                                            <span class="mb-0 fw-normal fs-3">
+                                                @if($item->save_draft == 1)
+                                                  Draft  
+                                                @endif
+
+                                                @if($item->save_draft == 2)
+                                                  Publish  
+                                                @endif
+
+                                                @if($item->save_draft == 3)
+                                                  Expire/Close  
+                                                @endif
+                                            </span>
+
+                                        </div>
+
+                                    </td>
+                                    <td>
+
                                         <div class="d-flex align-items-center gap-1">
 
-                                            
+                                            <a href="{{ route('admin.view_jobs',['id'=>$item->id]) }}" class="btn btn-success">
 
-                                            <a href="{{ route('admin.edit_jobs',['id'=>$item->id]) }}" class="btn btn-success">
+                                                View
+
+                                            </a>
+
+                                            <!-- <a href="{{ route('admin.edit_jobs',['id'=>$item->id]) }}" class="btn btn-success">
 
                                                 Edit
 
-                                            </a>
+                                            </a> -->
 
                                             <button type="button" onclick="return deleteCountry({{ $item->id }})"
 

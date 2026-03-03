@@ -15,7 +15,7 @@ use App\Models\JobsModel;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use App\Models\NurseApplication;
 
 use Illuminate\Support\Facades\Log;
 use App\Services\User\AuthServices;
@@ -31,6 +31,7 @@ use Validator;
 use DB;
 use URL;
 use Session;
+use Helpers;
 
 use App\Models\SpecialityModel;
 
@@ -46,6 +47,7 @@ class JobPostingController extends Controller
             $job_id = Session::get('jobId');
         }
         $data['job_data'] = JobsModel::where("id",$job_id)->first();
+        $data['job_id'] = $job_id;
 
         $user_id = Auth::guard('healthcare_facilities')->user()->id;
         
@@ -91,7 +93,7 @@ class JobPostingController extends Controller
         $user_id = $request->user_id;
 
         
-
+        $job_id = $request->job_id;
         $sector_preferences = $request->sector_preferences;
         $job_title = $request->job_title;
         $position_open = $request->position_open;
@@ -105,6 +107,7 @@ class JobPostingController extends Controller
         //$subnursetype = json_encode($request->subnursetype);
         $subwork = json_encode($request->input('subwork'));
         $subpwork = json_encode($request->input('subworkthlevel'));
+        //print_r($subpwork);die;
         $main_speciality = $request->main_speciality;
         $subspeciality = $request->subspeciality['primary'];
 
@@ -130,7 +133,7 @@ class JobPostingController extends Controller
         $willing_upskill = isset($request->willing_upskill)?1:0;
         $speciality = isset($request->subspeciality['secondary'])?json_encode($request->subspeciality['secondary']):'';
 
-        $job_id = Session::get('jobId');
+        //$job_id = Session::get('jobId');
         $job_post = JobsModel::find($job_id);
         
         $job_post->sector = $sector_preferences;
@@ -182,7 +185,7 @@ class JobPostingController extends Controller
         }else{
             $job_id = Session::get('jobId');
         }
-
+        $data['job_id'] = $job_id;
         $data['job_data'] = JobsModel::where("id",$job_id)->first();
         $data['employeement_type_preferences'] = DB::table("employeement_type_preferences")->where("sub_prefer_id","0")->get();
         return view('healthcare.contract-pay')->with($data);
@@ -206,7 +209,7 @@ class JobPostingController extends Controller
         $fixed_term_hours_week = (!empty($request->fixed_term_hours_week))?$request->fixed_term_hours_week:'';
         $fixed_term_salary_format = (!empty($request->fixed_term_salary_format))?$request->fixed_term_salary_format:'';
         $fixed_term_salary_min = (!empty($request->fixed_term_salary_min))?$request->fixed_term_salary_min:'';
-        $fixed_term_salary_max = (!empty($request->per_salary_max))?$request->fixed_term_salary_max:'';
+        $fixed_term_salary_max = (!empty($request->fixed_term_salary_max))?$request->fixed_term_salary_max:'';
 
         //for tmporary
         $temporary_hours_week = (!empty($request->temporary_hours_week))?$request->temporary_hours_week:'';
@@ -214,7 +217,8 @@ class JobPostingController extends Controller
         $temporary_salary_min = (!empty($request->temporary_salary_min))?$request->temporary_salary_min:'';
         $temporary_salary_max = (!empty($request->temporary_salary_min))?$request->temporary_salary_max:'';
         //echo Session::has('job_id');
-        $job_id = Session::get('jobId');
+        //$job_id = Session::get('jobId');
+        $job_id = $request->job_id;
 
         $job_post = JobsModel::find($job_id);
         $job_post->main_emp_type = $emptype_preferences;
@@ -269,6 +273,7 @@ class JobPostingController extends Controller
             $job_id = Session::get('jobId');
         }
         $data['job_data'] = DB::table("job_boxes")->where("id",$job_id)->first();
+        $data['job_id'] = $job_id;
         //print_r($data['job_data']);die;
 
         return view('healthcare.shift_scheduling')->with($data);
@@ -321,8 +326,8 @@ class JobPostingController extends Controller
         
         
         //print_r($schedule_model_data);die;
-
-        $job_id = Session::get('jobId');
+        $job_id = $request->job_id;
+        //$job_id = Session::get('jobId');
         $job_post = JobsModel::find($job_id);
         
         $job_post->shift_type = $shift_types_data;
@@ -393,7 +398,7 @@ class JobPostingController extends Controller
         }
         $data['job_data'] = DB::table("job_boxes")->where("id",$job_id)->first();
         //print_r($data['job_data']);die;
-
+        $data['job_id'] = $job_id;
         return view('healthcare.job_benefits')->with($data);
     }
 
@@ -402,8 +407,8 @@ class JobPostingController extends Controller
         $user_id = $request->user_id;
         $benefits_preferences = json_encode($request->benefits_preferences);
         
-        $job_id = Session::get('jobId');
-
+        //$job_id = Session::get('jobId');
+        $job_id = $request->job_id;
         $work_preferences_data = JobsModel::where("id",$job_id)->first();
 
         //print_r($work_preferences_data);
@@ -433,7 +438,7 @@ class JobPostingController extends Controller
         }
         
         $data['job_data'] = DB::table("job_boxes")->where("id",$job_id)->first();
-        
+        $data['job_id'] = $job_id;
         return view('healthcare.location_work_modal')->with($data);
     }
 
@@ -477,12 +482,14 @@ class JobPostingController extends Controller
         } while ($codeExists); // Loop if it exists
 
 
-        $jobId = "MQ-".$user_data->country."-".$year."-".$code;
+        $jobId = "MQ-".$user_data->country_code."-".$year."-".$code;
         
         //echo Session::has('job_id');
-        $job_data_id = Session::get('jobId');
-
+        //$job_data_id = Session::get('jobId');
+        $job_data_id = $request->job_id;
+        
         if($job_data_id){
+            //echo $job_state;die;
             $job_post = JobsModel::find($job_data_id);
             $job_post->healthcare_id = $user_id;
             
@@ -546,9 +553,31 @@ class JobPostingController extends Controller
 
         $state_data = DB::table("states")->where("id",$job_data->location_state)->first();
         $data['state_name'] = $state_data->name;
+        $data['job_id'] = $job_id;
         $data['vaccine_data'] = DB::table("vcc_state_required")->where("state_id",$job_data->location_state)->get();
         
         return view('healthcare.requirements')->with($data);
+    }
+
+    public function getMandatoryCourses(Request $request){
+        $courses_id = $request->courses_id;
+
+        $data['getCourses'] = DB::table("man_training_category")->where("parent",$courses_id)->orderBy('name', 'ASC')->get();
+        $courses_name = DB::table("man_training_category")->where("id",$courses_id)->first();
+        $data['courses_id'] = $courses_id;
+        $data['courses_name'] = $courses_name->name;
+        //print_r($getCourses);
+        return json_encode($data);
+    }
+
+    public function getLanguagesData(Request $request)
+    {
+        $language_id = $request->language_id;
+        $data['main_language_data'] = LanguageModel::where("language_id",$language_id)->first();
+        
+        $data['language_data'] = LanguageModel::where("sub_language_id",$language_id)->orderBy("language_name","ASC")->get();
+        //print_r(json_encode($data['language_data']));
+        return json_encode($data);
     }
 
     public function updateJobRequirements(Request $request)
@@ -561,12 +590,12 @@ class JobPostingController extends Controller
         $vaccination_required = json_encode($request->vaccination_required);
         $residency = json_encode($request->residency);
         $other_evidence = json_encode($request->other_evidence);
-        print_r($other_evidence);
+        $documents_req = json_encode($request->documents_req);
 
-        $job_id = Session::get('jobId');
-
-        $job_post = JobsModel::find(30);
-        
+        //$job_id = Session::get('jobId');
+        $job_id = $request->job_id;
+        $job_post = JobsModel::find($job_id);
+        //print_r($job_post);die;
         $job_post->mandatory_training_req = $mandatory_training;
         $job_post->degree_req = $education_req;
         $job_post->reg_licenses_req = $reg_licenses_req;
@@ -575,6 +604,7 @@ class JobPostingController extends Controller
         $job_post->vaccination_req = $vaccination_required;
         $job_post->checks_clearance_req = $residency;
         $job_post->other_evidence = $other_evidence;
+        $job_post->documents_required = $documents_req;
         
         $run = $job_post->save();
 
@@ -599,7 +629,25 @@ class JobPostingController extends Controller
         }
 
         $data['job_data'] = JobsModel::where("id",$job_id)->first();
+        $data['job_id'] = $job_id;
         return view('healthcare.job_description')->with($data);
+    }
+
+    public function uploadJobImgs(Request $request)
+    {
+        $files = $request->file('job_attachments');
+        $job_id = $request->job_id;
+
+        $jobdata = DB::table("job_boxes")->where("id", $job_id)->first();
+
+        if($jobdata->attachments != NULL){
+            $job_imgs = Helpers::multipleFileUpload($files, json_decode($jobdata->attachments));
+        }else{
+            $job_imgs = Helpers::multipleFileUpload($files, '');
+        }
+        
+        //print_r($job_imgs);
+        return $job_imgs;
     }
 
     public function updateJobDescription(Request $request)
@@ -608,16 +656,18 @@ class JobPostingController extends Controller
         $key_responsiblities = $request->key_responsiblities;
         $role_specific = $request->role_specific;
         $contact_person = $request->contact_person;
+        $job_attachments_file = $request->job_attachments_file;
         
         
         //echo Session::has('job_id');
-        $job_id = Session::get('jobId');
+        $job_id = $request->job_id;
 
         $job_post = JobsModel::find($job_id);
         $job_post->about_role = $about_role;
         $job_post->key_responsiblities = $key_responsiblities;
         $job_post->role_specific_work_environments = $role_specific;
         $job_post->contact_person_role = $contact_person;
+         $job_post->attachments = $job_attachments_file;
         
         
         $run = $job_post->save();
@@ -642,7 +692,7 @@ class JobPostingController extends Controller
         }
 
         $data['job_data'] = DB::table("job_boxes")->where("id",$job_id)->first();
-
+        $data['job_id'] = $job_id;
         return view('healthcare.visiblity_settings')->with($data);
     }
 
@@ -653,8 +703,8 @@ class JobPostingController extends Controller
         $listing_expiry = $request->listing_expiry;
         $custom_date = $request->custom_date;
 
-        $job_id = Session::get('jobId');
-
+        //$job_id = Session::get('jobId');
+        $job_id = $request->job_id;
         $job_post = JobsModel::find($job_id);
         $job_post->visiblity = $visiblity_mode;
         $job_post->application_deadline = $application_deadline;
@@ -709,10 +759,12 @@ class JobPostingController extends Controller
 
         // return based on action
         if($request->save == 1){
+            session()->forget('jobId');
             return response()->json(['status'=>1]); // draft saved
         }
 
         if($request->save == 2){
+            session()->forget('jobId');
             return response()->json(['status'=>3]); // published
         }
 
@@ -722,8 +774,9 @@ class JobPostingController extends Controller
     public function active_jobs()
     {
         $user_id = Auth::guard('healthcare_facilities')->user()->id;
-        $data['job_post_data'] = JobsModel::where("healthcare_id",$user_id)->where("save_draft","2")->get();
-        //print_r($data['job_post_data']);
+        $data['job_post_data'] = JobsModel::where("healthcare_id",$user_id)->where("save_draft","2")->orderBy('created_at','desc')->get();
+        // echo "<pre>";
+        // print_r($data['job_post_data']);die;
         return view('healthcare.active_jobs')->with($data);
 
     }
@@ -731,7 +784,7 @@ class JobPostingController extends Controller
     public function draft_jobs()
     {
         $user_id = Auth::guard('healthcare_facilities')->user()->id;
-        $data['job_post_data'] = JobsModel::where("healthcare_id",$user_id)->where("save_draft","0")->orWhere("save_draft","1")->get();
+        $data['job_post_data'] = JobsModel::where("healthcare_id",$user_id)->where("save_draft","0")->orWhere("save_draft","1")->orderBy('created_at','desc')->get();
 
         return view('healthcare.draft_jobs')->with($data);
 
@@ -744,8 +797,7 @@ class JobPostingController extends Controller
         $job_post = JobsModel::find($job_id);
 
         $job_post->save_draft = 3;
-        $run = $job_post->save();
-
+        $run = $job_post->save(); 
         if ($run) {
             $json['status'] = 1;
             
@@ -761,7 +813,7 @@ class JobPostingController extends Controller
     public function expired_jobs()
     {
         $user_id = Auth::guard('healthcare_facilities')->user()->id;
-        $data['job_post_data'] = JobsModel::where("healthcare_id",$user_id)->where("save_draft","3")->get();
+        $data['job_post_data'] = JobsModel::where("healthcare_id",$user_id)->where("save_draft","3")->orderBy('created_at','desc')->get();
 
         return view('healthcare.expired_jobs')->with($data);
 
@@ -822,6 +874,39 @@ class JobPostingController extends Controller
 
 
     }    
+
+    public function job_details(Request $request){
+        $job_id = $request->job_id;
+        $data['jobs'] = DB::table("job_boxes")->where("id", $job_id)->first();
+        $data['healthcare_data'] = User::where("id",$data['jobs']->healthcare_id)->first();
+        $data['state_data'] = DB::table("states")->where("id",$data['jobs']->location_state)->first();
+        return view('healthcare.job_detail')->with($data);
+    }
+
+    public function nurse_applicants(){
+        $nurse_application = NurseApplication::with('health_care')->orderBy("id","desc")->get();
+        return view('healthcare.nurse_appliction_list', compact('nurse_application'));
+    }
+
+    public function change_application_status(Request $request){
+        $application_id = $request->application_id;
+        $status = $request->value;
+
+        $job_post = NurseApplication::find($application_id);
+        $job_post->status = $status;
+        $run = $job_post->save();
+
+        if ($run) {
+            $json['status'] = 1;
+            
+            
+        } else {
+            $json['status'] = 0;
+        }
+
+        echo json_encode($json);
+        
+    }
 
     
 }

@@ -141,6 +141,7 @@ form#benefits_preferences_form ul.select2-selection__rendered {
     
                       <form id="benefits_preferences_form" method="POST" onsubmit="return benefits_preferences_form()">
                         @csrf
+                        <input type="hidden" name="job_id" value="{{ $job_id }}">
                         <input type="hidden" name="user_id" value="{{ Auth::guard('healthcare_facilities')->user()->id }}">
                         @if(!empty($benefits_preferences_data))
                         @foreach ($benefits_preferences_data as $benefits_data)
@@ -907,7 +908,15 @@ form#benefits_preferences_form ul.select2-selection__rendered {
                 title: 'Success',
                 text: 'Benefits Updated Successfully',
                 }).then(function() {
-                window.location.href = "{{ route('medical-facilities.job_benefits') }}";
+                const jobId = params.get("job_id");
+
+                if(jobId){
+                  window.location.href = "{{ route('medical-facilities.job_benefits') }}?job_id="+jobId;
+                  
+                }else{
+                  window.location.href = "{{ route('medical-facilities.job_benefits') }}";
+                }
+                
                 var tab_name = sessionStorage.getItem("tab-one");
                 if(tab_name != "job_description"){
                   sessionStorage.setItem("tab-one","benefits");

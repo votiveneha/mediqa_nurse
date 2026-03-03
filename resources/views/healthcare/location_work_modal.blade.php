@@ -227,6 +227,7 @@ input:checked + .slider_remote:before {
                             @csrf
                             <div class="form-group level-drp">
                                 <input type="hidden" name="user_id" value="{{ Auth::guard('healthcare_facilities')->user()->id }}">
+                                <input type="hidden" name="job_id" value="{{ $job_id }}">
                                 <label class="form-label" for="input-1">Country
                                 </label>
                                 <input class="country_code" type="hidden" name="country_code" id="country_code" value="AU">
@@ -630,7 +631,15 @@ input:checked + .slider_remote:before {
               title: 'Success',
               text: 'Location & Work Model added Successfully',
             }).then(function() {
-              window.location.href = "{{ route('medical-facilities.location_work_modal') }}";
+              const jobId = params.get("job_id");
+
+              if(jobId){
+                window.location.href = "{{ route('medical-facilities.location_work_modal') }}?job_id="+jobId;
+                
+              }else{
+                window.location.href = "{{ route('medical-facilities.location_work_modal') }}";
+              }
+              
               sessionStorage.setItem("tab-one","location_work_modal");
             });
           } else {

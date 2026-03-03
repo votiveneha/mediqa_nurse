@@ -131,6 +131,9 @@
                                     <h6 class="fs-4 fw-semibold mb-0">Phone</h6> --}}
                                 </th>
                                 <th>
+                                    <h6 class="fs-4 fw-semibold mb-0">Job Application</h6>
+                                </th>
+                                <th>
                                     <h6 class="fs-4 fw-semibold mb-0">Email</h6>
                                 </th>
                                 <th>
@@ -170,6 +173,16 @@
                                                 <span class="mb-0 fw-normal fs-3"> - - -</span>
                                             </div>
                                         </td>
+                                         <td>
+                                            <div class="">
+                                               <a href="{{url('admin/nurse-application-list')}}/{{$item->id}}"> 
+                                                <button 
+                                                    class="btn btn-primary w-100"  " >
+                                                    View
+                                                </button>
+                                                </a>
+                                            </div>
+                                        </td>
                                         {{-- <td>
                                             <div class="">
                                                 @if($item->phone)
@@ -182,6 +195,7 @@
                                                 <span class="mb-0 fw-normal fs-3">{{ $item->email }}</span>
                                             </div>
                                         </td>
+                     
                                         <td>
                                             <div class="">
                                                 <button 

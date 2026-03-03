@@ -151,7 +151,7 @@ form#job_requirements_form ul.select2-selection__rendered {
                       <form id="job_requirements_form" method="POST" onsubmit="return job_requirements_form()">
                         @csrf    
                         <div class="level-drp">
-                            
+                            <input type="hidden" name="job_id" value="{{ $job_id }}">
                             <div class="checkbox-group">
                                 <label><input type="checkbox" name="education[]"  value="no_minimum"> General Certifications Evidence</label>
                                 <div class="mandatory_training_checkbox">
@@ -339,13 +339,13 @@ form#job_requirements_form ul.select2-selection__rendered {
                                                     
                                                 </div>
                                                 <div class="delete-exp-btn">
-                                                    <a style="cursor: pointer;" onclick="removeClearance('s')">Delete</a>
+                                                    <button type="button" class="btn btn-default" style="cursor: pointer;" onclick="removeClearance('s')">Delete</button>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="add_specialized_clearances"></div>
                                         <div class="add_new_certification_div awe mb-3 mt-4">
-                                            <a style="cursor: pointer;" onclick="addClearance()">+ Add clearance</button>
+                                            <button type="button" class="btn btn-default" style="cursor: pointer;" onclick="addClearance()">+ Add clearance</button>
                                         </div>  
                                         <hr>  
                                     </div>
@@ -390,14 +390,28 @@ form#job_requirements_form ul.select2-selection__rendered {
                                         <div class="form-group clearance-item">
                                             <div class="other_evidence_field other_evidence_field-0">
                                                 <label class="form-label" for="input-1">Other Evidence</label>
-                                                <input type="text" name="other_evidence[]" placeholder="Other Evidence">
-                                                <button type="button" onclick="removeEvidence(0)">- Delete</button>
+                                                <input type="text" name="other_evidence[]" placeholder="Other Evidence"><br>
+                                                <button class="btn btn-default mt-1" type="button" onclick="removeEvidence(0)">- Delete</button>
                                             </div>
                                             
                                             <div class="add_other_evidence"></div>
-                                            <button type="button" onclick="addEvidence()">+ Add</button>
+                                            <button class="btn btn-default mt-1" type="button" onclick="addEvidence()">+ Add</button>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="other_evidence_requirement">
+                                    <div class="specailized_language_requirements">
+                                        <h6>Required documents on application:</h6>
+                                        <label>
+                                            <input type="checkbox" name="documents_req[]" value="CV">
+                                            CV
+                                        </label>
+                                        <label>
+                                            <input type="checkbox" name="documents_req[]" value="AHPRA number">
+                                            AHPRA number
+                                        </label>    
+                                    </div>
+                                    
                                 </div>
                             </div>
                         </div>    
@@ -993,7 +1007,7 @@ form#job_requirements_form ul.select2-selection__rendered {
                 <label class="form-label" for="input-1">Specialized Clearance type</label>\
                 <input type="text" name="special_clearances[]" placeholder="Enter clearance type">\
             </div>\
-            <button type="button" onclick="removeClearance('+i+')">Delete</button>\
+            <button type="button" class="btn btn-default" onclick="removeClearance('+i+')">Delete</button>\
         </div>');
 
         selectTwoFunction(i);
@@ -1012,7 +1026,7 @@ form#job_requirements_form ul.select2-selection__rendered {
                 <label class="form-label" for="input-1">Other Evidence '+j+'</label>\
                 <input type="text" name="special_clearances[]">\
             </div>\
-            <button type="button" onclick="removeEvidence('+j+')">Delete</button>\
+            <button class="btn btn-default" type="button" onclick="removeEvidence('+j+')">Delete</button>\
         </div>');
 
         selectTwoFunction(i);
@@ -1053,9 +1067,18 @@ form#job_requirements_form ul.select2-selection__rendered {
             Swal.fire({
               icon: 'success',
               title: 'Success',
-              text: 'Job Post Successfully',
+              text: 'Job Requirements Updated Successfully',
             }).then(function() {
-              window.location.href = "{{ route('medical-facilities.requirements') }}";
+              
+
+              const jobId = params.get("job_id");
+
+              if(jobId){
+                window.location.href = "{{ route('medical-facilities.requirements') }}?job_id="+jobId;
+                
+              }else{
+                window.location.href = "{{ route('medical-facilities.requirements') }}";
+              }
               var tab_name = sessionStorage.getItem("tab-one");
               if(tab_name != "job_description"){
                 sessionStorage.setItem("tab-one","requirements");

@@ -621,9 +621,9 @@
         <button class="btn btn-light border w-100">
           Message Employer
         </button>
-        <button class="btn btn-primary w-100">
+        {{-- <button class="btn btn-primary w-100">
           Submit Documents
-        </button>
+        </button> --}}
       </div>
     </div>
   </div>

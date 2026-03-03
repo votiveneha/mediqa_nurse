@@ -122,6 +122,25 @@ form#job_posting_form ul.select2-selection__rendered {
   min-height:180px;
 }
 
+.trans_img1{
+    margin-bottom: 5px;
+    display: flex;
+  }
+
+  .trans_img1 .close_btn i {
+    margin-left: 10px;
+    line-height: 22px;
+  }
+
+  .trans_img1 i.fa {
+    position: relative;
+    left: 0px;
+    font-size: 14px;
+    line-height: 25px;
+    margin-right: 5px;
+    color: #000000;
+  }
+
 
 </style>
 @endsection
@@ -154,6 +173,8 @@ form#job_posting_form ul.select2-selection__rendered {
                             <div class="form-group level-drp">
                                 <label class="form-label" for="input-1">About the Role
                                 </label>
+                                <input type="hidden" name="job_id" value="{{ $job_id }}">
+                                <input type="hidden" name="job_id" id="job_id" value="{{ $job_id }}">
                                 <div id="editor_role"></div>
                                 <input type="hidden" name="about_role" id="about_role">
                                 
@@ -185,9 +206,41 @@ form#job_posting_form ul.select2-selection__rendered {
 
                             <div class="form-group">
                                 <label>Attachments</label>
+                                <input type="hidden" name="job_attachments_file" class="job_attachments_file" value="{{ $job_data->attachments }}">
                                 <input type="file"
-                                  class="form-control"
-                                  multiple onchange="changeAttachment()">
+                                  class="form-control job_attachments"
+                                  multiple onchange="changeAttachment({{ $job_data->id }})">
+                                <div class="job_attachments_imgs">
+                                  <?php
+                                    
+                                      if($job_data->attachments != NULL){
+                                        $evidence_imgs = (array)json_decode($job_data->attachments);
+                                        
+
+                                        if(isset($evidence_imgs)){
+                                          $evorgimg = $evidence_imgs;
+                                        }else{
+                                          $evorgimg = array();
+                                        }
+                                        //print_r($evorgimg);
+                                        $i = 0;
+                                        ?>
+                                        @if(!empty($evorgimg))
+                                        @foreach ($evorgimg as $ev_img)
+                                        <div class="trans_img1 trans_img1-{{ $i+1 }}">
+                                          <a href=""><i class="fa fa-file" aria-hidden="true"></i>{{ $ev_img }}</a>
+                                          <div class="close_btn close_btn-' + i + '" onclick="deleteAwardEvidenceImg({{ $i+1 }},{{ $job_data->id }},'{{ $ev_img }}')" style="cursor: pointer;"><i class="fa fa-close" aria-hidden="true"></i></div>
+                                        </div>
+                                        <?php
+                                          $i++;
+                                        ?>
+                                        @endforeach
+                                        @endif
+                                        <?php
+                                      }
+                                      //print_r($evidence_imgs);
+                                    ?>
+                                </div>
                             </div>
                             
                             <div class="box-button mt-15">
@@ -503,21 +556,55 @@ form#job_posting_form ul.select2-selection__rendered {
 
     var selectedFiles1 = [];
 
-    function changeAttachment(){
-      if (!selectedFiles1[language_id]) {
-        selectedFiles1[language_id] = [];
+    function changeAttachment(job_id){
+      if (!selectedFiles1) {
+        selectedFiles1 = [];
       }
 
-      const newFiles = Array.from($('.upload_evidence-'+language_id)[0].files);
+      const newFiles = Array.from($('.job_attachments')[0].files);
 
       newFiles.forEach(file => {
         const exists = selectedFiles1.some(f => f.name === file.name && f.lastModified === file.lastModified);
         if (!exists) {
-            selectedFiles1[language_id].push(file);
+            selectedFiles1.push(file);
         }
       });
 
-      console.log("selectedFiles",selectedFiles1[language_id]);
+      console.log("selectedFiles",selectedFiles1);
+
+      var form_data = "";
+      form_data = new FormData();
+
+      for (var i = 0; i < selectedFiles1.length; i++) {
+        form_data.append("job_attachments[]", selectedFiles1[i], selectedFiles1[i]['name']);
+      }
+
+      form_data.append("job_id", job_id);
+      form_data.append("_token", '{{ csrf_token() }}');
+
+      $.ajax({
+        type: "post",
+        url: "{{ route('medical-facilities.uploadJobImgs') }}",
+        cache: false,
+        contentType: false,
+        processData: false,
+        async: true,
+        data: form_data,
+
+        success: function(data) {
+          var image_array = JSON.parse(data);
+          console.log("image_array", image_array);
+          var htmlData = '';
+          for (var i = 0; i < image_array.length; i++) {
+            //console.log("degree_transcript", image_array[i]);
+            var img_name = image_array[i];
+            //console.log("img_name", 'deleteImg(' + (i + 1) + ',' + user_id + ',"' + img_name + '")');
+            htmlData += '<div class="trans_img1 trans_img1-' + (i + 1) + '"><a href="{{ url("/public") }}/uploads/education_degree/' + img_name + '" target="_blank"><i class="fa fa-file" aria-hidden="true"></i>' + image_array[i] + '</a><div class="close_btn close_btn-' + i + '" onclick="deleteAwardEvidenceImg(' + (i + 1) + ',\'' + img_name + '\')" style="cursor: pointer;"><i class="fa fa-close" aria-hidden="true"></i></div></div>';
+          }
+          $(".job_attachments_imgs").html(htmlData);
+          $(".job_attachments_file").val(data);
+        }
+      });
     }
 
 
@@ -571,7 +658,15 @@ form#job_posting_form ul.select2-selection__rendered {
               title: 'Success',
               text: 'Job Description added Successfully',
             }).then(function() {
-              window.location.href = "{{ route('medical-facilities.job_description') }}";
+              const jobId = params.get("job_id");
+
+              if(jobId){
+                window.location.href = "{{ route('medical-facilities.job_description') }}?job_id="+jobId;
+                
+              }else{
+                window.location.href = "{{ route('medical-facilities.job_description') }}";
+              }
+              
               sessionStorage.setItem("tab-one","job_description");
             });
           } else {

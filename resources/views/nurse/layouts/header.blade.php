@@ -504,7 +504,7 @@ img, iframe, video {
                 <a class="hover-up " href='#'>Talent Search</a>
               </li>
               <li>
-                <a class="hover-up " href='#'>Applicants</a>
+                <a class="hover-up {{ request()->is('healthcare-facilities/nurse_applicants') ?'active':'' }}" href="{{ route('medical-facilities.nurse_applicants') }}">Applicants</a>
               </li>
               <li>
                 <a class="hover-up " href='#'>Interviews</a>

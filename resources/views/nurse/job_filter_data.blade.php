@@ -28,7 +28,9 @@
     $emp_pos_arr_string = implode(",",$emp_pos_arr);
 
     $emplyeement_type = json_decode($job->emplyeement_type);
-    
+    if (is_string($emplyeement_type)) {
+        $emplyeement_type = json_decode($emplyeement_type, true);
+    }
     $emplyeement_type_arr = array();  
     if(!empty($emplyeement_type)){
         foreach($emplyeement_type as $emptype){
@@ -84,6 +86,9 @@
     $benefits_arr_string = implode(",",$benefits_arr);
 
     $specialityies = json_decode($job->typeofspeciality);
+    if (is_string($specialityies)) {
+        $specialityies = json_decode($specialityies, true);
+    }
     
     $speciality_arr = array();  
     if(!empty($specialityies)){
@@ -147,7 +152,7 @@
                           <div class="job-info-details col-12 d-flex">
                             <div class="col-4">
                               {{-- <div class="job-role">{{ $job->agency_name }}</div> --}}
-                              <div class="location d-flex align-items-center"><i data-lucide="map-pin" width="18" height="18"></i> {{ country_name($job->location_name) }}</div>
+                              <div class="location d-flex align-items-center"><i data-lucide="map-pin" width="18" height="18"></i> {{ country_name($job->location_country) }}</div>
                             </div>
                             <div class="col-4">
                                   {{-- <div class="job-meta">
@@ -245,28 +250,31 @@
     <!-- Expanded Job Details -->
     <div class="job-info-details col-12 d-flex">
         <div class="col-4">
-        <div><strong>Sector:</strong> </div>
-        <div><strong>Employment Type:</strong> </div>
-        <div><strong>Shift Type:</strong></div>
-        <div><strong>Work Environment:</strong> </div>
-        <div><strong>Benefits:</strong></div>
-        <div><strong>Specialty:</strong> </div>
-        <div><strong>Experience Required:</strong></div>
-        <div class="last-date">Last Date: </div>
-        </div>
-         <div class="col-4">
-            <div> {{ $job->sector ?? "" }}</div>
-            <div>{{ $emplyeement_type_arr_string ?? ""}}</div>
-            <div> {{ $shift_type_arr_string }}</div>
-            <div>{{ $work_environment_arr_string ?? "" }}</div>
-            <div> {{ $benefits_arr_string ?? ""}}</div>
-            <div>{{ $speciality_arr_string ?? ""}}</div>
-            <div>  {{ $job->experience_level }}{{ $job->experience_level == 1 ? 'st' : ($job->experience_level == 2 ? 'nd' : ($job->experience_level == 3 ? 'rd' : 'th')) }} Year
-            </div>
-            <div> <?php
-                echo $formattedDate = date("d M Y", strtotime($job->application_submission_date ?? ""));
-            ?></div>
-         </div>
+                              <div><strong>Employment Type:</strong> </div>
+                              <div style="line-height:4.0"><strong>Shift Type:</strong> </div>
+                              <div><strong>Sector:</strong></div>
+                              <div><strong>Work Environment:</strong> </div>
+                              <!--<div><strong>Benefits:</strong> </div>-->
+                              <div><strong>Specialty:</strong> </div>
+                              <div><strong>Experience Required:</strong></div>
+                              <div>
+                                <span class="salary"><strong>Salary:</strong> </span>
+                              </div>
+                              <div class="last-date"><strong>Last Date:</strong></div>
+                            </div>
+                            <div class="col-4">
+                              <div>{{ $emplyeement_type_arr_string ?? "N/A"}}</div>
+                              <div>{{ $shift_type_arr_string ?? "N/A" }}</div>
+                              <div> {{ $job->sector ?? "N/A" }}</div>
+                              <div>{{ $work_environment_arr_string ?? "N/A"}}</div>
+                              <!--<div>{{ $benefits_arr_string }}</div>-->
+                              <div>{{ $speciality_name->name ?? "N/A" }} </div>
+                              <div>{{ $job->experience_level }}{{ $job->experience_level == 1 ? 'st' : ($job->experience_level == 2 ? 'nd' : ($job->experience_level == 3 ? 'rd' : 'th')) }} Year</div>
+                              <div>${{ $job->per_salary_min }}/hr</div>
+                              <div><?php
+                                    echo $formattedDate = date("d M Y", strtotime($job->application_deadline));
+                                  ?></div>
+                            </div>
            <div class="col-4 job-right-col">
              @php
                                   $benefitIds = json_decode($job->benefits, true) ?? [];

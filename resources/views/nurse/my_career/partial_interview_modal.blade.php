@@ -1,5 +1,7 @@
 <!-- schedule button modal  -->
 @if ( $modal_no == 1)
+<form>
+    <input type="hidden" id="interview_id" value="{{ $interviews->id }}">
 <div class="modal fade schedmdl-wrapper" id="schedModal_1" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content schedmdl-content">
@@ -10,26 +12,25 @@
                         {{$interviews->job->job_title}}
                     </h5>
                     <div class="schedstep-wrapper mt-2">
+
                         <label class="schedstep-item">
-                            <input type="radio" name="processStep" checked>
+                            <input type="radio" name="processStep" value="1" {{ $interviews->status == 1 ? 'checked' : '' }}>
                             <span class="schedstep-circle">1</span>
                             <span class="schedstep-label">Scheduled</span>
                         </label>
+
                         <label class="schedstep-item">
-                            <input type="radio" name="processStep">
-                            <span class="schedstep-circle"></span>
+                            <input type="radio" name="processStep" value="2" {{ $interviews->status == 2 ? 'checked' : '' }}>
+                            <span class="schedstep-circle">2</span>
                             <span class="schedstep-label">Reschedule Requested</span>
                         </label>
+
                         <label class="schedstep-item">
-                            <input type="radio" name="processStep">
-                            <span class="schedstep-circle"></span>
+                            <input type="radio" name="processStep" value="3" {{ $interviews->status == 3 ? 'checked' : '' }}>
+                            <span class="schedstep-circle">3</span>
                             <span class="schedstep-label">Confirmed</span>
                         </label>
-                        <label class="schedstep-item">
-                            <input type="radio" name="processStep">
-                            <span class="schedstep-circle"></span>
-                            <span class="schedstep-label">Completed</span>
-                        </label>
+
                     </div>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>            </div>
@@ -39,7 +40,18 @@
                     <!-- LEFT -->
                     <div class="col-lg-6">
                         <div class="d-flex gap-2 mb-2">
-                            <img src="" class="schedmdl-img mr-3">
+                                @php
+                                    $profileImg = $interviews->health_care->profile_img;
+                                    $defaultImg = asset('nurse/assets/imgs/nurse06.png'); 
+                                @endphp
+
+                                @if(!empty($profileImg))
+                                    {{-- Show uploaded image --}}
+                                    <img src="{{ asset($profileImg) }}" class="schedmdl-img mr-3">
+                                @else
+                                    {{-- Show default image --}}
+                                    <img src="{{ $defaultImg }}" class="schedmdl-img mr-3">
+                                @endif                                   
                             <div>
                                 <h6> {{$interviews->job->job_title}}</h6>
                                 {{-- <small class="text-muted text-12 lhn">
@@ -82,9 +94,9 @@
                     <!-- RIGHT -->
                     <div class="col-lg-6">
                         <div class="d-flex justify-content-end">
-                            <div class="schedmdl-badge mb-3 text-12">
-                                Starts in 2 Days 17h 25m
+                            <div data-schedule="{{ \Carbon\Carbon::parse($interviews->scheduled_at)->timezone(config('app.timezone'))->format('Y-m-d\TH:i:s') }}"  class="schedmdl-badge mb-3 text-12 countdown">                
                             </div>
+                            
                         </div>
                         <div class="onsite_bg p-2">
                             <div class="form-check form-switch d-flex gap-2">
@@ -119,11 +131,16 @@
                 {{-- <button class="btn btn-xs btn-light" id="schedModal_close" data-dismiss="modal">
                     Cancel
                 </button> --}}
-                <button class="btn btn-sm status-badge conditional_offer">
+                {{-- <button class="btn btn-sm status-badge conditional_offer">
+                    Submit Attendance
+                </button> --}}
+                <button type="button" class="btn btn-sm status-badge conditional_offer" id="submitAttendanceBtn">
                     Submit Attendance
                 </button>
             </div>
         </div>
     </div>
 </div>
+</form>
 @endif
+

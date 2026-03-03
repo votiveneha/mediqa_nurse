@@ -1049,12 +1049,14 @@
                       <div class="custom-multiselect">
                           <div class="select-box">Select Location</div>
                           <div class="checkbox-options">
+                              @if(!empty($registered_countries))
                               @foreach ($registered_countries as $code)
                                   <label>
                                     <input type="checkbox" class="location-checkbox" value="{{ $code }}">{{ country_name($code) }}        
-                                   </label>                   
+                                   </label>               
                                
                               @endforeach
+                              @endif
                           </div>
                       </div>
                 </div>
@@ -1174,10 +1176,13 @@
                     </div> --}}
                     <div class="job-container">
                      <div class="job-listings normal-pagination">
+                      
                       @if (count($jobs)>0)
                       @foreach($jobs as $job)
+                      
                       <div class="job-card item" data-location="{{ $job->location_name }}">
                           <!-- Top Row: Company Logo & Position -->
+                           
                           <div class="job-card-header">
                             <div class="job-company">
                                 <div class="job-logo">🏥</div>
@@ -1207,8 +1212,11 @@
                                       
                                       // $emp_pos_arr_string = implode(",",$emp_pos_arr);
                                       
-                                      $emplyeement_type = json_decode($job->emplyeement_type);
+                                      $emplyeement_type = json_decode($job->emplyeement_type, true);
                                       
+                                      if (is_string($emplyeement_type)) {
+                                          $emplyeement_type = json_decode($emplyeement_type, true);
+                                      }
                                       $emplyeement_type_arr = array();  
                                       if(!empty($emplyeement_type)){
                                         foreach($emplyeement_type as $emptype){
@@ -1236,19 +1244,23 @@
                                       
                                       $shift_type_arr_string = implode(",",$shift_type_arr);
                                       
-                                      $work_environment = json_decode($job->work_environment);
-                                      
-                                      $work_environment_arr = array();  
-                                      if(!empty($work_environment)){
-                                        foreach($work_environment as $work_env){
-                                          
-                                          $workenv = DB::table("work_enviornment_preferences")->where("prefer_id",$work_env)->first();
-                                          
-                                          $work_environment_arr[] = $workenv->env_name;
-                                        }
+                                     $work_environment = json_decode($job->work_environment, true);
+
+                                      $work_environment_arr = [];
+
+                                      if (!empty($work_environment)) {
+
+                                          $ids = collect($work_environment)->flatten()->filter()->values();
+
+                                          if ($ids->isNotEmpty()) {
+                                              $work_environment_arr = DB::table("work_enviornment_preferences")
+                                                  ->whereIn("prefer_id", $ids)
+                                                  ->pluck("env_name")
+                                                  ->toArray();
+                                          }
                                       }
-                                      
-                                      $work_environment_arr_string = implode(",",$work_environment_arr);
+
+                                      $work_environment_arr_string = implode(",", $work_environment_arr);
                                       
                                       $benefits = json_decode($job->benefits);
                                       
@@ -1263,8 +1275,14 @@
                                       }
                                       
                                       $benefits_arr_string = implode(",",$benefits_arr);
+
                                       
-                                      $specialityies = json_decode($job->typeofspeciality);
+                                      
+                                      $specialityies = json_decode($job->typeofspeciality, true);
+
+                                      if (is_string($specialityies)) {
+                                          $specialityies = json_decode($specialityies, true);
+                                      }
 
                                       $speciality_name = DB::table("speciality")->where("id",$specialityies[0])->first();
                                       
@@ -1317,7 +1335,7 @@
                           <div class="job-info-details col-12 d-flex">
                             <div class="col-4">
                               {{-- <div class="job-role">{{ $job->job_title }}</div> --}}
-                              <div class="location d-flex align-items-center"><i data-lucide="map-pin" width="18" height="18"></i> {{ country_name($job->location_name) }}</div>
+                              <div class="location d-flex align-items-center"><i data-lucide="map-pin" width="18" height="18"></i> {{ country_name($job->location_country) }}</div>
                             </div>
                             <div class="col-4">
                                   {{-- <div class="job-meta">
@@ -1411,32 +1429,24 @@
                             </script>
                           </div>  
                           <div class="job-info-details col-12 d-flex">
-                            <div class="col-4">
-                              <div><strong>Employment Type:</strong> </div>
-                              <div style="line-height:4.0"><strong>Shift Type:</strong> </div>
-                              <div><strong>Sector:</strong></div>
-                              <div><strong>Work Environment:</strong> </div>
+                            <div class="col-8 job_detail_data">
+                              <div><strong>Employment Type:</strong> {{ $emplyeement_type_arr_string ?? "N/A"}} </div>
+                              <div><strong>Shift Type:</strong> {{ $shift_type_arr_string ?? "N/A" }}</div>
+                              <div><strong>Sector:</strong> {{ $job->sector ?? "N/A" }}</div>
+                              <div><strong>Work Environment:</strong> {{ $work_environment_arr_string ?? "N/A"}}</div>
                               <!--<div><strong>Benefits:</strong> </div>-->
-                              <div><strong>Specialty:</strong> </div>
-                              <div><strong>Experience Required:</strong></div>
+                              <div><strong>Specialty:</strong> {{ $speciality_name->name ?? "N/A" }}</div>
+                              <div><strong>Experience Required:</strong> {{ $job->experience_level }}{{ $job->experience_level == 1 ? 'st' : ($job->experience_level == 2 ? 'nd' : ($job->experience_level == 3 ? 'rd' : 'th')) }} Year</div>
                               <div>
-                                <span class="salary"><strong>Salary:</strong> </span>
+                                <span class="salary"><strong>Salary:</strong> ${{ $job->per_salary_min }}/hr </span>
                               </div>
-                              <div class="last-date"><strong>Last Date:</strong></div>
-                            </div>
-                            <div class="col-4">
-                              <div>{{ $emplyeement_type_arr_string ?? "N/A"}}</div>
-                              <div>{{ $shift_type_arr_string ?? "N/A" }}</div>
-                              <div> {{ $job->sector ?? "N/A" }}</div>
-                              <div>{{ $work_environment_arr_string ?? "N/A"}}</div>
-                              <!--<div>{{ $benefits_arr_string }}</div>-->
-                              <div>{{ $speciality_name->name ?? "N/A" }} </div>
-                              <div>{{ $job->experience_level }}{{ $job->experience_level == 1 ? 'st' : ($job->experience_level == 2 ? 'nd' : ($job->experience_level == 3 ? 'rd' : 'th')) }} Year</div>
-                              <div>${{ $job->per_salary_min }}/hr</div>
-                              <div><?php
+                              <div class="last-date"><strong>  Last Date:</strong>
+                                <?php
                                     echo $formattedDate = date("d M Y", strtotime($job->application_deadline));
-                                  ?></div>
+                                  ?>
+                              </div>
                             </div>
+                            
                             <div class="col-4 job-right-col">
                               @php
                                   $benefitIds = json_decode($job->benefits, true) ?? [];
@@ -1579,7 +1589,8 @@
                           <?php
                             $user_id = Auth::guard("nurse_middle")->user()->id;
                             
-                            $apply_job_data = DB::table("job_apply")->where("user_id",$user_id)->where("job_id",$job->id)->first();
+                            // $apply_job_data = DB::table("job_apply")->where("user_id",$user_id)->where("job_id",$job->id)->first();
+                            $apply_job_data = DB::table("nurse_applications")->where("nurse_id",$user_id)->where("job_id",$job->id)->first();
                             //print_r($names);
                             ?>        
                           <!-- Footer: Match & Apply -->
@@ -1593,34 +1604,35 @@
                               @endif
                               </button> -->
                               <div class="action-row">
-                                  <button 
-                                      class="apply-btn apply-btn-{{ $job->id }} @if(!empty($apply_job_data)) applied @endif" 
-                                      onclick="applyNow('{{ $user_id }}','{{ $job->id }}')"
-                                  >
-                                      @if(!empty($apply_job_data))
-                                          Applied
-                                      @else
-                                          Apply Now
-                                      @endif
+                                    <button class="apply-btn apply-btn-{{ $job->id }} 
+                                    @if(!empty($apply_job_data)) applied @endif" @if(empty($apply_job_data))
+                                    onclick="applyNow('{{ $user_id }}','{{ $job->id }}')" @else disabled @endif>
+                                    @if(!empty($apply_job_data))
+                                    Applied
+                                    @else
+                                    Apply Now
+                                    @endif
                                   </button>
 
-                                  <a href="#" class="details-link">
+                                  <a href="{{ route('nurse.job_details',['job_id'=>$job->id]) }}" class="details-link">
                                       <i data-lucide="bookmark"></i>
                                       View Details
                                   </a>
                                 </div>
                             </div>
                       </div>
+                      
                       @endforeach
                       <div class="pagination-wrapper front-pagination">
                           {{ $jobs->links('pagination::bootstrap-4') }}
                       </div>
                       @else
                         <div id="no-jobs" class="no-jobs-box" >
-                            <h3>🚫 No Jobs Foun</h3>
+                            <h3>🚫 No Jobs Found</h3>
                             <p>Sorry, no jobs match your search.</p>
                         </div>
                       @endif
+                      
                      </div>
                      <div class="job-listings ajax-pagination d-none"></div>
                    </div>  
@@ -2902,25 +2914,53 @@ $('#renameCancel').click(function() {
          });
      }
    
-     function applyNow(user_id,job_id){
-       $.ajax({
-         type: "POST",
-         url: "{{ url('/nurse/applyJobs') }}",
-         data: {user_id:user_id,job_id:job_id,_token:'{{ csrf_token() }}'},
-         cache: false,
-         success: function(data){
-           //console.log("data",data);
-           if(data == 1){
-             let btn = $('.apply-btn-'+job_id);
-   
-             // simulate successful apply (you can call AJAX here)
-             btn.text('Applied');
-             btn.addClass('applied');
-             btn.prop('disabled', true); // optional: disable after applying
-           }
-         }  
-       });
-     }
+    function applyNow(user_id, job_id) {
+        $.ajax({
+            type: "POST",
+            url: "{{ url('/nurse/applyJobs') }}",
+            data: {
+                user_id: user_id,
+                job_id: job_id,
+                _token: '{{ csrf_token() }}'
+            },
+            cache: false,
+            success: function (response) {
+
+                if (response.status == true) {
+
+                    let btn = $('.apply-btn-' + job_id);
+
+                    btn.text('Applied');
+                    btn.addClass('applied');
+                    btn.prop('disabled', true);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: response.message,
+                        confirmButtonColor: '#3085d6'
+                    });
+
+                } else {
+
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Oops...',
+                        text: response.message,
+                        confirmButtonColor: '#d33'
+                    });
+
+                }
+            },
+            error: function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Something went wrong!',
+                });
+            }
+        });
+    }
    
   //  $(document).ready(function () {
   //  var itemsPerPage = 2;

@@ -93,7 +93,7 @@
 .custom-select-wrapper::after {
   content: "▼";
   position: absolute;
-  top: 76%;
+  top: 59%;
   right: 10px;
   transform: translateY(-50%);
   pointer-events: none;
@@ -138,6 +138,7 @@ form#job_posting_form ul.select2-selection__rendered {
                       <form id="job_posting_form" method="POST" onsubmit="return job_posting_form()">
                         @csrf
                         <input type="hidden" name="user_id" value="{{ Auth::guard('healthcare_facilities')->user()->id }}">
+                        <input type="hidden" name="job_id" value="{{ $job_id }}">
                         <div class="form-group level-drp">
                           <label class="form-label" for="input-1">Sector Preferences
                           </label>
@@ -390,7 +391,7 @@ form#job_posting_form ul.select2-selection__rendered {
                               @endforeach
                               @endif
                             </ul>
-                            <select class="js-example-basic-multiple addAll_removeAll_btn facworktype facworktype-1" data-list-id="wp_data-1" name="subworkthlevel[1][]" multiple onchange="getWpData('',1)"></select>
+                            <select class="js-example-basic-multiple addAll_removeAll_btn facworktype facworktype-1" data-list-id="wp_data-1" name="subworkthlevels[1][]" multiple onchange="getWpData('',1)"></select>
                             <span id="reqfacworktype" class="reqError text-danger valley"></span>
                           
                         </div>
@@ -1292,7 +1293,15 @@ form#job_posting_form ul.select2-selection__rendered {
               title: 'Success',
               text: 'Job Post Successfully',
             }).then(function() {
-              window.location.href = "{{ route('medical-facilities.job_posting') }}";
+              const jobId = params.get("job_id");
+
+              if(jobId){
+                window.location.href = "{{ route('medical-facilities.job_posting') }}?job_id="+jobId;
+                
+              }else{
+                window.location.href = "{{ route('medical-facilities.job_posting') }}";
+              }
+              
 
               var tab_name = sessionStorage.getItem("tab-one");
               if(tab_name != "job_description"){

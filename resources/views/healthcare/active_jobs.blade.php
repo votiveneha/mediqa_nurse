@@ -393,7 +393,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                       @include('healthcare.layouts.top_links')
                       <h3 class="mt-0 color-brand-1 mb-2 job-title">Active Jobs</h3>
                       <div class="preview-wrapper">
-
+                            
                             <!-- Card -->
                             @if(count($job_post_data)>0) 
                             @foreach($job_post_data as $job_post) 
@@ -411,7 +411,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                                     <div class="job-menu">
                                         <button class="menu-btn">⋮</button>
                                         <div class="menu-dropdown">
-                                            <a href="{{ route('medical-facilities.location_work_modal') }}?job_id={{ $job_post->id }}">View</a>
+                                            <a href="{{ route('medical-facilities.job_details',['job_id'=>$job_post->id]) }}">View</a>
                                             <a href="{{ route('medical-facilities.location_work_modal') }}?job_id={{ $job_post->id }}">Edit</a>
                                             <a href="#" onclick="duplicateJobs({{ $job_post->id }})">Duplicate</a>
                                             <a href="#" onclick="close_expire({{ $job_post->id }})">Close / Expire</a>
@@ -420,21 +420,25 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                                     
                                 </div>
                                 <div class="job-attributes">
-
+                                    
                                     <div class="attr">
                                         <span class="label">Type of Nurse</span>
                                         <span class="value">
                                         @php
                                             $nurse_type = json_decode($job_post->nurse_type);
+                                            
                                         @endphp
                                         {{ $nurse_type[0] ?? '—' }}
                                         </span>
                                     </div>
-
+                                     
                                     <div class="attr">
                                         <span class="label">Specialty</span>
                                         @php
-                                            $speciality_type = json_decode($job_post->typeofspeciality);
+                                            $speciality_type = (!empty($job_post->typeofspeciality))?$job_post->typeofspeciality:[];
+                                            if (is_string($speciality_type)) {
+                                                $speciality_type = json_decode($speciality_type, true);
+                                            }
                                             $speciality_data = DB::table("speciality")->where("id",$speciality_type[0])->first();
                                         @endphp
                                         <span class="value">{{ $speciality_data->name ?? '—' }}</span>

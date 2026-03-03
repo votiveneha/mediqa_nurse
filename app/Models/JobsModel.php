@@ -4,18 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class JobsModel extends Model
 {
     use HasFactory;
-    use SoftDeletes;
     protected $table = 'job_boxes';
     protected $guarded =[];
 
     protected $casts = [
         'shift_type' => 'array',
+        'typeofspeciality' => 'array',
+        'nurse_type_id' => 'array',
+        // 'location_state' => 'array',
+        'emplyeement_type' => 'array',
     ];
+
 
     public function getShiftNamesAttribute()
     {

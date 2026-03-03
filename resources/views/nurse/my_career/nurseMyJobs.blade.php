@@ -5,6 +5,10 @@
 <link rel="stylesheet" href="{{ url('/public') }}/nurse/assets/css/jquery.ui.datepicker.monthyearpicker.css">
 <link rel='stylesheet'
   href='https://cdn-uicons.flaticon.com/2.5.1/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.3/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/css/select2.min.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.12/css/intlTelInput.css" rel="stylesheet" />
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
 <style type="text/css">
@@ -1174,17 +1178,6 @@
     transition: none;
   }
 
-  /*      .job-drawer-modal.fade .modal-dialog {
-            transform: translateX(100%);
-            transition: transform 0.35s ease-in-out;
-        }
-        .job-drawer-modal.show .modal-dialog {
-            transform: translateX(0);
-        }
-        .modal-backdrop.show {
-            opacity: 0;
-        }*/
-  /* Header */
   .drawer-header {
     padding: 15px 20px;
     border-bottom: 1px solid #eee;
@@ -1305,13 +1298,14 @@
                   <button class="btn btn-light dropdown-toggle" data-toggle="dropdown">
                     <i class="fas fa-search"></i> Status
                   </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#">Accepted</a>
-                    <a class="dropdown-item" href="#">Onboarding</a>
-                    <a class="dropdown-item" href="#">Active</a>
-                    <a class="dropdown-item" href="#">Completed</a>
-                    <a class="dropdown-item" href="#">Terminated</a>
-                  </div>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item job-status-filter" data-value="Accepted">Accepted</a>
+                      <a class="dropdown-item job-status-filter" data-value="Onboarding">Onboarding</a>
+                      <a class="dropdown-item job-status-filter" data-value="Active">Active</a>
+                      <a class="dropdown-item job-status-filter" data-value="Completed">Completed</a>
+                      <a class="dropdown-item job-status-filter" data-value="Terminated">Terminated</a>
+                      <a class="dropdown-item job-status-filter" data-value="">All</a>
+                    </div>
                 </div>
 
                 <div class="dropdown mr-2 mb-2">
@@ -1319,43 +1313,46 @@
                     Facility
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#">Royal Women's Hospital</a>
-                    <a class="dropdown-item" href="#">MediHire Aged Care Center</a>
-                    <a class="dropdown-item" href="#">St. John Hospital</a>
+                    @foreach ($health_care_list as $id =>$list_health_care )
+                    <a class="dropdown-item job-facility-filter" data-id="{{$id}}" href="#">{{$list_health_care}}</a>
+                    @endforeach
                   </div>
                 </div>
-                <div class="dropdown mr-2 mb-2">
+                {{-- <div class="dropdown mr-2 mb-2">
                   <button class="btn btn-light dropdown-toggle" data-toggle="dropdown">
                     Shift Type
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#">Royal Women's Hospital</a>
-                    <a class="dropdown-item" href="#">MediHire Aged Care Center</a>
-                    <a class="dropdown-item" href="#">St. John Hospital</a>
+                     @foreach ($shift_type_list as $id =>$list_shift_type )
+                      <a class="dropdown-item job-shift-filter" data-value="{{$list_shift_type}}">{{$list_shift_type}}</a>
+              
+                    @endforeach
                   </div>
-                </div>
-                <div class="dropdown mr-2 mb-2">
+                </div> --}}
+                {{-- <div class="dropdown mr-2 mb-2">
                   <button class="btn btn-light dropdown-toggle" data-toggle="dropdown">
                     Speciality
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#">Royal Women's Hospital</a>
-                    <a class="dropdown-item" href="#">MediHire Aged Care Center</a>
-                    <a class="dropdown-item" href="#">St. John Hospital</a>
+                    @foreach ($specialities_list as $id => $list_speciality )
+                    <a class="dropdown-item job-speciality-filter" data-value="{{$list_speciality}}">{{$list_speciality}}</a>
+                   
+                    @endforeach
                   </div>
-                </div>
+                </div> --}}
                 <div class="dropdown mr-2 mb-2">
                   <button class="btn btn-light dropdown-toggle" data-toggle="dropdown">
                     Location
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#">Royal Women's Hospital</a>
-                    <a class="dropdown-item" href="#">MediHire Aged Care Center</a>
-                    <a class="dropdown-item" href="#">St. John Hospital</a>
+                      @foreach ($location_state_list as $id => $location_list )
+                       <a class="dropdown-item job-location-filter" data-value="{{$location_list}}">{{$location_list}}</a>
+                      {{-- <a class="dropdown-item" data-id="{{$id}}" href="#">{{$location_list}}</a> --}}
+                      @endforeach
                   </div>
                 </div>
-                <input type="date" class="form-control mr-2 mb-2 w-auto">
-                <input type="date" class="form-control mr-2 mb-2 w-auto">
+               <input type="date" id="fromDate" class="form-control mr-2 mb-2 w-auto">
+               <input type="date" id="toDate" class="form-control mr-2 mb-2 w-auto">
                 <div class="col-12 col-lg-3">
                   <button id="clearFilters" class="btn btn-light d-flex justify-content-between align-items-center w-100 filter-btn">
                     <span>
@@ -1368,44 +1365,104 @@
 
               <!-- TABLE -->
               <div class="table-responsive">
-                <table class="table table-bordered align-middle">
+                <table id="myJobsTable" class="table table-bordered align-middle">
                   <thead class="thead-light">
                     <tr>
                       <th>Job Title</th>
                       <th>Facility</th>
-                      <th>Start Date</th>
+                      <th>Date</th>
                       <th>Status</th>
                       <th width="260">Actions</th>
+                      <th style="display:none;">Shift Type</th>
+                      <th style="display:none;">Speciality</th>
+                      <th style="display:none;">Location</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
+                    @foreach ($my_job_list as $job_list )
+                    <tr>      
                       <td>
-                        <strong>Enrolled Nurse – Perioperative / Operating Theatre / Surgical</strong>
+                        <strong>{{$job_list->job_title}}</strong>
                       </td>
                       <td>
-                        <strong>Royal Women's Hospital</strong><br>
+                        <strong>{{$job_list->health_care->name}}</strong><br>
                         <small class="text-muted">
-                          <i class="fa fa-map-marker"></i> Sydney
+                          {{-- <i class="fa fa-map-marker"></i> {{$job_list->state_name->name}} --}}
                         </small><br>
                         <small class="text-muted">
-                          <i class="fa fa-envelope"></i> 1r@gmail.com
+                          <i class="fa fa-envelope"></i> {{$job_list->health_care->email}}
                         </small>
                       </td>
-                      <td>01 Mar 2026</td>
+                      <td>{{ \Carbon\Carbon::parse($job_list->application->hired_at)->format('d M
+                      Y') }}</td>
+                    <td>
+                      @php
+                      $statusMap = [
+                      1 => [
+                      'label' => 'Accepted',
+                      'class' => 'btn-success',
+                      ],
+                      2 => [
+                      'label' => 'Onboarding',
+                      'class' => 'btn-info',
+                      ],
+                      3 => [
+                      'label' => 'Active',
+                      'class' => 'btn-primary',
+                      ],
+                      4 => [
+                      'label' => 'Completed',
+                      'class' => 'btn-dark',
+                      ],
+                      5 => [
+                      'label' => 'Terminated',
+                      'class' => 'btn-danger',
+                      ],
+                      ];
+                    
+                      $status = $statusMap[$job_list->status] ?? [
+                      'label' => 'Unknown',
+                      'class' => 'btn-secondary',
+                      ];
+                      @endphp
+                    
+                      <button type="button" class="btn btn-sm text-white {{ $status['class'] }}">
+                        {{ $status['label'] }}
+                      </button>
+                    </td>
                       <td>
-                        <span class="badge badge-success px-3 py-2">Accepted</span>
+                          {{-- Start Onboarding --}}
+                         @if($job_list->status == 1)
+                          <button class="btn btn-success btn-sm mb-1 change-status" data-id="{{ $job_list->id }}" data-status="2">
+                            Start Onboarding
+                          </button><br>
+                          @endif
+
+                          {{-- Message --}}
+                          @if(in_array($job_list->status, [1,2,3,4]))
+                          <button class="btn btn-outline-primary btn-sm mt-1">
+                            Message
+                          </button>
+                          @endif
+
+                          {{-- Cancel Job --}}
+                          @if(in_array($job_list->status, [1,2]))
+                            <button class="btn btn-outline-danger btn-sm mt-1 change-status" data-id="{{ $job_list->id }}" data-status="5">
+                              Cancel Job
+                            </button>
+                          @endif
+
+                          {{-- No Action --}}
+                          @if($job_list->status == 5)
+                              <span class="text-muted small">No Actions Available</span>
+                          @endif
+
                       </td>
-                      <td>
-                        <button class="btn btn-success btn-sm mb-1">Start Onboarding</button>
-                        <button class="btn btn-primary btn-sm mb-1">
-                          <i class="fa fa-user"></i>
-                        </button>
-                        <br>
-                        <button class="btn btn-outline-primary btn-sm mt-1">Message</button>
-                        <button class="btn btn-outline-danger btn-sm mt-1">Cancel Job</button>
-                      </td>
+                      <td style="display:none;">{{$job_list->shift_type_show->shift_type ?? ''}}</td>
+                      <td style="display:none;">{{$job_list->speciality->name ?? ''}}</td>
+                      <td style="display:none;">{{$job_list->state_name->name ?? ''}}</td>
                     </tr>
+                    @endforeach
                   </tbody>
                 </table>
               </div>
@@ -1423,10 +1480,146 @@
 <!-- ----- -->
 @endsection
 @section('js')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.12/js/intlTelInput.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.11/jquery.mask.js"></script>
+
+<!-- jQuery (ONLY ONCE) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<!-- jQuery UI -->
 <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.js"></script>
-<script src="{{ url('/public') }}/nurse/assets/js/jquery.ui.datepicker.monthyearpicker.js"></script>
-{{-- @include('nurse.front_profile_js'); --}}
+
+<!-- Plugins -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.11/jquery.mask.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.12/js/intlTelInput.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+
+<!-- DataTables -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
+
+<!-- FullCalendar -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<script>
+  $(document).ready(function() {
+
+    let table = $('#myJobsTable').DataTable({
+        pageLength: 10,
+        pagingType: "simple",
+        ordering: true,
+        searching: false,
+        info: true,
+        lengthChange: false,
+        responsive: true
+    });
+
+    // STATUS FILTER
+    $('.job-status-filter').on('click', function(e) {
+        e.preventDefault();
+        let value = $(this).data('value');
+        table.column(3).search(value).draw();
+    });
+
+    // FACILITY FILTER
+    $('.job-facility-filter').on('click', function(e) {
+        e.preventDefault();
+        let value = $(this).text().trim();
+        table.column(1).search(value).draw();
+    });
+
+    // SHIFT FILTER
+    $('.job-shift-filter').on('click', function(e) {
+        e.preventDefault();
+        let value = $(this).data('value');
+        table.column(5).search(value).draw();
+    });
+
+    // SPECIALITY FILTER
+    $('.job-speciality-filter').on('click', function(e) {
+        e.preventDefault();
+        let value = $(this).data('value');
+        table.column(6).search(value).draw();
+    });
+
+    // LOCATION FILTER
+    $('.job-location-filter').on('click', function(e) {
+        e.preventDefault();
+        let value = $(this).data('value');
+        table.column(7).search(value).draw();
+    });
+
+    // DATE RANGE FILTER
+    $.fn.dataTable.ext.search.push(
+        function(settings, data, dataIndex) {
+            let min = $('#fromDate').val();
+            let max = $('#toDate').val();
+            let date = data[2]; // Date column index
+
+            if (!min && !max) return true;
+
+            let rowDate = moment(date, "DD MMM YYYY").format("YYYY-MM-DD");
+
+            if (min && rowDate < min) return false;
+            if (max && rowDate > max) return false;
+
+            return true;
+        }
+    );
+
+    $('#fromDate, #toDate').on('change', function() {
+        table.draw();
+    });
+
+    // CLEAR FILTERS
+    $('#clearFilters').on('click', function() {
+        $('#fromDate').val('');
+        $('#toDate').val('');
+        table.search('').columns().search('').draw();
+    });
+
+});
+</script>
+<script>
+    $(document).on('click', '.change-status', function() {
+
+      let jobId = $(this).data('id');
+      let newStatus = $(this).data('status');
+
+      $.ajax({
+          url: "{{ route('nurse.job.changeStatus') }}",
+          type: "POST",
+          data: {
+              _token: "{{ csrf_token() }}",
+              job_id: jobId,
+              status: newStatus
+          },
+          success: function(response) {
+
+              if(response.success) {
+
+                  Swal.fire({
+                      icon: 'success',
+                      title: 'Success!',
+                      text: 'Status updated successfully.',
+                      confirmButtonColor: '#3085d6'
+                  }).then(() => {
+                      window.location.reload();
+                  });
+
+              }
+
+          },
+          error: function() {
+
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Error!',
+                  text: 'Something went wrong. Please try again.'
+              });
+
+          }
+      });
+
+  });
+</script>
 @endsection

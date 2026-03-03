@@ -144,6 +144,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                         <input type="hidden" name="user_id" value="{{ Auth::guard('healthcare_facilities')->user()->id }}">
                         <div class="form-group drp--clr">
                           <label class="form-label" for="input-1">Shift Types</label>
+                          <input type="hidden" name="job_id" value="{{ $job_id }}">
                           <input type="hidden" name="shift_types_field" class="shift_types_field" value='@if(!empty($job_data)){{ $job_data->shift_type }}@endif'>
                           <ul id="shift_types_data" style="display:none;">
                             
@@ -1462,7 +1463,15 @@ form#shift_scheduling_form ul.select2-selection__rendered {
               title: 'Success',
               text: 'Shifts & Scheduling form added Successfully',
             }).then(function() {
-              window.location.href = "{{ route('medical-facilities.shift_scheduling') }}";
+              const jobId = params.get("job_id");
+
+              if(jobId){
+                window.location.href = "{{ route('medical-facilities.shift_scheduling') }}?job_id="+jobId;
+                
+              }else{
+                window.location.href = "{{ route('medical-facilities.shift_scheduling') }}";
+              }
+              
               
               var tab_name = sessionStorage.getItem("tab-one");
               if(tab_name != "job_description"){

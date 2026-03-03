@@ -1273,16 +1273,16 @@ public function ResetPassword(Request $request)
     }
 }
 
-    public function dashboard()
+    public function dashboard1()
     {
         $countries = DB::table('country')->where('status', 1)->get();
         return view('nurse.dashboard', compact('countries'));
     }
 
-    public function dashboard1()
+    public function dashboard()
     {
         $countries = DB::table('country')->where('status', 1)->get();
-        return view('nurse.dashboard1', compact('countries'));
+        return view('nurse.dashboard', compact('countries'));
     }
 
     public function save_registration_country(Request $request)

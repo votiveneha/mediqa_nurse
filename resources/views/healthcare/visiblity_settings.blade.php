@@ -141,6 +141,7 @@ form#shift_scheduling_form ul.select2-selection__rendered {
     
                       <form id="visiblity_settings_form" method="POST" onsubmit="return visiblity_settings_form()">
                         @csrf
+                        <input type="hidden" name="job_id" value="{{ $job_id }}">
                         <input type="hidden" name="user_id" value="{{ Auth::guard('healthcare_facilities')->user()->id }}">
                         <div class="visiblity_box">
                             <div class=" drp--clr">
@@ -481,7 +482,15 @@ form#shift_scheduling_form ul.select2-selection__rendered {
               title: 'Success',
               text: 'Visiblity & Settings updated Successfully',
             }).then(function() {
-              window.location.href = "{{ route('medical-facilities.visiblity_settings') }}";
+              const jobId = params.get("job_id");
+
+              if(jobId){
+                window.location.href = "{{ route('medical-facilities.visiblity_settings') }}?job_id="+jobId;
+                
+              }else{
+                window.location.href = "{{ route('medical-facilities.visiblity_settings') }}";
+              }
+              
               
               var tab_name = sessionStorage.getItem("tab-one");
               if(tab_name != "job_description"){

@@ -107,6 +107,8 @@ function country_name($country_id)
 {
 
         $lastRecord = CountryModel::where('iso2', $country_id)->first();
+
+        
         return $lastRecord->name;
 }
 function country_name_new($country_id)
@@ -678,6 +680,7 @@ function expire_jobs($user_id)
 {
         $job_box_data = JobsModel::where("healthcare_id",$user_id)->where("save_draft",2)->get();
         
+        $newDate = '';
         foreach($job_box_data as $job_box){
             $custom_expiry_date = $job_box->custom_expiry_date;
             $today_date = date('Y-m-d');

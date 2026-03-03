@@ -436,8 +436,8 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                                     <div class="job-menu">
                                         <button class="menu-btn">⋮</button>
                                         <div class="menu-dropdown">
-                                            <a href="#">View</a>
-                                            <a href="#">Edit</a>
+                                            <a href="{{ route('medical-facilities.job_details',['job_id'=>$job_post->id]) }}">View</a>
+                                            <a href="{{ route('medical-facilities.location_work_modal') }}?job_id={{ $job_post->id }}">Edit</a>
                                             <a href="#">Duplicate</a>
                                             <a href="#" data-bs-toggle="modal"
                                               data-bs-target="#deleteModal"
@@ -464,7 +464,10 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                                     <div class="attr">
                                         <span class="label">Specialty</span>
                                         @php
-                                            $speciality_type = (!empty($job_post->typeofspeciality))?json_decode($job_post->typeofspeciality):[];
+                                            $speciality_type = (!empty($job_post->typeofspeciality))?$job_post->typeofspeciality:[];
+                                            if (is_string($speciality_type)) {
+                                                $speciality_type = json_decode($speciality_type, true);
+                                            }
                                             $speciality_data = DB::table("speciality")->where("id",isset($speciality_type[0])?$speciality_type[0]:0)->first();
                                         @endphp
                                         <span class="value">{{ $speciality_data->name ?? '—' }}</span>
