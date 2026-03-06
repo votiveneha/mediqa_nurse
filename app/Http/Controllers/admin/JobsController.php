@@ -48,7 +48,7 @@ class JobsController extends Controller
 
     public function jobList()
     {
-        $data['job_list'] = DB::table("job_boxes")->Where("save_draft",2)->orWhere("save_draft",1)->orWhere("save_draft",3)->get();
+        $data['job_list'] = DB::table("job_boxes")->Where("save_draft",2)->orWhere("save_draft",1)->orWhere("save_draft",3)->orderBy("created_at","desc")->get();
         return view("admin.job_list")->with($data);
     }
 

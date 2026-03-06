@@ -1768,41 +1768,7 @@
                   </tr>
                   
 
-                  <!-- @if($filters)
-                  <tr class="filter-summary-row">
-                    <td></td>
-                    <td colspan="5">
-                      <div class="filter-summary">
-                        @foreach($filters as $key => $value)
-                          @if(is_array($value) && isset($value['min']) && isset($value['max']))
-                            {{-- Salary Range --}}
-                            <div class="filter-line">
-                              <strong>{{ ucwords(str_replace('_', ' ', $key)) }}:</strong>
-                              <span class="chip">${{ number_format($value['min']) }} – ${{ number_format($value['max']) }}</span>
-                            </div>
-
-                          @elseif(is_array($value) && !empty($value))
-                            {{-- Array fields (like multiple selections) --}}
-                            <div class="filter-line">
-                              <strong>{{ ucwords(str_replace('_', ' ', $key)) }}:</strong>
-                              @foreach($value as $item)
-                                <span class="chip">{{ $item }}</span>
-                              @endforeach
-                            </div>
-
-                          @elseif(!is_array($value) && !empty($value))
-                            {{-- Simple key-value pairs --}}
-                            <div class="filter-line">
-                              <strong>{{ ucwords(str_replace('_', ' ', $key)) }}:</strong>
-                              <span class="chip">{{ $value }}</span>
-                            </div>
-                          @endif
-                        @endforeach
-
-                      </div>
-                    </td>
-                  </tr>
-                  @endif -->
+    
                   @php
                     $i++;
                   @endphp

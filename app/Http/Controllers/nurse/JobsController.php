@@ -56,15 +56,73 @@ class JobsController extends Controller{
             ->get();
         $user_detail = Auth::guard('nurse_middle')->user();
         $user_id = $user_detail->id;
+
+        $nurseTypes = DB::table('profession_data')->where('user_id', $user_id)->pluck('nurse_data')->toArray();
+        $specialityTypes = DB::table('profession_data')->where('user_id', $user_id)->pluck('specialties')->toArray();
+
+        // echo "<pre>";
+        // print_r($nurseTypes);
+        // die;
         $data['work_preferences_data'] = DB::table("work_preferences")
             ->where("user_id", $user_id)
             ->first();
+
+        $workPreferences = $data['work_preferences_data'] ;
+        $sectorStatus = null;
+        if (!empty($workPreferences->sector_preferences)) {
+
+            if ($workPreferences->sector_preferences == "Public & Government") {
+                $sectorStatus = 1; // Public + Private
+            } elseif ($workPreferences->sector_preferences == "Private") {
+                $sectorStatus = 2; // Public
+            } elseif ($workPreferences->sector_preferences == "Public Government & Private") {
+                $sectorStatus = 3; // Private
+            }
+        }
+
+        if ($workPreferences) {
+            DB::table('saved_searches')->updateOrInsert(
+                ['user_id' => $user_id, 'status_my_preference'=> 1], // condition
+
+                [
+                    'name'                      => "My Preferences",
+                    'filter_sector'             => $sectorStatus,
+                    'filter_work_environment'   => $workPreferences->work_environment_preferences,
+                    'filter_employment_type'    => $workPreferences->emptype_preferences,
+                    'filter_work_shift'         => $workPreferences->work_shift_preferences,
+                    'filter_employee_positions' => $workPreferences->position_preferences,
+                    'filter_benefits_preferences' => $workPreferences->benefits_preferences,
+
+                    'filter_salary_min' => !empty($workPreferences->salary_expectations)
+                        ? explode('-', $workPreferences->salary_expectations)[0]
+                        : null,
+
+                    'filter_salary_max' => !empty($workPreferences->salary_expectations)
+                        ? explode('-', $workPreferences->salary_expectations)[1] ?? null
+                        : null,
+
+                    'filter_location_preference' => $workPreferences->prefered_location,
+
+                    'filter_nurse_type' => json_encode($nurseTypes),
+                    'filter_speciality' => json_encode($specialityTypes),
+                    'updated_at' => now(),
+                    'created_at' => now()
+                ]
+            );
+        }    
+
+        // echo "<pre>";
+        // print_r($workPreferences);
+        // die;
+   
         $data['saved_searches_data'] = DB::table("saved_searches")
             ->where("user_id", $user_id)
             ->get();
         $data['saved_my_preference'] = DB::table("saved_searches")
             ->where("user_id", $user_id)->where('status_my_preference', 1)
             ->first();
+
+
         $today = now();
 
         foreach ($data['saved_searches_data'] as $search) {
@@ -123,7 +181,9 @@ class JobsController extends Controller{
             ->values();
         $data['registered_countries'] = $allCountries;
 
-        $data['agencies_list'] = DB::table('agencies')->where('status', 1)->get();
+        $data['agencies_list'] = JobsModel::where('save_draft', 2)->groupBy('healthcare_id')->get(['healthcare_id']);
+
+        // echo "<pre>";   print_r($data['agencies_list']);die;              
         // $data['country_name'] = $country_merge;
         $data['user_data'] = DB::table("users")->where("id", $user_id)->first();
 
@@ -428,7 +488,7 @@ class JobsController extends Controller{
             $saved = DB::table('saved_searches')
                 ->where('searches_id', $request->search_id)
                 ->first();
-            // print_r($saved);die;
+            // echo "<pre>";  print_r($saved);die;
             if ($saved) {
                 // Nurse Type
                 if (!empty($saved->filter_nurse_type)) {
@@ -453,19 +513,18 @@ class JobsController extends Controller{
                     });
                 }
 
-                //Benefit
-                if (!empty($saved->filter_benefits_preferences)) {
-
-                    $nurseTypeIds = json_decode($saved->filter_benefits_preferences, true);
-
-                    $query->where(function ($q) use ($nurseTypeIds) {
-                        foreach ($nurseTypeIds as $id) {
-                            $q->orWhereJsonContains('benefits', $id);
+                // //Benefit
+                if (!empty($benefitIds)) {
+                    $query->where(function ($q) use ($benefitIds) {
+                        foreach ($benefitIds as $id) {
+                            $q->orWhereRaw("JSON_SEARCH(
+                            JSON_EXTRACT(benefits, '$.*[*]'),'one', ? ) IS NOT NULL
+                            ", [$id]);
                         }
                     });
                 }
 
-                //speciality
+                // //speciality
                 if (!empty($saved->filter_speciality)) {
 
                     $nurseTypeIds = json_decode($saved->filter_speciality, true);
@@ -477,38 +536,38 @@ class JobsController extends Controller{
                     });
                 }
 
-                if (!empty($saved->filter_work_shift)) {
+                // if (!empty($saved->filter_work_shift)) {
 
-                    $nurseTypeIds = json_decode($saved->filter_work_shift, true);
+                //     $nurseTypeIds = json_decode($saved->filter_work_shift, true);
 
-                    $query->where(function ($q) use ($nurseTypeIds) {
-                        foreach ($nurseTypeIds as $id) {
-                            $q->orWhereJsonContains('shift_type', $id);
-                        }
-                    });
-                }
-                // Work Environment
-                if (!empty($saved->filter_work_environment)) {
+                //     $query->where(function ($q) use ($nurseTypeIds) {
+                //         foreach ($nurseTypeIds as $id) {
+                //             $q->orWhereJsonContains('shift_type', $id);
+                //         }
+                //     });
+                // }
+                // // Work Environment
+                // if (!empty($saved->filter_work_environment)) {
 
-                    $nurseTypeIds = json_decode($saved->filter_work_environment, true);
+                //     $nurseTypeIds = json_decode($saved->filter_work_environment, true);
 
-                    $query->where(function ($q) use ($nurseTypeIds) {
-                        foreach ($nurseTypeIds as $id) {
-                            $q->orWhereJsonContains('work_environment', $id);
-                        }
-                    });
-                }
-                // Employee Positions
-                if (!empty($saved->filter_employee_positions)) {
+                //     $query->where(function ($q) use ($nurseTypeIds) {
+                //         foreach ($nurseTypeIds as $id) {
+                //             $q->orWhereJsonContains('work_environment', $id);
+                //         }
+                //     });
+                // }
+                // // Employee Positions
+                // if (!empty($saved->filter_employee_positions)) {
 
-                    $nurseTypeIds = json_decode($saved->filter_employee_positions, true);
+                //     $nurseTypeIds = json_decode($saved->filter_employee_positions, true);
 
-                    $query->where(function ($q) use ($nurseTypeIds) {
-                        foreach ($nurseTypeIds as $id) {
-                            $q->orWhereJsonContains('emplyeement_positions', $id);
-                        }
-                    });
-                }
+                //     $query->where(function ($q) use ($nurseTypeIds) {
+                //         foreach ($nurseTypeIds as $id) {
+                //             $q->orWhereJsonContains('emplyeement_positions', $id);
+                //         }
+                //     });
+                // }
 
                 // // Location
                 // if (!empty($saved->filter_location_preference)) {
@@ -522,33 +581,33 @@ class JobsController extends Controller{
                 }
 
                 // Salary Range
-                if (!empty($saved->filter_salary_min)) {
-                    $query->where('salary', '>=', $saved->filter_salary_min);
-                }
+                // if (!empty($saved->filter_salary_min)) {
+                //     $query->where('salary', '>=', $saved->filter_salary_min);
+                // }
 
-                if (!empty($saved->filter_salary_max)) {
-                    $query->where('salary', '<=', $saved->filter_salary_max);
-                }
+                // if (!empty($saved->filter_salary_max)) {
+                //     $query->where('salary', '<=', $saved->filter_salary_max);
+                // }
 
 
-                if (!empty($saved->filter_experience_years)) {
-                    $query->where('experience_level', '>=', $saved->filter_experience_years);
-                }
+                // if (!empty($saved->filter_experience_years)) {
+                //     $query->where('experience_level', '>=', $saved->filter_experience_years);
+                // }
             }
         }
         // Keyword
         if ($request->keywords) {
-            $query->where('nurse_type', 'LIKE', '%' . $request->keywords . '%');
+            $query->where('job_title', 'LIKE', '%' . $request->keywords . '%');
         }
 
         // Location
         if (!empty($request->locations)) {
-            $query->whereIn('location_name', $request->locations);
+            $query->whereIn('location_country', $request->locations);
         }
 
         // Agency
         if ($request->agency) {
-            $query->where('agency_name', $request->agency);
+            $query->where('healthcare_id', $request->agency);
         }
 
         // SORTING
@@ -558,9 +617,7 @@ class JobsController extends Controller{
             $query->orderBy('urgent_hire', 'desc');
         } elseif ($request->sort_name == 7) {
             $query->orderBy('application_submission_date', 'asc');
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
+        } 
 
         $jobs = $query->where("save_draft", 2)->paginate(2);
         // $jobs = $query->get();

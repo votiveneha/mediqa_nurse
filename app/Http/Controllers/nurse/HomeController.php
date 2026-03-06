@@ -9,6 +9,7 @@ use App\Models\EligibilityToWorkModel;
 use App\Models\WorkingChildrenCheckModel;
 use App\Models\PoliceCheckModel;
 use App\Models\OtherEvidance;
+use App\Models\JobsModel;
 
 
 use App\Http\Requests\AddnewsletterRequest;
@@ -68,6 +69,17 @@ class HomeController extends Controller
         $this->specialityRepository = $specialityRepository;
         $this->authServices = $authServices;
         
+    }
+
+    
+    public function dashboard()
+    {
+        $jobs_list = JobsModel::where('save_draft', 2)->get();
+        $user_id = Auth::guard("nurse_middle")->user()->id;
+        //  echo "<pre>";print_r($jobs_list);die;
+
+        $countries = DB::table('country')->where('status', 1)->get();
+        return view('nurse.dashboard', compact('countries', 'jobs_list','user_id'));
     }
     public function index($message = '')
     {
@@ -1279,11 +1291,6 @@ public function ResetPassword(Request $request)
         return view('nurse.dashboard', compact('countries'));
     }
 
-    public function dashboard()
-    {
-        $countries = DB::table('country')->where('status', 1)->get();
-        return view('nurse.dashboard', compact('countries'));
-    }
 
     public function save_registration_country(Request $request)
     {

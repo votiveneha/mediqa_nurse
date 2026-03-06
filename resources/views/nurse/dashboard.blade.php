@@ -1,5 +1,9 @@
+@php
+  use Carbon\Carbon;
+@endphp
 @extends('nurse.layouts.layout')
 @section('content')
+
     <style>
         /* =============================
                 STATUS BANNER
@@ -263,26 +267,29 @@
                                 <div class="sub-text">Based on your preferences and availability</div>
                             </div>
 
-                            <a href="#" class="view-all">
+                            <a href="{{route('nurse.find_jobs')}}" class="view-all">
                                 Go to Find Jobs →
                             </a>
                         </div>
                             <!-- =============================
                                 RECOMMENDED JOBS
                             ============================= -->
-                        <div class="d-flex justify-content-between mb-3">
+                        {{-- <div class="d-flex justify-content-between mb-3">
                             <h5 class="section-title">Recommended Jobs</h5>
                             <a href="#" class="view-all">View all →</a>
-                        </div>
+                        </div> --}}
 
                         <div class="row ">
 
+                            @foreach ($jobs_list as $jobs)
+                                
+                     
                             <!-- JOB CARD -->
                             <div class="col-lg-4 col-md-6 d-flex">
                                 <div class="job-card w-100 mb-4">
                                     <!-- Header -->
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <div class="job-title mb-0">ICU Nurse</div>
+                                        <div class="job-title mb-0">{{$jobs->job_title}}</div>
                                         <i class="far fa-heart heart"></i>
                                     </div>
 
@@ -291,11 +298,11 @@
 
                                         <div class="d-flex gap-4">
                                             <span class="job-meta mr-3">
-                                                <i class="fas fa-map-marker-alt"></i> Sydney, NSW
+                                                <i class="fas fa-map-marker-alt"></i> {{$jobs->state_name}},{{$jobs->country_name}}
                                             </span>
 
                                             <span class="job-meta">
-                                                <i class="far fa-circle"></i> Casual
+                                                <i class="far fa-circle"></i> {{$jobs->employment_type}}
                                             </span>
                                         </div>
 
@@ -303,13 +310,66 @@
                                     </div>
 
                                     <!-- Salary -->
-                                    <div class="nurse-salary mt-2">
+                                    {{-- <div class="nurse-salary mt-2">
                                         <span class="salary"> $ </span> <span> 55/hr </span>
-                                    </div>
+                                    </div> --}}
 
+                                    <div class="nurse-salary mt-2">
+                                    
+                                        @php
+                                    
+                                        if($jobs->main_emp_type == 1){
+                                        $min = $jobs->per_salary_min;
+                                        $max = $jobs->per_salary_max;
+                                        $per = $jobs->salary_permanent;
+                                        }
+                                        elseif($jobs->main_emp_type == 2){
+                                        $min = $jobs->fixed_term_salary_min;
+                                        $max = $jobs->fixed_term_salary_max;
+                                        $per = $jobs->salary_range_fix_term;
+                                        }
+                                        elseif($jobs->main_emp_type == 3){
+                                        $min = $jobs->temporary_salary_min;
+                                        $max = $jobs->temporary_salary_max;
+                                        $per = $jobs->salary_range_temporary;
+                                        }
+                                    
+                                        @endphp
+                                    
+                                        @if(!empty($min))
+                                        <span class="salary">$</span>
+                                        <span>{{ $min }} - {{ $max }}/{{$per}}</span>
+                                        @endif
+                                    
+                                    </div>
+                                    @php
+                                    $startDate = Carbon::parse($jobs->created_at);
+                                        switch ($jobs->expiry_date) {
+                                        case 1:
+                                        $endDate = $startDate->copy()->addDays(7);
+                                        break;
+                                        case 2:
+                                        $endDate = $startDate->copy()->addDays(14);
+                                        break;
+                                        case 3:
+                                        $endDate = $startDate->copy()->addDays(30);
+                                        break;
+                                        case 4:
+                                        $endDate = $startDate->copy()->addDays(60);
+                                        break;
+                                        case 5:
+                                        $endDate = Carbon::parse($jobs->custom_expiry_date);
+                                        break;
+                                        default:
+                                        $endDate = null;
+                                        }
+                                        $start = $startDate->format('d M Y');
+                                        $end = $endDate ? $endDate->format('d M Y') : '';
+                                        $date_range = $start . ' – ' . $end;
+                                    @endphp
                                     <!-- Shift Dates -->
                                     <div class="job-meta mt-1">
-                                        7am–3pm • 14 Apr – 20 Apr
+                                        {{$date_range}}
                                     </div>
 
                                     <!-- Bullet Details -->
@@ -327,125 +387,31 @@
                                     <!-- Footer -->
                                     <div class="job-footer">
 
-                                        <button class="btn nurse-apply-btn text-white">
+                                        {{-- <button class="btn nurse-apply-btn text-white">
                                             Apply Now
+                                        </button> --}}
+                                        @php
+                                            $apply_job_data = DB::table("nurse_applications")->where("nurse_id",$user_id)->where("job_id",$jobs->id)->first();
+                                        @endphp
+                                        <button class="btn text-white nurse-apply-btn {{ $jobs->id }} 
+                                            @if(!empty($apply_job_data)) applied @endif" @if(empty($apply_job_data))
+                                            onclick="applyNow('{{ $user_id }}','{{ $jobs->id }}')" @else disabled @endif>
+                                            @if(!empty($apply_job_data))
+                                            Applied
+                                            @else
+                                            Apply Now
+                                            @endif
                                         </button>
                                         <div>
-                                               <a href="#" class="d-flex gap-2">
-                                                <span><i class="fa fa-bookmark-o" aria-hidden="true"></i></span>
-                                               Details
-                                              </a>
+                                            <a href="{{ route('nurse.job_details',['job_id'=>$jobs->id]) }}" class="d-flex gap-2">
+                                            <span><i class="fa fa-bookmark-o" aria-hidden="true"></i></span>
+                                            Details
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- JOB CARD -->
-                            <div class="col-lg-4 col-md-6 d-flex">
-                                <div class="job-card w-100 mb-4">
-                                    <!-- Header -->
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="job-title  mb-0">ICU Nurse</div>
-                                        <i class="far fa-heart heart"></i>
-                                    </div>
-                                    <!-- Location & Type -->
-                                    <div class="d-flex justify-content-between align-items-center mt-2">
-                                        <div class="d-flex gap-4">
-                                            <span class="job-meta mr-3">
-                                                <i class="fas fa-map-marker-alt"></i> Sydney, NSW
-                                            </span>
-                                            <span class="job-meta">
-                                                <i class="far fa-circle"></i> Casual
-                                            </span>
-                                        </div>
-                                        <span class="badge badge-new">New</span>
-                                    </div>
-                                    <!-- Salary -->
-                                    <div class="nurse-salary mt-2">
-                                        <span class="salary"> $ </span> <span> 55/hr </span>
-                                    </div>
-                                    <!-- Shift Dates -->
-                                    <div class="job-meta mt-1">
-                                        7am–3pm • 14 Apr – 20 Apr
-                                    </div>
-                                    <!-- Bullet Details -->
-                                    <div class="job-details">
-                                        <div>
-                                            <p>Single patient COVID care</p>
-                                            <p>PPE provided</p>
-                                        </div>
-                                        <div class="match">
-                                            87% match
-                                        </div>
-                                    </div>
-                                    <!-- Footer -->
-                                    <div class="job-footer">
-
-                                        <button class="btn nurse-apply-btn text-white">
-                                            Apply Now
-                                        </button>
-                                        <div>
-                                               <a href="#" class="d-flex gap-2">
-                                                <span><i class="fa fa-bookmark-o" aria-hidden="true"></i></span>
-                                               Details
-                                              </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                              <!-- JOB CARD -->
-                            <div class="col-lg-4 col-md-6 d-flex">
-                                <div class="job-card w-100 mb-4">
-                                    <!-- Header -->
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="job-title  mb-0">ICU Nurse</div>
-                                        <i class="far fa-heart heart"></i>
-                                    </div>
-                                    <!-- Location & Type -->
-                                    <div class="d-flex justify-content-between align-items-center mt-2">
-                                        <div class="d-flex gap-4">
-                                            <span class="job-meta mr-3">
-                                                <i class="fas fa-map-marker-alt"></i> Sydney, NSW
-                                            </span>
-                                            <span class="job-meta">
-                                                <i class="far fa-circle"></i> Casual
-                                            </span>
-                                        </div>
-                                        <span class="badge badge-new">New</span>
-                                    </div>
-                                    <!-- Salary -->
-                                    <div class="nurse-salary mt-2">
-                                        <span class="salary"> $ </span> <span> 55/hr </span>
-                                    </div>
-                                    <!-- Shift Dates -->
-                                    <div class="job-meta mt-1">
-                                        7am–3pm • 14 Apr – 20 Apr
-                                    </div>
-                                    <!-- Bullet Details -->
-                                    <div class="job-details">
-                                        <div>
-                                            <p>Single patient COVID care</p>
-                                            <p>PPE provided</p>
-                                        </div>
-                                        <div class="match">
-                                            87% match
-                                        </div>
-                                    </div>
-                                    <!-- Footer -->
-                                    <div class="job-footer">
-
-                                        <button class="btn nurse-apply-btn text-white">
-                                            Apply Now
-                                        </button>
-                                        <div>
-                                               <a href="#" class="d-flex gap-2">
-                                                <span><i class="fa fa-bookmark-o" aria-hidden="true"></i></span>
-                                               Details
-                                              </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
 
                         <!-- ============== -->
@@ -457,260 +423,6 @@
                 </div>
             </div>
         </section>
-
-        {{-- <section class="section-box mt-30">
-            <div class="container">
-                <div class="row flex-row-reverse">
-
-                    <div class="col-lg-9 col-md-12 col-sm-12 col-12 float-right">
-                        <div class="row">
-                            <!-- Tabs -->
-                            <div class="col-md-12">
-                                <ul class="nav flex-column flex-md-row custom-tabs">
-                                    <li class="nav-item">
-                                        <a class="nav-link active" data-toggle="tab" href="#acceptedTab">
-                                            Top Matches
-                                            <span class="custom-badge">3</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" data-toggle="tab" href="#onboardinTab">
-                                            Instatnt connect
-                                            <span class="custom-badge">2</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" data-toggle="tab" href="#activeShifts">
-                                            Last Minute
-                                            <span class="custom-badge">1</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" data-toggle="tab" href="#completedJobTab">
-                                            Immediate Start
-                                            <span class="custom-badge">8</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" data-toggle="tab" href="#urgentHire">
-                                            Urgent Hire
-                                            <span class="custom-badge">8</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" data-toggle="tab" href="#new">
-                                            New
-                                            <span class="custom-badge">8</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <!-- Content -->
-                            <div class="col-md-12 mt-3 mt-lg-0">
-                                <div class="tab-content">
-                                    <div class="tab-pane fade show active" id="acceptedTab">
-                                        <!-- ======  nurse jobs ====== -->
-
-
-                                        <!-- =============================
-                                                          STATUS BANNER
-                                                      ============================= -->
-                                        <div class="status-banner mb-4 text-center mt-4">
-                                            <h5>Complete your credentials to view job details and unlock job applications
-                                            </h5>
-                                            <p class="mb-2">We need your credentials to unlock matching jobs.</p>
-
-                                            <strong>Status: Not Started</strong><br><br>
-
-                                            <button class="btn btn-primary-custom">
-                                                Continue Registration
-                                            </button>
-                                        </div>
-
-                                        <!-- =============================
-                                                        HEADLINE
-                                                    ============================= -->
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <div>
-                                                <h3 class="dashboard-title">Your Job Matches</h3>
-                                                <div class="sub-text">Based on your preferences and availability</div>
-                                            </div>
-
-                                            <a href="#" class="view-all">
-                                                Go to Find Jobs →
-                                            </a>
-                                        </div>
-
-                                        <!-- =============================
-                                                        RECOMMENDED JOBS
-                                                    ============================= -->
-                                        <div class="d-flex justify-content-between mb-3">
-                                            <h5 class="section-title">Recommended Jobs</h5>
-                                            <a href="#" class="view-all">View all →</a>
-                                        </div>
-                                        <div class="row">
-
-                                            <!-- JOB CARD -->
-                                            <div class="col-lg-6 col-md-6">
-                                                <div class="job-card">
-                                                    <!-- Header -->
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <div class="job-title">ICU Nurse</div>
-                                                        <i class="far fa-heart heart"></i>
-                                                    </div>
-
-                                                    <!-- Location & Type -->
-                                                    <div class="d-flex justify-content-between align-items-center mt-2">
-
-                                                        <div class="d-flex gap-4">
-                                                            <span class="job-meta mr-3">
-                                                                <i class="fas fa-map-marker-alt"></i> Sydney, NSW
-                                                            </span>
-
-                                                            <span class="job-meta">
-                                                                <i class="far fa-circle"></i> Casual
-                                                            </span>
-                                                        </div>
-
-                                                        <span class="badge badge-new">New</span>
-                                                    </div>
-
-                                                    <!-- Salary -->
-                                                    <div class="nurse-salary mt-2">
-                                                        <span class="salary"> $ </span> <span> 55/hr </span>
-                                                    </div>
-
-                                                    <!-- Shift Dates -->
-                                                    <div class="job-meta mt-1">
-                                                        7am–3pm • 14 Apr – 20 Apr
-                                                    </div>
-
-                                                    <!-- Bullet Details -->
-                                                    <div class="job-details">
-                                                        <div>
-                                                            <p>Single patient COVID care</p>
-                                                            <p>PPE provided</p>
-                                                        </div>
-                                                        <div class="match">
-                                                            87% match
-                                                        </div>
-
-                                                    </div>
-
-                                                    <!-- Footer -->
-                                                    <div class="job-footer">
-
-                                                        <button class="btn nurse-apply-btn text-white">
-                                                            Apply Now
-                                                        </button>
-                                                        <div>
-                                                            <p class="d-flex gap-1">
-                                                                <span><i class="fa fa-bookmark-o"
-                                                                        aria-hidden="true"></i></span>
-                                                                <span> Details</span>
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- JOB CARD -->
-                                            <div class="col-lg-6 col-md-6">
-                                                <div class="job-card">
-                                                    <!-- Header -->
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <div class="job-title">ICU Nurse</div>
-                                                        <i class="far fa-heart heart"></i>
-                                                    </div>
-
-                                                    <!-- Location & Type -->
-                                                    <div class="d-flex justify-content-between align-items-center mt-2">
-
-                                                        <div class="d-flex gap-4">
-                                                            <span class="job-meta mr-3">
-                                                                <i class="fas fa-map-marker-alt"></i> Sydney, NSW
-                                                            </span>
-
-                                                            <span class="job-meta">
-                                                                <i class="far fa-circle"></i> Casual
-                                                            </span>
-                                                        </div>
-
-                                                        <span class="badge badge-new">New</span>
-                                                    </div>
-
-                                                    <!-- Salary -->
-                                                    <div class="nurse-salary mt-2">
-                                                        <span class="salary"> $ </span> <span> 55/hr </span>
-                                                    </div>
-
-                                                    <!-- Shift Dates -->
-                                                    <div class="job-meta mt-1">
-                                                        7am–3pm • 14 Apr – 20 Apr
-                                                    </div>
-
-                                                    <!-- Bullet Details -->
-                                                    <div class="job-details">
-                                                        <div>
-                                                            <p>Single patient COVID care</p>
-                                                            <p>PPE provided</p>
-                                                        </div>
-                                                        <div class="match">
-                                                            87% match
-                                                        </div>
-
-                                                    </div>
-
-                                                    <!-- Footer -->
-                                                    <div class="job-footer">
-
-                                                        <button class="btn nurse-apply-btn text-white">
-                                                            Apply Now
-                                                        </button>
-                                                        <div>
-                                                            <p class="d-flex gap-1">
-                                                                <span><i class="fa fa-bookmark-o"
-                                                                        aria-hidden="true"></i></span>
-                                                                <span> Details</span>
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-
-
-
-
-                                        </div>
-                                        <!-- ============== -->
-                                    </div>
-                                    <div class="tab-pane fade" id="onboardinTab">
-                                        <p>onboarding content goes here...</p>
-                                    </div>
-                                    <div class="tab-pane fade" id="activeShifts">
-                                        <p>Active Shift content goes here...</p>
-                                    </div>
-                                    <div class="tab-pane fade" id="completedJobTab">
-                                        <p>Completed Shift content goes here...</p>
-                                    </div>
-                                    <div class="tab-pane fade" id="urgentHire">
-                                        <p>Urgent Hire content goes here...</p>
-                                    </div>
-                                    <div class="tab-pane fade" id="new">
-                                        <p>New content goes here...</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-12 col-sm-12 col-12"></div>
-                </div>
-            </div>
-        </section> --}}
-
-
     </main>
 
     {{-- City Selection Modal --}}
@@ -835,5 +547,54 @@
                 }
             });
         });
+    </script>
+    <script>
+     function applyNow(user_id, job_id) {
+        $.ajax({
+            type: "POST",
+            url: "{{ url('/nurse/applyJobs') }}",
+            data: {
+                user_id: user_id,
+                job_id: job_id,
+                _token: '{{ csrf_token() }}'
+            },
+            cache: false,
+            success: function (response) {
+
+                if (response.status == true) {
+
+                    let btn = $('.apply-btn-' + job_id);
+
+                    btn.text('Applied');
+                    btn.addClass('applied');
+                    btn.prop('disabled', true);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: response.message,
+                        confirmButtonColor: '#3085d6'
+                    });
+
+                } else {
+
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Oops...',
+                        text: response.message,
+                        confirmButtonColor: '#d33'
+                    });
+
+                }
+            },
+            error: function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Something went wrong!',
+                });
+            }
+        });
+    }
     </script>
 @endsection

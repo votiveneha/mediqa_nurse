@@ -498,7 +498,7 @@ img, iframe, video {
                 <a class="hover-up " href='#'>Settings</a>
               </li>
               <li>
-                <a class="{{ request()->is('healthcare-facilities/job_posting') ?'active':'' }} hover-up " href="{{ route('medical-facilities.job_posting') }}">Job Postings</a>
+                <a class="{{ request()->is('healthcare-facilities/location_work_modal') ?'active':'' }} hover-up " href="{{ route('medical-facilities.location_work_modal') }}">Job Postings</a>
               </li>
               <li>
                 <a class="hover-up" href="#">Find Nurse</a>

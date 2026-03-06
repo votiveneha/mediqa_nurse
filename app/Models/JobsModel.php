@@ -52,5 +52,23 @@ class JobsModel extends Model
             ->value('name');
     }
 
+    public function getCountryNameAttribute()
+    {
+        if (!$this->location_country) {
+            return null;
+        }
+
+        return CountryModel::where('iso2', $this->location_country)
+            ->value('name');
+    }
+    public function getStateNameAttribute()
+    {
+        if (!$this->location_state) {
+            return null;
+        }
+
+        return StateModel::where('id', $this->location_state)
+            ->value('name');
+    }
 
 }

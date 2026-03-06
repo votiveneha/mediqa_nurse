@@ -144,9 +144,9 @@ form#job_posting_form ul.select2-selection__rendered {
                           </label>
                           <select class="form-input mr-10 select-active" name="sector_preferences" id="sector_preferences">
                             <option value="">select</option>
-                            <option value="Public & Government" @if(!empty($job_data) && $job_data->sector == "Public & Government") selected @endif>Public & Government</option>
-                            <option value="Private" @if(!empty($job_data) && $job_data->sector == "Private") selected @endif>Private</option>
-                            <option value="Public Government & Private" @if(!empty($job_data) && $job_data->sector == "Public Government & Private") selected @endif>Public Government & Private</option>
+                            <option value="1" @if(!empty($job_data) && $job_data->sector == "1") selected @endif>Public & Government</option>
+                            <option value="2" @if(!empty($job_data) && $job_data->sector == "2") selected @endif>Private</option>
+                            <option value="3" @if(!empty($job_data) && $job_data->sector == "3") selected @endif>Public Government & Private</option>
                           </select>
                           <span id='reqsector_preferences' class='reqError text-danger valley'></span>
                         </div>
