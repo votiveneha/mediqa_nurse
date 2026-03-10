@@ -53,7 +53,10 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
   Route::get('/getEmpData', 'JobPostingController@getEmpData')->name('getEmpData');
   Route::get('/getStates', 'JobPostingController@getStates')->name('getStates');
   Route::get('/getLanguagesData', 'JobPostingController@getLanguagesData')->name('getLanguagesData');
-  Route::middleware('healthcare')->group(function () {
+  Route::get('/getAccreditationsData', 'HomeController@getAccreditationsData')->name('getAccreditationsData');
+  Route::get('/email-verification/{token}', 'HomeController@email_verification')->name('email-verification');
+  Route::get('/profile-under-reviewed', 'HomeController@profileUnderReviewed')->name('profile-under-reviewed');
+  Route::middleware('healthcare_facilities')->group(function () {
     Route::get('/my-profile', 'HomeController@manage_profile')->name('my-profile');
     Route::get('/job_posting', 'JobPostingController@job_posting')->name('job_posting');
     Route::get('/contract_pay', 'JobPostingController@contract_pay')->name('contract_pay');
@@ -86,6 +89,7 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
     Route::post('/uploadJobImgs', 'JobPostingController@uploadJobImgs')->name('uploadJobImgs');
     Route::get('/nurse_applicants', 'JobPostingController@nurse_applicants')->name('nurse_applicants');
     Route::post('/change_application_status', 'JobPostingController@change_application_status')->name('change_application_status');
+    Route::post('/updateProfile', 'HomeController@updateProfile')->name('updateProfile');
   });
 });
 
@@ -149,6 +153,8 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::middleware('nurse_middle')->group(function () {
     Route::get('/my-profile', 'HomeController@manage_profile')->name('my-profile');
     Route::get('/dashboard', 'HomeController@dashboard')->name('dashboard');
+    Route::post('/filter-jobs', 'HomeController@filterJobs')->name('filter.jobs');
+
     Route::get('/dashboard1', 'HomeController@dashboard1')->name('dashboard1');
     Route::post('/changepassword', 'HomeController@changepassword')->name('changepassword');
     Route::any('/updateProfile', 'HomeController@updateProfile')->name('updateProfile');

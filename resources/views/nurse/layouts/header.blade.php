@@ -495,7 +495,7 @@ img, iframe, video {
           <nav class="nav-main-menu w-100">
             <ul class="main-menu">
               <li>
-                <a class="hover-up " href='#'>Settings</a>
+                <a class="hover-up {{ request()->is('healthcare-facilities/my-profile') ?'active':'' }}" href="{{ route('medical-facilities.my-profile') }}">Settings</a>
               </li>
               <li>
                 <a class="{{ request()->is('healthcare-facilities/location_work_modal') ?'active':'' }} hover-up " href="{{ route('medical-facilities.location_work_modal') }}">Job Postings</a>

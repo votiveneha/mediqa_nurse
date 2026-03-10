@@ -49,16 +49,16 @@
                   <div class="col-md-6">
                     <div class="form-group">
                   <label class="form-label" for="fullname">Hospital Name *</label>
-                  <input class="form-control" id="fullname" type="text" name="fullname">
+                  <input class="form-control" id="fullname" type="text" name="hospital_name">
                   <span id="reqfullname" class="reqError valley"></span>
                 </div>
                   </div>
                   <div class="col-md-6">
                      <div class="form-group">
-                  <label class="form-label" for="emailaddress">Email address *</label>
-                  <input class="form-control" id="emailaddress" type="email" name="emailaddress">
-                  <span id="reqemailaddress" class="reqError valley"></span>
-                </div>
+                      <label class="form-label" for="emailaddress">Email address *</label>
+                      <input class="form-control" id="emailaddress" type="email" name="emailaddress">
+                      <span id="reqemailaddress" class="reqError valley"></span>
+                    </div>
                   </div>
                   <!-- <div class="col-md-6">
                     <div class="form-group">
@@ -209,7 +209,7 @@
               title: 'Success',
               text: 'Congratulations! Your registration was successful. Please check your email; we have sent you a verification email to your registered address!',
             }).then(function() {
-              window.location.href = "{{ route('medical-facilities.email-verification-pending') }}";
+              window.location.href = res.redirect;
             });
           } else {
             Swal.fire({

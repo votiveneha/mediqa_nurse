@@ -69,6 +69,7 @@ Route::prefix('/admin')->name('admin.')->namespace('App\Http\Controllers\admin')
 
     // Nurse Managemenent
     Route::get('/customer-list', 'NurseController@customerList')->name('customer-list');
+    Route::get('/healthcare-list', 'HealthcareController@index')->name('healthcareList');
     Route::get('/incoming-nurse-list', 'NurseController@incommingNurseList')->name('incoming-nurse-list');
     Route::get('/unverified-nurse-list', 'NurseController@unverified_nurse_list')->name('unverified-nurse-list');
     Route::post('/send_remainder', 'NurseController@send_remainder')->name('send_remainder');

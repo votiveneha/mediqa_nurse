@@ -104,21 +104,228 @@ class HomeController extends Controller
             $user->password = Hash::make($password);
             $run = $user->save();
             $r   = User::where('email', $emailaddress)->first();
+            //print_r($r->id);
             Auth::guard('healthcare_facilities')->login($r);
-            Auth::login($r);
+            $request->session()->regenerate();
+            $request->session()->save();
+            //Auth::login($r);
         }else{
             $run = 0;
         }
 
+        //echo Auth::guard('healthcare_facilities')->check();die;
+
         if ($run) {
-            Session::put('user_id', $r->id);
+            if (empty($r->emailToken)) {
+                $r->emailToken = Crypt::encryptString($r->email);
+                $r->save();
+            }
+
+            $verificationUrl = url('healthcare-facilities/email-verification/' . $r->emailToken);
+
+            $htmlBody = '
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Verify Your Account</title>
+                </head>
+                <body style="margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, Helvetica, sans-serif;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4; padding:30px 0;">
+                        <tr>
+                            <td align="center">
+                                <table width="100%" max-width="600" cellpadding="0" cellspacing="0"
+                                    style="max-width:600px; background:#ffffff; border-radius:8px; overflow:hidden;">
+
+                                    <!-- Header -->
+                                    <tr>
+                                            <td style="background:#000; padding:20px; text-align:center;">
+                                                <h1 style="margin:0; color:#ffffff; font-size:22px;">
+                                                    ' . e(env("APP_NAME")) . '
+                                                </h1>
+                                            </td>
+                                    </tr>
+
+                                    <!-- Body -->
+                                    <tr>
+                                        <td style="padding:30px; color:#333333;">
+                                            <p style="margin:0 0 15px;">
+                                                Hello <strong>' . e($r->name) . '</strong>,
+                                            </p>
+
+                                            <p style="margin:0 0 15px;">
+                                                Welcome and thank you for registering at <strong>Mediqa</strong>.
+                                            </p>
+
+                                            <p style="margin:0 0 25px;">
+                                                Please verify your account by clicking the button below.
+                                            </p>
+
+                                            <!-- Button -->
+                                            <p style="text-align:center; margin:0 0 25px;">
+                                                <a href="' . $verificationUrl . '" target="_blank"
+                                                style="
+                                                    display:inline-block;
+                                                    padding:14px 26px;
+                                                    background:#000000;
+                                                    color:#ffffff;
+                                                    text-decoration:none;
+                                                    border-radius:5px;
+                                                    font-size:16px;
+                                                ">
+                                                    Verify Account
+                                                </a>
+                                            </p>
+
+                                            <p style="margin:0 0 10px; font-size:14px; color:#555;">
+                                                If the button doesn’t work, copy and paste this link into your browser:
+                                            </p>
+
+                                            <p style="word-break:break-all; font-size:14px;">
+                                                <a href="' . $verificationUrl . '" target="_blank" style="color:#0d6efd;">
+                                                    ' . $verificationUrl . '
+                                                </a>
+                                            </p>
+
+                                            <p style="margin:25px 0 0; font-size:14px; color:#777;">
+                                                If you did not create an account, no action is required.
+                                            </p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Footer -->
+                                    <tr>
+                                        <td style="background:#f0f0f0; padding:15px; text-align:center; font-size:12px; color:#777;">
+                                            © ' . '2024' . ' Mediqa. All rights reserved.
+                                        </td>
+                                    </tr>
+
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+                ';
+
+            try {
+                \App\Helpers\ZeptoMailHelper::sendMail(
+                    $r->email,
+                    "Email Verification - Mediqa",
+                    $htmlBody
+                );
+
+                \Log::info("Verification email sent", ['user_id' => $r->id]);
+            } catch (\Throwable $ex) {
+                \Log::error("Failed to send verification email", [
+                    'user_id' => $r->id,
+                    'error'   => $ex->getMessage()
+                ]);
+            }
+            //Session::put('user_id', $r->id);
+            //$request->session()->regenerate();
             $json['status'] = 1;
+            $json['redirect'] = route('medical-facilities.email-verification-pending');
             $json['message'] = 'Congratulations! Your registration was successful. Please check your email; we have sent you a verification email to your registered address!';
         }else{
             $json['status'] = 0;
             $json['message'] = 'Email is already registered.!';
         }
-        echo json_encode($json);
+        return response()->json($json);
+    }
+
+    public function profileUnderReviewed()
+    {
+        // die();
+
+        if (Auth::guard('healthcare_facilities')->user()) {
+            if (Auth::guard('healthcare_facilities')->user()->user_stage == 2) {
+
+                //return redirect()->route('nurse.dashboard');
+            } else {
+                $title = "";
+                $message = "";
+                return view('auth.profile-under-reviewed', compact('title', 'message'));
+            }
+        } else {
+
+            return redirect()->route('medical-facilities.login');
+        }
+    }
+        public function email_verification($emailToken)
+    {
+        $title = "email-verification";
+
+        if (!User::where('emailToken', $emailToken)->exists()) {
+            return $this->expiredLink();
+        }
+
+        try {
+            $email = Crypt::decryptString($emailToken);
+        } catch (\Throwable $e) {
+            return $this->expiredLink();
+        }
+
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            return $this->expiredLink();
+        }
+
+        if ($user->emailVerified == '1') {
+            return $this->expiredLink();
+        }
+
+        $update = [
+            'emailVerified'     => '1',
+            'email_verify'      => 1,
+            'email_verified_at' => now(),
+            'emailToken'        => '',
+            'user_stage'        => '1',
+        ];
+
+        $run = User::where('email', $email)->update($update);
+
+        if (!$run) {
+            return back()->with('error', 'Something went wrong.');
+        }
+
+        if (!Auth::guard('healthcare_facilities')->check()) {
+            Session::put('user_id', $user->id);
+            Auth::guard('healthcare_facilities')->attempt([
+                'email'    => $user->email,
+                'password' => $user->ps
+            ]);
+        }
+
+        Mail::to("votivetester.vijendra@gmail.com")->send(
+            new \App\Mail\DemoMail([
+                'subject' => 'New Nurse',
+                'email'   => 'votivetester.vijendra@gmail.com',
+                'body'    => "
+                    <p>Dear Mediqa Team,</p>
+                    <p>A new Nurse/Midwife has successfully verified their email.</p>
+                    <p><strong>Name:</strong> {$user->name} {$user->lastname}</p>
+                    <p><strong>Email:</strong> {$user->email}</p>
+                    <p><strong>Date:</strong> " . now()->format('Y-m-d') . "</p>
+                "
+            ])
+        );
+
+        return redirect('/healthcare-facilities')->with([
+            'message' => '<h6 style="color:green">Your email has been verified successfully.</h6>',
+            'status'  => 1
+        ]);
+    }
+    private function expiredLink()
+    {
+        $message = '<h6 style="color:red">Verification link has expired.</h6>';
+        $status  = 0;
+        $title   = 'Email Verification';
+
+        return response()
+            ->view('nurse.verification-expired', compact('message', 'status', 'title'))
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     }
 
     public function login($message = '')
@@ -142,7 +349,7 @@ class HomeController extends Controller
                 setcookie("email", "");
                 setcookie("password", "");
             }
-            return redirect('/healthcare-facilities/location_work_modal')->with('success', 'You are Logged in sucessfully.');
+            return redirect('/healthcare-facilities/my-profile')->with('success', 'You are Logged in sucessfully.');
         } else {
             return back()->with('error', 'Invalid login details.');
         }
@@ -158,9 +365,10 @@ class HomeController extends Controller
 
     public function emailVerificationPending()
     {
-
+        
         if (Auth::guard('healthcare_facilities')->user()) {
-
+            
+            
             if (Auth::guard('healthcare_facilities')->user()->emailVerified == 1 &&  Auth::guard('healthcare_facilities')->user()->user_stage == 1 && Auth::guard('healthcare_facilities')->user()->type == 1) {
 
                 return redirect()->route('medical-facilities.profile-under-reviewed');
@@ -169,7 +377,7 @@ class HomeController extends Controller
             } else {
                 $title = "";
                 $message = "";
-
+                //print_r(Auth::guard('healthcare_facilities')->user());die;
                 return view('auth.email-verification-pending', compact('title', 'message'));
             }
         } else if (Session::get('user_id')) {
@@ -189,26 +397,70 @@ class HomeController extends Controller
     }
 
     public function manage_profile(){
-        return view('healthcare.profile');
+        $user_id = Auth::guard('healthcare_facilities')->user()->id;
+        $data['user_data'] = User::where("id",$user_id)->first();
+        return view('healthcare.settings.profile')->with($data);
     }
 
-    public function profileUnderReviewed()
-    {
-        // die();
+    public function updateProfile(Request $request){
+        $user_id = Auth::guard('healthcare_facilities')->user()->id;
+        $facility_name = $request->facility_name;
+        $sector_preferences = $request->sector_preferences;
+        $subwork = json_encode($request->input('subwork'));
+        $subpwork = json_encode($request->input('subworkthlevel'));
+        $country = $request->country;
+        $site_data = json_encode($request->site_data);
 
-        if (Auth::guard('healthcare_facilities')->user()) {
-            if (Auth::guard('healthcare_facilities')->user()->user_stage == 2) {
+        $request->validate([
+            'facility_logo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
 
-                return redirect()->route('nurse.dashboard');
-            } else {
-                $title = "";
-                $message = "";
-                return view('auth.profile-under-reviewed', compact('title', 'message'));
-            }
-        } else {
+        if ($request->hasFile('facility_logo')) {
 
-            return redirect()->route('medical-facilities.login');
+            $image = $request->file('facility_logo');
+
+            $imageName = time().'_'.$image->getClientOriginalName();
+
+            $image->move(public_path('healthcareimg/uploads'), $imageName);
+
+            
+        }else{
+            $imageName = "";
         }
+
+        //print_r($site_data);
+        $user_data = User::find($user_id);
+        $user_data->name = $facility_name;
+        $user_data->sector = $sector_preferences;
+        $user_data->profile_img = $imageName;
+        $user_data->facility_services = $subpwork;
+        $user_data->country_iso = $country;
+        $user_data->site_data = $site_data;
+        $run = $user_data->save();
+
+        if ($run) {
+            $json['status'] = 1;
+            
+            
+        } else {
+            $json['status'] = 0;
+        }
+
+        echo json_encode($json);
     }
+
+    
+
+    public function getAccreditationsData(Request $request){
+        $id = $request->id;
+        $data["accreditation_data"] = DB::table("accreditation_certifications")->where("parent",$id)->get();
+        $accreditation_name = DB::table("accreditation_certifications")->where("id",$id)->first();
+        $data["accreditation_id"] = $id;
+        $data["accreditation_name"] = $accreditation_name->name;
+        echo json_encode($data);
+        
+    }
+
+   
     
 }

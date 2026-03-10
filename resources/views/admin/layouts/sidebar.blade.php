@@ -239,7 +239,14 @@
            </li>
          </ul>
        </li>
-
+       <li class="sidebar-item">
+          <a class="sidebar-link" href="{{route('admin.healthcareList')}}" aria-expanded="false">
+            <span class="d-flex">
+              <i class="ti ti-building-store"></i>
+            </span>
+            <span class="hide-menu">Healthcare Management</span>
+          </a>
+       </li>   
        <li class="sidebar-item">
          <a class="sidebar-link has-arrow" href="#" aria-expanded="false">
            <span class="d-flex">

@@ -55,6 +55,7 @@ use App\Models\OtherVaccineModel;
 use Illuminate\Support\Facades\Storage;
 use App\Models\EvidanceFileModel;
 use App\Models\Profession;
+use App\Models\SavedSearches;
 
 class HomeController extends Controller
 {
@@ -71,16 +72,150 @@ class HomeController extends Controller
         
     }
 
-    
     public function dashboard()
     {
-        $jobs_list = JobsModel::where('save_draft', 2)->get();
+        // $jobs_list = JobsModel::where('save_draft', 2)->orderBy('created_at','desc')->limit(6)->get();
+        $jobs_list = JobsModel::where('save_draft', 2)->orderBy('id', 'asc')->get();
         $user_id = Auth::guard("nurse_middle")->user()->id;
         //  echo "<pre>";print_r($jobs_list);die;
 
         $countries = DB::table('country')->where('status', 1)->get();
-        return view('nurse.dashboard', compact('countries', 'jobs_list','user_id'));
+        return view('nurse.dashboard', compact('countries', 'jobs_list', 'user_id'));
     }
+
+    public function filterJobs(Request $request)
+    {
+        // print_r($request->all());die;
+        $user_id = Auth::guard("nurse_middle")->user()->id;
+        $filter_data = $request->filter;
+        $jobs_list = JobsModel::query();
+
+        if ($filter_data == 'top') {
+            $saved =  SavedSearches::where('user_id', $user_id)->where('status_my_preference', 1)->first();
+            if ($saved) {
+                // Nurse Type
+                if (!empty($saved->filter_nurse_type)) {
+
+                    $nurseTypeIds = json_decode($saved->filter_nurse_type, true);
+
+                    $jobs_list->where(function ($q) use ($nurseTypeIds) {
+                        foreach ($nurseTypeIds as $id) {
+                            $q->orWhereJsonContains('nurse_type_id', $id);
+                        }
+                    });
+                }
+
+                if (!empty($saved->filter_employment_type)) {
+
+                    $nurseTypeIds = json_decode($saved->filter_employment_type, true);
+
+                    $jobs_list->where(function ($q) use ($nurseTypeIds) {
+                        foreach ($nurseTypeIds as $id) {
+                            $q->orWhereJsonContains('emplyeement_type', $id);
+                        }
+                    });
+                }
+
+                // //Benefit
+                if (!empty($benefitIds)) {
+                    $jobs_list->where(function ($q) use ($benefitIds) {
+                        foreach ($benefitIds as $id) {
+                            $q->orWhereRaw("JSON_SEARCH(
+                            JSON_EXTRACT(benefits, '$.*[*]'),'one', ? ) IS NOT NULL
+                            ", [$id]);
+                        }
+                    });
+                }
+
+                // //speciality
+                if (!empty($saved->filter_speciality)) {
+
+                    $nurseTypeIds = json_decode($saved->filter_speciality, true);
+
+                    $jobs_list->where(function ($q) use ($nurseTypeIds) {
+                        foreach ($nurseTypeIds as $id) {
+                            $q->orWhereJsonContains('typeofspeciality', $id);
+                        }
+                    });
+                }
+
+                // if (!empty($saved->filter_work_shift)) {
+
+                //     $nurseTypeIds = json_decode($saved->filter_work_shift, true);
+
+                //     $jobs_list->where(function ($q) use ($nurseTypeIds) {
+                //         foreach ($nurseTypeIds as $id) {
+                //             $q->orWhereJsonContains('shift_type', $id);
+                //         }
+                //     });
+                // }
+                // // Work Environment
+                // if (!empty($saved->filter_work_environment)) {
+
+                //     $nurseTypeIds = json_decode($saved->filter_work_environment, true);
+
+                //     $jobs_list->where(function ($q) use ($nurseTypeIds) {
+                //         foreach ($nurseTypeIds as $id) {
+                //             $q->orWhereJsonContains('work_environment', $id);
+                //         }
+                //     });
+                // }
+                // // Employee Positions
+                // if (!empty($saved->filter_employee_positions)) {
+
+                //     $nurseTypeIds = json_decode($saved->filter_employee_positions, true);
+
+                //     $jobs_list->where(function ($q) use ($nurseTypeIds) {
+                //         foreach ($nurseTypeIds as $id) {
+                //             $q->orWhereJsonContains('emplyeement_positions', $id);
+                //         }
+                //     });
+                // }
+
+                // // Location
+                // if (!empty($saved->filter_location_preference)) {
+                //     $locations = json_decode($saved->filter_location_preference, true);
+                //     $jobs_list->whereIn('location_name', $locations);
+                // }
+
+                // Sector
+                if (!empty($saved->filter_sector)) {
+                    $jobs_list->where('sector', $saved->filter_sector);
+                }
+
+                // Salary Range
+                // if (!empty($saved->filter_salary_min)) {
+                //     $jobs_list->where('salary', '>=', $saved->filter_salary_min);
+                // }
+
+                // if (!empty($saved->filter_salary_max)) {
+                //     $jobs_list->where('salary', '<=', $saved->filter_salary_max);
+                // }
+
+
+                // if (!empty($saved->filter_experience_years)) {
+                //     $jobs_list->where('experience_level', '>=', $saved->filter_experience_years);
+                // }
+            }
+        } elseif ($filter_data == 'instant') {
+            echo 'instant';
+            die;
+        } elseif ($filter_data == 'last_minute') {
+            echo 'last_minute';
+            die;
+        } elseif ($filter_data == 'immediate') {
+            echo 'immediate';
+            die;
+        } elseif ($filter_data == 'urgent') {
+            echo 'urgent';
+            die;
+        } else {
+            $jobs_list->where('healthcare_id', 501);
+        }
+        $jobs_list = $jobs_list->where('save_draft', 2)->get();
+        return view('nurse.dashboard_partial', compact('jobs_list', 'user_id'))->render();
+    }
+
     public function index($message = '')
     {
         if (!Auth::guard('nurse_middle')->check()) {
