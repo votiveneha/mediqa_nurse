@@ -71,16 +71,16 @@ class HomeController extends Controller
         $this->authServices = $authServices;
         
     }
-
+ 
     public function dashboard()
     {
-        // $jobs_list = JobsModel::where('save_draft', 2)->orderBy('created_at','desc')->limit(6)->get();
-        $jobs_list = JobsModel::where('save_draft', 2)->orderBy('id', 'asc')->get();
+        $jobs_list = JobsModel::where('save_draft', 2)->orderBy('created_at','desc')->limit(6)->get();
+        // $jobs_list = JobsModel::where('save_draft', 2)->orderBy('id','asc')->get();
         $user_id = Auth::guard("nurse_middle")->user()->id;
         //  echo "<pre>";print_r($jobs_list);die;
 
         $countries = DB::table('country')->where('status', 1)->get();
-        return view('nurse.dashboard', compact('countries', 'jobs_list', 'user_id'));
+        return view('nurse.dashboard', compact('countries', 'jobs_list','user_id'));
     }
 
     public function filterJobs(Request $request)
@@ -89,9 +89,10 @@ class HomeController extends Controller
         $user_id = Auth::guard("nurse_middle")->user()->id;
         $filter_data = $request->filter;
         $jobs_list = JobsModel::query();
+        $today = Carbon::now()->toDateString();
 
-        if ($filter_data == 'top') {
-            $saved =  SavedSearches::where('user_id', $user_id)->where('status_my_preference', 1)->first();
+        if($filter_data == 'top'){
+            $saved =  SavedSearches::where('user_id',$user_id)->where('status_my_preference',1)->first();
             if ($saved) {
                 // Nurse Type
                 if (!empty($saved->filter_nurse_type)) {
@@ -197,23 +198,43 @@ class HomeController extends Controller
                 //     $jobs_list->where('experience_level', '>=', $saved->filter_experience_years);
                 // }
             }
-        } elseif ($filter_data == 'instant') {
-            echo 'instant';
-            die;
-        } elseif ($filter_data == 'last_minute') {
-            echo 'last_minute';
-            die;
-        } elseif ($filter_data == 'immediate') {
-            echo 'immediate';
-            die;
-        } elseif ($filter_data == 'urgent') {
-            echo 'urgent';
-            die;
-        } else {
-            $jobs_list->where('healthcare_id', 501);
+                        
+        }elseif ($filter_data == 'instant'){
+            $jobs_list = $jobs_list->whereDate('updated_at',$today)->where('main_emp_type',3);
+        }elseif ($filter_data == 'last_minute'){
+            $jobs_list = $jobs_list
+                ->where(function ($query) {
+                    $query->whereDate('updated_at', Carbon::today())
+                        ->orWhereDate('updated_at', Carbon::yesterday());
+                })
+                ->where('main_emp_type', 3);
+        }elseif ($filter_data == 'immediate'){
+            $jobs_list = $jobs_list
+                ->whereBetween('updated_at', [Carbon::today(), Carbon::today()->addDays(7)])
+                ->where('main_emp_type', '!=', 3);
+        }elseif ($filter_data == 'urgent'){
+            $jobs_list = $jobs_list
+                ->whereBetween('updated_at', [Carbon::today(), Carbon::today()->addDays(5)])
+                ->where('urgent_hire', 1);
+        }else {
+
+            $jobs_list = $jobs_list->where(function ($query) {
+
+                $query->where(function ($q) {
+                    // Temporary jobs → 5 days
+                    $q->where('main_emp_type', 3)
+                        ->where('updated_at', '>=', Carbon::now()->subDays(5));
+                })
+
+                    ->orWhere(function ($q) {
+                        // Permanent / Fixed → 15 days
+                        $q->whereIn('main_emp_type', [1, 2])
+                            ->where('updated_at', '>=', Carbon::now()->subDays(15));
+                    });
+            });
         }
-        $jobs_list = $jobs_list->where('save_draft', 2)->get();
-        return view('nurse.dashboard_partial', compact('jobs_list', 'user_id'))->render();
+        $jobs_list = $jobs_list->where('save_draft',2)->get();
+        return view('nurse.dashboard_partial',compact('jobs_list','user_id'))->render();
     }
 
     public function index($message = '')

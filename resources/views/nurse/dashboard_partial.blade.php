@@ -128,7 +128,7 @@ use Carbon\Carbon;
                     Complete Credentials to Apply
                 </button>
                 @elseif($status == 3 || $status == 4)
-                <button class="btn nurse-apply-btn text-white status-pill status-in-review"
+                <button class="btn nurse-apply-btn  status-pill status-in-review"
                     onclick="openStatusModal('review')">
                     Verification in Progress
                 </button>

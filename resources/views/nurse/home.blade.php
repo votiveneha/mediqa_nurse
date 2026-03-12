@@ -59,7 +59,7 @@
         .filters {
             border-radius: 10px;
             /* display: grid;
-                    grid-template-columns: repeat(5, 1fr); */
+                                                                                grid-template-columns: repeat(5, 1fr); */
         }
 
         .filter-item {
@@ -340,13 +340,118 @@
             border-radius: 8px;
             font-weight: 500;
         }
-        .stop h4{
-          font-size: 16px;
+
+        .stop h4 {
+            font-size: 16px;
         }
-        .stop h4 span{
-          font-size: 20px;
-          font-weight: 800;
-          margin-left: 4px;
+
+        .stop h4 span {
+            font-size: 20px;
+            font-weight: 800;
+            margin-left: 4px;
+        }
+
+        .score-cards {
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .tooltip-circle {
+            background: #50b5a3;
+            /* padding: 1px 9px; */
+            border-radius: 100%;
+            width: 100%;
+            display: inline-flex;
+            width: fit-content;
+            justify-content: center;
+            align-items: center;
+            width: 18px;
+            height: 18px;
+        }
+
+        .tooltip-circle i {
+            font-size: 10px;
+        }
+
+        .step1 {
+            background: #cfe8df;
+            color: #2f9c7a;
+        }
+
+        .step2 {
+            background: #dbe9f8;
+            color: #2d74c4;
+        }
+
+        .step3 {
+            background: #fde7c7;
+            color: #e59e26;
+        }
+
+        .card-box {
+            background: #fff;
+            border-radius: 10px;
+        }
+
+        .list-item {
+            background: #f5f7fa;
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .check-list li {
+            margin-bottom: 10px;
+        }
+
+        .info-icon {
+            color: #fff;
+            cursor: pointer;
+        }
+
+        /* ======== */
+
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip-btn {
+            cursor: pointer;
+            margin-left: 5px;
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        .tooltip_speciality_status {
+            display: none;
+            position: absolute;
+            top: 25px;
+            /* left: 0; */
+            right: 0;
+            width: 320px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            z-index: 999;
+        }
+
+        .tooltip_speciality_status ul {
+            padding-left: 18px;
+            margin: 0;
+        }
+
+        /* Show on hover */
+        .tooltip-container:hover .tooltip_speciality_status {
+            display: block;
         }
     </style>
     <main class="main">
@@ -999,10 +1104,10 @@
                                     <svg width="90" height="90" viewBox="0 0 120 120">
                                         <!-- Heart -->
                                         <path d="M60 22
-                        C60 18 55 14 50 18
-                        C45 22 48 30 60 38
-                        C72 30 75 22 70 18
-                        C65 14 60 18 60 22Z" fill="#ff6b6b" />
+                                                                                    C60 18 55 14 50 18
+                                                                                    C45 22 48 30 60 38
+                                                                                    C72 30 75 22 70 18
+                                                                                    C65 14 60 18 60 22Z" fill="#ff6b6b" />
                                         <!-- Briefcase -->
                                         <rect x="25" y="45" width="70" height="45" rx="6"
                                             fill="#4a5f73" />
@@ -1171,11 +1276,11 @@
                                 </figure>
                             </div>
                         </div>
-                         <div class="col-lg-6 col-sm-12">
+                        <div class="col-lg-6 col-sm-12">
                             <div class="content-job-inner">
                                 <h2 class="text-30 wow animate__ animate__fadeInUp animated"
                                     style="visibility: visible; animation-name: fadeInUp;"> Stop scrolling </h2>
-                                     <h2 class="text-30 wow animate__ animate__fadeInUp animated"
+                                <h2 class="text-30 wow animate__ animate__fadeInUp animated"
                                     style="visibility: visible; animation-name: fadeInUp;"> Start matching </h2>
                                 <div class="mt-20 pr-50 text-md-lh28 wow animate__ animate__fadeInUp animated"
                                     style="visibility: visible; animation-name: fadeInUp;">
@@ -1183,12 +1288,271 @@
                                         <h4>Create Your <span> <a href="#"> Professional Profile </a></span></h4>
                                     </div>
                                 </div>
-                               
+
                             </div>
                         </div>
                     </div>
 
 
+                </div>
+
+            </section>
+            <section class="py-5">
+                <div class="container">
+                    <h2 class="text-center">How Matching Works</h2>
+                    <div class="row mt-4 d-flex align-items-stretch">
+                        <!-- Step 1 -->
+                        <div class="col-md-6 col-sm-12 mb-4 d-flex">
+                            <div class="bg-white score-cards h-100">
+                                <div class="d-flex mb-3">
+                                    <div class="ml-3">
+                                        <h5>Build Your Professional Profile, always 100% free.</h5>
+                                        <div class="mt-2">
+                                            <p>Your qualifications and preferences become your matching blueprint</p>
+                                            <p>Data securely stored and ready: </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-box">
+                                    <div class="list-item">
+                                        {{-- </span> --}}
+                                        {{-- <label class="form-label"> --}}
+                                        Specialty Status
+                                        <span class="tooltip-container">
+                                            <span class="info tooltip-btn tooltip-circle">
+                                                <i class="fa fa-info info-icon" aria-hidden="true"></i>
+                                            </span>
+                                            <div class="tooltip_speciality_status">
+                                                <ul>
+                                                    <li><strong>For every specialty you choose, tell us how it fits into
+                                                            your career today: </strong></li>
+                                                    <li><strong>Principal :</strong> Your main area of practice </li>
+                                                    <li><strong>Current :</strong> Actively practising in this specialty
+                                                    </li>
+                                                    <li><strong>First:</strong> Your original or foundational specialty
+                                                    </li>
+                                                    <li><strong>Former :</strong> Previously practised but not current
+                                                    </li>
+                                                    <li><strong>Upskilling / Transitioning:</strong> Moving into this
+                                                        specialty </li>
+                                                </ul>
+                                            </div>
+                                        </span>
+                                        {{-- </label> --}}
+
+
+                                    </div>
+                                    <div class="list-item">
+                                        {{-- <label class="form-label"> --}}
+                                        Registration & Licences
+                                        <span class="tooltip-container">
+                                            <span class="info tooltip-btn tooltip-circle">
+                                                <i class="fa fa-info info-icon" aria-hidden="true"></i>
+                                            </span>
+                                            <div class="tooltip_speciality_status">
+                                                <ul>
+
+                                                    <li><strong>AHPRA:</strong>Verified registration, endorsements,
+                                                        conditions, expiry </li>
+                                                    <li><strong>NDIS :</strong> registered provider status required
+                                                    </li>
+                                                    <li>Bills under Medicare / MBS (NP/Midwife)
+                                                    </li>
+                                                    <li>PBS Prescriber
+                                                    </li>
+                                                    <li>Immunisation Provider</li>
+                                                    <li>Uses radiation equipment </li>
+                                                </ul>
+                                            </div>
+                                        </span>
+                                        {{-- </label> --}}
+                                    </div>
+                                    <div class="list-item">
+                                        Checks & Clearances
+                                        <span class="tooltip-container">
+                                            <span class="info tooltip-btn tooltip-circle">
+                                                <i class="fa fa-info info-icon" aria-hidden="true"></i>
+                                            </span>
+                                            <div class="tooltip_speciality_status">
+                                                <ul>
+
+                                                    <li>Residency </li>
+                                                    <li>NDIS Worker Screening Check
+                                                    </li>
+                                                    <li>Working With Children Check (WWCC)
+                                                    </li>
+                                                    <li>Police Clearance required
+                                                    </li>
+                                                    <li>Specialized Clearances </li>
+                                                </ul>
+                                            </div>
+                                        </span>
+                                    </div>
+                                    <div class="list-item">
+                                        General Certifications
+                                        <span class="tooltip-container">
+                                            <span class="info tooltip-btn tooltip-circle">
+                                                <i class="fa fa-info info-icon" aria-hidden="true"></i>
+                                            </span>
+                                            <div class="tooltip_speciality_status">
+                                                <ul>
+                                                    <li>Life Support </li>
+                                                    <li>Medication & Clinical Skills
+                                                    </li>
+                                                    <li>Wound & Clinical Care
+                                                    </li>
+                                                    <li>Aged Care / Communi</li>
+                                                    <li>Clinical Skills and Core Competencies</li>
+                                                    <li>Midwifery-Specific Training</li>
+                                                    <li>Leadership and Professional Development</li>
+                                                    <li>Technology and Innovation in Healthcare</li>
+                                                    <li>Wellness and Self-Care</li>
+                                                    <li>NDIS Mandatory Training</li>
+                                                </ul>
+                                            </div>
+                                        </span>
+                                    </div>
+                                    <div class="list-item">
+                                        Vaccination
+                                        <span class="tooltip-container">
+                                            <span class="info tooltip-btn tooltip-circle">
+                                                <i class="fa fa-info info-icon" aria-hidden="true"></i>
+                                            </span>
+                                            <div class="tooltip_speciality_status">
+                                                <ul>
+                                                    <li>State-specific: Each state has a predefined vaccination profile.
+                                                    </li>
+                                                    <li>System-defined</li>
+                                                </ul>
+                                            </div>
+                                        </span>
+                                    </div>
+                                     <div class="list-item">
+                                        Shift & Lifestyle Preferences
+                                        <span class="tooltip-container">
+                                            <span class="info tooltip-btn tooltip-circle">
+                                                <i class="fa fa-info info-icon" aria-hidden="true"></i>
+                                            </span>
+                                            <div class="tooltip_speciality_status">
+                                                <ul>
+                                                    <li>Day or night shifts? Fixed roster? Self-scheduling? Weekends off? Your flexibility shapes your opportunities. </li>
+                                                </ul>
+                                            </div>
+                                        </span>
+                                    </div>
+                                    <div class="list-item">
+                                        Location Radius
+                                        <span class="tooltip-container">
+                                            <span class="info tooltip-btn tooltip-circle">
+                                                <i class="fa fa-info info-icon" aria-hidden="true"></i>
+                                            </span>
+                                            <div class="tooltip_speciality_status">
+                                                <ul>
+                                                    <li>Choose where you’re willing to work: suburb, state, relocation, or
+                                                        international. </li>
+                                                </ul>
+                                            </div>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Step 2 -->
+                        <div class="col-md-6 col-sm-12 mb-4 d-flex">
+                            <div class="h-100 d-flex flex-column w-100">
+                            <div class="bg-white score-cards flex-fill ">
+                                <div class="d-flex mb-3">
+                                    <div class="ml-3">
+                                        <h5>Intelligent Match % scoring</h5>
+                                    </div>
+                                </div>
+                                <div class="card-box">
+                                    <div class="list-item">
+                                        {{-- </span> --}}
+                                        {{-- <label class="form-label"> --}}
+                                        Every job is scored against your real profile, not keywords.
+
+                                        We don’t guess based on CV text
+                                        <span class="tooltip-container">
+                                            <span class="info tooltip-btn tooltip-circle">
+                                                <i class="fa fa-info info-icon" aria-hidden="true"></i>
+                                            </span>
+                                            <div class="tooltip_speciality_status">
+                                                <ul>
+                                                    <li><Strong>We measure structured alignment across: </Strong></li>
+                                                    <li>Specialty & specialty status</li>
+                                                    <li>Years of experience in each area </li>
+                                                    <li>AHPRA registration & endorsements
+                                                    </li>
+                                                    <li>Compliance readiness (vaccines, checks, training)
+                                                    </li>
+                                                    <li>Shift compatibility
+                                                    </li>
+                                                    <li>Location radius </li>
+                                                    <li>Benefits alignment </li>
+                                                    <li>Each factor is weighted.
+                                                        Each job is evaluated in real time.
+                                                        When you see a high match, you know why. </li>
+                                                </ul>
+                                            </div>
+                                        </span>
+                                        {{-- </label> --}}
+                                    </div>
+                                </div>
+                            </div>
+                              <div class="bg-white score-cards mt-4 flex-fill">
+                                <div class="d-flex mb-3">
+                                    <div class="ml-3">
+                                        <h5>Apply with confidence </h5>
+                                    </div>
+                                </div>
+                                <div class="card-box">
+                                    <div class="list-item">
+                                        {{-- </span> --}}
+                                        {{-- <label class="form-label"> --}}
+                                        Move Faster, High-match candidates stand out immediately
+                                        <span class="tooltip-container">
+                                            <span class="info tooltip-btn tooltip-circle">
+                                                <i class="fa fa-info info-icon" aria-hidden="true"></i>
+                                            </span>
+                                            <div class="tooltip_speciality_status">
+                                                <ul>
+                                                    <li><Strong>Medical facilities and Agencies can see your:   </Strong></li>
+                                                    <li>Verified registration </li>
+                                                    <li>Compliance readiness  </li>
+                                                    <li>Specialty alignment </li>
+                                                    <li>Shift compatibility </li>
+                                                    <li>That means fewer delays, and faster decisions. </li>
+                                                </ul>
+                                            </div>
+                                        </span>
+                                        {{-- </label> --}}
+                                    </div>
+                                    <p>Receive Instant Opportunities </p>
+                                      <div class="list-item">
+                                        {{-- </span> --}}
+                                        {{-- <label class="form-label"> --}}
+                                      When timing matters, MediQa makes it visible. 
+                                        <span class="tooltip-container">
+                                            <span class="info tooltip-btn tooltip-circle">
+                                                <i class="fa fa-info info-icon" aria-hidden="true"></i>
+                                            </span>
+                                            <div class="tooltip_speciality_status">
+                                                <ul>
+                                                    <li>Instant Connect → Same-day shifts</Strong></li>
+                                                    <li>Last Minute → Starts within 48h </li>
+                                                    <li>Immediate Start → Within 7 days </li>
+                                                    <li>Urgent Hire → Employer priority </li>
+                                                </ul>
+                                            </div>
+                                        </span>
+                                        {{-- </label> --}}
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </section>

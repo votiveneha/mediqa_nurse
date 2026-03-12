@@ -702,6 +702,7 @@ class JobPostingController extends Controller
         $application_deadline = $request->application_deadline;
         $listing_expiry = $request->listing_expiry;
         $custom_date = $request->custom_date;
+        $priority_tags = isset($request->priority_tags)?1:0;
 
         //$job_id = Session::get('jobId');
         $job_id = $request->job_id;
@@ -710,6 +711,7 @@ class JobPostingController extends Controller
         $job_post->application_deadline = $application_deadline;
         $job_post->expiry_date = $listing_expiry;
         $job_post->custom_expiry_date = $custom_date;
+        $job_post->urgent_hire = $priority_tags;
         
         
         $run = $job_post->save();

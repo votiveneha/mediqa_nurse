@@ -150,9 +150,13 @@ form#update_profile_form ul.select2-selection__rendered {
                           <input class="form-control logo" type="file" name="facility_logo" id="profile_image">
                           <span id='reqsector_preferences' class='reqError text-danger valley'></span>
                         </div>
-                        @if($user_data->profile_img != NULL)
+                        @if($user_data->profile_img != "nurse/assets/imgs/nurse06.png" || $user_data->profile_img != NULL)
                         <div class="show_logo">
                           <img src="{{ asset('/healthcareimg/uploads') }}/{{ $user_data->profile_img }}" style="width:100px;height:100px;">
+                        </div>
+                        @else
+                        <div class="show_logo">
+                          <img src="{{ asset('nurse/assets/imgs/nurse06.png') }}" style="width:100px;height:100px;">
                         </div>
                         @endif
                         <div class="form-group level-drp">
@@ -404,8 +408,75 @@ form#update_profile_form ul.select2-selection__rendered {
                         <div class="add_another_location_btn">
                           <a style="cursor:pointer" class="btn btn-default another_location" onclick="another_location()">Add another Location</a>
                         </div>
-                        <div class="form-group level-drp">
+                        @php
+                          $get_accreditation = (!empty($user_data->accreditations_certifications))?json_decode($user_data->accreditations_certifications):[];  
                           
+                        @endphp
+                        @if(!empty($get_accreditation))
+                        <div class="another_accreditations_data">
+                        @foreach($get_accreditation as $index=>$accreditation)
+                        <div class="form-group level-drp">
+                            <input type="hidden" name="accreditation_no" class="accreditation_no" value="{{ $index }}">    
+                            <label class="form-label" for="input-1">Accreditations & Certifications:</label>
+                            <?php
+                                
+                                $accreditations_data = DB::table('accreditation_certifications')->where("parent",0)->orderBy("id","asc")->get();
+                                
+                                $acc_arr = [];
+                                foreach($accreditation as $sub_index=>$acc){
+                                  $acc_arr[] = $sub_index;
+                                }
+
+                                $acc_json = json_encode($acc_arr);
+                                //print_r($acc_arr);
+                                
+                            ?>
+                            <input type="hidden" name="mainfactype" class="acctype acctype-{{ $index }}" value="{{ $acc_json }}">
+                            <ul id="accreditations_data-{{ $index }}" style="display:none;">
+                             
+                              @if(!empty($accreditations_data))
+                              @foreach($accreditations_data as $ac_data)
+                              <li data-value="{{ $ac_data->id }}">{{ $ac_data->name }}</li>
+                              @endforeach
+                              @endif
+                            </ul>
+                            <select class="js-example-basic-multiple addAll_removeAll_btn facworktype facworktype-1" data-list-id="accreditations_data-{{ $index }}" name="accreditations_data[1][]" multiple onchange="getAccreditationFields('',{{ $index }})"></select>
+                            <span id="reqfacworktype" class="reqError text-danger valley"></span>
+                                
+                        </div>
+                        <div class="accreditions_data-{{ $index }}">
+                          @foreach($acc_arr as $accarr)
+                          @php
+                             $accreditations_subdata = DB::table('accreditation_certifications')->where("parent",$accarr)->orderBy("id","asc")->get();   
+                             $accreditations_subdataname = DB::table('accreditation_certifications')->where("id",$accarr)->first(); 
+                             $ac_data_arr = (array)$accreditation;
+                             
+                             $ac_data_json = json_encode($ac_data_arr[$accarr])
+                          @endphp
+                          <div class="accredition_main_div accredition_main_div-{{ $index }}{{ $accarr }}">
+                            <div class="subaccreditiondiv subaccreditiondiv-{{ $index }}{{ $accarr }} form-group level-drp">
+                              <label class="form-label accredition_label accredition_label-{{ $index }}{{ $accarr }}" for="input-1">{{ $accreditations_subdataname->name}}</label>
+                              <input type="hidden" name="subaccredition" class="subaccredition subaccredition-{{ $index }}{{ $accarr }}" value="">
+                              <input type="hidden" name="subaccredition_list" class="subaccredition_list-{{ $index }}" value="{{ $accarr }}">
+                              <input type="hidden" name="mainfactype" class="subacctype subacctype-{{ $index }}{{ $accarr }}" value="{{ $ac_data_json }}">
+                              <ul id="subaccredition_field-{{ $index }}{{ $accarr }}" style="display:none;">
+                                @foreach($accreditations_subdata as $ac_data)
+                                <li data-value="{{ $ac_data->id }}">{{ $ac_data->name }}</li>
+                                @endforeach
+                              </ul>
+                              <select class="js-example-basic-multiple addAll_removeAll_btn accredition_valid accredition_valid-{{ $index }}{{ $accarr }}" data-list-id="subaccredition_field-{{ $index }}{{ $accarr }}" name="subaccreditation_data[{{ $index }}][{{ $accarr }}][]" multiple></select>
+                              <span id="reqsubaccredition-{{ $accarr }}" class="reqError text-danger valley"></span>
+                            </div>
+                            <div class="showsubwpaccreditiondata showsubaccreditiondata-{{ $index }}{{ $accarr }}"></div>
+                          </div>
+                          @endforeach
+                        </div>
+                        
+                        @endforeach   
+                        </div>     
+                        @else
+                        <div class="form-group level-drp">
+                            <input type="hidden" name="accreditation_no" class="accreditation_no" value="1">    
                             <label class="form-label" for="input-1">Accreditations & Certifications:</label>
                             <?php
                                 
@@ -438,7 +509,7 @@ form#update_profile_form ul.select2-selection__rendered {
                                 // $p_memb_json = json_encode(isset($p_memb_arr[0])?$p_memb_arr[0]:[]);
                             ?>
                             <!-- <input type="hidden" name="mainfactype" class="mainfactype mainfactype-1" value="{{ $p_memb_json }}"> -->
-                            <ul id="accreditations_data" style="display:none;">
+                            <ul id="accreditations_data-1" style="display:none;">
                              
                               @if(!empty($accreditations_data))
                               @foreach($accreditations_data as $ac_data)
@@ -446,11 +517,13 @@ form#update_profile_form ul.select2-selection__rendered {
                               @endforeach
                               @endif
                             </ul>
-                            <select class="js-example-basic-multiple addAll_removeAll_btn facworktype facworktype-1" data-list-id="accreditations_data" name="subworkthlevels[1][]" multiple onchange="getAccreditationFields()"></select>
+                            <select class="js-example-basic-multiple addAll_removeAll_btn facworktype facworktype-1" data-list-id="accreditations_data-1" name="accreditations_data[1][]" multiple onchange="getAccreditationFields('',1)"></select>
                             <span id="reqfacworktype" class="reqError text-danger valley"></span>
-                          
+                                
                         </div>
-                        <div class="accreditions_data"></div>
+                        <div class="accreditions_data-1"></div>
+                        <div class="another_accreditations_data"></div>
+                        @endif
                         <div class="add_another_location_btn">
                           <a style="cursor:pointer" class="btn btn-default" onclick="another_accreditations()">Add another Accreditations & Certifications</a>
                         </div>
@@ -460,9 +533,9 @@ form#update_profile_form ul.select2-selection__rendered {
                           </label>
                           <select class="form-input mr-10 select-active work_environment_size" name="work_environment_size" id="work_environment_size">
                             <option value="">select</option>
-                            <option value="1">Small clinic</option>
-                            <option value="2">Medium hospital</option>
-                            <option value="3">Large tertiary centre</option>
+                            <option value="1" @if($user_data->work_environment_size == 1) selected @endif>Small clinic</option>
+                            <option value="2" @if($user_data->work_environment_size == 2) selected @endif>Medium hospital</option>
+                            <option value="3" @if($user_data->work_environment_size == 3) selected @endif>Large tertiary centre</option>
                           </select>
                           <span id='reqsector_preferences' class='reqError text-danger valley'></span>
                           
@@ -477,17 +550,17 @@ form#update_profile_form ul.select2-selection__rendered {
                           <select class="form-input mr-10 select-active staff_wellbeing_field" name="staff_wellbeing_field" id="staff_wellbeing_field" onchange="getStaff(this.value,'single')">
                             <option value="">select</option>
                             @foreach($staff_data as $st_data)
-                            <option value="{{ $st_data->id }}">{{ $st_data->name }}</option>
+                            <option value="{{ $st_data->id }}" @if($user_data->staff_wellbeing_programs == $st_data->id) selected @endif>{{ $st_data->name }}</option>
                             @endforeach
                             
                           </select>
                           <span id='reqsector_preferences' class='reqError text-danger valley'></span>
                           
                         </div>
-                        <div class="form-group level-drp staff_wellbeing_other d-none">
+                        <div class="form-group level-drp staff_wellbeing_other @if($user_data->staff_wellbeing_programs != 7) d-none @endif">
                             <label class="form-label accredition_label accredition_label" for="input-1">Other</label>
                             
-                            <input type="text" name="other_text" class="other_text" />
+                            <input type="text" name="other_text" class="other_text" value="{{ $user_data->other_staff_wellbeing }}"/>
                             <span id="reqsubaccredition" class="reqError text-danger valley"></span>
                         </div>
                         <h6 class="emergency_text">Technology & Equipment</h6>
@@ -497,6 +570,7 @@ form#update_profile_form ul.select2-selection__rendered {
                           @php
                             $emr_data = DB::table("healthcare_profile_dropdowns")->where("parent",2)->get();    
                           @endphp
+                          <input type="hidden" class="show_emr_ehr" value="{{ $user_data->technology_emr_system }}"/>
                           <ul id="emr_ehr_data" style="display:none;">
                              
                             @if(!empty($emr_data))
@@ -505,14 +579,14 @@ form#update_profile_form ul.select2-selection__rendered {
                             @endforeach
                             @endif
                           </ul>
-                          <select class="js-example-basic-multiple addAll_removeAll_btn facworktype facworktype-1" data-list-id="emr_ehr_data" name="subworkthlevels[1][]" multiple onchange="getStaff('','multiple')"></select>
+                          <select class="js-example-basic-multiple addAll_removeAll_btn facworktype facworktype-1" data-list-id="emr_ehr_data" name="emr_ehr_data[]" multiple onchange="getStaff('','multiple')"></select>
                           <span id='reqsector_preferences' class='reqError text-danger valley'></span>
                           
                         </div>
                         <div class="form-group level-drp emr_ehr_other d-none">
                             <label class="form-label accredition_label accredition_label" for="input-1">Other</label>
                             
-                            <input type="text" name="emr_other_text" class="emr_other_text" />
+                            <input type="text" name="emr_other_text" class="emr_other_text" value="{{ $user_data->other_technology_emr }}"/>
                             <span id="reqsubaccredition" class="reqError text-danger valley"></span>
                         </div>
                         <div class="form-group level-drp">
@@ -524,7 +598,7 @@ form#update_profile_form ul.select2-selection__rendered {
                           <select class="form-input mr-10 select-active equipment_field" name="equipment_field" id="equipment_field">
                             <option value="">select</option>
                             @foreach($equipment_data as $st_data)
-                            <option value="{{ $st_data->id }}">{{ $st_data->name }}</option>
+                            <option value="{{ $st_data->id }}" @if($user_data->equipment_facilities == $st_data->id) selected @endif>{{ $st_data->name }}</option>
                             @endforeach
                             
                           </select>
@@ -534,11 +608,12 @@ form#update_profile_form ul.select2-selection__rendered {
                         <div class="level-drp digital_health_checkboxes">
                             <label class="form-label accredition_label accredition_label" for="input-1">Digital Health Integration</label>
                             @php
-                              $digital_health_data = DB::table("healthcare_profile_dropdowns")->where("parent",3)->get();    
+                              $digital_health_data = DB::table("healthcare_profile_dropdowns")->where("parent",3)->get();
+                              $digital_health_arr = (is_array(json_decode($user_data->digital_health_integration)))?json_decode($user_data->digital_health_integration):[];    
                             @endphp
                             @foreach($digital_health_data as $st_data)
                             <div class="digital_health_checkbox">
-                              <input type="checkbox" name="digital_health_text" class="digital_health_text" value="{{ $st_data->id }}"/>  {{ $st_data->name }}
+                              <input type="checkbox" name="digital_health_text[]" class="digital_health_text" @if(in_array($st_data->id, $digital_health_arr)) checked @endif value="{{ $st_data->id }}"/>  {{ $st_data->name }}
                             </div>
                             @endforeach
                             <span id="reqsubaccredition" class="reqError text-danger valley"></span>
@@ -553,24 +628,24 @@ form#update_profile_form ul.select2-selection__rendered {
                           <select class="form-input mr-10 select-active professional_field" name="professional_field" id="professional_field" onchange="getStaff(this.value,'single')">
                             <option value="">select</option>
                             @foreach($professional_data as $st_data)
-                            <option value="{{ $st_data->id }}">{{ $st_data->name }}</option>
+                            <option value="{{ $st_data->id }}" @if($user_data->professional_development == $st_data->id) selected @endif>{{ $st_data->name }}</option>
                             @endforeach
                             
                           </select>
                           <span id='reqsector_preferences' class='reqError text-danger valley'></span>
                           
                         </div>
-                        <div class="form-group level-drp professional_other d-none">
+                        <div class="form-group level-drp professional_other @if($user_data->professional_development != 26) d-none @endif">
                             <label class="form-label accredition_label accredition_label" for="input-1">Other</label>
                             
-                            <input type="text" name="professional_other_text" class="professional_other_text" />
+                            <input type="text" name="professional_other_text" class="professional_other_text" value="{{ $user_data->other_professional_development }}"/>
                             <span id="reqsubaccredition" class="reqError text-danger valley"></span>
                         </div>
                         <h6 class="emergency_text">Contact Person</h6>
                         <div class="form-group level-drp">
                           <label class="form-label accredition_label accredition_label" for="input-1">Full Name</label>
                           
-                          <input type="text" name="full_name" class="full_name" />
+                          <input type="text" name="full_name" class="full_name" value="{{ $user_data->contact_person_name }}"/>
                           <span id="reqsubaccredition" class="reqError text-danger valley"></span>
                         </div>      
                         
@@ -583,7 +658,7 @@ form#update_profile_form ul.select2-selection__rendered {
                           <select class="form-input mr-10 select-active role_position_field" name="role_position_field" id="role_position_field" onchange="getRole(this.value)">
                             <option value="">select</option>
                             @foreach($role_data as $r_data)
-                            <option value="{{ $r_data->id }}">{{ $r_data->name }}</option>
+                            <option value="{{ $r_data->id }}" @if($user_data->role_position == $r_data->id) selected @endif>{{ $r_data->name }}</option>
                             @endforeach
                             
                           </select>
@@ -593,32 +668,35 @@ form#update_profile_form ul.select2-selection__rendered {
                         <div class="form-group level-drp role_position_other d-none">
                             <label class="form-label accredition_label accredition_label" for="input-1">Other</label>
                             
-                            <input type="text" name="role_position_other_text" class="role_position_other_text" />
+                            <input type="text" name="role_position_other_text" class="role_position_other_text" value="{{ $user_data->role_position_other }}"/>
                             <span id="reqsubaccredition" class="reqError text-danger valley"></span>
                         </div>
                         <div class="form-group level-drp">
                           <label class="form-label accredition_label accredition_label" for="input-1">Email</label>
                           
-                          <input type="email" name="email" class="email" />
+                          <input type="email" name="email" class="email" value="@if($user_data->email != NULL) {{ $user_data->email }} @endif"/>
                           <span id="reqsubaccredition" class="reqError text-danger valley"></span>
                         </div>
                         <div class="form-group level-drp">
                           <label class="form-label accredition_label accredition_label" for="input-1">Phone</label>
                           
-                          <input type="text" name="phone" class="phone" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                          <input type="text" name="phone" class="phone" maxlength="10" value="{{ $user_data->phone }}" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                           <span id="reqsubaccredition" class="reqError text-danger valley"></span>
                         </div>  
+                        @php
+                          $communication_method = (is_array(json_decode($user_data->communication_method)))?json_decode($user_data->communication_method):[];
+                        @endphp
                         <div class="level-drp">
                           <label class="form-label" for="input-1">Preferred Communication Method 
                           </label>
                           <div class="communication_checkbox">
-                            <input type="checkbox" name="communication_text" class="communication_text" value="1"/>  Email
+                            <input type="checkbox" name="communication_text[]" @if(in_array(1,$communication_method)) checked @endif class="communication_text" value="1"/>  Email
                           </div>
                           <div class="communication_checkbox">
-                            <input type="checkbox" name="communication_text" class="communication_text" value="2"/>  Phone
+                            <input type="checkbox" name="communication_text[]" @if(in_array(2,$communication_method)) checked @endif class="communication_text" value="2"/>  Phone
                           </div>
                           <div class="communication_checkbox">
-                            <input type="checkbox" name="communication_text" class="communication_text" value="3"/>  In App
+                            <input type="checkbox" name="communication_text[]" @if(in_array(3,$communication_method)) checked @endif class="communication_text" value="3"/>  In App
                           </div>      
                           <span id='reqsector_preferences' class='reqError text-danger valley'></span>
                           
@@ -626,10 +704,10 @@ form#update_profile_form ul.select2-selection__rendered {
                         <h6 class="emergency_text">Facility Profile Visibility</h6>
                         <div class="level-drp">
                           <div class="profile_visiblity_checkbox">
-                            <input type="checkbox" name="profile_visiblity" class="profile_visiblity" value="1"/>  Public
+                            <input type="radio" name="profile_visiblity" class="profile_visiblity" @if($user_data->profile_visiblity == "1") checked @endif value="1"/>  Public
                           </div>
                           <div class="profile_visiblity_checkbox">
-                            <input type="checkbox" name="profile_visiblity" class="profile_visiblity" value="1"/>  Private
+                            <input type="radio" name="profile_visiblity" class="profile_visiblity" @if($user_data->profile_visiblity == "2") checked @endif value="2"/>  Private
                           </div>
                         </div>
                         <div class="box-button mt-15">
@@ -897,7 +975,28 @@ form#update_profile_form ul.select2-selection__rendered {
     }
 
     function another_accreditations(){
+      var accreditations_data = '<?php echo json_encode($accreditations_data); ?>';
+
+      var lastValue = $('.accreditation_no').last().val();
+      var nextValues = parseInt(lastValue)+1;
       
+      var parse_accreditations_data = JSON.parse(accreditations_data);
+      console.log("accreditations_data",parse_accreditations_data);
+
+      var acc_html = '';
+      var ap = 'ap';
+      for(var i=0;i<parse_accreditations_data.length;i++){
+        acc_html += '<li data-value="'+parse_accreditations_data[i].id+'">'+parse_accreditations_data[i].name+'</li>'
+      }
+      $(".another_accreditations_data").append('\<div class="form-group level-drp">\
+        <input type="hidden" name="accreditation_no" class="accreditation_no" value="'+nextValues+'">\
+        <label class="form-label" for="input-1">Accreditations & Certifications:</label>\
+        <ul id="accreditations_data-'+nextValues+'" style="display:none;">'+acc_html+'</ul>\
+        <select class="js-example-basic-multiple_acc-'+nextValues+' addAll_removeAll_btn facworktype facworktype-1" data-list-id="accreditations_data-'+nextValues+'" name="accreditations_data['+nextValues+'][]" multiple onchange="getAccreditationFields(\''+ap+'\',\''+nextValues+'\')"></select>\
+        <span id="reqfacworktype" class="reqError text-danger valley"></span>\
+        </div><div class="accreditions_data-'+nextValues+'"></div>');
+
+        selectTwoFunction("_acc-"+nextValues);
     }
 
     function getStaff(value,type){
@@ -1220,20 +1319,26 @@ form#update_profile_form ul.select2-selection__rendered {
       toggleClearButton();
     }
 
-    function getAccreditationFields(){
-      var selectedValues = $('.js-example-basic-multiple[data-list-id="accreditations_data"]').val();
+    function getAccreditationFields(ap,next_values){
 
-      $(".accreditions_data .subaccredition_list").each(function(i,val){
+      if(ap == ''){
+        var selectedValues = $('.js-example-basic-multiple[data-list-id="accreditations_data-'+next_values+'"]').val();
+      }else{
+        var selectedValues = $('.js-example-basic-multiple_acc-'+next_values+'[data-list-id="accreditations_data-'+next_values+'"]').val();
+      }
+      
+
+      $(".accreditions_data-"+next_values+" .subaccredition_list-"+next_values).each(function(i,val){
           var val1 = $(val).val();
           console.log("val",val1);
           if(selectedValues.includes(val1) == false){
-              $(".subaccreditiondiv-"+val1).remove();
+              $(".accredition_main_div-"+next_values+val1).remove();
               
           }
       });
 
       for(var i=0;i<selectedValues.length;i++){
-        if($(".accreditions_data .accredition_main_div-"+selectedValues[i]).length < 1){
+        if($(".accreditions_data-"+next_values+" .accredition_main_div-"+next_values+selectedValues[i]).length < 1){
           $.ajax({
               type: "GET",
               url: "{{ url('/healthcare-facilities/getAccreditationsData') }}",
@@ -1253,22 +1358,22 @@ form#update_profile_form ul.select2-selection__rendered {
                   
                   if(data1.accreditation_id != 6){
                     var ap = "ap";
-                    $(".accreditions_data").append('\<div class="accredition_main_div accredition_main_div-'+data1.accreditation_id+'"><div class="subaccreditiondiv subaccreditiondiv-'+data1.accreditation_id+' form-group level-drp">\
-                        <label class="form-label accredition_label accredition_label-'+data1.accreditation_id+'" for="input-1">'+data1.accreditation_name+'</label>\
-                        <input type="hidden" name="subaccredition" class="subaccredition subaccredition-'+data1.accreditation_id+'" value="">\
-                        <input type="hidden" name="subaccredition_list" class="subaccredition_list" value="'+data1.accreditation_id+'">\
-                        <ul id="subaccredition_field-'+data1.accreditation_id+'" style="display:none;">'+accreditation_text+'</ul>\
-                        <select class="js-example-basic-multiple'+data1.accreditation_id+' addAll_removeAll_btn accredition_valid accredition_valid-'+data1.accreditation_id+'" data-list-id="subaccredition_field-'+data1.accreditation_id+'" name="subworkthlevel['+data1.accreditation_id+'][]" multiple></select>\
+                    $(".accreditions_data-"+next_values).append('\<div class="accredition_main_div accredition_main_div-'+next_values+data1.accreditation_id+'"><div class="subaccreditiondiv subaccreditiondiv-'+next_values+data1.accreditation_id+' form-group level-drp">\
+                        <label class="form-label accredition_label accredition_label-'+next_values+data1.accreditation_id+'" for="input-1">'+data1.accreditation_name+'</label>\
+                        <input type="hidden" name="subaccredition" class="subaccredition subaccredition-'+next_values+data1.accreditation_id+'" value="">\
+                        <input type="hidden" name="subaccredition_list" class="subaccredition_list-'+next_values+'" value="'+data1.accreditation_id+'">\
+                        <ul id="subaccredition_field-'+next_values+data1.accreditation_id+'" style="display:none;">'+accreditation_text+'</ul>\
+                        <select class="js-example-basic-multiple'+next_values+data1.accreditation_id+' addAll_removeAll_btn accredition_valid accredition_valid-'+next_values+data1.accreditation_id+'" data-list-id="subaccredition_field-'+next_values+data1.accreditation_id+'" name="subaccreditation_data['+next_values+']['+data1.accreditation_id+'][]" multiple></select>\
                         <span id="reqsubaccredition-'+data1.accreditation_id+'" class="reqError text-danger valley"></span>\
-                        </div><div class="showsubwpaccreditiondata showsubaccreditiondata-'+data1.accreditation_id+'"></div></div>');
+                        </div><div class="showsubwpaccreditiondata showsubaccreditiondata-'+next_values+data1.accreditation_id+'"></div></div>');
 
                     
-                    selectTwoFunction(data1.accreditation_id);
+                    selectTwoFunction(next_values+data1.accreditation_id);
                   }else{
-                    $(".accreditions_data").append('\<div class="accredition_main_div accredition_main_div-'+selectedValues[i]+'"><div class="subaccreditiondiv subaccreditiondiv-'+selectedValues[i]+' form-group level-drp">\
-                      <label class="form-label accredition_label accredition_label-'+selectedValues[i]+'" for="input-1">Other</label>\
+                    $(".accreditions_data").append('\<div class="accredition_main_div accredition_main_div-'+next_values+data1.accreditation_id+'"><div class="subaccreditiondiv subaccreditiondiv-'+next_values+data1.accreditation_id+' form-group level-drp">\
+                      <label class="form-label accredition_label accredition_label-'+next_values+data1.accreditation_id+'" for="input-1">Other</label>\
                       <input type="hidden" name="subaccredition" class="subaccredition subaccredition-'+selectedValues[i]+'" value="">\
-                      <input type="hidden" name="subaccredition_list" class="subaccredition_list" value="'+selectedValues[i]+'">\
+                      <input type="hidden" name="subaccredition_list" class="subaccredition_list" value="'+data1.accreditation_id+'">\
                       <input type="text" name="other_text" class="other_text">\
                       <span id="reqsubaccredition-'+selectedValues[i]+'" class="reqError text-danger valley"></span>\
                       </div><div class="showsubwpaccreditiondata showsubaccreditiondata-'+selectedValues[i]+'"></div></div>');
@@ -1290,17 +1395,23 @@ form#update_profile_form ul.select2-selection__rendered {
         success: function(data) {
             if(data != ""){
                 var state_data = JSON.parse(data);
+                console.log("state_data",state_data);
                 var job_state = '';
-                var job_selected_state = '<?php echo $user_data->site_data; ?>';
-                var job_selected_state = JSON.parse(job_selected_state);
-
-                var sitesArray = Object.values(job_selected_state);
-
-                //console.log("job_selected_state",state_data);
-                console.log("job_selected_state",sitesArray[location_no-1].state);
+                
                 for(var i = 0;i<state_data.length;i++){
-                    if(state_data[i].id == sitesArray[location_no-1].state){
-                      var selected_text = 'selected';
+                    var job_selected_state = '<?php echo $user_data->site_data; ?>';
+                    if(job_selected_state != ""){
+                      var job_selected_state = JSON.parse(job_selected_state);
+
+                      var sitesArray = Object.values(job_selected_state);
+
+                      //console.log("job_selected_state",state_data);
+                      console.log("job_selected_state",sitesArray[location_no-1].state);
+                      if(state_data[i].id == sitesArray[location_no-1].state){
+                        var selected_text = 'selected';
+                      }else{
+                        var selected_text = '';
+                      }
                     }else{
                       var selected_text = '';
                     }
@@ -1457,6 +1568,32 @@ form#update_profile_form ul.select2-selection__rendered {
         
       });  
     } 
+
+    if ($(".show_emr_ehr").val() != "") {
+      var show_emr_ehr = JSON.parse($(".show_emr_ehr").val());
+      $('.js-example-basic-multiple[data-list-id="emr_ehr_data"]').select2().val(show_emr_ehr).trigger('change');
+    }
+
+    
+    $(".accreditation_no").each(function(){
+      var acc_val = $(this).val();
+      if($(".acctype-"+acc_val).val() != ""){
+        var acc_vals = JSON.parse($(".acctype-"+acc_val).val());  
+        console.log("acc_vals",acc_vals);
+        $('.js-example-basic-multiple[data-list-id="accreditations_data-'+acc_val+'"]').select2().val(acc_vals).trigger('change');
+
+        $(".subaccredition_list-"+acc_val).each(function(){
+          var subacc_val = $(this).val();
+          if($(".subacctype-"+acc_val+subacc_val).val() != ""){
+            var subacc_vals = JSON.parse($(".subacctype-"+acc_val+subacc_val).val());  
+            console.log("acc_vals",subacc_vals);
+            $('.js-example-basic-multiple[data-list-id="subaccredition_field-'+acc_val+subacc_val+'"]').select2().val(subacc_vals).trigger('change');
+          }
+          
+        });
+      }
+      
+    });
     
   </script>
 @endsection

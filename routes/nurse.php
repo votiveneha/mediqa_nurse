@@ -43,6 +43,8 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
   Route::get('/medical-facilities-registraion', 'HomeController@registraion')->name('medical-facilities-registraion');
   Route::post('/healthcareRegistration', 'HomeController@healthcareRegistration')->name('healthcareRegistration');
   Route::get('/email-verification-pending', 'HomeController@emailVerificationPending')->name('email-verification-pending');
+  Route::get('/accept_invitation', 'HomeController@accept_invitation')->name('accept_invitation');
+  Route::get('/acceptInvitation', 'SettingsController@accept_invitation')->name('acceptInvitation');
   Route::get('/profile-under-reviewed', 'HomeController@profileUnderReviewed')->name('profile-under-reviewed');
   Route::get('/login', 'HomeController@login')->name('login');
   Route::post('/userloginAction', 'HomeController@userloginAction')->name('userloginAction');
@@ -53,11 +55,18 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
   Route::get('/getEmpData', 'JobPostingController@getEmpData')->name('getEmpData');
   Route::get('/getStates', 'JobPostingController@getStates')->name('getStates');
   Route::get('/getLanguagesData', 'JobPostingController@getLanguagesData')->name('getLanguagesData');
+  
   Route::get('/getAccreditationsData', 'HomeController@getAccreditationsData')->name('getAccreditationsData');
   Route::get('/email-verification/{token}', 'HomeController@email_verification')->name('email-verification');
   Route::get('/profile-under-reviewed', 'HomeController@profileUnderReviewed')->name('profile-under-reviewed');
   Route::middleware('healthcare_facilities')->group(function () {
     Route::get('/my-profile', 'HomeController@manage_profile')->name('my-profile');
+    Route::get('/users', 'SettingsController@index')->name('users');
+    Route::get('/invite_users', 'SettingsController@invite_users')->name('invite_users');
+    
+    Route::post('/inviteUser', 'SettingsController@inviteUser')->name('inviteUser');
+    Route::get('/deactivateUser', 'SettingsController@deactivate_user')->name('deactivateUser');
+    Route::get('/deleteUser', 'SettingsController@delete_user')->name('deleteUser');
     Route::get('/job_posting', 'JobPostingController@job_posting')->name('job_posting');
     Route::get('/contract_pay', 'JobPostingController@contract_pay')->name('contract_pay');
     Route::post('/updateContractPay', 'JobPostingController@updateContractPay')->name('updateContractPay');
@@ -338,6 +347,7 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   /**************[Find Jobs]**************/
   Route::get('/find_jobs', 'JobsController@index')->name('find_jobs');
   Route::get('/job_details/{job_id}', 'JobsController@job_details')->name('job_details');
+  Route::get('/healthcare_details/{id}', 'JobsController@healthcare_details')->name('healthcare_details');
   Route::post('/getWorkFlexiblityData', 'JobsController@getWorkFlexiblityData')->name('getWorkFlexiblityData');  
   Route::post('/getWorkEnvironmentData', 'JobsController@getWorkEnvironmentData')->name('getWorkEnvironmentData');  
   Route::post('/getNurseData', 'JobsController@getNurseData')->name('getNurseData'); 

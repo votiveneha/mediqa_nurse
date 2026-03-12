@@ -2,851 +2,999 @@
 @section('css')
 
 <style>
-   /* Search bar */
-   .search-bar {
-   display: flex;
-   gap: 10px;
-   margin-bottom: 20px;
-   }
-   .search-bar input,
-   .search-bar select,
-   .search-bar button {
-   padding: 10px;
-   font-size: 14px;
-   border: 1px solid #ccc;
-   border-radius: 5px;
-   }
-   .search-bar input {
-   flex: 2;
-   }
-   .search-bar select {
-   flex: 1;
-   }
-   .search-bar button {
-   background-color: black;
-   color: white;
-   border: none;
-   cursor: pointer;
-   }
-   /* Layout */
-   .content {
-   display: flex;
-   gap: 20px;
-   }
-   .filters {
-   background: white;
-   padding: 10px 10px;
-   border-radius: 8px;
-   box-shadow: 0 0 10px rgba(0,0,0,0.05);
-   }
-   .filter-sidebar {
-   border: 1px solid #ccc;
-   border-radius: 6px;
-   font-family: Arial, sans-serif;
-   background-color: #fff;
-   overflow: hidden;
-   }
-   .filter-header {
-   padding: 12px 16px;
-   font-weight: bold;
-   border-bottom: 1px solid #ccc;
-   background-color: #f9f9f9;
-   }
-   .filter-list {
-   list-style: none;
-   margin: 0;
-   padding: 0;
-   }
-   .filter-item {
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   padding: 12px 16px;
-   border-bottom: 1px solid #eee;
-   cursor: pointer;
-   font-size: 14px;
-   }
-   .filter-item:hover {
-   background-color: #f0f0f0;
-   }
-   .arrow {
-   font-size: 16px;
-   color: #888;
-   }
-   .toggle {
-   display: flex;
-   align-items: center;
-   margin: 15px 0;
-   }
-   .toggle input {
-   margin-right: 10px;
-   }
-   .job-card {
-   border: 1px solid #E5E7EB;
-   border-radius: 10px;
-   padding: 16px;
-   margin-bottom: 24px;
-   background: #FFFFFF;
-   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-   }
-   .job-card.item {
+  /* Search bar */
+  .search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .search-bar input,
+  .search-bar select,
+  .search-bar button {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  .search-bar input {
+    flex: 2;
+  }
+
+  .search-bar select {
+    flex: 1;
+  }
+
+  .search-bar button {
+    background-color: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  /* Layout */
+  .content {
+    display: flex;
+    gap: 20px;
+  }
+
+  .filters {
+    background: white;
+    padding: 10px 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  }
+
+  .filter-sidebar {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+    overflow: hidden;
+  }
+
+  .filter-header {
+    padding: 12px 16px;
+    font-weight: bold;
+    border-bottom: 1px solid #ccc;
+    background-color: #f9f9f9;
+  }
+
+  .filter-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .filter-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .filter-item:hover {
+    background-color: #f0f0f0;
+  }
+
+  .arrow {
+    font-size: 16px;
+    color: #888;
+  }
+
+  .toggle {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+  }
+
+  .toggle input {
+    margin-right: 10px;
+  }
+
+  .job-card {
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 24px;
+    background: #FFFFFF;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .job-card.item {
     margin-top: 0px;
     margin-bottom: 24px;
     position: relative;
   }
-   .job-company {
-   display: flex;
-   width: 100% !important;
-   }
-   .job-logo {
-   width: 48px;
-   height: 48px;
-   background: #007bff;
-   border-radius: 8px;
-   color: white;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   margin-right: 10px;
-   font-size: 20px;
-   }
-   .job-details .location {
-   color: #555;
-   font-size: 0.9rem;
-   }
-   .job-details.d-flex.align-items-center.justify-content-between {
+
+  .job-company {
+    display: flex;
+    width: 100% !important;
+  }
+
+  .job-logo {
+    width: 48px;
+    height: 48px;
+    background: #007bff;
+    border-radius: 8px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    font-size: 20px;
+  }
+
+  .job-details .location {
+    color: #555;
+    font-size: 0.9rem;
+  }
+
+  .job-details.d-flex.align-items-center.justify-content-between {
     width: 100%;
   }
-   .job-sort-dropdown select {
-   font-size: 0.85rem;
-   padding: 5px 8px;
-   }
-   .job-role {
-   font-size: 1.1rem;
-   font-weight: bold;
-   /* margin-top: 12px; */
-   }
-   .job-meta {
-   display: flex;
-   justify-content: space-between;
-   font-size: 0.95rem;
-   color: #555;
-   margin-top: 4px;
-   }
-   .job-matches {
-   display: flex;
-   flex-wrap: wrap;
-   gap: 10px;
-   font-size: 0.85rem;
-   color: #333;
-   margin: 12px 0;
-   }
-   .dot {
-   display: inline-block;
-   width: 8px;
-   height: 8px;
-   border-radius: 50%;
-   margin-right: 6px;
-   }
-   .dot.blue {
-   background-color: #007bff;
-   }
-   .dot.grey {
-   background-color: #ccc;
-   }
-   .job-footer {
-   display: flex;
-   justify-content: end;
-   align-items: center;
-   border-top: 1px solid #eee;
-   padding-top: 10px;
-   margin-top: 10px;
-   }
-   .match-score {
-   font-weight: bold;
-   color: #28a745;
-   font-size: 0.95rem;
-   }
-   .apply-btn {
-   background-color: #3C8093;
-   color: white;
-   border: none;
-   padding: 6px 14px;
-   border-radius: 6px;
-   cursor: pointer;
-   font-weight: 500;
-   }
-   .apply-btn:hover {
-   background-color: #326A7A;
-   }
-   .apply-btn.applied {
-   background: #7BA9B7;
-   color: #28a745; /* green */
-   font-weight: 600;
-   display: flex;
-   align-items: center;
-   gap: 6px;
-   border: none;
-   cursor: default;
-   padding: 0;
-   }
-   .apply-btn.applied::before {
-   content: "✔"; /* check icon */
-   font-weight: bold;
-   }
-   .search-bar label {
-   font-size: 12px;
-   margin-bottom: 4px;
-   font-weight: 500;
-   }
-   .find_job_div{
-   background: #f5f6fa;
-   }
-   .toggle-container {
-   display: flex;
-   align-items: center;
-   margin-bottom: 20px;
-   font-family: 'Segoe UI', sans-serif;
-   }
-   .toggle-label {
-   font-weight: 500;
-   }
-   /* The switch - the box around the slider */
-   .switch {
-   position: relative;
-   display: inline-block;
-   width: 44px;
-   height: 24px;
-   }
-   /* Hide default HTML checkbox */
-   .switch input {
-   opacity: 0;
-   width: 0;
-   height: 0;
-   }
-   /* The slider */
-   .slider {
-   position: absolute;
-   cursor: pointer;
-   background-color: #ccc;
-   border-radius: 34px;
-   top: 0;
-   left: 0;
-   right: 0;
-   bottom: 0;
-   transition: 0.4s;
-   }
-   /* Slider circle */
-   .slider:before {
-   position: absolute;
-   content: "";
-   height: 18px;
-   width: 18px;
-   left: 3px;
-   bottom: 3px;
-   background-color: white;
-   transition: 0.4s;
-   border-radius: 50%;
-   }
-   /* Checked background */
-   .switch input:checked + .slider {
-   background-color: black;
-   }
-   /* Checked position of the slider circle */
-   .switch input:checked + .slider:before {
-   transform: translateX(20px);
-   }
-   /* Rounded style */
-   .slider.round {
-   border-radius: 34px;
-   }
-   .modal-overlay {
-   position: fixed;
-   top: 0;
-   left: 0;
-   width: 100%;
-   height: 100%;
-   background: rgba(0, 0, 0, 0.4);
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   z-index: 999;
-   }
-   .modal-content {
-   background: #fff;
-   width: 50%;
-   max-height: 90vh;
-   border-radius: 8px;
-   padding: 16px;
-   overflow-y: auto;
-   }
-   .modal-content-custom{
-    width: 100% !important;
-   }
-   button.btn.btn-link.p-0.show-more-btn {
-        text-align: left;
-    }
-   .modal-header {
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   }
-   .modal-header h2 {
-   margin: 0;
-   font-size: 18px;
-   }
-   .modal-subtext {
-   font-size: 0.9rem;
-   color: #555;
-   margin-bottom: 12px;
-   }
-   .close-btn {
-   font-size: 20px;
-   background: none;
-   border: none;
-   cursor: pointer;
-   }
-   .accordion-section {
-   margin-bottom: 16px;
-   }
-   .accordion-header {
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   cursor: pointer;
-   background: #f7f7f7;
-   padding: 8px;
-   border-radius: 4px;
-   }
-   .accordion-content {
-   margin-top: 8px;
-   padding-left: 12px;
-   }
-   .accordion-content label {
-   display: block;
-   margin-bottom: 6px;
-   font-size: 0.95rem;
-   }
-   .action-links {
-   font-size: 0.85rem;
-   color: #007bff;
-   }
-   .action-links a {
-   margin-left: 4px;
-   cursor: pointer;
-   text-decoration: none;
-   }
-   .third-level{
-   display:none;
-   margin-left:20px;
-   }
-   .panel {
-   width: 50%;
-   padding: 10px;
-   }
-   .panel.left {
-   border-right: 1px solid #ddd;
-   }
-   .panel.left, .panel.right {
-   padding: 16px;
-   overflow-y: auto;
-   }
-   .search-box {
-   width: 100%;
-   padding: 8px;
-   margin: 10px 0;
-   /* border: 1px solid #ccc; */
-   border-radius: 6px;
-   }
-   .search-box input {
-   width: 100%;
-   padding: 6px;
-   border: 1px solid #ccc;
-   border-radius: 4px;
-   }
-   .list-item {
-   padding: 8px;
-   cursor: pointer;
-   border-radius: 4px;
-   }
-   .list-item:hover {
-   background-color: #f2f2f2;
-   }
-   .checkbox-list,.checkbox-list-spec {
-   max-height: 60vh;
-   overflow-y: auto;
-   padding-right: 10px;
-   }
-   .checkbox-list label, .checkbox-list-spec label {
-   display: flex;
-   align-items: center;
-   margin: 6px 0;
-   }
-   .checkbox-list input[type="checkbox"], .checkbox-list-spec input[type="checkbox"] {
-   margin-right: 10px;
-   }
-   .modal-actions {
-   margin-top: 15px;
-   text-align: right;
-   }
-   .modal-actions button {
-   padding: 8px 14px;
-   margin-left: 10px;
-   border: none;
-   border-radius: 4px;
-   cursor: pointer;
-   }
-   .cancel-btn {
-   background-color: #f0f0f0;
-   }
-   .apply-btn {
-   background-color: #1e293b;
-   color: white;
-   }
-   .modal-header {
-   font-weight: bold;
-   margin-bottom: 10px;
-   }
-   .select-bar {
-   display: flex;
-   justify-content: space-between;
-   font-size: 13px;
-   margin-bottom: 5px;
-   }
-   .select-bar span {
-   color: #1e293b;
-   cursor: pointer;
-   }
-   .filter-item {
-   list-style: none;
-   border-bottom: 1px solid #ddd;
-   padding: 12px 16px;
-   }
-   .filter-label {
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   cursor: pointer;
-   font-weight: 600;
-   }
-   .arrow {
-   transition: transform 0.3s ease;
-   }
-   .arrow.rotated {
-   transform: rotate(90deg);
-   }
-   .sector-options {
-   display: none;
-   margin-top: 10px;
-   padding-left: 10px;
-   }
-   .sector-options label {
-   display: block;
-   margin-bottom: 8px;
-   font-size: 14px;
-   }
-   .auto_fill_message{
-   color:#28a745;
-   display:none;
-   }
-   .auto_empty_message{
-   color:#28a745;
-   display:none;
-   }
-   .tooltip_preferences {
-   background: #333;
-   color: #fff;
-   padding: 6px 10px;
-   border-radius: 6px;
-   font-size: 12px;
-   white-space: nowrap;
-   margin-left: 10px;
-   display: none; /* hidden by default */
-   }
-   .btn-secondary {
-   background-color: #f1f1f1;
-   color: #333;
-   border: 1px solid #ccc;
-   }
- .urgent-tag {
-      background: #000000ff;
-      color: #fff;
-      font-size: 12px;
-      font-weight: bold;
-      padding: 4px 10px;
-      border-radius: 12px;
-      height: fit-content;
-      position: absolute;
-      margin-top: -68px;
-      width: 14%;
-      margin-left: -30px;
-  }
-    .urgent-tag-new {
-      width: auto;
-      margin-left: -62px;
-  }
-   .custom-multiselect {
-   position: relative;
-   width: 220px; /* same as other selects */
-   }
-   .select-box {
-   background: #fff;
-   border: 1px solid #ced4da;
-   border-radius: 6px;
-   padding: 6px 12px;
-   cursor: pointer;
-   font-size: 14px;
-   line-height: 1.5;
-   }
-   .custom-multiselect .select-box::after {
-   content: "▾";
-   position: absolute;
-   right: 2px;
-   top: 50%;
-   transform: translateY(-50%);
-   pointer-events: none;
-   color: #6c757d;
-   font-size: 20px;
-   }
-   .checkbox-options {
-   display: none;
-   position: absolute;
-   background: #fff;
-   border: 1px solid #ced4da;
-   border-radius: 6px;
-   margin-top: 2px;
-   padding: 8px;
-   z-index: 1000;
-   width: 100%;
-   max-height: 200px;
-   overflow-y: auto;
-   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-   }
-   .checkbox-options label {
-   display: flex;
-   align-items: center;
-   justify-content: flex-start;
-   gap: 6px; /* spacing between checkbox & text */
-   font-size: 14px;
-   padding: 4px 8px;
-   cursor: pointer;
-   width: 100%;
-   }
-   .checkbox-options input[type="checkbox"] {
-   margin: 0;
-   width: 14px;
-   height: 14px;
-   accent-color: #0d6efd; /* Bootstrap primary color */
-   }
-   .checkbox-options input{
-   flex:none;
-   }
-   .no-jobs-box {
-   padding: 20px;
-   margin: 15px 0;
-   border: 2px dashed #ccc;
-   border-radius: 8px;
-   background: #fafafa;
-   text-align: center;
-   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-   }
-   .no-jobs-box h3 {
-   margin: 0 0 10px;
-   font-size: 18px;
-   color: #444;
-   }
-   .no-jobs-box p {
-   margin: 0;
-   font-size: 14px;
-   color: #777;
-   }
-   .last-date {
-   font-size: 13px;
-   font-weight: 500;
-   color: #dc3545; /* red */
-   margin-top: 4px;
-   }
-   .item { display: none; margin: 5px; padding: 10px; border: 1px solid #ccc; }
-   .pagination { 
-   margin-top: 20px;
-   justify-content: center; 
-   align-items: center; 
-   gap: 6px; 
-   }
-   .pagination button {
-   padding: 5px 10px;
-   margin: 2px;
-   border: 1px solid #333;
-   cursor: pointer;
-   background: #f2f2f2;
-   border-radius: 10px;
-   }
-   .pagination .active {
-   background: #333;
-   color: #fff;
-   }
-   .accordion-header .actions button {
-   margin-left: 5px;
-   padding: 2px 8px;
-   font-size: 12px;
-   border: 1px solid #ccc;
-   background: #fff;
-   cursor: pointer;
-   border-radius: 4px;
-   }
-   .accordion-header .actions button:hover {
-   background: #eee;
-   }
-   .form-group.top_filter.location_filter .select-box {
-   background: #fff;
-   border: 1px solid #ced4da;
-   border-radius: 6px;
-   padding: 8px 12px;
-   cursor: pointer;
-   font-size: 14px;
-   line-height: inherit;
-   height: 43px;
-   color: #666666;
-   }
-   .top_filter.agency_filter select#agency {
-   background: #fff;
-   height: 43px;
-   color: #666666;
-   border: 1px solid #ced4da;
-   }
-   .top_filter.sort_by_filter select {
-   background: #fff;
-   height: 43px;
-   color: #666666;
-   border: 1px solid #ced4da;
-   }
-   .top_filter.keywords_filter {
-   width: 35%;
-   }
-   .top_filter.keywords_filter input#keywords {
-   background: #fff;
-   height: 43px;
-   color: #666666;
-   border: 1px solid #ced4da;
-   }
-   .search-bar {
-   display: flex;
-   gap: 10px;
-   margin-bottom: 20px;
-   padding-right: 8px;
-   margin-left: -10px;
-   justify-content: space-between;
-   }
-   .job-card.item {
-   margin-top: 0px;
-   }
-   .row.filters_jobs {
-   margin-bottom: 40px;
-   }
-   .tag-badge {
-   display: inline-flex;
-   align-items: center;
-   background-color: #e9f5ff;
-   color: #0d6efd;
-   padding: 6px 12px;
-   border-radius: 20px;
-   margin: 4px;
-   font-size: 14px;
-   font-weight: 500;
-   }
-   .tag-badge .remove-tag {
-   margin-left: 8px;
-   cursor: pointer;
-   font-weight: bold;
-   color: #0d6efd;
-   }
-   .tag-badge .remove-tag:hover {
-   color: #dc3545; /* red on hover */
-   }
-   .edit-btns{
-   background: #ffffffff;
-   border: none;
-   border-radius: 50%;
-   width: 40px;
-   height: 40px;
-   cursor: pointer;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   transition: background 0.3s ease, transform 0.2s ease;
-   }
-   #saveSearchModal .modal-content{
-   width:100%;
-   }
 
-   /* match circle  */
-   .match-circle {
+  .job-sort-dropdown select {
+    font-size: 0.85rem;
+    padding: 5px 8px;
+  }
+
+  .job-role {
+    font-size: 1.1rem;
+    font-weight: bold;
+    /* margin-top: 12px; */
+  }
+
+  .job-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    color: #555;
+    margin-top: 4px;
+  }
+
+  .job-matches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: #333;
+    margin: 12px 0;
+  }
+
+  .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+
+  .dot.blue {
+    background-color: #007bff;
+  }
+
+  .dot.grey {
+    background-color: #ccc;
+  }
+
+  .job-footer {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+    margin-top: 10px;
+  }
+
+  .match-score {
+    font-weight: bold;
+    color: #28a745;
+    font-size: 0.95rem;
+  }
+
+  .apply-btn {
+    background-color: #3C8093;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  .apply-btn:hover {
+    background-color: #326A7A;
+  }
+
+  .apply-btn.applied {
+    background: #7BA9B7;
+    color: #28a745;
+    /* green */
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    cursor: default;
+    padding: 0;
+  }
+
+  .apply-btn.applied::before {
+    content: "✔";
+    /* check icon */
+    font-weight: bold;
+  }
+
+  .search-bar label {
+    font-size: 12px;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .find_job_div {
+    background: #f5f6fa;
+  }
+
+  .toggle-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .toggle-label {
+    font-weight: 500;
+  }
+
+  /* The switch - the box around the slider */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+  }
+
+  /* Hide default HTML checkbox */
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  /* The slider */
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    background-color: #ccc;
+    border-radius: 34px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: 0.4s;
+  }
+
+  /* Slider circle */
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+  }
+
+  /* Checked background */
+  .switch input:checked+.slider {
+    background-color: black;
+  }
+
+  /* Checked position of the slider circle */
+  .switch input:checked+.slider:before {
+    transform: translateX(20px);
+  }
+
+  /* Rounded style */
+  .slider.round {
+    border-radius: 34px;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+
+  .modal-content {
+    background: #fff;
+    width: 50%;
+    max-height: 90vh;
+    border-radius: 8px;
+    padding: 16px;
+    overflow-y: auto;
+  }
+
+  .modal-content-custom {
+    width: 100% !important;
+  }
+
+  button.btn.btn-link.p-0.show-more-btn {
+    text-align: left;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+  }
+
+  .modal-subtext {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 12px;
+  }
+
+  .close-btn {
+    font-size: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .accordion-section {
+    margin-bottom: 16px;
+  }
+
+  .accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background: #f7f7f7;
+    padding: 8px;
+    border-radius: 4px;
+  }
+
+  .accordion-content {
+    margin-top: 8px;
+    padding-left: 12px;
+  }
+
+  .accordion-content label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+  }
+
+  .action-links {
+    font-size: 0.85rem;
+    color: #007bff;
+  }
+
+  .action-links a {
+    margin-left: 4px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .third-level {
+    display: none;
+    margin-left: 20px;
+  }
+
+  .panel {
+    width: 50%;
+    padding: 10px;
+  }
+
+  .panel.left {
+    border-right: 1px solid #ddd;
+  }
+
+  .panel.left,
+  .panel.right {
+    padding: 16px;
+    overflow-y: auto;
+  }
+
+  .search-box {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+    /* border: 1px solid #ccc; */
+    border-radius: 6px;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .list-item {
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .list-item:hover {
+    background-color: #f2f2f2;
+  }
+
+  .checkbox-list,
+  .checkbox-list-spec {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 10px;
+  }
+
+  .checkbox-list label,
+  .checkbox-list-spec label {
+    display: flex;
+    align-items: center;
+    margin: 6px 0;
+  }
+
+  .checkbox-list input[type="checkbox"],
+  .checkbox-list-spec input[type="checkbox"] {
+    margin-right: 10px;
+  }
+
+  .modal-actions {
+    margin-top: 15px;
+    text-align: right;
+  }
+
+  .modal-actions button {
+    padding: 8px 14px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .cancel-btn {
+    background-color: #f0f0f0;
+  }
+
+  .apply-btn {
+    background-color: #1e293b;
+    color: white;
+  }
+
+  .modal-header {
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .select-bar {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 5px;
+  }
+
+  .select-bar span {
+    color: #1e293b;
+    cursor: pointer;
+  }
+
+  .filter-item {
+    list-style: none;
+    border-bottom: 1px solid #ddd;
+    padding: 12px 16px;
+  }
+
+  .filter-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .arrow {
+    transition: transform 0.3s ease;
+  }
+
+  .arrow.rotated {
+    transform: rotate(90deg);
+  }
+
+  .sector-options {
+    display: none;
+    margin-top: 10px;
+    padding-left: 10px;
+  }
+
+  .sector-options label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .auto_fill_message {
+    color: #28a745;
+    display: none;
+  }
+
+  .auto_empty_message {
+    color: #28a745;
+    display: none;
+  }
+
+  .tooltip_preferences {
+    background: #333;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    margin-left: 10px;
+    display: none;
+    /* hidden by default */
+  }
+
+  .btn-secondary {
+    background-color: #f1f1f1;
+    color: #333;
+    border: 1px solid #ccc;
+  }
+
+  .urgent-tag {
+    background: #000000ff;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 12px;
+    height: fit-content;
+    position: absolute;
+    margin-top: -68px;
+    width: 14%;
+    margin-left: -30px;
+  }
+
+  .urgent-tag-new {
+    width: auto;
+    margin-left: -62px;
+  }
+
+  .custom-multiselect {
+    position: relative;
+    width: 220px;
+    /* same as other selects */
+  }
+
+  .select-box {
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .custom-multiselect .select-box::after {
+    content: "▾";
+    position: absolute;
+    right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #6c757d;
+    font-size: 20px;
+  }
+
+  .checkbox-options {
+    display: none;
+    position: absolute;
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    margin-top: 2px;
+    padding: 8px;
+    z-index: 1000;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  }
+
+  .checkbox-options label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    /* spacing between checkbox & text */
+    font-size: 14px;
+    padding: 4px 8px;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .checkbox-options input[type="checkbox"] {
+    margin: 0;
+    width: 14px;
+    height: 14px;
+    accent-color: #0d6efd;
+    /* Bootstrap primary color */
+  }
+
+  .checkbox-options input {
+    flex: none;
+  }
+
+  .no-jobs-box {
+    padding: 20px;
+    margin: 15px 0;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    background: #fafafa;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .no-jobs-box h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    color: #444;
+  }
+
+  .no-jobs-box p {
+    margin: 0;
+    font-size: 14px;
+    color: #777;
+  }
+
+  .last-date {
+    font-size: 13px;
+    font-weight: 500;
+    color: #dc3545;
+    /* red */
+    margin-top: 4px;
+  }
+
+  .item {
+    display: none;
+    margin: 5px;
+    padding: 10px;
+    border: 1px solid #ccc;
+  }
+
+  .pagination {
+    margin-top: 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pagination button {
+    padding: 5px 10px;
+    margin: 2px;
+    border: 1px solid #333;
+    cursor: pointer;
+    background: #f2f2f2;
+    border-radius: 10px;
+  }
+
+  .pagination .active {
+    background: #333;
+    color: #fff;
+  }
+
+  .accordion-header .actions button {
+    margin-left: 5px;
+    padding: 2px 8px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .accordion-header .actions button:hover {
+    background: #eee;
+  }
+
+  .form-group.top_filter.location_filter .select-box {
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: inherit;
+    height: 43px;
+    color: #666666;
+  }
+
+  .top_filter.agency_filter select#agency {
+    background: #fff;
+    height: 43px;
+    color: #666666;
+    border: 1px solid #ced4da;
+  }
+
+  .top_filter.sort_by_filter select {
+    background: #fff;
+    height: 43px;
+    color: #666666;
+    border: 1px solid #ced4da;
+  }
+
+  .top_filter.keywords_filter {
+    width: 35%;
+  }
+
+  .top_filter.keywords_filter input#keywords {
+    background: #fff;
+    height: 43px;
+    color: #666666;
+    border: 1px solid #ced4da;
+  }
+
+  .search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-right: 8px;
+    margin-left: -10px;
+    justify-content: space-between;
+  }
+
+  .job-card.item {
+    margin-top: 0px;
+  }
+
+  .row.filters_jobs {
+    margin-bottom: 40px;
+  }
+
+  .tag-badge {
+    display: inline-flex;
+    align-items: center;
+    background-color: #e9f5ff;
+    color: #0d6efd;
+    padding: 6px 12px;
+    border-radius: 20px;
+    margin: 4px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .tag-badge .remove-tag {
+    margin-left: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #0d6efd;
+  }
+
+  .tag-badge .remove-tag:hover {
+    color: #dc3545;
+    /* red on hover */
+  }
+
+  .edit-btns {
+    background: #ffffffff;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+
+  #saveSearchModal .modal-content {
+    width: 100%;
+  }
+
+  /* match circle  */
+  .match-circle {
     position: absolute;
     bottom: 0;
     right: 0;
-      width: 85px;
-      height: 85px;
-      border-radius: 50%;
-      background: conic-gradient(
-          #16A34A calc(var(--percent) * 1%), 
-          #9CA3AF 0
-      );
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      /* position: relative; */
-    }
+    width: 85px;
+    height: 85px;
+    border-radius: 50%;
+    background: conic-gradient(#16A34A calc(var(--percent) * 1%),
+        #9CA3AF 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* position: relative; */
+  }
 
-    .match-inner {
-        width: 70px;
-        height: 70px;
-        background: white;
-        border-radius: 50%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
+  .match-inner {
+    width: 70px;
+    height: 70px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 
-    .match-inner .percent {
-        font-size: 20px;
-        font-weight: bold;
-        color: #16A34A;
-    }
+  .match-inner .percent {
+    font-size: 20px;
+    font-weight: bold;
+    color: #16A34A;
+  }
 
-    .match-inner .label {
-        font-size: 12px;
-        color: #16A34A;
-    }
+  .match-inner .label {
+    font-size: 12px;
+    color: #16A34A;
+  }
 
-    /* action-row  */
-    .action-row {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        margin-left: 10px;
-    }
+  /* action-row  */
+  .action-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-left: 10px;
+  }
 
-    /* Apply Button */
-    .apply-btn {
-        background: #3C8093;
-        color: white;
-        padding: 8px 18px;
-        border-radius: 8px;
-        border: none;
-        font-size: 14px;
-        cursor: pointer;
-    }
+  /* Apply Button */
+  .apply-btn {
+    background: #3C8093;
+    color: white;
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+  }
 
-    .apply-btn.applied {
-        background: #7BA9B7;
-        color: white;
-        padding: 8px 18px;
-        border-radius: 8px;
-        border: none;
-        font-size: 14px;
-        cursor: pointer;
-    }
+  .apply-btn.applied {
+    background: #7BA9B7;
+    color: white;
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+  }
 
-    /* Details link */
-    .details-link {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        color: #0EA5E9;
-        text-decoration: none;
-        font-size: 14px;
-    }
+  /* Details link */
+  .details-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #0EA5E9;
+    text-decoration: none;
+    font-size: 14px;
+  }
 
-    .details-link i {
-        width: 18px;
-        height: 18px;
-        stroke-width: 1.7;
-    }
+  .details-link i {
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.7;
+  }
 
-    .details-link:hover {
-      color: #0284C7;
-    }
+  .details-link:hover {
+    color: #0284C7;
+  }
 
-    /* heart icon  */
-    .heart-toggle {
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-    }
+  /* heart icon  */
+  .heart-toggle {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
 
-    .heart-toggle svg {
-        width: 30px;
-        height: 30px;
-        margin-right: 10px;
-        stroke: #9CA3AF;
-        fill: transparent;
-        transition: 0.25s ease;
-    }
+  .heart-toggle svg {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    stroke: #9CA3AF;
+    fill: transparent;
+    transition: 0.25s ease;
+  }
 
-    .heart-toggle:hover svg {
-        stroke: #0EA5E9;
-    }
+  .heart-toggle:hover svg {
+    stroke: #0EA5E9;
+  }
 
-    .heart-toggle.active svg {
-        stroke: #3C8093; 
-        fill: #3C8093;
-    }
+  .heart-toggle.active svg {
+    stroke: #3C8093;
+    fill: #3C8093;
+  }
 
-    /* priority tag  */
-    .priority-tags {
-        display: flex;
-        gap: 6px;
-        align-items: center;
-        position: relative;
-    }
+  /* priority tag  */
+  .priority-tags {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    position: relative;
+  }
 
-    .tag {
-        padding: 2px 6px;
-        font-size: 13.5px;
-        font-weight: 500;
-        border-radius: 10px;
-        white-space: nowrap;
-        flex-shrink: 0;
-    }
+  .tag {
+    padding: 2px 6px;
+    font-size: 13.5px;
+    font-weight: 500;
+    border-radius: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 
-    .tag-new { background:#D1FAE5; color:#065F46; }
-    .tag-urgent { background:#FEE2E2; color:#B91C1C; }
-    .tag-last_minute { background:#DBEAFE; color:#1E40AF; }
-    .tag-immediate { background:#EDE9FE; color:#5B21B6; }
+  .tag-new {
+    background: #D1FAE5;
+    color: #065F46;
+  }
 
-    .tag-more {
-        padding: 2px 6px;
-        background: #F3F4F6;
-        color: #374151;
-        border-radius: 10px;
-        font-size: 13px;
-        cursor: pointer;
-        position: relative;
-    }
+  .tag-urgent {
+    background: #FEE2E2;
+    color: #B91C1C;
+  }
 
-    .tags-tooltip {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        margin-top: 8px;
-        background: #fff;
-        border-radius: 10px;
-        padding: 10px;
-        box-shadow: 0 10px 25px rgba(0,0,0,.12);
-        display: none;
-        flex-direction: column;
-        gap: 8px;
-        min-width: 200px;
-        z-index: 10;
-    }
+  .tag-last_minute {
+    background: #DBEAFE;
+    color: #1E40AF;
+  }
 
-    .tags-tooltip .tag {
-        display: inline-flex;
-        width: fit-content;
-    }
+  .tag-immediate {
+    background: #EDE9FE;
+    color: #5B21B6;
+  }
 
-    /* .tooltip-tag {
+  .tag-more {
+    padding: 2px 6px;
+    background: #F3F4F6;
+    color: #374151;
+    border-radius: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .tags-tooltip {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .12);
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 200px;
+    z-index: 10;
+  }
+
+  .tags-tooltip .tag {
+    display: inline-flex;
+    width: fit-content;
+  }
+
+  /* .tooltip-tag {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -860,77 +1008,81 @@
         border-radius: 50%;
     } */
 
-    .tag-more:hover .tags-tooltip {
-        display: flex;
-    }
+  .tag-more:hover .tags-tooltip {
+    display: flex;
+  }
 
-    .job-right-col {
-      position: relative;
-      min-height: 200px;
-    }
+  .job-right-col {
+    position: relative;
+    min-height: 200px;
+  }
 
-    /* Feature list */
-    .job-features {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-    }
+  /* Feature list */
+  .job-features {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
 
-    .feature-item {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 14px;
-        color: #374151;
-    }
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    color: #374151;
+  }
 
-    .feature-item img {
-        width: 30px;
-        height: 30px;
-        object-fit: contain;
-    }
-    .saved-add-search {
-        background: #e0f2fe;
-        color: #0369a1;
-        border: 1px dashed #7dd3fc;
-        font-weight: 500;
-        border-radius: 20px;
-        padding: 4px;
-        width: 100%;
-        text-wrap-mode: nowrap;
-    }
+  .feature-item img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+  }
 
-    .chip-new {
-      text-wrap-mode: nowrap;
-      font-size: 0.9rem;
-      font-weight: 500;
-    }
+  .saved-add-search {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px dashed #7dd3fc;
+    font-weight: 500;
+    border-radius: 20px;
+    padding: 4px;
+    width: 100%;
+    text-wrap-mode: nowrap;
+  }
 
-    .pagination-wrapper .page-item.active .page-link {
+  .chip-new {
+    text-wrap-mode: nowrap;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .pagination-wrapper .page-item.active .page-link {
     background-color: #000000ff;
     border-color: #000000ff;
     border-radius: 10px;
-}
- .pagination-wrapper .page-link {
+  }
+
+  .pagination-wrapper .page-link {
     color: #000000ff;
-}
- .pagination-wrapper .page-item .page-link{
+  }
+
+  .pagination-wrapper .page-item .page-link {
     border-radius: 10px;
- }
- .pagination-wrapper .pagination .active {
+  }
+
+  .pagination-wrapper .pagination .active {
     background: #000000ff;
     border-radius: 10px;
-  
-}
-    
-.saved-search-tab {
+
+  }
+
+  .saved-search-tab {
     position: relative;
     display: inline-flex;
     align-items: center;
-}
+  }
 
-/* Tooltip */
-.saved-search-tab .tooltip-text {
+  /* Tooltip */
+  .saved-search-tab .tooltip-text {
     position: absolute;
     top: 50%;
     left: 105%;
@@ -948,21 +1100,20 @@
     transition: opacity 0.2s ease;
 
     z-index: 999;
-}
+  }
 
-/* Show on hover */
-.saved-search-tab:hover .tooltip-text {
+  /* Show on hover */
+  .saved-search-tab:hover .tooltip-text {
     opacity: 1;
     visibility: visible;
-}
-
+  }
 </style>
 @endsection
 @section('content')
 <main class="main find_job_div">
-   <section class="section-box mt-30">
-      <div class="container">
-         <!-- <div id="oneTimeMessage" class="alert alert-info" 
+  <section class="section-box mt-30">
+    <div class="container">
+      <!-- <div id="oneTimeMessage" class="alert alert-info" 
             style="display:none;margin:10px 0; font-size:14px; padding:12px 40px 12px 12px; 
                     border-radius:6px; background:#e8f4fd; border:1px solid #b6e0fe; color:#084298; 
                     position:relative;">
@@ -979,215 +1130,216 @@
             ×
             </button>
             </div> -->
-        <div class="saved-searches-row" id="search-tabs">
-            <div class="searchtabs">
+      <div class="saved-searches-row" id="search-tabs">
+        <div class="searchtabs">
 
-                @if($saved_searches_data->isNotEmpty()) 
-                    @php $i = 2; @endphp
+          @if($saved_searches_data->isNotEmpty())
+          @php $i = 2; @endphp
 
-                    {{-- My Preferences (shown only once) --}}
-                    @if(!empty($saved_my_preference))
-                        <div class="saved-search-tab active tooltip-wrapper"
-                            data-id="{{ $saved_my_preference->searches_id }}">
-                            My Preferences
-                            <span class="tooltip-text">
-                                This search is always linked to your current preferences.
-                            </span>
-                        </div>
-                    @endif
+          {{-- My Preferences (shown only once) --}}
+          @if(!empty($saved_my_preference))
+          <div id="my-prefernece-tab" class="saved-search-tab active tooltip-wrapper" data-id="{{ $saved_my_preference->searches_id }}">
+            My Preferences
+            <span class="tooltip-text">
+              This search is always linked to your current preferences.
+            </span>
+          </div>
+          @endif
 
 
-                    {{-- Other saved searches --}}
-                    @foreach($saved_searches_data as $saved_searches)
+          {{-- Other saved searches --}}
+          @foreach($saved_searches_data as $saved_searches)
 
-                        @if($saved_searches->status_my_preference == 1)
-                            @continue
-                        @endif
+          @if($saved_searches->status_my_preference == 1)
+          @continue
+          @endif
 
-                        <div class="saved-search-tab" data-id="{{ $saved_searches->searches_id }}">
-                            @if(empty($saved_searches->name))
-                                Saved search {{ $i }}
-                            @else
-                                {{ $saved_searches->name }}
-                            @endif
-                        </div>
+          <div class="saved-search-tab" data-id="{{ $saved_searches->searches_id }}">
+            @if(empty($saved_searches->name))
+            Saved search {{ $i }}
+            @else
+            {{ $saved_searches->name }}
+            @endif
+          </div>
 
-                        @php $i++; @endphp
-                    @endforeach
-                @endif
+          @php $i++; @endphp
+          @endforeach
+          @endif
 
-            </div>
-
-            <div class="add-new" @if($saved_searches_data->isEmpty()) style="display:none;" @endif>
-                <button class="saved-add-search">+ Save New</button>
-            </div>
         </div>
 
-         <div class="job_tabs">
-            
-            <ul class="tab-nav">
-                <li class="active" data-tab="tab1">Find Jobs</li>
-                <li data-tab="tab2">Manage Saved Searches</li>
-                
-            </ul>
-         </div>
-         
-          <div id="tab1" class="tab-content-jobs active">
-              <div class="find-jobs-header d-flex justify-content-between align-items-center mb-3">
-                <h2 class="find-jobs-title mb-0 fw-bold">Find Jobs</h2>
-                <button id="add-search-btn">+ Save Search</button>
+        <div class="add-new" @if($saved_searches_data->isEmpty()) style="display:none;" @endif>
+          <button class="saved-add-search">+ Save New</button>
+        </div>
+      </div>
+
+      <div class="job_tabs">
+
+        <ul class="tab-nav">
+          <li class="active" data-tab="tab1">Find Jobs</li>
+          <li data-tab="tab2">Manage Saved Searches</li>
+
+        </ul>
+      </div>
+
+      <div id="tab1" class="tab-content-jobs active">
+        <div class="find-jobs-header d-flex justify-content-between align-items-center mb-3">
+          <h2 class="find-jobs-title mb-0 fw-bold">Find Jobs</h2>
+          <button id="add-search-btn">+ Save Search</button>
+        </div>
+        <!-- Horizontal Search Bar with Labels -->
+        <div class="search-bar">
+          <div class="top_filter keywords_filter">
+            <label for="keywords">Keywords</label>
+            <input type="text" id="keywords" placeholder="e.g. ICU, aged care, night shift">
+          </div>
+
+          <div class="form-group top_filter location_filter">
+            <label for="agency">Location</label>
+            <div class="custom-multiselect">
+              <div class="select-box">Select Location</div>
+              <div class="checkbox-options">
+                @if(!empty($registered_countries))
+                @foreach ($registered_countries as $code)
+                <label>
+                  <input type="checkbox" class="location-checkbox" value="{{ $code }}">{{ country_name($code) }}
+                </label>
+
+                @endforeach
+                @endif
               </div>
-              <!-- Horizontal Search Bar with Labels -->
-              <div class="search-bar">
-                <div class="top_filter keywords_filter">
-                    <label for="keywords">Keywords</label>
-                    <input type="text" id="keywords"  placeholder="e.g. ICU, aged care, night shift">
-                </div>
-           
-                <div class="form-group top_filter location_filter">
-                    <label for="agency">Location</label>
-                      <div class="custom-multiselect">
-                          <div class="select-box">Select Location</div>
-                          <div class="checkbox-options">
-                              @if(!empty($registered_countries))
-                              @foreach ($registered_countries as $code)
-                                  <label>
-                                    <input type="checkbox" class="location-checkbox" value="{{ $code }}">{{ country_name($code) }}        
-                                   </label>               
-                               
-                              @endforeach
-                              @endif
-                          </div>
-                      </div>
-                </div>
-                <!-- Hidden input to store selected values -->
-                <input type="hidden" id="selectedLocations" name="locations">
-                <div class="top_filter agency_filter">
-                    <label for="agency">Facility/Agency</label>
-                    <select id="agency">
-                      <option value="">Select Agency</option>
-                      @foreach ($agencies_list as $agencies_list )
-                        <option value="{{$agencies_list->id}}">{{$agencies_list->name}}</option>
-                      @endforeach
-                    </select>
-                </div>
-                <?php 
+            </div>
+          </div>
+          <!-- Hidden input to store selected values -->
+          <input type="hidden" id="selectedLocations" name="locations">
+          <div class="top_filter agency_filter">
+            <label for="agency">Facility/Agency</label>
+            <select id="agency">
+              <option value="">Select Agency</option>
+                @foreach ($agencies_list as $agency)
+                <option value="{{ $agency->healthcare_id }}">{{ $agency->health_care_name }}</option>
+                @endforeach
+            </select>
+          </div>
+          <?php 
                    $find_job_sort =  DB::table('find_job_sort')->where('status',1)->get();
                 ?>
-                <div class="top_filter sort_by_filter">
-                    <label for="sort">Sort By</label>
-                    <select onchange="sortBy(this.value)">
-                        @foreach ($find_job_sort as $sort_job )
-                          <option value="{{$sort_job->id}}">{{$sort_job->name}}</option>
-                        @endforeach
-                    </select>
-                </div>
-              </div>
-              <div class="row">
-                <div class="filters col-md-4">
-                    <div class="filter-sidebar">
-                      <div class="filter-header">Filters</div>
-                      <ul class="filter-list">
-                          <li class="filter-item">
-                            <label for="toggleRegisteredPreferences" class="toggle-label">
-                                Use My Registered Preferences
-                                <div class="auto_fill_message">Filters are Auto-filled from your preferences</div>
-                                <div class="auto_empty_message">Filters are empty/default and not Auto-filled<br> from your preferences</div>
-                            </label>
-                            &nbsp;
-                            <label class="switch">
-                            <input type="checkbox" id="toggleRegisteredPreferences" checked>
-                            <span class="slider round"></span>
-                            </label>
-                          </li>
-                          <li class="filter-item">
-                            <label for="toggleRegisteredPreferences" class="toggle-label">
-                                Update My Preferences
-                                <!-- <div class="tooltip_preferences" id="tooltipPref">
+          <div class="top_filter sort_by_filter">
+            <label for="sort">Sort By</label>
+            <select onchange="sortBy(this.value)">
+              @foreach ($find_job_sort as $sort_job )
+              <option value="{{$sort_job->id}}">{{$sort_job->name}}</option>
+              @endforeach
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="filters col-md-4">
+            <div class="filter-sidebar">
+              <div class="filter-header">Filters</div>
+              <ul class="filter-list">
+                <li class="filter-item">
+                  <label for="toggleRegisteredPreferences" class="toggle-label">
+                    Use My Registered Preferences
+                    <div class="auto_fill_message">Filters are Auto-filled from your preferences</div>
+                    <div class="auto_empty_message">Filters are empty/default and not Auto-filled<br> from your
+                      preferences</div>
+                  </label>
+                  &nbsp;
+                  <label class="switch">
+                    <input type="checkbox" id="toggleRegisteredPreferences" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </li>
+                <li class="filter-item">
+                  <label for="toggleRegisteredPreferences" class="toggle-label">
+                    Update My Preferences
+                    <!-- <div class="tooltip_preferences" id="tooltipPref">
                                   Temporary filtering, your current filter choices are not saved
                                   </div> -->
-                            </label>
-                            &nbsp;
-                            <label class="switch update_switch" data-bs-toggle="tooltip" data-bs-placement="right"
-                                title="Your current filter choices are saved in your Work Preferences & Flexibility section. Your preferences are updated for future job matching">
-                            <input type="checkbox" id="toggleUpdatePreferences">
-                            <span class="slider round"></span>
-                            </label>
-                          </li>
-                          <li class="filter-item" onclick="openSectorModal()">
-                            <span>Sector</span>
-                            <span class="arrow">›</span>
-                          </li>
-                          <li class="filter-item" onclick="openModal('Employment Type','employeement_type_preferences','sub_prefer_id','emp_prefer_id','emp_type')">
-                            <span>Employment Type</span>
-                            <span class="arrow">›</span>
-                          </li>
-                          <li class="filter-item" onclick="openModal_enviroment('Shift Type')">
-                            <span>Shift Type</span>
-                            <span class="arrow">›</span>
-                          </li>
-                          <li class="filter-item" onclick="openModal_enviroment('Work Environment')">
-                            <span>Work Environment</span>
-                            <span class="arrow">›</span>
-                          </li>
-                          <!-- <li class="filter-item" onclick="openModal('Position','employee_positions','subposition_id','position_id','position_name')">
+                  </label>
+                  &nbsp;
+                  <label class="switch update_switch" data-bs-toggle="tooltip" data-bs-placement="right"
+                    title="Your current filter choices are saved in your Work Preferences & Flexibility section. Your preferences are updated for future job matching">
+                    <input type="checkbox" id="toggleUpdatePreferences">
+                    <span class="slider round"></span>
+                  </label>
+                </li>
+                <li class="filter-item" onclick="openSectorModal()">
+                  <span>Sector</span>
+                  <span class="arrow">›</span>
+                </li>
+                <li class="filter-item"
+                  onclick="openModal('Employment Type','employeement_type_preferences','sub_prefer_id','emp_prefer_id','emp_type')">
+                  <span>Employment Type</span>
+                  <span class="arrow">›</span>
+                </li>
+                <li class="filter-item" onclick="openModal_enviroment('Shift Type')">
+                  <span>Shift Type</span>
+                  <span class="arrow">›</span>
+                </li>
+                <li class="filter-item" onclick="openModal_enviroment('Work Environment')">
+                  <span>Work Environment</span>
+                  <span class="arrow">›</span>
+                </li>
+                <!-- <li class="filter-item" onclick="openModal('Position','employee_positions','subposition_id','position_id','position_name')">
                             <span>Position</span>
                             <span class="arrow">›</span>
                           </li> -->
-                          <li class="filter-item" onclick="openModal_enviroment('Benefits')">
-                            <span>Benefits</span>
-                            <span class="arrow">›</span>
-                          </li>
-                          <li class="filter-item" onclick="openLocationModel()">
-                            <span>Location Preferences</span>
-                            <span class="arrow">›</span>
-                          </li>
-                          <li class="filter-item" onclick="openNurseModal('Type of nurse')">
-                            <span>Type of nurse</span>
-                            <span class="arrow">›</span>
-                          </li>
-                          <li class="filter-item" onclick="openSpecialityModal('Speciality')">
-                            <span>Specialty</span>
-                            <span class="arrow">›</span>
-                          </li>
-                          <li class="filter-item" onclick="openYearExperienceModal()">
-                            <span>Years of Experience</span>
-                            <span class="arrow">›</span>
-                          </li>
-                          <!-- <li class="filter-item">
+                <li class="filter-item" onclick="openModal_enviroment('Benefits')">
+                  <span>Benefits</span>
+                  <span class="arrow">›</span>
+                </li>
+                <li class="filter-item" onclick="openLocationModel()">
+                  <span>Location Preferences</span>
+                  <span class="arrow">›</span>
+                </li>
+                <li class="filter-item" onclick="openNurseModal('Type of nurse')">
+                  <span>Type of nurse</span>
+                  <span class="arrow">›</span>
+                </li>
+                <li class="filter-item" onclick="openSpecialityModal('Speciality')">
+                  <span>Specialty</span>
+                  <span class="arrow">›</span>
+                </li>
+                <li class="filter-item" onclick="openYearExperienceModal()">
+                  <span>Years of Experience</span>
+                  <span class="arrow">›</span>
+                </li>
+                <!-- <li class="filter-item">
                             <span>Certifications</span>
                             <span class="arrow">›</span>
                             </li> -->
-                          <li class="filter-item" onclick="openSalaryModal()">
-                            <span>Salary Range</span>
-                            <span class="arrow">›</span>
-                          </li>
-                      </ul>
-                    </div>
-                    {{-- <div>
-                      <button id="reset-filter-button">Reset Filter</button>                 
-                    </div> --}}
-                </div>
-                <!-- Job Listings -->
-                <div class="job-listings col-md-8">
-                    {{-- <div id="no-jobs" class="no-jobs-box" style="display:none;">
-                      <h3>🚫 No Jobs Found</h3>
-                      <p>Sorry, no jobs match your search.</p>
-                    </div> --}}
-                    <div class="job-container">
-                     <div class="job-listings normal-pagination">
-                      
-                      @if (count($jobs)>0)
-                      @foreach($jobs as $job)
-                      
-                      <div class="job-card item" data-location="{{ $job->location_name }}">
-                          <!-- Top Row: Company Logo & Position -->
-                           
-                          <div class="job-card-header">
-                            <div class="job-company">
-                                <div class="job-logo">🏥</div>
-                                <div class="job-details d-flex align-items-center justify-content-between">
-                                  <?php
+                <li class="filter-item" onclick="openSalaryModal()">
+                  <span>Salary Range</span>
+                  <span class="arrow">›</span>
+                </li>
+              </ul>
+            </div>
+            {{-- <div>
+              <button id="reset-filter-button">Reset Filter</button>
+            </div> --}}
+          </div>
+          <!-- Job Listings -->
+          <div class="job-listings col-md-8">
+            {{-- <div id="no-jobs" class="no-jobs-box" style="display:none;">
+              <h3>🚫 No Jobs Found</h3>
+              <p>Sorry, no jobs match your search.</p>
+            </div> --}}
+            <div class="job-container">
+              <div class="job-listings normal-pagination">
+
+                @if (count($jobs)>0)
+                @foreach($jobs as $job)
+
+                <div class="job-card item" data-location="{{ $job->location_name }}">
+                  <!-- Top Row: Company Logo & Position -->
+
+                  <div class="job-card-header">
+                    <div class="job-company">
+                      <div class="job-logo">🏥</div>
+                      <div class="job-details d-flex align-items-center justify-content-between">
+                        <?php
                                       $nurse_type = json_decode($job->nurse_type);
                                       $nurse_arr = array();  
                                       if(!empty($nurse_type)){
@@ -1297,20 +1449,20 @@
                                       }
                                       $speciality_arr_string = implode(",",$speciality_arr);
                                       ?>
-                                  <div>
-                                    {{-- <strong class="fs-5">{{ $nurse_arr_string }}</strong> --}}
-                                    <strong class="fs-5">{{ $job->job_title }}</strong>
-                                  </div>
-                                  <div>
-                                    <div class="heart-toggle" data-active="0">
-                                        <i data-lucide="heart"></i>
-                                    </div>
-                                    @if($job->urgent_hire == 1)
-                                      <div class="urgent-tag">Urgent Hiring</div>
-                                    @endif
-                                  </div>
-                                  {{-- <script>
-                                  document.addEventListener("DOMContentLoaded", () => {
+                        <div>
+                          {{-- <strong class="fs-5">{{ $nurse_arr_string }}</strong> --}}
+                          <strong class="fs-5">{{ $job->job_title }}</strong>
+                        </div>
+                        <div>
+                          <div class="heart-toggle" data-active="0">
+                            <i data-lucide="heart"></i>
+                          </div>
+                          @if($job->urgent_hire == 1)
+                          <div class="urgent-tag">Urgent Hiring</div>
+                          @endif
+                        </div>
+                        {{-- <script>
+                          document.addEventListener("DOMContentLoaded", () => {
                                       lucide.createIcons();
 
                                       document.querySelectorAll('.heart-toggle').forEach(el => {
@@ -1319,42 +1471,42 @@
                                           });
                                       });
                                   });
-                                  </script> --}}
-                                </div>
-                            </div>
-                          </div>
-                          <hr>
-                          <!-- Job Role / Hospital Name -->
-                          <!-- <div class="job-role">{{ $job->agency_name }}</div> -->
-                          <!-- Main Job Info -->
-                          <!-- <div class="job-meta">
+                        </script> --}}
+                      </div>
+                    </div>
+                  </div>
+                  <hr>
+                  <!-- Job Role / Hospital Name -->
+                  <!-- <div class="job-role">{{ $job->agency_name }}</div> -->
+                  <!-- Main Job Info -->
+                  <!-- <div class="job-meta">
                             <span><strong>Position:</strong> </span>
                             <span class="salary"><strong>Salary:</strong> ${{ $job->salary }}/hr</span>
                           </div> -->
-                          <!-- Expanded Job Details -->
-                          <div class="job-info-details col-12 d-flex">
-                            <div class="col-4">
-                              {{-- <div class="job-role">{{ $job->job_title }}</div> --}}
-                              <div class="location d-flex align-items-center"><i data-lucide="map-pin" width="18" height="18"></i> {{ country_name($job->location_country) }}</div>
-                            </div>
-                            <div class="col-4">
-                                  {{-- <div class="job-meta">
-                                      <span><strong>Position:</strong> {{ $emp_pos_arr_string }}</span>
-                                    </div> --}}
-                            </div>
-                            <div class="col-4">
-                                <div class="priority-tags" 
-                                    data-tags='[
+                  <!-- Expanded Job Details -->
+                  <div class="job-info-details col-12 d-flex">
+                    <div class="col-4">
+                      {{-- <div class="job-role">{{ $job->job_title }}</div> --}}
+                      <div class="location d-flex align-items-center"><i data-lucide="map-pin" width="18"
+                          height="18"></i> {{ country_name($job->location_country) }}</div>
+                    </div>
+                    <div class="col-4">
+                      {{-- <div class="job-meta">
+                        <span><strong>Position:</strong> {{ $emp_pos_arr_string }}</span>
+                      </div> --}}
+                    </div>
+                    <div class="col-4">
+                      <div class="priority-tags" data-tags='[
                                       {"key":"new","label":"New"},
                                       {"key":"urgent","label":"Urgent"},
                                       {"key":"last_minute","label":"Last Minute"},
                                       {"key":"immediate","label":"Immediate Start"}
                                     ]'>
-                                </div>
+                      </div>
 
-                            </div>
-                            <script>
-                            function renderTagsBySpace(container) {
+                    </div>
+                    <script>
+                      function renderTagsBySpace(container) {
                                 const tags = JSON.parse(container.dataset.tags || "[]");
 
                                 container.innerHTML = "";
@@ -1426,94 +1578,95 @@
                                     });
                                 });
                             });
-                            </script>
-                          </div>  
-                          <div class="job-info-details col-12 d-flex">
-                            <div class="col-8 job_detail_data">
-                              <div><strong>Employment Type:</strong> {{ $emplyeement_type_arr_string ?? "N/A"}} </div>
-                              <div><strong>Shift Type:</strong> {{ $shift_type_arr_string ?? "N/A" }}</div>
-                              <div><strong>Sector:</strong> {{ $job->sector ?? "N/A" }}</div>
-                              <div><strong>Work Environment:</strong> {{ $work_environment_arr_string ?? "N/A"}}</div>
-                              <!--<div><strong>Benefits:</strong> </div>-->
-                              <div><strong>Specialty:</strong> {{ $speciality_name->name ?? "N/A" }}</div>
-                              <div><strong>Experience Required:</strong> {{ $job->experience_level }}{{ $job->experience_level == 1 ? 'st' : ($job->experience_level == 2 ? 'nd' : ($job->experience_level == 3 ? 'rd' : 'th')) }} Year</div>
-                              <div>
-                                <span class="salary"><strong>Salary:</strong> ${{ $job->per_salary_min }}/hr </span>
-                              </div>
-                              <div class="last-date"><strong>  Last Date:</strong>
-                                <?php
+                    </script>
+                  </div>
+                  <div class="job-info-details col-12 d-flex">
+                    <div class="col-8 job_detail_data">
+                      <div><strong>Employment Type:</strong> {{ $emplyeement_type_arr_string ?? "N/A"}} </div>
+                      <div><strong>Shift Type:</strong> {{ $shift_type_arr_string ?? "N/A" }}</div>
+                      <div><strong>Sector:</strong> {{ $job->sector ?? "N/A" }}</div>
+                      <div><strong>Work Environment:</strong> {{ $work_environment_arr_string ?? "N/A"}}</div>
+                      <!--<div><strong>Benefits:</strong> </div>-->
+                      <div><strong>Specialty:</strong> {{ $speciality_name->name ?? "N/A" }}</div>
+                      <div><strong>Experience Required:</strong> {{ $job->experience_level }}{{ $job->experience_level
+                        == 1 ? 'st' : ($job->experience_level == 2 ? 'nd' : ($job->experience_level == 3 ? 'rd' : 'th'))
+                        }} Year</div>
+                      <div>
+                        <span class="salary"><strong>Salary:</strong> ${{ $job->per_salary_min }}/hr </span>
+                      </div>
+                      <div class="last-date"><strong> Last Date:</strong>
+                        <?php
                                     echo $formattedDate = date("d M Y", strtotime($job->application_deadline));
                                   ?>
+                      </div>
+                    </div>
+
+                    <div class="col-4 job-right-col">
+                      @php
+                      $benefitIds = json_decode($job->benefits, true) ?? [];
+
+                      $benefits = [];
+                      if (!empty($benefitIds)) {
+                      $benefits = DB::table('benefits_preferences')
+                      ->whereIn('benefits_id', $benefitIds)
+                      ->get();
+                      }
+
+                      $visibleBenefits = $benefits->take(3);
+                      $extraBenefitsCount = $benefits->count() - 3;
+                      @endphp
+                      <div class="job-features">
+                        <div><strong>Benefits:</strong></div>
+
+                        @foreach($visibleBenefits as $benefit)
+                        <div class="feature-item">
+                          @if($benefit->icon)
+                          <img src="{{ asset('uploads/benefits/'.$benefit->icon) }}"
+                            alt="{{ $benefit->benefits_name }}">
+                          @endif
+                          <span>{{ $benefit->benefits_name }}</span>
+                        </div>
+                        @endforeach
+
+                        @if($extraBenefitsCount > 0)
+                        <button class="btn btn-link p-0 show-more-btn" data-bs-toggle="modal"
+                          data-bs-target="#benefitsModal-{{ $job->id }}">
+                          +{{ $extraBenefitsCount }} more
+                        </button>
+                        @endif
+                      </div>
+                      <div class="modal fade" id="benefitsModal-{{ $job->id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-md">
+                          <div class="modal-content modal-content-custom">
+                            <div class="modal-header">
+                              <h5 class="modal-title">All Benefits</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+
+                            <div class="modal-body">
+                              <div class="job-features">
+                                @foreach($benefits as $benefit)
+                                <div class="feature-item">
+                                  @if($benefit->icon)
+                                  <img src="{{ asset('uploads/benefits/'.$benefit->icon) }}"
+                                    alt="{{ $benefit->benefits_name }}">
+                                  @endif
+                                  <span>{{ $benefit->benefits_name }}</span>
+                                </div>
+                                @endforeach
                               </div>
                             </div>
-                            
-                            <div class="col-4 job-right-col">
-                              @php
-                                  $benefitIds = json_decode($job->benefits, true) ?? [];
 
-                                  $benefits = [];
-                                  if (!empty($benefitIds)) {
-                                      $benefits = DB::table('benefits_preferences')
-                                          ->whereIn('benefits_id', $benefitIds)
-                                          ->get();
-                                  }
-
-                                  $visibleBenefits = $benefits->take(3);
-                                  $extraBenefitsCount = $benefits->count() - 3;
-                                @endphp
-                                <div class="job-features">
-                                    <div><strong>Benefits:</strong></div>
-
-                                    @foreach($visibleBenefits as $benefit)
-                                        <div class="feature-item">
-                                            @if($benefit->icon)
-                                                <img src="{{ asset('uploads/benefits/'.$benefit->icon) }}" alt="{{ $benefit->benefits_name }}">
-                                            @endif
-                                            <span>{{ $benefit->benefits_name }}</span>
-                                        </div>
-                                    @endforeach
-
-                                    @if($extraBenefitsCount > 0)
-                                        <button
-                                            class="btn btn-link p-0 show-more-btn"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#benefitsModal-{{ $job->id }}">
-                                            +{{ $extraBenefitsCount }} more
-                                        </button>
-                                    @endif
-                                </div>
-                                <div class="modal fade" id="benefitsModal-{{ $job->id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-md">
-                                    <div class="modal-content modal-content-custom">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">All Benefits</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-
-                                        <div class="modal-body">
-                                            <div class="job-features">
-                                                @foreach($benefits as $benefit)
-                                                    <div class="feature-item">
-                                                        @if($benefit->icon)
-                                                            <img src="{{ asset('uploads/benefits/'.$benefit->icon) }}"
-                                                                alt="{{ $benefit->benefits_name }}">
-                                                        @endif
-                                                        <span>{{ $benefit->benefits_name }}</span>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-
-                                        <div class="modal-footer">
-                                            <button class="btn btn-secondary" data-bs-dismiss="modal">
-                                                Close
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="modal-footer">
+                              <button class="btn btn-secondary" data-bs-dismiss="modal">
+                                Close
+                              </button>
                             </div>
-                              <div>
-                                <?php
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <?php
                                   $sector_percent = (!empty($work_preferences_data) && $work_preferences_data->sector_preferences == $job->sector) ? 1 : 0;
                                   $emptype_preferences = (!empty($work_preferences_data))?$work_preferences_data->emptype_preferences:'';
                                   $emp_type = (array)json_decode($emptype_preferences);
@@ -1569,225 +1722,262 @@
                                   
                                   $work_environment_preferences = (!empty($work_preferences_data))?$work_preferences_data->work_environment_preferences:'';        
                                   $workEnvPrefs = (array)json_decode($work_environment_preferences);
-                                  ?>        
-                                    <div class="match-circle" data-value="{{ $total_percent }}">
-                                    <div class="match-inner">
-                                        <div class="percent">{{ $total_percent }}%</div>
-                                        <div class="label">Match</div>
-                                    </div>
-                                </div>
-                                <script>
-                                    document.querySelectorAll('.match-circle').forEach(el => {
+                                  ?>
+                        <div class="match-circle" data-value="{{ $total_percent }}">
+                          <div class="match-inner">
+                            <div class="percent">{{ $total_percent }}%</div>
+                            <div class="label">Match</div>
+                          </div>
+                        </div>
+                        <script>
+                          document.querySelectorAll('.match-circle').forEach(el => {
                                         const val = el.getAttribute('data-value') || 0;
                                         el.style.setProperty('--percent', val);
                                     });
-                                </script>
-                              </div>
-                            </div>
-                          </div>  
-                          <!-- Footer: Match & Apply -->
-                          <?php
+                        </script>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Footer: Match & Apply -->
+                  <?php
                             $user_id = Auth::guard("nurse_middle")->user()->id;
                             
                             // $apply_job_data = DB::table("job_apply")->where("user_id",$user_id)->where("job_id",$job->id)->first();
                             $apply_job_data = DB::table("nurse_applications")->where("nurse_id",$user_id)->where("job_id",$job->id)->first();
                             //print_r($names);
-                            ?>        
-                          <!-- Footer: Match & Apply -->
-                          <div class="job-footer">
-                            <!-- <div class="match-score">{{ $total_percent }}% Match</div> -->
-                              <!-- <button class="apply-btn apply-btn-{{ $job->id }} @if(!empty($apply_job_data)) applied @endif" onclick="applyNow('{{ $user_id }}','{{ $job->id }}')">
+                            ?>
+                  <!-- Footer: Match & Apply -->
+                  <div class="job-footer">
+                    <!-- <div class="match-score">{{ $total_percent }}% Match</div> -->
+                    <!-- <button class="apply-btn apply-btn-{{ $job->id }} @if(!empty($apply_job_data)) applied @endif" onclick="applyNow('{{ $user_id }}','{{ $job->id }}')">
                               @if(!empty($apply_job_data))
                               Applied
                               @else
                               Apply Now
                               @endif
                               </button> -->
-                              <div class="action-row">
-                                    <button class="apply-btn apply-btn-{{ $job->id }} 
+                    <div class="action-row">
+                      <button class="apply-btn apply-btn-{{ $job->id }} 
                                     @if(!empty($apply_job_data)) applied @endif" @if(empty($apply_job_data))
-                                    onclick="applyNow('{{ $user_id }}','{{ $job->id }}')" @else disabled @endif>
-                                    @if(!empty($apply_job_data))
-                                    Applied
-                                    @else
-                                    Apply Now
-                                    @endif
-                                  </button>
-
-                                  <a href="{{ route('nurse.job_details',['job_id'=>$job->id]) }}" class="details-link">
-                                      <i data-lucide="bookmark"></i>
-                                      View Details
-                                  </a>
-                                </div>
-                            </div>
-                      </div>
-                      
-                      @endforeach
-                      <div class="pagination-wrapper front-pagination">
-                          {{ $jobs->links('pagination::bootstrap-4') }}
-                      </div>
-                      @else
-                        <div id="no-jobs" class="no-jobs-box" >
-                            <h3>🚫 No Jobs Found</h3>
-                            <p>Sorry, no jobs match your search.</p>
-                        </div>
-                      @endif
-                      
-                     </div>
-                     <div class="job-listings ajax-pagination d-none"></div>
-                   </div>  
-                    {{-- <div class="pagination"></div> --}}
-                
-                </div>
-              </div>
-          </div>
-          <div id="tab2" class="tab-content-jobs">
-            
-            <div class="manage-section">
-              <div class="manage-header">
-                  <h6>Manage Saved Searches</h6>          
-                  <button id="deleteSelected" style="margin-top:10px;">Delete Selected</button>
-              </div>
-              <table id="savedSearchTable" class="table">
-                <thead>
-                  <tr>
-                    <th><input type="checkbox" id="selectAll"></th>
-                    <th>Name</th>
-                    <th>Search Type</th>
-                    <th>Filters summary</th>
-                    <th>Matches Today</th>
-                    <th>Alert</th>
-                    <th>Delivery</th>
-                    <th>Created</th>
-                    <th>Last run</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @if($saved_searches_data->isNotEmpty())
-                  @php
-                    $i = 1;
-                  @endphp
-                  @foreach($saved_searches_data as $saved_searches)
-                  <tr data-id="{{ $i }}" data-value="{{ $saved_searches->searches_id }}" data-filters='{{ $saved_searches->filters }}' data-name='{{ $saved_searches->delivery }}'>
-                    <td>
-                      @if($saved_searches->status_my_preference != 1 && $i != 0)
-                      <input type="checkbox" class="select-item">
-                      @endif
-                    </td>
-                    {{-- <td>Saved search {{ $i }}</td> --}}
-                  <td>
-                    {{-- My Preferences --}}
-                    @if($saved_searches->status_my_preference == 1)
-                            My Preferences
-
-                        {{-- Named saved search --}}
-                        @elseif(!empty($saved_searches->name))
-                            {{ $saved_searches->name }}
-
-                        {{-- Auto numbered --}}
+                        onclick="applyNow('{{ $user_id }}','{{ $job->id }}')" @else disabled @endif>
+                        @if(!empty($apply_job_data))
+                        Applied
                         @else
-                            Saved search {{ $i }}
+                        Apply Now
                         @endif
-                    </td>
-                    <td>{{ $saved_searches->type }}</td>
-                    <td>
-                      <div class="filter-summary">
-                        
-                        @php
-                          $filters = json_decode($saved_searches->filters, true);
-                          
-                        @endphp
-                        @if(!empty($filters))
-                          @php
-                          $firstFilterValue = collect($filters)
-                              ->filter(fn($v) => !empty($v))
-                              ->first();
-                          @endphp
+                      </button>
 
-                          @if(is_array($firstFilterValue))
-                            <span class="chip-new">{{ implode(', ', $firstFilterValue) }}</span>
-                          @elseif($firstFilterValue)
-                            <span class="chip-new">{{ $firstFilterValue }}</span>
-                          @endif
-                          <a href="#" class="btn-readmore" data-id="{{ $saved_searches->searches_id }}" data-filters='{{ $saved_searches->filters }}'>Read More</a>
-                        @endif
-                        
+                      <a href="{{ route('nurse.job_details',['job_id'=>$job->id]) }}" class="details-link">
+                        <i data-lucide="bookmark"></i>
+                        View Details
+                      </a>
+                    </div>
+                  </div>
+                </div>
 
-                      </div>
-                    </td>
-                    <td>
-                      <span class="match-count badge bg-info text-dark">
-                        {{ $search->matches_today ?? 0 }}
-                      </span>
-                    </td>
-                    <td><span class="alert-pill alert-on">{{ $saved_searches->alert }}</span></td>
-                    <td>
-                      @if($saved_searches->delivery === 'Email')
-                        <i class="fa-solid fa-envelope"></i>
-                      @elseif($saved_searches->delivery === 'In-app')
-                        <i class="fa-solid fa-laptop"></i>
-                      @elseif($saved_searches->delivery === 'SMS')
-                        <i class="fa-solid fa-comment-sms"></i>
-                      @endif
-                      <!-- {{ $saved_searches->delivery }} -->
-                    </td>
-                    <td>
+                @endforeach
+                <div class="pagination-wrapper front-pagination">
+                  {{ $jobs->links('pagination::bootstrap-4') }}
+                </div>
+                @else
+                <div id="no-jobs" class="no-jobs-box">
+                  <h3>🚫 No Jobs Found</h3>
+                  <p>Sorry, no jobs match your search.</p>
+                </div>
+                @endif
+
+              </div>
+              <div class="job-listings ajax-pagination d-none"></div>
+            </div>
+            {{-- <div class="pagination"></div> --}}
+
+          </div>
+        </div>
+      </div>
+      <div id="tab2" class="tab-content-jobs">
+
+        <div class="manage-section">
+          <div class="manage-header">
+            <h6>Manage Saved Searches</h6>
+            <button id="deleteSelected" style="margin-top:10px;">Delete Selected</button>
+          </div>
+          <table id="savedSearchTable" class="table">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="selectAll"></th>
+                <th>Name</th>
+                <th>Search Type</th>
+                <th>Filters summary</th>
+                <th>Matches Today</th>
+                <th>Alert</th>
+                <th>Delivery</th>
+                <th>Created</th>
+                <th>Last run</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if($saved_searches_data->isNotEmpty())
+              @php
+              $i = 1;
+              @endphp
+              @foreach($saved_searches_data as $saved_searches)
+              <tr data-id="{{ $i }}" data-value="{{ $saved_searches->searches_id }}"
+                data-filters='{{ $saved_searches->filters }}' data-name='{{ $saved_searches->delivery }}'>
+                <td>
+                  @if($saved_searches->status_my_preference != 1 && $i != 0)
+                  <input type="checkbox" class="select-item">
+                  @endif
+                </td>
+                {{-- <td>Saved search {{ $i }}</td> --}}
+                <td>
+                  {{-- My Preferences --}}
+                  @if($saved_searches->status_my_preference == 1)
+                  My Preferences
+
+                  {{-- Named saved search --}}
+                  @elseif(!empty($saved_searches->name))
+                  {{ $saved_searches->name }}
+
+                  {{-- Auto numbered --}}
+                  @else
+                  Saved search {{ $i }}
+                  @endif
+                </td>
+                <td>{{ $saved_searches->type }}</td>
+                <td>
+                  <div class="filter-summary">
+
                     @php
-                     $dateOnly = date('Y-m-d', strtotime($saved_searches->created_at));
-                     $today = date('Y-m-d');
+                    $filters = json_decode($saved_searches->filters, true);
+
+                    @endphp
+                    @if(!empty($filters))
+                    @php
+                    $firstFilterValue = collect($filters)
+                    ->filter(fn($v) => !empty($v))
+                    ->first();
                     @endphp
 
-                    @if($dateOnly === $today)
-                      Today
-                    @else
-                      {{ $dateOnly }}      
+                    @if(is_array($firstFilterValue))
+                    <span class="chip-new">{{ implode(', ', $firstFilterValue) }}</span>
+                    @elseif($firstFilterValue)
+                    <span class="chip-new">{{ $firstFilterValue }}</span>
                     @endif
-                    </td>
-                    <td class="last_run_at-{{ $saved_searches->searches_id }}">
-                      {{ $saved_searches->last_run_at }}
-                    </td>
-                    <td class="actions">
-                      <div class="alert_box d-flex align-items-center gap-1">
-                        <div class="alert-toggle-wrapper">
-                          <label class="alert-toggle">
-                            <input type="checkbox" class="alert-toggle-input" @if($saved_searches->alert != "Off") checked @endif data-id="{{ $saved_searches->searches_id }}">
-                            <span class="alert-toggle-slider"></span>
-                          </label>
-                        </div>
-                      
-                      <button class="btn-run" data-id="{{ $saved_searches->searches_id }}">Run</button>
-                      <button class="btn-edit" data-id="{{ $saved_searches->searches_id }}">Edit</button>
-                      <button class="btn-duplicate">Duplicate</button>
-                        @if($saved_searches->status_my_preference != 1 && $i != 0)
-                            <button class="btn-delete" data-name="single-delete">Delete</button>
-                        @endif
+                    <a href="#" class="btn-readmore" data-id="{{ $saved_searches->searches_id }}"
+                      data-filters='{{ $saved_searches->filters }}'>Read More</a>
+                    @endif
+
+
+                  </div>
+                </td>
+                <td>
+                  <span class="match-count badge bg-info text-dark">
+                    {{ $search->matches_today ?? 0 }}
+                  </span>
+                </td>
+                <td><span class="alert-pill alert-on">{{ $saved_searches->alert }}</span></td>
+                <td>
+                  @if($saved_searches->delivery === 'Email')
+                  <i class="fa-solid fa-envelope"></i>
+                  @elseif($saved_searches->delivery === 'In-app')
+                  <i class="fa-solid fa-laptop"></i>
+                  @elseif($saved_searches->delivery === 'SMS')
+                  <i class="fa-solid fa-comment-sms"></i>
+                  @endif
+                  <!-- {{ $saved_searches->delivery }} -->
+                </td>
+                <td>
+                  @php
+                  $dateOnly = date('Y-m-d', strtotime($saved_searches->created_at));
+                  $today = date('Y-m-d');
+                  @endphp
+
+                  @if($dateOnly === $today)
+                  Today
+                  @else
+                  {{ $dateOnly }}
+                  @endif
+                </td>
+                <td class="last_run_at-{{ $saved_searches->searches_id }}">
+                  {{ $saved_searches->last_run_at }}
+                </td>
+                <td class="actions">
+                  <div class="alert_box d-flex align-items-center gap-1">
+                    <div class="alert-toggle-wrapper">
+                      <label class="alert-toggle">
+                        <input type="checkbox" class="alert-toggle-input" @if($saved_searches->alert != "Off") checked
+                        @endif data-id="{{ $saved_searches->searches_id }}">
+                        <span class="alert-toggle-slider"></span>
+                      </label>
+                    </div>
+
+                    <button class="btn-run" data-id="{{ $saved_searches->searches_id }}">Run</button>
+                    <button class="btn-edit" data-id="{{ $saved_searches->searches_id }}">Edit</button>
+                    <button class="btn-duplicate">Duplicate</button>
+                    @if($saved_searches->status_my_preference != 1 && $i != 0)
+                    <button class="btn-delete" data-name="single-delete">Delete</button>
+                    @endif
+
+                  </div>
+                </td>
+              </tr>
+
+
+              <!-- @if($filters)
+                  <tr class="filter-summary-row">
+                    <td></td>
+                    <td colspan="5">
+                      <div class="filter-summary">
+                        @foreach($filters as $key => $value)
+                          @if(is_array($value) && isset($value['min']) && isset($value['max']))
+                            {{-- Salary Range --}}
+                            <div class="filter-line">
+                              <strong>{{ ucwords(str_replace('_', ' ', $key)) }}:</strong>
+                              <span class="chip">${{ number_format($value['min']) }} – ${{ number_format($value['max']) }}</span>
+                            </div>
+
+                          @elseif(is_array($value) && !empty($value))
+                            {{-- Array fields (like multiple selections) --}}
+                            <div class="filter-line">
+                              <strong>{{ ucwords(str_replace('_', ' ', $key)) }}:</strong>
+                              @foreach($value as $item)
+                                <span class="chip">{{ $item }}</span>
+                              @endforeach
+                            </div>
+
+                          @elseif(!is_array($value) && !empty($value))
+                            {{-- Simple key-value pairs --}}
+                            <div class="filter-line">
+                              <strong>{{ ucwords(str_replace('_', ' ', $key)) }}:</strong>
+                              <span class="chip">{{ $value }}</span>
+                            </div>
+                          @endif
+                        @endforeach
 
                       </div>
                     </td>
                   </tr>
-                  
-
-    
-                  @php
-                    $i++;
-                  @endphp
-                  @endforeach
-                  @endif
-                </tbody>
-              </table>
-            </div>
-          </div>
-         
+                  @endif -->
+              @php
+              $i++;
+              @endphp
+              @endforeach
+              @endif
+            </tbody>
+          </table>
+        </div>
       </div>
-      @include('nurse.job_modals')
-      @include('nurse.saved_searches')
-   </section>
-   <!-- Save Search Modal -->
+
+    </div>
+    @include('nurse.job_modals')
+    @include('nurse.saved_searches')
+  </section>
+  <!-- Save Search Modal -->
   <div class="toast" id="toast"></div>
 </main>
 <script>
-    $(document).ready(function(){
+  $(document).ready(function(){
       
 
       $('.tab-nav li').click(function(){
@@ -1809,9 +1999,9 @@
         $('#' + $(this).data('tab')).addClass('active');
       });
     });
-  </script>
+</script>
 <script>
-   let editId = null;
+  let editId = null;
    let deleteId = null;
    
    $('#add-search-btn, .add-new').on('click', function(e) {
@@ -2370,7 +2560,7 @@ $('#renameCancel').click(function() {
    // });
 </script>
 <script>
-   $(document).ready(function(){
+  $(document).ready(function(){
        
      
          
@@ -2409,65 +2599,19 @@ $('#renameCancel').click(function() {
    });
 </script>
 <script>
-   // $(document).ready(function () {
-   //     var $container = $('.job-listings'); // replace with your actual wrapper id/class
-   
-   //     // Get all job cards
-   //     var $cards = $container.children('.job-card');
-   
-   //     // Sort by match percentage
-   //     $cards.sort(function (a, b) {
-   //         var aVal = parseInt($(a).find('.match-score').text()); // "20% Match" → 20
-   //         var bVal = parseInt($(b).find('.match-score').text());
-   
-   //         return bVal - aVal; // High to Low (swap if you want Low → High)
-   //     });
-   
-   //     // Re-append in sorted order
-   //     $container.append($cards);
-   // });
-  //  $(document).on("click", ".pagination a", function(e) {
-  //       e.preventDefault();
-
-  //       $.ajax({
-  //           url: $(this).attr('href'),
-  //           type: "GET",
-  //           success: function(data) {
-  //               $(".job-listings").html(data);
-  //           }
-  //       });
-  //   });
-
-
-
-    //  function sortBy(value){
-    //    if(value != null){
-    //      $.ajax({
-    //        type: "POST",
-    //        url: "{{ url('/nurse/getJobsSorting') }}",
-    //        data: {sort_name:value,_token:'{{ csrf_token() }}'},
-    //       //  cache: false,
-    //        success: function(data){
-    //          console.log("data",data);
-    //          $(".job-listings").html(data);
-    //        }  
-    //      });
-    //    }
-   
-    // function sortBy(value) {
-    //   currentSort = value;
-
-    //   $.ajax({
-    //       type: "POST",
-    //       url: "{{ url('/nurse/getJobsSorting') }}",
-    //       data: {
-    //           sort_name: value,
-    //           _token: "{{ csrf_token() }}"
-    //       },
-    //       success: function (html) {
-    //           $(".job-listings").html(html);
-    //       }
-    //   });
+    $(document).ready(function () {   
+      const urlParams = new URLSearchParams(window.location.search);
+        let chipFilter = urlParams.get('chip_filter');
+        if (chipFilter) {
+        chipFilter = chipFilter.replace(/"/g, ''); // remove quotes
+        if (chipFilter === 'top') {
+        let tab = $('#my-prefernece-tab');    
+        if (tab.length) {
+        tab.trigger('click');
+        }   
+        }
+      } 
+    });
 
       let filters = {
           keywords: '',
@@ -3138,6 +3282,6 @@ $('#renameCancel').click(function() {
 </script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
-    lucide.createIcons();
+  lucide.createIcons();
 </script>
 @endsection

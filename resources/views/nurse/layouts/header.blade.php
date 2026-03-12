@@ -485,6 +485,10 @@ img, iframe, video {
   @else
 
   @if (Auth::guard('healthcare_facilities')->check())
+  @php
+    $user_id = Auth::guard('healthcare_facilities')->user()->id;
+    $user_data = DB::table("users")->where("id",$user_id)->first();
+  @endphp
   <header class="header sticky-bar  border-bottom nurse-header-menu">
     <div class="container">
       <div class="main-header nurse-header">
@@ -494,18 +498,22 @@ img, iframe, video {
         <div class="header-nav nurse-header">
           <nav class="nav-main-menu w-100">
             <ul class="main-menu">
+              @if($user_data->role != 5)
               <li>
                 <a class="hover-up {{ request()->is('healthcare-facilities/my-profile') ?'active':'' }}" href="{{ route('medical-facilities.my-profile') }}">Settings</a>
               </li>
+              @endif
               <li>
                 <a class="{{ request()->is('healthcare-facilities/location_work_modal') ?'active':'' }} hover-up " href="{{ route('medical-facilities.location_work_modal') }}">Job Postings</a>
               </li>
+              @if($user_data->role != 5)
               <li>
                 <a class="hover-up" href="#">Find Nurse</a>
               </li>
               <li>
                 <a class="hover-up " href='#'>Saved Candidates</a>
               </li>
+              @endif
               <li>
                 <a class="hover-up " href='#'>Hiring</a>
               </li>

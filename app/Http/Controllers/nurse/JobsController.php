@@ -31,9 +31,10 @@ use App\Models\JobsModel;
 use App\Models\RegisteredProfile;
 use App\Models\User;
 
+
 class JobsController extends Controller{
 
-    public function index()
+    public function index(Request $request)
     {
         $this->ensureDefaultSearch();
         $data['employeement_type_data'] = DB::table("employeement_type_preferences")->where("sub_prefer_id", 0)->get();
@@ -187,7 +188,45 @@ class JobsController extends Controller{
         // $data['country_name'] = $country_merge;
         $data['user_data'] = DB::table("users")->where("id", $user_id)->first();
 
-        $data['jobs'] = DB::table("job_boxes")->where("save_draft", 2)->orderBy('created_at','desc')->paginate(2);
+        $today = Carbon::now()->toDateString();
+        $chip_filter = trim($request->chip_filter, '"') ?? "";
+        $query = DB::table("job_boxes")->where('save_draft', 2);
+        if ($chip_filter == 'instant') {
+            $query->whereDate('updated_at', $today)
+                ->where('main_emp_type', 3);
+        } elseif ($chip_filter == 'last_minute') {
+            $query->where(function ($q) {
+                $q->whereDate('updated_at', Carbon::today())
+                    ->orWhereDate('updated_at', Carbon::yesterday());
+            })->where('main_emp_type', 3);
+        } elseif ($chip_filter == 'immediate') {
+            $query->whereBetween('updated_at', [
+                Carbon::today(),
+                Carbon::today()->addDays(7)
+            ])
+                ->where('main_emp_type', '!=', 3);
+        } elseif ($chip_filter == 'urgent') {
+            $query->whereBetween('updated_at', [
+                Carbon::today(),
+                Carbon::today()->addDays(5)
+            ])
+                ->where('urgent_hire', 1);
+        } elseif($chip_filter == 'new') {
+            $query->where(function ($q) {
+                $q->where(function ($sub) {
+                    $sub->where('main_emp_type', 3)
+                        ->where('updated_at', '>=', Carbon::now()->subDays(5));
+                })
+                    ->orWhere(function ($sub) {
+                        $sub->whereIn('main_emp_type', [1, 2])
+                            ->where('updated_at', '>=', Carbon::now()->subDays(15));
+                    });
+            });
+        }else{
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $data['jobs'] = $query->paginate(2);
         return view('nurse.find_jobs')->with($data);
     }
 
@@ -198,100 +237,6 @@ class JobsController extends Controller{
         $data['state_data'] = DB::table("states")->where("id",$data['jobs']->location_state)->first();
         return view('nurse.job_details')->with($data);
     }
-    // public function index()
-    // {
-    //     $this->ensureDefaultSearch();
-    //     $data['employeement_type_data'] = DB::table("employeement_type_preferences")->where("sub_prefer_id",0)->get();
-    //     $data['shift_type_data'] = DB::table("work_shift_preferences")->where("shift_id",0)->where("sub_shift_id",NULL)->get();
-    //     $data['employee_positions'] = DB::table("employee_positions")->where("subposition_id",0)->get();
-    //     $data['benefits_preferences'] = DB::table("benefits_preferences")->where("subbenefit_id",0)->get();
-    //     $data['work_environment_data'] = DB::table("work_enviornment_preferences")
-    //         ->where("sub_env_id", 0)
-    //         ->where("sub_envp_id", 0)
-    //         ->get();
-    //     $data['work_shift_data'] = DB::table("work_shift_preferences")
-    //         ->where("shift_id", 0)
-    //         ->where("sub_shift_id", NULL)
-    //         ->get();    
-    //     $data['type_of_nurse'] = DB::table("practitioner_type")
-    //         ->where("parent", 0)
-    //         ->get();        
-    //     $data['speciality'] = DB::table("speciality")
-    //         ->where("parent", 0)
-    //         ->get();
-    //     $user_detail = Auth::guard('nurse_middle')->user();
-    //     $user_id = $user_detail->id;
-    //     $data['work_preferences_data'] = DB::table("work_preferences")
-    //         ->where("user_id", $user_id)
-    //         ->first();    
-    //     $data['saved_searches_data'] = DB::table("saved_searches")
-    //         ->where("user_id", $user_id)
-    //         ->get();            
-    //     $today = now();    
-
-    //     foreach ($data['saved_searches_data'] as $search) {
-    //         $filters = json_decode($search->filters, true);
-
-    //         $query = JobsModel::query();
-
-    //         // Example: Apply filters dynamically
-    //         if (!empty($filters['sector'])) {
-    //             $query->where('sector', $filters['sector']);
-    //         }
-
-    //         // Employment type (multiple IDs)
-    //         if (!empty($filters['employment_type'])) {
-    //             $query->whereIn('emplyeement_type', $filters['employment_type']);
-    //         }
-
-    //         // Work shift (multiple IDs)
-    //         if (!empty($filters['work_shift'])) {
-    //             $query->whereIn('shift_type', $filters['work_shift']);
-    //         }
-
-    //         // Work environment
-    //         if (!empty($filters['work_environment'])) {
-    //             $query->whereIn('work_environment', $filters['work_environment']);
-    //         }
-
-    //         // Employee positions
-    //         if (!empty($filters['employee_positions'])) {
-    //             $query->whereIn('emplyeement_positions', $filters['employee_positions']);
-    //         }
-    //         // if (!empty($filters['nurse_type'])) {
-    //         //     $query->whereIn('nurse_type', (array) $filters['nurse_type']);
-    //         // }
-    //         // if (!empty($filters['speciality'])) {
-    //         //     $query->whereIn('speciality', (array) $filters['speciality']);
-    //         // }
-
-    //         // Only jobs added today
-    //         $query->whereDate('created_at', $today);
-
-    //         // Count matching jobs
-    //         $data['query_count'] = $query->count();
-    //     }
-
-
-    //     $residanceCountry = $user_detail->country;
-    //     $registeredCountries = RegisteredProfile::where('user_id', $user_id)
-    //         ->pluck('country_code') // just get codes
-    //         ->toArray();
-
-    //     // merge residence + registered
-    //     $allCountries = collect($registeredCountries)
-    //         ->push($residanceCountry)
-    //         ->unique() // remove duplicates
-    //         ->values();
-    //     $data['registered_countries'] = $allCountries;
-
-    //     $data['agencies_list'] = DB::table('agencies')->where('status', 1)->get();
-
-    //     $data['user_data'] = DB::table("users")->where("id",$user_id)->first();
-                   
-    //     $data['jobs'] = DB::table("job_boxes")->get();                
-    //     return view('nurse.find_jobs')->with($data);
-    // }
 
     public function capitalizeFirstTwo($string) {
         $result = '';
@@ -633,43 +578,6 @@ class JobsController extends Controller{
             'html' => view('nurse.job_filter_data', compact('jobs'))->render()
         ]);
     }
-    public function getJobsSorting_old(Request $request)
-    {
-        $query = DB::table("job_boxes");
-
-        // 🔍 Keyword
-        if ($request->keywords) {
-            $query->where(function ($q) use ($request) {
-                $q->where('nurse_type', 'LIKE', '%' . $request->keywords . '%');
-                // ->orWhere('nurse_type', 'LIKE', '%' . $request->keywords . '%');
-            });
-        }
-
-        // 📍 Location (multiple)
-        if (!empty($request->locations)) {
-            $query->whereIn('location_name', $request->locations);
-        }
-
-        // 🏥 Agency
-        if ($request->agency) {
-            $query->where('agency_name', $request->agency);
-        }
-
-        // 🔃 Sorting
-        if ($request->sort_name == 2) {
-            $query->orderBy('id', 'desc');
-        } elseif ($request->sort_name == 5) {
-            $query->orderBy('urgent_hire', 'desc');
-        } elseif ($request->sort_name == 7) {
-            $query->orderBy('application_submission_date', 'asc');
-        } else {
-            $query->orderBy('id', 'desc');
-        }
-
-        $jobs = $query->orderBy('created_at', 'asc')->paginate(2);
-
-        return view('nurse.job_filter_data', compact('jobs'))->render();
-    }
 
     public function getNurseData(Request $request)
     {
@@ -795,17 +703,6 @@ class JobsController extends Controller{
 
         $updateWorkPreferencesFlexiblity = DB::table("work_preferences")->where("user_id",$user_id)->update(['sector_preferences'=>$sector_data]);
     }
-
-    // public function applyJobs(Request $request){
-    //     $user_id = $request->user_id;
-    //     $job_id = $request->job_id; 
-
-    //     $applyJobs = DB::table("job_apply")->insert(["user_id"=>$user_id,"job_id"=>$job_id]);
-
-    //     if($applyJobs == 1){
-    //         return $applyJobs;
-    //     }
-    // }
 
     public function applyJobs(Request $request)
     {

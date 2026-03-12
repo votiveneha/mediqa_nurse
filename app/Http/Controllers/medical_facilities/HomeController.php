@@ -340,17 +340,49 @@ class HomeController extends Controller
 
     public function userloginAction(Request $request)
     {
-        
-        if (Auth::guard('healthcare_facilities')->attempt(['email' => $request->email, 'password' => $request->password, 'role' => 2])) {
-            if (isset($request->remember_me) && !empty($request->remember_me)) {
+
+        $user_data = User::where("email", $request->email)->first();
+        if (Auth::guard('healthcare_facilities')->attempt([
+            'email' => $request->email,
+            'password' => $request->password
+        ])  && $user_data->status == 1) {
+
+            $user = Auth::guard('healthcare_facilities')->user();
+
+            // Remember me
+            if ($request->remember_me) {
                 setcookie("email", $request->email, time() + 3600);
                 setcookie("password", $request->password, time() + 3600);
             } else {
                 setcookie("email", "");
                 setcookie("password", "");
             }
-            return redirect('/healthcare-facilities/my-profile')->with('success', 'You are Logged in sucessfully.');
+
+            // Redirect based on role
+            if ($user->role == 2) {
+
+                return redirect('/healthcare-facilities/location_work_modal')
+                    ->with('success', 'You are Logged in successfully.');
+
+            } elseif ($user->role == 5) {
+
+                if($user->email_verify == 0 && $user->emailVerified == 0 && $user->user_stage == 0){
+                    return redirect('/healthcare-facilities/accept_invitation')
+                    ->with('success', 'You are Logged in successfully.');
+                }else{
+                    return redirect('/healthcare-facilities/location_work_modal')
+                    ->with('success', 'You are Logged in successfully.');
+                }
+                
+
+            } else {
+
+                Auth::guard('healthcare_facilities')->logout();
+                return back()->with('error', 'Unauthorized access.');
+            }
+
         } else {
+
             return back()->with('error', 'Invalid login details.');
         }
     }
@@ -361,6 +393,11 @@ class HomeController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('healthcare-facilities');
+    }
+
+    public function accept_invitation()
+    {
+        return view('healthcare.settings.accept_invitation');
     }
 
     public function emailVerificationPending()
@@ -410,6 +447,25 @@ class HomeController extends Controller
         $subpwork = json_encode($request->input('subworkthlevel'));
         $country = $request->country;
         $site_data = json_encode($request->site_data);
+        $work_environment_size = $request->work_environment_size;
+        $staff_wellbeing_field = $request->staff_wellbeing_field;
+        $other_text = $request->other_text;
+        $emr_ehr_data = json_encode($request->emr_ehr_data);
+        $emr_other_text = $request->emr_other_text;
+        $equipment_field = $request->equipment_field;
+        $digital_health_text = json_encode($request->digital_health_text);
+        $professional_field = $request->professional_field;
+        $professional_other_text = $request->professional_other_text;
+        $full_name = $request->full_name;
+        $role_position_field = $request->role_position_field;
+        $email = $request->email;
+        $phone = $request->phone;
+        $communication_text = json_encode($request->communication_text);
+        
+        $subaccreditation_data = json_encode($request->subaccreditation_data);
+
+        //print_r($subaccreditation_data);die;
+        $profile_visiblity = $request->profile_visiblity;
 
         $request->validate([
             'facility_logo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -436,6 +492,22 @@ class HomeController extends Controller
         $user_data->facility_services = $subpwork;
         $user_data->country_iso = $country;
         $user_data->site_data = $site_data;
+        $user_data->work_environment_size = $work_environment_size;
+        $user_data->accreditations_certifications = $subaccreditation_data;
+        $user_data->staff_wellbeing_programs = $staff_wellbeing_field;
+        $user_data->other_staff_wellbeing = $other_text;
+        $user_data->technology_emr_system = $emr_ehr_data;
+        $user_data->other_technology_emr = $emr_other_text;
+        $user_data->equipment_facilities = $equipment_field;
+        $user_data->digital_health_integration = $digital_health_text;
+        $user_data->professional_development = $professional_field;
+        $user_data->other_professional_development = $professional_other_text;
+        $user_data->contact_person_name = $full_name;
+        $user_data->role_position = $role_position_field;
+        $user_data->email = $email;
+        $user_data->phone = $phone;
+        $user_data->communication_method = $communication_text;
+        $user_data->profile_visiblity = $profile_visiblity;
         $run = $user_data->save();
 
         if ($run) {

@@ -61,9 +61,23 @@
     </div>
   </div>
 
+  @php
+    $user_id = Auth::guard('healthcare_facilities')->user()->id;
+    $user_data = DB::table("users")->where("id",$user_id)->first();
+
+    $visiblity = "";
+    if($user_data->profile_visiblity == 1){
+      $visiblity = "Public";
+    }
+
+    if($user_data->profile_visiblity == 2){
+      $visiblity = "Private";
+    }
+  @endphp
+
   <div class="profile-chklst">
     <span>Profile</span>
-   
+    <span class="badge public">{{ $visiblity }}</span>
   </div>
 
   
@@ -72,7 +86,7 @@
     <ul class="nav" role="tablist">
       <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs {{ request()->routeIs('medical-facilities.my-profile') ? 'active' : '' }}" href="{{ route('medical-facilities.my-profile') }}" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-user"></i> Profile</a></li>
       
-      <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="#" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-users"></i> Users</a></li>
+      <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs {{ request()->routeIs('medical-facilities.users') ? 'active' : '' }}" href="{{ route('medical-facilities.users') }}" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-users"></i> Users</a></li>
       <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="#" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-credit-card"></i> Billing</a></li>
       <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="#" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-bell"></i> Notifications</a></li>
       <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="#" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-shield-check"></i> Compliance & Security</a></li>

@@ -181,6 +181,17 @@ form#shift_scheduling_form ul.select2-selection__rendered {
                               <input class="form-control temporary_hours_per_week" type="date" name="application_deadline" value="{{ $job_data->application_deadline }}" id="application_deadline">
                               <span id='reqtemporaryrangenotes' class='reqError text-danger valley'></span>
                             </div>
+                            <div class="level-drp">
+                              <label class="form-label" for="input-1">Priority Tags
+                              </label>
+                              
+                              <div class="form-check">
+                                  <input type="checkbox" name="priority_tags" value="1" @if($job_data->urgent_hire == 1) checked @endif id="priority_tags">
+                                  <label class="form-check-label" for="7 days">
+                                  Urgent
+                                  </label>
+                              </div>
+                            </div>
                             <div class=" drp--clr">
                                 <label class="form-label" for="input-1">Listing expiry</label>
                                 <div class="visiblity_input">

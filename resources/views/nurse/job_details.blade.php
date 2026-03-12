@@ -134,7 +134,7 @@
 
                     <div class="job-detail-left">
 
-                        <img alt="{{ $healthcare_data->name }}" src="{{ asset($healthcare_data->profile_img) }}">
+                        <img alt="{{ $healthcare_data->name }}" src="{{ asset('healthcareimg/uploads') }}/{{ $healthcare_data->profile_img }}">
 
                         <div class="title-wrap">
                             <h1 class="job-title">{{ $jobs->job_title }}</h1>
@@ -427,7 +427,7 @@
                             <p><b>Name:</b> {{ $jobs->contact_person_role }}</p>
                             <p><b>Role:</b> -</p>
                             <p><b>Contact:</b> -</p>
-                            <a href="#">View Facility Profile</a>
+                            <a href="{{ route('nurse.healthcare_details',['id'=>$jobs->healthcare_id])}}">View Facility Profile</a>
                         </div>
 
 
