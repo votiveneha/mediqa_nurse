@@ -237,6 +237,15 @@ class JobsController extends Controller{
         $data['state_data'] = DB::table("states")->where("id",$data['jobs']->location_state)->first();
         return view('nurse.job_details')->with($data);
     }
+    
+    public function healthcare_details(Request $request){
+        $healthcare_id = $request->id;
+        $data['healthcare_data'] = DB::table("users")->where("id", $healthcare_id)->first();
+        //print_r($data);die;
+        // $data['healthcare_data'] = User::where("id",$data['jobs']->healthcare_id)->first();
+        // $data['state_data'] = DB::table("states")->where("id",$data['jobs']->location_state)->first();
+        return view('nurse.view_healthcare_profile')->with($data);
+    }
 
     public function capitalizeFirstTwo($string) {
         $result = '';

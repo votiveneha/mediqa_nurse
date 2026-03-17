@@ -167,9 +167,27 @@
                                     }
 
                                     $country = DB::table("country")->where("iso2",$healthcare_data->country_iso)->first();
+                                    
+                                    $work_environment_data = (array) json_decode($healthcare_data->facility_services);
+
+                                    $work_environment_arr = [];
+
+                                    foreach ($work_environment_data as $work_environment) {
+                                        $work_environment_arr = array_merge($work_environment_arr, (array)$work_environment);
+                                    }
+                                    $work_name_arr = [];
+                                    foreach ($work_environment_arr as $work_env) {
+                                        $work_enviornment_preferences = DB::table('work_enviornment_preferences')
+                                            ->where('prefer_id', $work_env)
+                                            ->first();
+                                        $work_name_arr[] = $work_enviornment_preferences->env_name;
+                                    }
+
+                                    $commaSeparated_work = implode(',', $work_name_arr);
                                 @endphp
                                 <div>Sector: {{ $sector }}</div>
                                 <div>Operating Country: {{ $country->name }}</div>
+                                <div>Facility Services & Care Areas: {{ $commaSeparated_work  }}</div>
                             </div>
                                     
                         </div>
@@ -192,7 +210,7 @@
 
                             @php
                                 $state_data = DB::table("states")->where("id",$sdata->state)->first();
-                                $i = 1;
+                                //$i = 1;
                             @endphp
                             <h4>Site {{ $i }}</h4>
                             <p>
@@ -207,6 +225,30 @@
                             @endif
                         </div>
                         @endif
+                        <div class="card">
+                            <h2>Accreditations & Certifications:</h2>
+                            @php
+                            $get_accreditation = (!empty($healthcare_data->accreditations_certifications))?json_decode($healthcare_data->accreditations_certifications):[];  
+                            //print_r($get_accreditation);
+                            @endphp
+                            
+                            @foreach($get_accreditation as $accreditation)
+                                @foreach($accreditation as $index=>$accred)
+                                    @php
+                                        $accred_data = DB::table("accreditation_certifications")->where("id",$index)->first();
+                                    @endphp
+                                    <h4>{{ $accred_data->name }}</h4>
+                                    <ul>
+                                        @foreach ($accred as $ac_data)
+                                            @php
+                                                $accred_data1 = DB::table("accreditation_certifications")->where("id",$ac_data)->first();
+                                            @endphp
+                                            <li>{{ $accred_data1->name }}</li>
+                                        @endforeach
+                                    </ul>
+                                @endforeach
+                            @endforeach
+                        </div>
                         <div class="card">
                             <h2>Work Environment Details</h2>
                             <h4>Size</h4>

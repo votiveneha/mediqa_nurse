@@ -56,6 +56,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\EvidanceFileModel;
 use App\Models\Profession;
 use App\Models\SavedSearches;
+use App\Services\User\NurseJobMatchService;
 
 class HomeController extends Controller
 {
@@ -71,14 +72,77 @@ class HomeController extends Controller
         $this->authServices = $authServices;
         
     }
- 
-    public function dashboard()
+
+    public function dashboard(NurseJobMatchService $matchService)
     {
-        $jobs_list = JobsModel::where('save_draft', 2)->orderBy('created_at','desc')->limit(6)->get();
-        // $jobs_list = JobsModel::where('save_draft', 2)->orderBy('id','asc')->get();
         $user_id = Auth::guard("nurse_middle")->user()->id;
+        $user_active_country = Auth::guard("nurse_middle")->user()->active_country;
+        $nurseData = Profession::where('user_id', $user_id)->get();
+        $nurseTypes = $nurseData->pluck('nurse_data')->toArray();
+        $nurseSpecialties = $nurseData->pluck('specialties')->toArray();
+        $experience_data = $nurseData->pluck('assistent_level');
+
+        //vaccination 5%
+        $nurseVaccines = DB::table('vaccination_front')
+                    ->where('user_id', $user_id)
+                    ->pluck('vaccination_id')
+                    ->toArray();
+
+        //Checks and Clearance 5%
+        $eligibility = DB::table('eligibility_to_work')
+            ->where('user_id', $user_id)
+            ->first();
+
+        $policeCheck = DB::table('police_check')
+            ->where('user_id', $user_id)
+            ->exists();
+
+        $workingChildren = DB::table('working_children_check')
+            ->where('user_id', $user_id)
+            ->exists();
+
+        $ndisCheck = DB::table('ndis_screening_check')
+            ->where('user_id', $user_id)
+            ->exists();
+
+        $preferences = DB::table('work_preferences')
+            ->where('user_id', $user_id)
+            ->first();
+        $jobs_list = JobsModel::where('save_draft', 2)
+            ->orderBy('id', 'desc')
+            ->where('location_country', $user_active_country)
+            ->get();
+
+        foreach ($jobs_list as $job) {
+            $job->match_percentage = $matchService->calculateMatch(
+                $nurseTypes,
+                $nurseSpecialties,
+                $experience_data,
+                $nurseVaccines,
+                $eligibility,
+                $policeCheck,
+                $workingChildren,
+                $ndisCheck,
+                $preferences,
+                $job
+            );
+        }
+        
+        $countries = DB::table('country')->where('status', 1)->get();
+        return view('nurse.dashboard', compact('countries', 'jobs_list', 'user_id'));
+    }
+    public function dashboard_old(NurseJobMatchService $matchService)
+    {
+        // $jobs_list = JobsModel::where('save_draft', 2)->orderBy('created_at','desc')->limit(6)->get();
+        $jobs_list = JobsModel::where('save_draft', 2)->orderBy('id','asc')->get();
+        $user_id = Auth::guard("nurse_middle")->user()->id;
+        $nurse = User::find($user_id);
         //  echo "<pre>";print_r($jobs_list);die;
 
+        foreach ($jobs_list as $job) {
+            $job->match_percentage = $matchService->calculateMatch($user_id, $job);
+        }
+        print_r($job->match_percentage);die;
         $countries = DB::table('country')->where('status', 1)->get();
         return view('nurse.dashboard', compact('countries', 'jobs_list','user_id'));
     }
@@ -87,6 +151,8 @@ class HomeController extends Controller
     {
         // print_r($request->all());die;
         $user_id = Auth::guard("nurse_middle")->user()->id;
+        $user_active_country = Auth::guard("nurse_middle")->user()->active_country;
+
         $filter_data = $request->filter;
         $jobs_list = JobsModel::query();
         $today = Carbon::now()->toDateString();
@@ -233,7 +299,9 @@ class HomeController extends Controller
                     });
             });
         }
-        $jobs_list = $jobs_list->where('save_draft',2)->get();
+        $jobs_list = $jobs_list->where('save_draft',2)
+                              ->where('location_country', $user_active_country)
+                              ->get();
         return view('nurse.dashboard_partial',compact('jobs_list','user_id'))->render();
     }
 

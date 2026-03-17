@@ -43,4 +43,10 @@ class HealthcareController extends Controller
         // $data['state_data'] = DB::table("states")->where("id",$data['jobs']->location_state)->first();
         return view('admin.healthcare.view_healthcare_profile')->with($data);
     }
+    
+    public function recruiter_list()
+    {
+        $data['recruiter_list'] = User::where("role",5)->where('email_verify','1')->where('user_stage','1')->orderBy('created_at','desc')->get();
+        return view("admin.healthcare.recruiter_list")->with($data);
+    }
 }

@@ -150,23 +150,21 @@ form#update_profile_form ul.select2-selection__rendered {
                           <input class="form-control logo" type="file" name="facility_logo" id="profile_image">
                           <span id='reqsector_preferences' class='reqError text-danger valley'></span>
                         </div>
-                        @if($user_data->profile_img != "nurse/assets/imgs/nurse06.png" || $user_data->profile_img != NULL)
+                        @if($user_data->profile_img != "nurse/assets/imgs/nurse06.png")
                         <div class="show_logo">
                           <img src="{{ asset('/healthcareimg/uploads') }}/{{ $user_data->profile_img }}" style="width:100px;height:100px;">
                         </div>
-                        @else
-                        <div class="show_logo">
-                          <img src="{{ asset('nurse/assets/imgs/nurse06.png') }}" style="width:100px;height:100px;">
-                        </div>
+                        
                         @endif
                         <div class="form-group level-drp">
                           <label class="form-label" for="input-1">Sector Preferences
                           </label>
+                          
                           <select class="form-input mr-10 select-active sector_preferences" name="sector_preferences" id="sector_preferences">
                             <option value="">select</option>
-                            <option value="1" @if($user_data->sector != "1") selected @endif>Public & Government</option>
-                            <option value="2" @if($user_data->sector != "2") selected @endif>Private</option>
-                            <option value="3" @if($user_data->sector != "3") selected @endif>Public Government & Private</option>
+                            <option value="1" @if($user_data->sector == 1) selected @endif>Public & Government</option>
+                            <option value="2" @if($user_data->sector == 2) selected @endif>Private</option>
+                            <option value="3" @if($user_data->sector == 3) selected @endif>Public Government & Private</option>
                           </select>
                           <span id='reqsector_preferences' class='reqError text-danger valley'></span>
                           
@@ -674,13 +672,13 @@ form#update_profile_form ul.select2-selection__rendered {
                         <div class="form-group level-drp">
                           <label class="form-label accredition_label accredition_label" for="input-1">Email</label>
                           
-                          <input type="email" name="email" class="email" value="@if($user_data->email != NULL) {{ $user_data->email }} @endif"/>
+                          <input type="email" name="email" class="email" value="@if($user_data->email != NULL) {{ $user_data->email }} @endif" readonly/>
                           <span id="reqsubaccredition" class="reqError text-danger valley"></span>
                         </div>
                         <div class="form-group level-drp">
                           <label class="form-label accredition_label accredition_label" for="input-1">Phone</label>
                           
-                          <input type="text" name="phone" class="phone" maxlength="10" value="{{ $user_data->phone }}" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                          <input type="number" name="phone" class="phone" maxlength="10" value="{{ $user_data->phone }}" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                           <span id="reqsubaccredition" class="reqError text-danger valley"></span>
                         </div>  
                         @php

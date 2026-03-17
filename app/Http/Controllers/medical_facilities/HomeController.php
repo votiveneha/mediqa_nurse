@@ -312,7 +312,7 @@ class HomeController extends Controller
             ])
         );
 
-        return redirect('/healthcare-facilities')->with([
+        return redirect('/healthcare-facilities/login')->with([
             'message' => '<h6 style="color:green">Your email has been verified successfully.</h6>',
             'status'  => 1
         ]);
@@ -361,7 +361,7 @@ class HomeController extends Controller
             // Redirect based on role
             if ($user->role == 2) {
 
-                return redirect('/healthcare-facilities/location_work_modal')
+                return redirect('/healthcare-facilities/my-profile')
                     ->with('success', 'You are Logged in successfully.');
 
             } elseif ($user->role == 5) {
@@ -445,6 +445,7 @@ class HomeController extends Controller
         $sector_preferences = $request->sector_preferences;
         $subwork = json_encode($request->input('subwork'));
         $subpwork = json_encode($request->input('subworkthlevel'));
+        //print_r($subpwork);die;
         $country = $request->country;
         $site_data = json_encode($request->site_data);
         $work_environment_size = $request->work_environment_size;
@@ -471,6 +472,8 @@ class HomeController extends Controller
             'facility_logo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
+        $user_data = User::find($user_id);
+
         if ($request->hasFile('facility_logo')) {
 
             $image = $request->file('facility_logo');
@@ -481,11 +484,11 @@ class HomeController extends Controller
 
             
         }else{
-            $imageName = "";
+            $imageName = $user_data->profile_img;
         }
 
         //print_r($site_data);
-        $user_data = User::find($user_id);
+        
         $user_data->name = $facility_name;
         $user_data->sector = $sector_preferences;
         $user_data->profile_img = $imageName;

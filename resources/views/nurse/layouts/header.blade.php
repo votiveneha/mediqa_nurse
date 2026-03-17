@@ -540,7 +540,13 @@ img, iframe, video {
               <div class="info-member">
                 <div class="dropdown">
 
-                  <a class="font-xs color-text-paragraph-2 icon-down" data-bs-toggle="dropdown" style="cursor:pointer;"> <img alt="{{  Auth::guard('healthcare_facilities')->user()->name }}" src="{{ asset( Auth::guard('healthcare_facilities')->user()->profile_img)}}"><strong class="color-brand-1" >{{ Auth::guard('healthcare_facilities')->user()->name }}</strong></a>
+                  <a class="font-xs color-text-paragraph-2 icon-down" data-bs-toggle="dropdown" style="cursor:pointer;">
+                  @if($user_data->profile_img != "nurse/assets/imgs/nurse06.png" && $user_data->profile_img != "") 
+                  <img alt="{{  Auth::guard('healthcare_facilities')->user()->name }}" src="{{ asset( '/healthcareimg/uploads')}}/{{ Auth::guard('healthcare_facilities')->user()->profile_img }}">
+                  @else
+                  <img alt="{{  Auth::guard('healthcare_facilities')->user()->name }}" src="{{ asset( 'https://mediqa.com/public/nurse/assets/imgs/nurse06.png')}}">
+                  @endif
+                  <strong class="color-brand-1" >{{ Auth::guard('healthcare_facilities')->user()->name }}</strong></a>
                   <ul class="dropdown-menu dropdown-menu-light dropdown-menu-end" aria-labelledby="dropdownProfisle">
                     <!-- <li> --><a href='#' class="dropdown-item">Settings</a><!-- </li> -->
                     <!--  <li> --><a href='{{ route("medical-facilities.change_password") }}' class="dropdown-item change_password_link" style="cursor: pointer;">change Password</a><!-- </li> -->

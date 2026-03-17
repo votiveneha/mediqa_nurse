@@ -59,7 +59,7 @@
         .filters {
             border-radius: 10px;
             /* display: grid;
-                                                                                grid-template-columns: repeat(5, 1fr); */
+                                                                                                                                grid-template-columns: repeat(5, 1fr); */
         }
 
         .filter-item {
@@ -124,7 +124,7 @@
             padding-left: 22px;
             margin-bottom: 6px;
             color: #666;
-            display: inline-block;
+            /* display: inline-block; */
             text-align: left;
             font-weight: 500;
         }
@@ -137,7 +137,8 @@
             top: 50%;
             transform: translateY(-50%);
             font-size: 12px;
-            color: #50b5a3;
+            /* color: #50b5a3; */
+            color: #000;
         }
 
         .feature-card a {
@@ -187,7 +188,8 @@
         }
 
         .nurse-card i {
-            color: #50b5a3;
+            /* color: #50b5a3; */
+            color: #000;
             margin-right: 5px;
             font-size: 14px;
             text-align: center;
@@ -283,37 +285,86 @@
         }
 
         /* modal  */
-        .right-modal .modal-dialog {
+        .side-modal {
+            display: none;
             position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .side-modal-content {
+            position: absolute;
             right: 0;
             top: 0;
-            margin: 0;
-            height: 100%;
             width: 420px;
-            transform: translateX(100%);
-            transition: transform .3s ease;
-        }
-
-        .right-modal.show .modal-dialog {
-            transform: translateX(0);
-        }
-
-        .right-modal .modal-content {
+            max-width: 100%;
             height: 100%;
-            border-radius: 0;
-        }
-
-        .right-modal .modal-body {
+            background: #fff;
+            padding: 25px;
             overflow-y: auto;
+            animation: slideInRight 0.3s ease;
         }
 
+        @keyframes slideInRight {
+            from {
+                right: -420px;
+            }
+
+            to {
+                right: 0;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .submenu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .submenu li {
+            margin-bottom: 12px;
+        }
+
+        .submenu li a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .more-btn a {
+            background: #000;
+            color: #fff;
+            padding: 6px 10px !important;
+            border-radius: 20px;
+            margin: 6px 0 0;
+            font-weight: 500;
+            font-size: 12px;
+            display: inline;
+        }
+
+        /* ========================= */
         .text-30 {
             font-size: 28px;
             font-weight: 700;
         }
 
         .credential i {
-            color: #50b5a3;
+            /* color: #50b5a3; */
+            color: #000;
             margin-right: 6px;
         }
 
@@ -452,6 +503,154 @@
         /* Show on hover */
         .tooltip-container:hover .tooltip_speciality_status {
             display: block;
+        }
+
+        /* shift structure  */
+        .extra-shift {
+            display: none;
+        }
+
+        .nurse-card.show-all .extra-shift {
+            display: list-item;
+        }
+
+        .show-more-btn {
+            color: #2d2de3d4;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* ====================== */
+        /* JOB CARD */
+        .job-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            border: 1px solid #000;
+        }
+
+        /* Header */
+        .job-title {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .heart {
+            font-size: 18px;
+            color: #bbb;
+            cursor: pointer;
+        }
+
+        .heart:hover {
+            color: #e74c3c;
+        }
+
+        /* Location & type */
+        .job-meta {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .job-meta i {
+            margin-right: 4px;
+            font-size: 11px;
+        }
+
+        /* Salary */
+        .salary {
+            color: #0a7c86;
+        }
+
+        .nurse-salary {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        /* Badge */
+        .badge-new {
+            background: #d4f5ea;
+            color: #198754;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            height: fit-content;
+        }
+
+        .badge-temporary {
+            background: #FEE2E2;
+            color: #B91C1C;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            height: fit-content;
+        }
+
+        .badge-fixed-term {
+            background: #DBEAFE;
+            color: #1E40AF;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            height: fit-content;
+        }
+
+        /* Details list */
+        .job-details {
+            font-size: 12px;
+            margin-top: 8px;
+            color: #495057;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+
+        /* Footer */
+        .job-footer {
+            margin-top: 12px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 20px;
+            enter;
+        }
+
+        .match {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .nurse-apply-btn {
+            background: #000;
+            color: #fff;
+            /* border: 1px solid #2c7a7b; */
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            display: inline;
+            transition: all ease-in-out .3s
+        }
+
+        .nurse-apply-btn:hover {
+            background: #fff;
+            border: 1px solid #000;
+            color: #000 !important;
+        }
+
+        .create-space {
+            padding-right: 14px;
+        }
+
+        .pt-scroll {
+            padding-top: 40px;
+        }
+
+        .more-btn a:hover {
+            text-decoration: underline;
         }
     </style>
     <main class="main">
@@ -881,10 +1080,11 @@
                                                     <h1 class="hero-title">Find Jobs That Actually Match You</h1>
                                                     <p class="hero-text"> Powered by your preferences, credentials, and
                                                         flexibility.</p>
-                                                    <p class="hero-text mt-4"> No more endless scrolling. Mediqe uses your
-                                                        profile Compliance and availability to show the roles you're most
-                                                        likely t get. </p>
-                                                    <a class="create-btn mt-3 btn">Create Your Free Profile</a>
+                                                    <p class="hero-text mt-4">No more endless scrolling. Mediqa uses your
+                                                        profile, compliance, and availability to show the roles you’re most
+                                                        likely to get. </p>
+                                                    <a class="btn btn-default btn-shadow hover-up mt-3">Create Your Free
+                                                        Profile</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -955,8 +1155,8 @@
                         <div class="col-md-2">
                             <div class="filter-item">
                                 {{-- ⏱  --}}
-                                <div class="clock circle-check">
-                                    <i class="fa fa-clock-o" aria-hidden="true"></i>
+                                <div class="">
+                                    <i class="fa fa-clock-o star" aria-hidden="true"></i>
                                 </div>
                                 <div>
                                     <h4> Last Minute</h4>
@@ -979,12 +1179,12 @@
                         <div class="col-md-2">
                             <div class="filter-item">
                                 {{-- ▶ --}}
-                                <div class="circle-check">
-                                    <i class="fa fa-play" aria-hidden="true"></i>
+                                <div class="">
+                                    <i class="fa fa-briefcase star"></i>
                                 </div>
                                 <div>
                                     <h4> Urgent Hire </h4>
-                                    <p>Within 7 days</p>
+                                    <p>Employer priority</p>
                                 </div>
 
                             </div>
@@ -1050,10 +1250,16 @@
                                     </h5>
                                     <ul>
                                         <li>Primary Specialty</li>
-                                        <li>Primary Specialty</li>
-                                        <a href="#" data-toggle="modal" data-target="#filterModal">
+                                        {{-- <li>Primary Specialty</li> --}}
+                                        {{-- <a href="#" data-toggle="modal" data-target="#filterModal">
                                             see more
-                                        </a>
+                                        </a> --}}
+                                        <div class="more-btn">
+                                            <a href="javascript:void(0)" class="browse_menu flyout"
+                                                data-open="typeOfNurseModal">
+                                                + see more
+                                            </a>
+                                        </div>
                                     </ul>
                                 </div>
                                 <hr class="hr-bg">
@@ -1085,9 +1291,15 @@
                                         <i class="fa fa-users" aria-hidden="true"></i> Work Environment
                                     </h5>
                                     <ul>
-                                        <li>Location </li>
-                                        <li>Preferences</li>
+                                        <li>Location Preferences</li>
+                                        {{-- <li>Preferences</li> --}}
                                     </ul>
+                                     <div class="more-btn">
+                                            <a href="javascript:void(0)" class="browse_menu flyout"
+                                                data-open="workEnvironment">
+                                                + see more
+                                            </a>
+                                        </div>
                                 </div>
 
                                 {{-- <ul>
@@ -1095,7 +1307,7 @@
 																																									<li>Primary Specialty</li>
 																																									<li>Graduate Friendly</li>
 																																									<li>Work Environment</li>
-																																								</ul> --}}
+																																	</ul> --}}
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -1103,11 +1315,13 @@
                                 <div class="text-center">
                                     <svg width="90" height="90" viewBox="0 0 120 120">
                                         <!-- Heart -->
-                                        <path d="M60 22
-                                                                                    C60 18 55 14 50 18
-                                                                                    C45 22 48 30 60 38
-                                                                                    C72 30 75 22 70 18
-                                                                                    C65 14 60 18 60 22Z" fill="#ff6b6b" />
+                                        <path
+                                            d="M60 22
+                                                                                                                                    C60 18 55 14 50 18
+                                                                                                                                    C45 22 48 30 60 38
+                                                                                                                                    C72 30 75 22 70 18
+                                                                                                                                    C65 14 60 18 60 22Z"
+                                            fill="#ff6b6b" />
                                         <!-- Briefcase -->
                                         <rect x="25" y="45" width="70" height="45" rx="6"
                                             fill="#4a5f73" />
@@ -1148,17 +1362,21 @@
                                         <h5>
                                             <i class="fa fa-bars" aria-hidden="true"></i>Shift Structure
                                         </h5>
-                                        <ul>
+                                        <ul class="shift-list">
                                             <li>Shift Types</li>
                                             <li>Shift Length</li>
-                                            <li>Schedule Model</li>
-                                            <li>Weekly Work Patterns</li>
-                                            <li>Shift Rotation & Cycle</li>
-                                            <li>Non-Traditional Shift </li>
-                                            <li>Maternity & Midwifery Shift</li>
-                                            <li>Days Off</li>
-                                            <li>Specific Days Off</li>
+
+                                            <li class="extra-shift">Schedule Model</li>
+                                            <li class="extra-shift">Weekly Work Patterns</li>
+                                            <li class="extra-shift">Shift Rotation & Cycle</li>
+                                            <li class="extra-shift">Non-Traditional Shift </li>
+                                            <li class="extra-shift">Maternity & Midwifery Shift</li>
+                                            <li class="extra-shift">Days Off</li>
+                                            <li class="extra-shift">Specific Days Off</li>
                                         </ul>
+                                        <div class="more-btn">
+                                            <a href="javascript:void(0)" class="show-more-btn">+ See more</a>
+                                        </div>
                                     </div>
                                     <!-- <ul><li>Public / Government / Private</li><li>Permanent / Temporary</li><li>Shift Structure</li><li>Schedule Model</li></ul> -->
                                 </div>
@@ -1193,54 +1411,66 @@
                                             <h5>
                                                 <i class="fa fa-suitcase" aria-hidden="true"></i>Financial
                                             </h5>
-                                            <ul>
+                                            <ul class="shift-list">
                                                 <li>Overtime</li>
                                                 <li>Shift Loading </li>
-                                                <li>Bonuses</li>
-                                                <li>Sign-On Bonus</li>
+                                                <li class="extra-shift">Bonuses</li>
+                                                <li class="extra-shift">Sign-On Bonus</li>
                                             </ul>
+                                            <div class="more-btn">
+                                                <a href="javascript:void(0)" class="show-more-btn">+ See more</a>
+                                            </div>
                                         </div>
                                         <div class="nurse-card">
                                             <h5>
                                                 <i class="fa fa-file" aria-hidden="true"></i> Work-Life:
                                             </h5>
-                                            <ul>
+                                            <ul class="shift-list">
                                                 <li>Flexible Rosters </li>
                                                 <li>Self-Scheduling</li>
-                                                <li>Paid Time Off</li>
-                                                <li>Work-from-Home</li>
-                                                <li>Childcare</li>
+                                                <li class="extra-shift">Paid Time Off</li>
+                                                <li class="extra-shift">Work-from-Home</li>
+                                                <li class="extra-shift">Childcare</li>
                                             </ul>
+                                            <div class="more-btn">
+                                                <a href="javascript:void(0)" class="show-more-btn">+ See more</a>
+                                            </div>
                                         </div>
                                     </div>
                                     <hr class="hr-bg">
-                                    <div class="d-flex gap-3 mt-3 flex-wrap">
+                                    <div class="d-flex gap-3 flex-wrap">
                                         <div class="nurse-card">
                                             <h5>
                                                 <i class="fa fa-sun-o" aria-hidden="true"></i> Career Growth
                                             </h5>
-                                            <ul>
+                                            <ul class="shift-list">
                                                 <li>Paid CPD </li>
                                                 <li>Residencies </li>
-                                                <li>Fellowships </li>
-                                                <li>Graduate </li>
-                                                <li>Friendly</li>
-                                                <li>Student Friendly </li>
+                                                <li class="extra-shift">Fellowships </li>
+                                                <li class="extra-shift">Graduate </li>
+                                                <li class="extra-shift">Friendly</li>
+                                                <li class="extra-shift">Student Friendly </li>
                                             </ul>
+                                            <div class="more-btn">
+                                                <a href="javascript:void(0)" class="show-more-btn">+ See more</a>
+                                            </div>
                                         </div>
                                         <div class="nurse-card">
                                             <h5>
                                                 <i class="fa fa-globe" aria-hidden="true"></i> Travel & Support
                                             </h5>
-                                            <ul>
+                                            <ul class="shift-list">
                                                 <li>Relocation </li>
                                                 <li>Housing</li>
-                                                <li>Travel Allowance</li>
-                                                <li>Sponsorship</li>
-                                                <li>Paid Flights </li>
-                                                <li>Car allowance</li>
-                                                <li>Fuel allowance </li>
+                                                <li class="extra-shift">Travel Allowance</li>
+                                                <li class="extra-shift">Sponsorship</li>
+                                                <li class="extra-shift">Paid Flights </li>
+                                                <li class="extra-shift">Car allowance</li>
+                                                <li class="extra-shift">Fuel allowance </li>
                                             </ul>
+                                            <div class="more-btn">
+                                                <a href="javascript:void(0)" class="show-more-btn">+ See more</a>
+                                            </div>
                                         </div>
                                     </div>
                                     <hr class="hr-bg">
@@ -1262,41 +1492,7 @@
                     </div>
                 </div>
             </section>
-            <section class="bg-white overflow-visible py-5">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-6 col-sm-12">
-                            <div class="box-image-job">
-                                {{-- <!-- <img class="img-job-1" alt="jobBox" src="{{ asset('nurse/assets/imgs/page/homepage1/img-chart.png') }}"> --> --}}
-                                {{-- <img class="img-job-2" alt="jobBox"
-                                    src="{{ asset('nurse/assets/imgs/page/homepage1/img-chart.png') }}"> --}}
-                                <figure class="wow animate__ animate__fadeIn animated"
-                                    style="visibility: visible; animation-name: fadeIn;">
-                                    <img alt="jobBox" src="{{ asset('nurse/assets/imgs/stop-scroll.jpg') }}">
-                                </figure>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-sm-12">
-                            <div class="content-job-inner">
-                                <h2 class="text-30 wow animate__ animate__fadeInUp animated"
-                                    style="visibility: visible; animation-name: fadeInUp;"> Stop scrolling </h2>
-                                <h2 class="text-30 wow animate__ animate__fadeInUp animated"
-                                    style="visibility: visible; animation-name: fadeInUp;"> Start matching </h2>
-                                <div class="mt-20 pr-50 text-md-lh28 wow animate__ animate__fadeInUp animated"
-                                    style="visibility: visible; animation-name: fadeInUp;">
-                                    <div class="stop">
-                                        <h4>Create Your <span> <a href="#"> Professional Profile </a></span></h4>
-                                    </div>
-                                </div>
 
-                            </div>
-                        </div>
-                    </div>
-
-
-                </div>
-
-            </section>
             <section class="py-5">
                 <div class="container">
                     <h2 class="text-center">How Matching Works</h2>
@@ -1427,7 +1623,7 @@
                                             </div>
                                         </span>
                                     </div>
-                                     <div class="list-item">
+                                    <div class="list-item">
                                         Shift & Lifestyle Preferences
                                         <span class="tooltip-container">
                                             <span class="info tooltip-btn tooltip-circle">
@@ -1435,7 +1631,8 @@
                                             </span>
                                             <div class="tooltip_speciality_status">
                                                 <ul>
-                                                    <li>Day or night shifts? Fixed roster? Self-scheduling? Weekends off? Your flexibility shapes your opportunities. </li>
+                                                    <li>Day or night shifts? Fixed roster? Self-scheduling? Weekends off?
+                                                        Your flexibility shapes your opportunities. </li>
                                                 </ul>
                                             </div>
                                         </span>
@@ -1460,108 +1657,142 @@
                         <!-- Step 2 -->
                         <div class="col-md-6 col-sm-12 mb-4 d-flex">
                             <div class="h-100 d-flex flex-column w-100">
-                            <div class="bg-white score-cards flex-fill ">
-                                <div class="d-flex mb-3">
-                                    <div class="ml-3">
-                                        <h5>Intelligent Match % scoring</h5>
+                                <div class="bg-white score-cards flex-fill ">
+                                    <div class="d-flex mb-3">
+                                        <div class="ml-3">
+                                            <h5>Intelligent Match % scoring</h5>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="card-box">
-                                    <div class="list-item">
-                                        {{-- </span> --}}
-                                        {{-- <label class="form-label"> --}}
-                                        Every job is scored against your real profile, not keywords.
+                                    <div class="card-box">
+                                        <div class="list-item">
+                                            {{-- </span> --}}
+                                            {{-- <label class="form-label"> --}}
+                                            Every job is scored against your real profile, not keywords.
 
-                                        We don’t guess based on CV text
-                                        <span class="tooltip-container">
-                                            <span class="info tooltip-btn tooltip-circle">
-                                                <i class="fa fa-info info-icon" aria-hidden="true"></i>
+                                            We don’t guess based on CV text
+                                            <span class="tooltip-container">
+                                                <span class="info tooltip-btn tooltip-circle">
+                                                    <i class="fa fa-info info-icon" aria-hidden="true"></i>
+                                                </span>
+                                                <div class="tooltip_speciality_status">
+                                                    <ul>
+                                                        <li><Strong>We measure structured alignment across: </Strong></li>
+                                                        <li>Specialty & specialty status</li>
+                                                        <li>Years of experience in each area </li>
+                                                        <li>AHPRA registration & endorsements
+                                                        </li>
+                                                        <li>Compliance readiness (vaccines, checks, training)
+                                                        </li>
+                                                        <li>Shift compatibility
+                                                        </li>
+                                                        <li>Location radius </li>
+                                                        <li>Benefits alignment </li>
+                                                        <li>Each factor is weighted.
+                                                            Each job is evaluated in real time.
+                                                            When you see a high match, you know why. </li>
+                                                    </ul>
+                                                </div>
                                             </span>
-                                            <div class="tooltip_speciality_status">
-                                                <ul>
-                                                    <li><Strong>We measure structured alignment across: </Strong></li>
-                                                    <li>Specialty & specialty status</li>
-                                                    <li>Years of experience in each area </li>
-                                                    <li>AHPRA registration & endorsements
-                                                    </li>
-                                                    <li>Compliance readiness (vaccines, checks, training)
-                                                    </li>
-                                                    <li>Shift compatibility
-                                                    </li>
-                                                    <li>Location radius </li>
-                                                    <li>Benefits alignment </li>
-                                                    <li>Each factor is weighted.
-                                                        Each job is evaluated in real time.
-                                                        When you see a high match, you know why. </li>
-                                                </ul>
-                                            </div>
-                                        </span>
-                                        {{-- </label> --}}
+                                            {{-- </label> --}}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                              <div class="bg-white score-cards mt-4 flex-fill">
-                                <div class="d-flex mb-3">
-                                    <div class="ml-3">
-                                        <h5>Apply with confidence </h5>
+                                <div class="bg-white score-cards mt-4 flex-fill">
+                                    <div class="d-flex mb-3">
+                                        <div class="ml-3">
+                                            <h5>Apply with confidence </h5>
+                                        </div>
+                                    </div>
+                                    <div class="card-box">
+                                        <div class="list-item">
+                                            {{-- </span> --}}
+                                            {{-- <label class="form-label"> --}}
+                                            Move Faster, High-match candidates stand out immediately
+                                            <span class="tooltip-container">
+                                                <span class="info tooltip-btn tooltip-circle">
+                                                    <i class="fa fa-info info-icon" aria-hidden="true"></i>
+                                                </span>
+                                                <div class="tooltip_speciality_status">
+                                                    <ul>
+                                                        <li><Strong>Medical facilities and Agencies can see your: </Strong>
+                                                        </li>
+                                                        <li>Verified registration </li>
+                                                        <li>Compliance readiness </li>
+                                                        <li>Specialty alignment </li>
+                                                        <li>Shift compatibility </li>
+                                                        <li>That means fewer delays, and faster decisions. </li>
+                                                    </ul>
+                                                </div>
+                                            </span>
+                                            {{-- </label> --}}
+                                        </div>
+                                        <p>Receive Instant Opportunities </p>
+                                        <div class="list-item">
+                                            {{-- </span> --}}
+                                            {{-- <label class="form-label"> --}}
+                                            When timing matters, MediQa makes it visible.
+                                            <span class="tooltip-container">
+                                                <span class="info tooltip-btn tooltip-circle">
+                                                    <i class="fa fa-info info-icon" aria-hidden="true"></i>
+                                                </span>
+                                                <div class="tooltip_speciality_status">
+                                                    <ul>
+                                                        <li>Instant Connect → Same-day shifts</Strong></li>
+                                                        <li>Last Minute → Starts within 48h </li>
+                                                        <li>Immediate Start → Within 7 days </li>
+                                                        <li>Urgent Hire → Employer priority </li>
+                                                    </ul>
+                                                </div>
+                                            </span>
+                                            {{-- </label> --}}
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="card-box">
-                                    <div class="list-item">
-                                        {{-- </span> --}}
-                                        {{-- <label class="form-label"> --}}
-                                        Move Faster, High-match candidates stand out immediately
-                                        <span class="tooltip-container">
-                                            <span class="info tooltip-btn tooltip-circle">
-                                                <i class="fa fa-info info-icon" aria-hidden="true"></i>
-                                            </span>
-                                            <div class="tooltip_speciality_status">
-                                                <ul>
-                                                    <li><Strong>Medical facilities and Agencies can see your:   </Strong></li>
-                                                    <li>Verified registration </li>
-                                                    <li>Compliance readiness  </li>
-                                                    <li>Specialty alignment </li>
-                                                    <li>Shift compatibility </li>
-                                                    <li>That means fewer delays, and faster decisions. </li>
-                                                </ul>
-                                            </div>
-                                        </span>
-                                        {{-- </label> --}}
-                                    </div>
-                                    <p>Receive Instant Opportunities </p>
-                                      <div class="list-item">
-                                        {{-- </span> --}}
-                                        {{-- <label class="form-label"> --}}
-                                      When timing matters, MediQa makes it visible. 
-                                        <span class="tooltip-container">
-                                            <span class="info tooltip-btn tooltip-circle">
-                                                <i class="fa fa-info info-icon" aria-hidden="true"></i>
-                                            </span>
-                                            <div class="tooltip_speciality_status">
-                                                <ul>
-                                                    <li>Instant Connect → Same-day shifts</Strong></li>
-                                                    <li>Last Minute → Starts within 48h </li>
-                                                    <li>Immediate Start → Within 7 days </li>
-                                                    <li>Urgent Hire → Employer priority </li>
-                                                </ul>
-                                            </div>
-                                        </span>
-                                        {{-- </label> --}}
-                                    </div>
-                                </div>
-                            </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
             </section>
+            <section class="bg-white overflow-visible py-5">
+                <div class="container">
+                    <h2 class="text-center"> Create Your Professional Profile </h2>
+                    <div class="row align-items-center pt-scroll">
+                        <div class="col-lg-6 col-sm-12">
+                            <div class="box-image-job">
+                                <figure class="wow animate__ animate__fadeIn animated"
+                                    style="visibility: visible; animation-name: fadeIn;">
+                                    <img alt="jobBox" src="{{ asset('nurse/assets/imgs/scroll6.jpg') }}">
+                                </figure>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-sm-12">
+                            <div class="content-job-inner">
+                                <h2 class="text-30 wow animate__ animate__fadeInUp animated"
+                                    style="visibility: visible; animation-name: fadeInUp;"> Stop scrolling </h2>
+                                <h2 class="text-30 wow animate__ animate__fadeInUp animated"
+                                    style="visibility: visible; animation-name: fadeInUp;"> Start matching </h2>
+                                <div class="mt-20 pr-50 text-md-lh28 wow animate__ animate__fadeInUp animated"
+                                    style="visibility: visible; animation-name: fadeInUp;">
+                                    <div class="stop d-flex align-items-center flex-wrap">
+                                        {{-- <h4 class="create-space">Create Your </h4> --}}
+                                        {{-- <a href="#"> Professional Profile </a> --}}
+                                        <span> <a class="btn btn-default btn-shadow hover-up">Create Your Professional
+                                                Profile</a></span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
             <!-- LATEST JOBS -->
             <section class="jobs py-5">
                 <div class="container">
                     <h2 class="text-center">Latest Jobs</h2>
                     <div class="row mt-15">
-                        <div class="col-md-4">
+                        {{-- <div class="col-md-4">
                             <div class="job-card">
                                 <div class="latest-job-card">
                                     <img src="https://images.unsplash.com/photo-1581594693702-fbdc51b2763b"
@@ -1593,7 +1824,6 @@
                                 </div>
                                 <div class="job-content">
                                     <h5>Assistant in Nursing — Medical</h5>
-                                    {{-- <p class="job-price">$14000 - 15000</p> --}}
                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                         <p class="job-price">$14000 - 15000</p>
                                         <p class="job-right-content">$60/hr</p>
@@ -1615,7 +1845,6 @@
                                 </div>
                                 <div class="job-content">
                                     <h5>Enrolled Nurse – Paediatrics</h5>
-                                    {{-- <p class="job-price">$25 - 40k</p> --}}
                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                         <p class="job-price">$25 - 40k</p>
                                         <p class="job-right-content">$60/hr</p>
@@ -1625,12 +1854,167 @@
                                     </div>
                                 </div>
                             </div>
+                        </div> --}}
+                        <!-- JOB CARD -->
+                        <div class="col-lg-4 col-md-6 d-flex">
+                            <div class="job-card w-100 mb-4">
+                                <!-- Header -->
+                                <div class="d-flex justify-content-between gap-2">
+                                    <div class="job-title mb-0">Advanced Midwife – Community Health</div>
+                                    <span class="badge badge-new">Permanent</span>
+                                </div>
+                                <!-- Location & Type -->
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <div class="d-flex gap-4">
+                                        <span class="job-meta mr-3">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            Queensland,Australia
+                                            {{-- {{ $jobs->state_name }},{{ $jobs->country_name }} --}}
+                                        </span>
+                                        <span class="job-meta">
+                                            <i class="far fa-circle"></i>
+                                            Full-time
+                                        </span>
+                                    </div>
+
+                                </div>
+                                <div class="nurse-salary mt-2">
+                                    <span class="salary">$</span>
+                                    <span>1000 - 2000 Weekly</span>
+                                </div>
+
+                                <!-- Shift Dates -->
+                                <div class="job-meta mt-1">
+                                    27 Feb 2026 – 28 Apr 2026
+                                </div>
+                                <!-- Bullet Details -->
+                                <div class="job-details">
+                                    <div class="match">
+                                        % match
+                                    </div>
+                                </div>
+                                <!-- Footer -->
+                                <div class="job-footer">
+                                    <button class="btn nurse-apply-btn text-white">
+                                        Complete Credentials to Apply
+                                    </button>
+                                    <div>
+                                        <a href="#" class="d-flex gap-2">
+                                            <span><i class="fa fa-bookmark-o" aria-hidden="true"></i></span>
+                                            Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                        <div class="col-lg-4 col-md-6 d-flex">
+                            <div class="job-card w-100 mb-4">
+                                <!-- Header -->
+                                <div class="d-flex justify-content-between gap-2">
+                                    <div class="job-title mb-0">Advanced Midwife – Community Health</div>
+                                    <span class="badge badge-fixed-term">Fixed Term</span>
+                                </div>
+                                <!-- Location & Type -->
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <div class="d-flex gap-4">
+                                        <span class="job-meta mr-3">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                              Queensland,Australia
+                                            {{-- {{ $jobs->state_name }},{{ $jobs->country_name }} --}}
+                                        </span>
+                                        <span class="job-meta">
+                                            <i class="far fa-circle"></i>
+                                            Full-time
+                                        </span>
+                                    </div>
+
+                                </div>
+                                <div class="nurse-salary mt-2">
+                                    <span class="salary">$</span>
+                                    <span>1000 - 2000 Weekly</span>
+                                </div>
+
+                                <!-- Shift Dates -->
+                                <div class="job-meta mt-1">
+                                    27 Feb 2026 – 28 Apr 2026
+                                </div>
+                                <!-- Bullet Details -->
+                                <div class="job-details">
+                                    <div class="match">
+                                        % match
+                                    </div>
+                                </div>
+                                <!-- Footer -->
+                                <div class="job-footer">
+                                    <button class="btn nurse-apply-btn text-white">
+                                        Complete Credentials to Apply
+                                    </button>
+                                    <div>
+                                        <a href="#" class="d-flex gap-2">
+                                            <span><i class="fa fa-bookmark-o" aria-hidden="true"></i></span>
+                                            Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6 d-flex">
+                            <div class="job-card w-100 mb-4">
+                                <!-- Header -->
+                                <div class="d-flex justify-content-between gap-2">
+                                    <div class="job-title mb-0">Advanced Midwife – Community Health</div>
+                                    <span class="badge badge-temporary">Temporary</span>
+                                </div>
+                                <!-- Location & Type -->
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <div class="d-flex gap-4">
+                                        <span class="job-meta mr-3">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                              Queensland,Australia
+                                            {{-- {{ $jobs->state_name }},{{ $jobs->country_name }} --}}
+                                        </span>
+                                        <span class="job-meta">
+                                            <i class="far fa-circle"></i>
+                                            Full-time
+                                        </span>
+                                    </div>
+
+                                </div>
+                                <div class="nurse-salary mt-2">
+                                    <span class="salary">$</span>
+                                    <span>1000 - 2000 Weekly</span>
+                                </div>
+
+                                <!-- Shift Dates -->
+                                <div class="job-meta mt-1">
+                                    27 Feb 2026 – 28 Apr 2026
+                                </div>
+                                <!-- Bullet Details -->
+                                <div class="job-details">
+                                    <div class="match">
+                                        % match
+                                    </div>
+                                </div>
+                                <!-- Footer -->
+                                <div class="job-footer">
+                                    <button class="btn nurse-apply-btn text-white">
+                                        Complete Credentials to Apply
+                                    </button>
+                                    <div>
+                                        <a href="#" class="d-flex gap-2">
+                                            <span><i class="fa fa-bookmark-o" aria-hidden="true"></i></span>
+                                            Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </section>
 
-            <section class="section-box overflow-visible mt-80 mb-100">
+            <section class="section-box overflow-visible  mb-100">
                 <div class="container">
                     <div class="row">
                         <div class="col-lg-6 col-sm-12">
@@ -1680,21 +2064,115 @@
         </div>
 
 
-        <div class="modal fade right-modal" id="filterModal">
-            <div class="modal-dialog">
+        {{-- <div class="modal fade" id="filterModal">
+            <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
 
                     <div class="modal-header">
                         <h5 class="modal-title">Filters</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <button class="modal-close-btn" data-dismiss="modal">
+                            <i class="fa fa-times"></i>
+                        </button>
                     </div>
                     <div class="modal-body">
                         Your content here
                     </div>
                 </div>
             </div>
+        </div> --}}
+        <div id="typeOfNurseModal" class="side-modal">
+            <div class="side-modal-content">
+
+                <div class="modal-header">
+                    <h3>Type of Nurse</h3>
+                    <span class="close-btn" data-close="typeOfNurseModal">&times;</span>
+                </div>
+
+            </div>
+        </div>
+
+        {{-- modal 2 Work environment  --}}
+         <div id="workEnvironment" class="side-modal">
+            <div class="side-modal-content">
+
+                <div class="modal-header">
+                    <h3>Work Environment</h3>
+                    <span class="close-btn" data-close="typeOfNurseModal">&times;</span>
+                </div>
+
+            </div>
         </div>
         <script src="{{ asset('nurse/assets/js/plugins/counterup.js') }}"></script>
     </main>
     @endsection @section('js')
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+
+    /* OPEN MODAL */
+    document.querySelectorAll("[data-open]").forEach(btn => {
+
+        btn.addEventListener("click", function(e){
+            e.preventDefault();
+
+            const modalId = this.getAttribute("data-open");
+            const modal = document.getElementById(modalId);
+
+            if(modal){
+                modal.style.display = "block";
+            }
+
+        });
+
+    });
+
+
+    /* CLOSE MODAL */
+    document.querySelectorAll("[data-close]").forEach(btn => {
+
+        btn.addEventListener("click", function(){
+
+            const modalId = this.getAttribute("data-close");
+            const modal = document.getElementById(modalId);
+
+            if(modal){
+                modal.style.display = "none";
+            }
+
+        });
+
+    });
+
+
+    /* CLICK OUTSIDE CLOSE */
+    window.addEventListener("click", function(e){
+
+        document.querySelectorAll(".side-modal").forEach(modal => {
+
+            if(e.target === modal){
+                modal.style.display = "none";
+            }
+
+        });
+
+    });
+
+});
+
+        // shift structure 
+        document.querySelectorAll('.show-more-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const card = this.closest('.nurse-card');
+
+                card.classList.toggle('show-all');
+
+                if (card.classList.contains('show-all')) {
+                    this.textContent = "See less";
+                } else {
+                    this.textContent = "See more";
+                }
+            });
+        });
+    </script>
 @endsection

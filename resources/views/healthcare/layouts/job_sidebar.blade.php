@@ -48,10 +48,18 @@
 
  }
 </style>
+@php
+ $user_id = Auth::guard('healthcare_facilities')->user()->id;
+    $user_data = DB::table("users")->where("id",$user_id)->first();
+@endphp
 <div class="sidebar_profile">
   <div class="box-company-profile mb-20">
     <div class="image-compay-rel">
-      <img alt="{{  Auth::guard('healthcare_facilities')->user()->lastname }}" src="{{ asset( Auth::guard('healthcare_facilities')->user()->profile_img)}}">
+      @if($user_data->profile_img != "nurse/assets/imgs/nurse06.png" && $user_data->profile_img != "")  
+      <img alt="{{  Auth::guard('healthcare_facilities')->user()->name }}" src="{{ asset( '/healthcareimg/uploads')}}/{{ Auth::guard('healthcare_facilities')->user()->profile_img }}">
+      @else
+      <img alt="{{  Auth::guard('healthcare_facilities')->user()->name }}" src="{{ asset( 'https://mediqa.com/public/nurse/assets/imgs/nurse06.png')}}">
+      @endif
     </div>
     <div class="row mt-10">
       <div class="text-center">

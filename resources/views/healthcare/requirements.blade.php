@@ -277,7 +277,7 @@ form#job_requirements_form ul.select2-selection__rendered {
                                                                 Overseas-qualified candidates considered
                                                             </label>
                                                             <div id="overseasOptions" class="d-none" style="margin-left:20px;">
-                                                                <label><input type="checkbox" name="residency[]" value="sponsorship"> Sponsorship available</label>
+                                                                <label><input type="checkbox" name="residency[]" value="overseasponsorship"> Sponsorship available</label>
                                                                 <label><input type="checkbox" name="residency[]" value="bridging"> Bridging program supported</label>
                                                                 <label><input type="checkbox" name="residency[]" value="supervised"> Supervised practice available</label>
                                                             </div>
@@ -286,9 +286,9 @@ form#job_requirements_form ul.select2-selection__rendered {
                                                 </div>
                                             </div>
                                             
-                                            <label><input type="checkbox" name="residency[]" value="pr"> NDIS Worker Screening Check evidence</label>
-                                            <label><input type="checkbox" name="residency[]" value="visa"> Working With Children Check (WWCC) evidence</label>
-                                            <label><input type="checkbox" name="residency[]" value="sponsorship"> Police Clearance</label>
+                                            <label><input type="checkbox" name="residency[]" value="ndis_screen_check"> NDIS Worker Screening Check evidence</label>
+                                            <label><input type="checkbox" name="residency[]" value="working_children"> Working With Children Check (WWCC) evidence</label>
+                                            <label><input type="checkbox" name="residency[]" value="police_clearance"> Police Clearance</label>
                                             <hr>
                                         </div>
                                     </div>

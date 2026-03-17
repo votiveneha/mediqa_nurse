@@ -422,12 +422,39 @@
                     <div class="right-col">
 
                         <!-- CONTACT -->
+                        <!--<div class="card">-->
+                        <!--    <h2>Contact Person</h2>-->
+                        <!--    <p><b>Name:</b> {{ $jobs->contact_person_role }}</p>-->
+                        <!--    <p><b>Role:</b> -</p>-->
+                        <!--    <p><b>Contact:</b> -</p>-->
+                        <!--    <a href="{{ route('nurse.healthcare_details',['id'=>$jobs->healthcare_id])}}">View Facility Profile</a>-->
+                        <!--</div>-->
+                        @php
+                            $healthcare_data = DB::table("users")->where("id",$jobs->healthcare_id)->first();
+                            $role_position_data = DB::table("role_position")->where("id",$healthcare_data->role_position)->first(); 
+                        @endphp
                         <div class="card">
                             <h2>Contact Person</h2>
-                            <p><b>Name:</b> {{ $jobs->contact_person_role }}</p>
-                            <p><b>Role:</b> -</p>
-                            <p><b>Contact:</b> -</p>
+                            <p><b>Name:</b> {{ $healthcare_data->contact_person_name }}</p>
+                            <p><b>Role:</b> {{ $role_position_data->name }}</p>
+                            <p><b>Email:</b> {{ $healthcare_data->email }}</p>
+                            <p><b>Phone:</b> {{ $healthcare_data->phone }}</p>
                             <a href="{{ route('nurse.healthcare_details',['id'=>$jobs->healthcare_id])}}">View Facility Profile</a>
+                            <h4>Preferred Communication Method</h4>
+                            <ul>
+                                @foreach (json_decode($healthcare_data->communication_method) as $communication_method)
+                                    @if($communication_method == 1)
+                                    <li>Email</li>
+                                    @endif
+                                    @if($communication_method == 2)
+                                    <li>Phone</li>
+                                    @endif
+                                    @if($communication_method == 3)
+                                    <li>In App</li>
+                                    @endif
+                                @endforeach
+                            </ul>
+                            
                         </div>
 
 
@@ -435,15 +462,17 @@
                         <!-- REQUIRED DOCS -->
                         <div class="card">
                             <h2>Documents Required</h2>
-                            @php
-                            $documents_required = json_decode($jobs->documents_required);     
-                            @endphp
-                            <ul>
-                                @foreach($documents_required as $rq_doc)
-                                <li>{{ $rq_doc }}</li>
-                                
-                                @endforeach
-                            </ul>
+                      @php
+                    $documents_required = json_decode($jobs->documents_required, true) ?? [];
+                    @endphp
+                    
+                    <ul>
+                        @forelse ($documents_required as $rq_doc)
+                        <li>{{ $rq_doc }}</li>
+                        @empty
+                        <li>No Record Found</li>
+                        @endforelse
+                    </ul>
                         </div>
 
 

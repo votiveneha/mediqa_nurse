@@ -246,7 +246,15 @@
             </span>
             <span class="hide-menu">Healthcare Management</span>
           </a>
-       </li>   
+       </li>  
+       <li class="sidebar-item">
+          <a class="sidebar-link" href="{{route('admin.recruiter_list')}}" aria-expanded="false">
+            <span class="d-flex">
+              <i class="ti ti-building-store"></i>
+            </span>
+            <span class="hide-menu">Recruiter List</span>
+          </a>
+       </li>  
        <li class="sidebar-item">
          <a class="sidebar-link has-arrow" href="#" aria-expanded="false">
            <span class="d-flex">

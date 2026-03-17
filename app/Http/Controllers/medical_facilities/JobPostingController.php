@@ -9,6 +9,7 @@ use App\Models\EligibilityToWorkModel;
 use App\Models\WorkingChildrenCheckModel;
 use App\Models\PoliceCheckModel;
 use App\Models\PractitionerTypeModel;
+use App\Models\LanguageModel;
 
 use App\Models\WorkPreferModel;
 use App\Models\JobsModel;
@@ -776,7 +777,18 @@ class JobPostingController extends Controller
     public function active_jobs()
     {
         $user_id = Auth::guard('healthcare_facilities')->user()->id;
-        $data['job_post_data'] = JobsModel::where("healthcare_id",$user_id)->where("save_draft","2")->orderBy('created_at','desc')->get();
+        //$data['job_post_data'] = JobsModel::where("healthcare_id",$user_id)->where("save_draft","2")->orderBy('created_at','desc')->get();
+        $user_data = DB::table("users")->where("id",$user_id)->first();
+        $healthcare_id = $user_data->healthcare_id;
+        $data['job_post_data'] = JobsModel::where(function ($query) use ($user_id, $healthcare_id) {
+
+        $query->where('healthcare_id', $user_id)
+              ->orWhere('healthcare_id', $healthcare_id);
+
+    })
+    ->where('save_draft', 2)
+    ->orderBy('created_at','desc')
+    ->get();
         // echo "<pre>";
         // print_r($data['job_post_data']);die;
         return view('healthcare.active_jobs')->with($data);
@@ -786,7 +798,25 @@ class JobPostingController extends Controller
     public function draft_jobs()
     {
         $user_id = Auth::guard('healthcare_facilities')->user()->id;
-        $data['job_post_data'] = JobsModel::where("healthcare_id",$user_id)->where("save_draft","0")->orWhere("save_draft","1")->orderBy('created_at','desc')->get();
+        // $data['job_post_data'] = JobsModel::where("healthcare_id", $user_id)
+        //                         ->where(function($query){
+        //                             $query->where("save_draft", "0")
+        //                                   ->orWhere("save_draft", "1");
+        //                         })
+        //                         ->orderBy('created_at','desc')
+        //                         ->get();
+        
+        $user_data = DB::table("users")->where("id",$user_id)->first();
+        $healthcare_id = $user_data->healthcare_id;
+        $data['job_post_data'] = JobsModel::where(function ($query) use ($user_id, $healthcare_id) {
+
+        $query->where('healthcare_id', $user_id)
+              ->orWhere('healthcare_id', $healthcare_id);
+
+    })
+    ->whereIn('save_draft', [0,1])
+    ->orderBy('created_at','desc')
+    ->get();
 
         return view('healthcare.draft_jobs')->with($data);
 
