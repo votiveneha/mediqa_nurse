@@ -902,6 +902,13 @@
   }
 
   /* heart icon  */
+  .job-like-btn{
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    cursor:pointer;
+    font-size:21px;
+    }
   .heart-toggle {
     cursor: pointer;
     display: flex;
@@ -917,7 +924,7 @@
     transition: 0.25s ease;
   }
 
-  .heart-toggle:hover svg {
+  .job-like-btn:hover svg {
     stroke: #0EA5E9;
   }
 
@@ -1138,7 +1145,7 @@
 
           {{-- My Preferences (shown only once) --}}
           @if(!empty($saved_my_preference))
-          <div id="my-prefernece-tab" class="saved-search-tab active tooltip-wrapper" data-id="{{ $saved_my_preference->searches_id }}">
+          <div id="my-prefernece-tab" class="saved-search-tab  tooltip-wrapper" data-id="{{ $saved_my_preference->searches_id }}">
             My Preferences
             <span class="tooltip-text">
               This search is always linked to your current preferences.
@@ -1455,7 +1462,18 @@
                         </div>
                         <div>
                           <div class="heart-toggle" data-active="0">
-                            <i data-lucide="heart"></i>
+                            {{-- <i data-lucide="heart"></i> --}}
+                            @php
+                            $user_id = Auth::guard("nurse_middle")->user()->id;
+                                          $liked = DB::table('nurse_job_likes')
+                                          ->where('nurse_id', $user_id)
+                                          ->where('job_id', $job->id)
+                                          ->exists();
+                                          @endphp
+                              <a href="javascript:void(0)" class="job-like-btn" data-job="{{$job->id}}">
+                                  <i class="{{ $liked ? 'fas fa-heart text-danger' : 'far fa-heart' }}"></i>
+                              </a>
+                                
                           </div>
                           @if($job->urgent_hire == 1)
                           <div class="urgent-tag">Urgent Hiring</div>
@@ -1666,74 +1684,21 @@
                         </div>
                       </div>
                       <div>
-                        <?php
-                                  $sector_percent = (!empty($work_preferences_data) && $work_preferences_data->sector_preferences == $job->sector) ? 1 : 0;
-                                  $emptype_preferences = (!empty($work_preferences_data))?$work_preferences_data->emptype_preferences:'';
-                                  $emp_type = (array)json_decode($emptype_preferences);
-                                  $mainIndex = array_key_first($emp_type);
-                                  
-                                  if($mainIndex != ""){
-                                    $ids = $emp_type[$mainIndex];
-                                  }else{
-                                    $ids = [0];
-                                  }
-                                  
-                                  $names = DB::table('employeement_type_preferences')
-                                              ->whereIn('emp_prefer_id', $ids)
-                                              ->pluck('emp_type')
-                                              ->toArray();
-                                  $mainIndexName = DB::table('employeement_type_preferences')
-                                                    ->where('emp_prefer_id', $mainIndex)
-                                                    ->value('emp_type');        
-                                                    
-                                  $result = [
-                                    "main_index" => $mainIndexName,
-                                    "children"   => $names
-                                  ];             
-                                  
-                                  $searchValues = array_map('trim', explode(',', $emplyeement_type_arr_string));
-                                  //print_r($searchValues);
-                                  $getEmp = '';
-                                  foreach ($searchValues as $searchValue) {
-                                      if ($result['main_index'] === $searchValue) {
-                                          $getEmp = 1;
-                                      } elseif (in_array($searchValue, $result['children'])) {
-                                          $getEmp = 1;
-                                      } else {
-                                          $getEmp = 0;
-                                      }
-                                  }
-                                  
-                                  $shift_values = (array)json_decode($job->shift_type);
-                                  $shift_percent = '';
-                                  foreach ($shift_values as $shiftKey) {
-                                    $work_shift_preferences = (!empty($work_preferences_data))?$work_preferences_data->work_shift_preferences:'';        
-                                    if (array_key_exists($shiftKey, (array)json_decode($work_shift_preferences))) {
-                                      $shift_percent = 1;
-                                    } else {
-                                      $shift_percent = 0;
-                                    }
-                                  }
-                                  
-                                  $match_percent_add = $sector_percent + $getEmp + $shift_percent;
-                                  
-                                  $total_percent = $match_percent_add * 100/10;
-                                  
-                                  
-                                  $work_environment_preferences = (!empty($work_preferences_data))?$work_preferences_data->work_environment_preferences:'';        
-                                  $workEnvPrefs = (array)json_decode($work_environment_preferences);
-                                  ?>
-                        <div class="match-circle" data-value="{{ $total_percent }}">
+                        @php
+                          // $total_percent = 84;
+                        @endphp
+                  
+                        <div class="match-circle" data-value="{{ $job->match_percentage }}">
                           <div class="match-inner">
-                            <div class="percent">{{ $total_percent }}%</div>
+                            <div class="percent">{{ round($job->match_percentage) }}%</div>
                             <div class="label">Match</div>
                           </div>
                         </div>
                         <script>
                           document.querySelectorAll('.match-circle').forEach(el => {
-                                        const val = el.getAttribute('data-value') || 0;
-                                        el.style.setProperty('--percent', val);
-                                    });
+                              const val = el.getAttribute('data-value') || 0;
+                              el.style.setProperty('--percent', val);
+                          });
                         </script>
                       </div>
                     </div>
@@ -1748,7 +1713,7 @@
                             ?>
                   <!-- Footer: Match & Apply -->
                   <div class="job-footer">
-                    <!-- <div class="match-score">{{ $total_percent }}% Match</div> -->
+             
                     <!-- <button class="apply-btn apply-btn-{{ $job->id }} @if(!empty($apply_job_data)) applied @endif" onclick="applyNow('{{ $user_id }}','{{ $job->id }}')">
                               @if(!empty($apply_job_data))
                               Applied
@@ -1977,9 +1942,38 @@
   <div class="toast" id="toast"></div>
 </main>
 <script>
-  $(document).ready(function(){
-      
+  $(document).on('click','.job-like-btn',function(){
 
+        let button = $(this);
+        let job_id = button.data('job');
+
+        $.ajax({
+            url: "{{route('nurse.jobs.like')}}",
+            type: "POST",
+            data:{
+                job_id:job_id,
+                _token:"{{csrf_token()}}"
+            },
+            success:function(res){
+
+                if(res.status == 'liked'){
+                    button.find('i')
+                    .removeClass('far fa-heart')
+                    .addClass('fas fa-heart text-danger');
+                }
+                else{
+                    button.find('i')
+                    .removeClass('fas fa-heart text-danger')
+                    .addClass('far fa-heart');
+                }
+
+            }
+        });
+
+    });
+</script>
+<script>
+  $(document).ready(function(){
       $('.tab-nav li').click(function(){
         // Remove active classes
         $('.tab-nav li').removeClass('active');

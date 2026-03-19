@@ -167,4 +167,10 @@ class SettingsController extends Controller
         echo json_encode($json);
     }
 
+    public function billing(Request $request)
+    {
+        $data['plan_data'] = DB::table("plan_management")->where("status",1)->get();
+        return view('healthcare.settings.billing')->with($data);
+    }
+
 }

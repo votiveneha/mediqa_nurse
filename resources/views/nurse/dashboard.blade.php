@@ -3,273 +3,11 @@ use Carbon\Carbon;
 @endphp
 @extends('nurse.layouts.layout')
 @section('content')
-{{-- <style>
-    .status-bg {
-        background: #fff4da;
-        border-radius: 10px;
-        padding: 25px;
-        border: 1px solid #ffe0b2;
-    }
-
-    .status-bg h5 {
-        font-weight: 600;
-    }
-
-    .btn-primary-custom {
-        background: #000;
-        color: #fff;
-        border: none;
-        padding: 14px 22px;
-        border-radius: 6px;
-        border: 1px solid #000;
-        transition: all ease-in-out .3s;
-    }
-
-    .btn-primary-custom:hover {
-        background: transparent;
-        color: #000;
-    }
-
-    /* HEADLINE */
-    .dashboard-title {
-        font-weight: 700;
-    }
-
-    .sub-text {
-        color: #6c757d;
-    }
-
-    /* JOB CARD */
-    .job-card {
-        background: #fff;
-        border-radius: 14px;
-        padding: 14px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-        border: 1px solid #000;
-    }
-
-    /* Header */
-    .job-title {
-        font-weight: 700;
-        font-size: 18px;
-    }
-
-    .heart {
-        font-size: 18px;
-        color: #bbb;
-        cursor: pointer;
-    }
-
-    .heart:hover {
-        color: #e74c3c;
-    }
-
-    /* Location & type */
-    .job-meta {
-        font-size: 12px;
-        color: #6c757d;
-    }
-
-    .job-meta i {
-        margin-right: 4px;
-        font-size: 11px;
-    }
-
-    /* Salary */
-    .salary {
-        color: #0a7c86;
-    }
-
-    .nurse-salary {
-        font-size: 16px;
-        font-weight: 700;
-    }
-
-    /* Badge */
-    .badge-new {
-        background: #d4f5ea;
-        color: #198754;
-        font-size: 12px;
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-weight: 600;
-    }
-
-    /* Details list */
-    .job-details {
-        font-size: 12px;
-        margin-top: 8px;
-        color: #495057;
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-    }
-
-    /* Footer */
-    .job-footer {
-        margin-top: 12px;
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        gap: 20px;
-        enter;
-    }
-
-    .match {
-        font-size: 13px;
-        color: #6c757d;
-    }
-
-    .nurse-apply-btn {
-        background: #2c7a7b;
-        border: 1px solid #2c7a7b;
-        padding: 12px 18px;
-        border-radius: 6px;
-        font-size: 14px;
-        display: inline;
-        transition: all ease-in-out .3s
-    }
-
-    .nurse-apply-btn:hover {
-        background: #fff;
-        border: 1px solid #256b6c;
-        color: #256b6c !important;
-    }
-
-    .section-title {
-        font-weight: 600;
-    }
-
-    .view-all {
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    /* ========== */
-    /* 20/2  */
-    /* ======= filyter chips ======== */
-    /* Horizontal scroll container */
-    .chip-container {
-        display: flex;
-        overflow-x: auto;
-        padding-bottom: 8px;
-        gap: 10px;
-    }
-
-    /* Hide scrollbar (optional) */
-    .chip-container::-webkit-scrollbar {
-        display: none;
-    }
-
-    /* Chip Style */
-    .filter-chip {
-        border: 1px solid #e0e0e0;
-        background: #fff;
-        padding: 5px 10px;
-        border-radius: 30px;
-        font-weight: 500;
-        white-space: nowrap;
-        cursor: pointer;
-        transition: .2s;
-        color: #444;
-        font-size: 12px;
-    }
-
-    .filter-chip i {
-        margin-right: 2px;
-        font-size: 10px;
-    }
-
-    /* Hover */
-    .filter-chip:hover {
-        background: #f2f6ff;
-    }
-
-    /* ACTIVE CHIP */
-    .filter-chip.active {
-        background: #2c7a7b;
-        color: #fff;
-        border-color: #2c7a7b;
-        box-shadow: 0 2px 6px rgba(43, 109, 246, 0.25);
-    }
-
-    /* Urgent visual hint */
-    .filter-chip.urgent {
-        border-color: #ffb3b3;
-    }
-
-    .status-verified {
-        background-color: #16a34a;
-        color: white;
-    }
-
-    .status-in-review {
-        background-color: #ffe605;
-        color: black;
-    }
-
-    .status-pending {
-        background-color: #f97316;
-    }
-
-    .status-not-started {
-        background-color: #9ca3af;
-    }
-
-    .status-incomplete {
-        background-color: #dc2626;
-    }
-
-    .status-submitted {
-        background-color: #2563eb;
-    }
-
-    .status-expired {
-        background-color: #4b5563;
-    }
-
-    .modal-status-header {
-        padding: 14px;
-        color: white;
-        font-weight: 600;
-        border-radius: 6px 6px 0 0;
-    }
-
-    .status-not-started {
-        background: #9ca3af;
-    }
-
-    .status-pending {
-        background: #f97316;
-    }
-
-    .status-in-review {
-        background: #ffe605;
-        color: black;
-    }
-
-    .status-incomplete {
-        background: #dc2626;
-    }
-
-    .status-expired {
-        background: #4b5563;
-    }
-    footer{
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-    }
-    /* .filter-chip[data-mode="top"]{
-        margin-right:20px;
-    } */
-</style> --}}
-
 <style>
-    /* =============================
-                STATUS BANNER
-            ============================= */
+    .job-like-btn{
+        cursor:pointer;
+        font-size:18px;
+     }
     .status-bg {
         background: #fff4da;
         border-radius: 10px;
@@ -542,7 +280,7 @@ use Carbon\Carbon;
             <div class="row flex-row-reverse">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-12 float-right">
                     <div class="chip-container">
-                        <button class="filter-chip active" data-filter="top">
+                        <button class="filter-chip" data-filter="top">
                             <i class="fas fa-star"></i> Top Matches
                         </button>
                         <button class="filter-chip" data-filter="instant">
@@ -585,7 +323,16 @@ use Carbon\Carbon;
                                 <!-- Header -->
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="job-title mb-0">{{ $jobs->job_title }}</div>
-                                    <i class="far fa-heart heart"></i>
+                                   @php
+                                        $liked = DB::table('nurse_job_likes')
+                                        ->where('nurse_id', $user_id)
+                                        ->where('job_id', $jobs->id)
+                                        ->exists();
+                                   @endphp
+                                   <a href="javascript:void(0)" class="job-like-btn" data-job="{{$jobs->id}}">
+                                    <i class="{{ $liked ? 'fas fa-heart text-danger' : 'far fa-heart' }}"></i>
+                                   </a>
+
                                 </div>
                                 <!-- Location & Type -->
                                 <div class="d-flex justify-content-between align-items-center mt-2">
@@ -876,6 +623,37 @@ use Carbon\Carbon;
 </div>
 @endsection
 @section('js')
+<script>
+    $(document).on('click','.job-like-btn',function(){
+
+        let button = $(this);
+        let job_id = button.data('job');
+
+        $.ajax({
+            url: "{{route('nurse.jobs.like')}}",
+            type: "POST",
+            data:{
+                job_id:job_id,
+                _token:"{{csrf_token()}}"
+            },
+            success:function(res){
+
+                if(res.status == 'liked'){
+                    button.find('i')
+                    .removeClass('far fa-heart')
+                    .addClass('fas fa-heart text-danger');
+                }
+                else{
+                    button.find('i')
+                    .removeClass('fas fa-heart text-danger')
+                    .addClass('far fa-heart');
+                }
+
+            }
+        });
+
+    });
+</script>
 <script>
     function openStatusModal(status) {
             if (status == 'not_started') {

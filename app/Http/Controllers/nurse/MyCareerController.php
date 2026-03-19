@@ -84,25 +84,35 @@ class MyCareerController extends Controller
             ->where('status', 8)
             ->get();
 
+        //    echo "<pre>"; print_r($hiredApplications);die;
         foreach ($hiredApplications as $application) {
+            if ($application->job) {
+                NurseMyJobs::updateOrCreate(
+                    // 🔎 Condition to check existing record
+                    [
+                        'application_id' => $application->id
+                    ],
+                    // 📝 Data to insert OR update
+                    [
+                        'nurse_id'        => $application->nurse_id,
+                        'employer_id'     => $application->employer_id,
+                        'job_id'          => $application->job_id,
+                        'job_title'       => $application->job_title ?? null,
+                        'location_state_id' => $application->job->location_state ?? null,
+                        'specialty'       => !empty($application->job->typeofspeciality)
+                            ? json_encode($application->job->typeofspeciality)
+                            : null,
+                        'employment_type' => !empty($application->job->emplyeement_type)
+                            ? json_encode($application->job->emplyeement_type)
+                            : null,
+                        'shift_type'      => !empty($application->job->shift_type)
+                            ? json_encode($application->job->shift_type)
+                            : null,
 
-            if (!$application->job) continue;
-
-            NurseMyJobs::updateOrCreate(
-                ['application_id' => $application->id],
-                [
-                    'nurse_id'         => $application->nurse_id,
-                    'employer_id'      => $application->employer_id,
-                    'job_id'           => $application->job_id,
-                    'job_title'        => $application->job->job_title ?? null,
-                    'location_state_id' => $application->job->location_state ?? null,
-                    'specialty'        => $application->job->typeofspeciality,
-                    'employment_type'  => $application->job->emplyeement_type,
-                    'shift_type'       => $application->job->shift_type,
-                ]
-            );
+                    ]
+                );
+            }
         }
-
         /*
     |--------------------------------------------------------------------------
     | Get My Jobs

@@ -214,10 +214,10 @@
 
 
 
-                        <div class="match-ring match-ring-bg">
+                        {{-- <div class="match-ring match-ring-bg">
                             <span>87%</span>
                             <small>Match</small>
-                        </div>
+                        </div> --}}
                         <button class="save-btn job-detail-save">❤️ Save</button>
 
                         <!-- <div class="priority-tags">

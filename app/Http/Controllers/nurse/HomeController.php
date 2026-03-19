@@ -73,10 +73,47 @@ class HomeController extends Controller
         
     }
 
+
+    public function like_Jobs(Request $request)
+    {
+        $nurse_id = Auth::guard("nurse_middle")->user()->id;
+        $job_id = $request->job_id;
+
+        $like = DB::table('nurse_job_likes')
+            ->where('nurse_id', $nurse_id)
+            ->where('job_id', $job_id)
+            ->first();
+
+        if ($like) {
+
+            DB::table('nurse_job_likes')
+                ->where('nurse_id', $nurse_id)
+                ->where('job_id', $job_id)
+                ->delete();
+
+            return response()->json([
+                'status' => 'unliked'
+            ]);
+        } else {
+
+            DB::table('nurse_job_likes')->insert([
+                'nurse_id' => $nurse_id,
+                'job_id' => $job_id,
+                'type' => 1,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            return response()->json([
+                'status' => 'liked'
+            ]);
+        }
+    }
     public function dashboard(NurseJobMatchService $matchService)
     {
         $user_id = Auth::guard("nurse_middle")->user()->id;
         $user_active_country = Auth::guard("nurse_middle")->user()->active_country;
+        $user = User::where('id', $user_id)->first();
         $nurseData = Profession::where('user_id', $user_id)->get();
         $nurseTypes = $nurseData->pluck('nurse_data')->toArray();
         $nurseSpecialties = $nurseData->pluck('specialties')->toArray();
@@ -115,6 +152,7 @@ class HomeController extends Controller
 
         foreach ($jobs_list as $job) {
             $job->match_percentage = $matchService->calculateMatch(
+                $user,
                 $nurseTypes,
                 $nurseSpecialties,
                 $experience_data,
@@ -127,27 +165,13 @@ class HomeController extends Controller
                 $job
             );
         }
-        
+        $jobs_list = $jobs_list->sortByDesc('match_percentage')->values();
         $countries = DB::table('country')->where('status', 1)->get();
         return view('nurse.dashboard', compact('countries', 'jobs_list', 'user_id'));
     }
-    public function dashboard_old(NurseJobMatchService $matchService)
-    {
-        // $jobs_list = JobsModel::where('save_draft', 2)->orderBy('created_at','desc')->limit(6)->get();
-        $jobs_list = JobsModel::where('save_draft', 2)->orderBy('id','asc')->get();
-        $user_id = Auth::guard("nurse_middle")->user()->id;
-        $nurse = User::find($user_id);
-        //  echo "<pre>";print_r($jobs_list);die;
 
-        foreach ($jobs_list as $job) {
-            $job->match_percentage = $matchService->calculateMatch($user_id, $job);
-        }
-        print_r($job->match_percentage);die;
-        $countries = DB::table('country')->where('status', 1)->get();
-        return view('nurse.dashboard', compact('countries', 'jobs_list','user_id'));
-    }
 
-    public function filterJobs(Request $request)
+    public function filterJobs(Request $request, NurseJobMatchService $matchService)
     {
         // print_r($request->all());die;
         $user_id = Auth::guard("nurse_middle")->user()->id;
@@ -302,6 +326,56 @@ class HomeController extends Controller
         $jobs_list = $jobs_list->where('save_draft',2)
                               ->where('location_country', $user_active_country)
                               ->get();
+
+        $user = User::where('id', $user_id)->first();
+        $nurseData = Profession::where('user_id', $user_id)->get();
+        $nurseTypes = $nurseData->pluck('nurse_data')->toArray();
+        $nurseSpecialties = $nurseData->pluck('specialties')->toArray();
+        $experience_data = $nurseData->pluck('assistent_level');
+
+        //vaccination 5%
+        $nurseVaccines = DB::table('vaccination_front')
+            ->where('user_id', $user_id)
+            ->pluck('vaccination_id')
+            ->toArray();
+
+        //Checks and Clearance 5%
+        $eligibility = DB::table('eligibility_to_work')
+            ->where('user_id', $user_id)
+            ->first();
+
+        $policeCheck = DB::table('police_check')
+            ->where('user_id', $user_id)
+            ->exists();
+
+        $workingChildren = DB::table('working_children_check')
+            ->where('user_id', $user_id)
+            ->exists();
+
+        $ndisCheck = DB::table('ndis_screening_check')
+            ->where('user_id', $user_id)
+            ->exists();
+
+        $preferences = DB::table('work_preferences')
+            ->where('user_id', $user_id)
+            ->first();
+
+        foreach ($jobs_list as $job) {
+            $job->match_percentage = $matchService->calculateMatch(
+                $user,
+                $nurseTypes,
+                $nurseSpecialties,
+                $experience_data,
+                $nurseVaccines,
+                $eligibility,
+                $policeCheck,
+                $workingChildren,
+                $ndisCheck,
+                $preferences,
+                $job
+            );
+        }
+        $jobs_list = $jobs_list->sortByDesc('match_percentage')->values();
         return view('nurse.dashboard_partial',compact('jobs_list','user_id'))->render();
     }
 

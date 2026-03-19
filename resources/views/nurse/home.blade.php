@@ -2097,7 +2097,7 @@
 
                 <div class="modal-header">
                     <h3>Work Environment</h3>
-                    <span class="close-btn" data-close="typeOfNurseModal">&times;</span>
+                    <span class="close-btn" data-close="workEnvironment">&times;</span>
                 </div>
 
             </div>

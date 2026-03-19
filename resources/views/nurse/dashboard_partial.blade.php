@@ -8,7 +8,15 @@ use Carbon\Carbon;
             <!-- Header -->
             <div class="d-flex justify-content-between align-items-center">
                 <div class="job-title mb-0">{{ $jobs->job_title }}</div>
-                <i class="far fa-heart heart"></i>
+                @php
+                $liked = DB::table('nurse_job_likes')
+                ->where('nurse_id', $user_id)
+                ->where('job_id', $jobs->id)
+                ->exists();
+                @endphp
+                <a href="javascript:void(0)" class="job-like-btn" data-job="{{$jobs->id}}">
+                    <i class="{{ $liked ? 'fas fa-heart text-danger' : 'far fa-heart' }}"></i>
+                </a>
             </div>
             <!-- Location & Type -->
             <div class="d-flex justify-content-between align-items-center mt-2">
@@ -84,7 +92,7 @@ use Carbon\Carbon;
                     <p>PPE provided</p>
                 </div> --}}
                 <div class="match">
-                    87% match
+                   {{$jobs->match_percentage}}% match
                 </div>
             </div>
             <!-- Footer -->

@@ -52,7 +52,7 @@ class JobPostingController extends Controller
 
         $user_id = Auth::guard('healthcare_facilities')->user()->id;
         
-        expire_jobs($user_id);
+        //expire_jobs($user_id);
         
         return view('healthcare.job_posting')->with($data);
     }

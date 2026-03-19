@@ -30,11 +30,12 @@ use App\Models\SavedSearches;
 use App\Models\JobsModel;
 use App\Models\RegisteredProfile;
 use App\Models\User;
-
+use App\Models\Profession;
+use App\Services\User\NurseJobMatchService;
 
 class JobsController extends Controller{
 
-    public function index(Request $request)
+    public function index(Request $request,NurseJobMatchService $matchService)
     {
         $this->ensureDefaultSearch();
         $data['employeement_type_data'] = DB::table("employeement_type_preferences")->where("sub_prefer_id", 0)->get();
@@ -227,6 +228,56 @@ class JobsController extends Controller{
         }
 
         $data['jobs'] = $query->paginate(2);
+
+        //calculate Match percentage 
+        $user = User::where('id', $user_id)->first();
+        $nurseData = Profession::where('user_id', $user_id)->get();
+        $nurseTypes = $nurseData->pluck('nurse_data')->toArray();
+        $nurseSpecialties = $nurseData->pluck('specialties')->toArray();
+        $experience_data = $nurseData->pluck('assistent_level');
+
+        //vaccination 5%
+        $nurseVaccines = DB::table('vaccination_front')
+            ->where('user_id', $user_id)
+            ->pluck('vaccination_id')
+            ->toArray();
+
+        //Checks and Clearance 5%
+        $eligibility = DB::table('eligibility_to_work')
+            ->where('user_id', $user_id)
+            ->first();
+
+        $policeCheck = DB::table('police_check')
+            ->where('user_id', $user_id)
+            ->exists();
+
+        $workingChildren = DB::table('working_children_check')
+            ->where('user_id', $user_id)
+            ->exists();
+
+        $ndisCheck = DB::table('ndis_screening_check')
+            ->where('user_id', $user_id)
+            ->exists();
+
+        $preferences = DB::table('work_preferences')
+            ->where('user_id', $user_id)
+            ->first();
+
+        foreach ($data['jobs']  as $job) {
+            $job->match_percentage = $matchService->calculateMatch(
+                $user,
+                $nurseTypes,
+                $nurseSpecialties,
+                $experience_data,
+                $nurseVaccines,
+                $eligibility,
+                $policeCheck,
+                $workingChildren,
+                $ndisCheck,
+                $preferences,
+                $job
+            );
+        }
         return view('nurse.find_jobs')->with($data);
     }
 
@@ -235,16 +286,8 @@ class JobsController extends Controller{
         $data['jobs'] = DB::table("job_boxes")->where("id", $job_id)->first();
         $data['healthcare_data'] = User::where("id",$data['jobs']->healthcare_id)->first();
         $data['state_data'] = DB::table("states")->where("id",$data['jobs']->location_state)->first();
+        
         return view('nurse.job_details')->with($data);
-    }
-    
-    public function healthcare_details(Request $request){
-        $healthcare_id = $request->id;
-        $data['healthcare_data'] = DB::table("users")->where("id", $healthcare_id)->first();
-        //print_r($data);die;
-        // $data['healthcare_data'] = User::where("id",$data['jobs']->healthcare_id)->first();
-        // $data['state_data'] = DB::table("states")->where("id",$data['jobs']->location_state)->first();
-        return view('nurse.view_healthcare_profile')->with($data);
     }
 
     public function capitalizeFirstTwo($string) {
@@ -357,7 +400,7 @@ class JobsController extends Controller{
     }
 
 
-    public function getJobsSorting(Request $request)
+    public function getJobsSorting(Request $request,NurseJobMatchService $matchService)
     {
         // echo "<pre>";print_r($request->all());die;
         $query = DB::table('job_boxes');
@@ -576,6 +619,57 @@ class JobsController extends Controller{
         $jobs = $query->where("save_draft", 2)->paginate(2);
         // $jobs = $query->get();
         // print_r($jobs);die;
+        //calculate Match percentage 
+        $user_id = Auth::guard('nurse_middle')->user()->id;
+
+        $user = User::where('id', $user_id)->first();
+        $nurseData = Profession::where('user_id', $user_id)->get();
+        $nurseTypes = $nurseData->pluck('nurse_data')->toArray();
+        $nurseSpecialties = $nurseData->pluck('specialties')->toArray();
+        $experience_data = $nurseData->pluck('assistent_level');
+
+        //vaccination 5%
+        $nurseVaccines = DB::table('vaccination_front')
+            ->where('user_id', $user_id)
+            ->pluck('vaccination_id')
+            ->toArray();
+
+        //Checks and Clearance 5%
+        $eligibility = DB::table('eligibility_to_work')
+            ->where('user_id', $user_id)
+            ->first();
+
+        $policeCheck = DB::table('police_check')
+            ->where('user_id', $user_id)
+            ->exists();
+
+        $workingChildren = DB::table('working_children_check')
+            ->where('user_id', $user_id)
+            ->exists();
+
+        $ndisCheck = DB::table('ndis_screening_check')
+            ->where('user_id', $user_id)
+            ->exists();
+
+        $preferences = DB::table('work_preferences')
+            ->where('user_id', $user_id)
+            ->first();
+
+        foreach ($jobs  as $job) {
+            $job->match_percentage = $matchService->calculateMatch(
+                $user,
+                $nurseTypes,
+                $nurseSpecialties,
+                $experience_data,
+                $nurseVaccines,
+                $eligibility,
+                $policeCheck,
+                $workingChildren,
+                $ndisCheck,
+                $preferences,
+                $job
+            );
+        }
         if ($jobs->count() == 0) {
             return response()->json([
                 'status' => false,

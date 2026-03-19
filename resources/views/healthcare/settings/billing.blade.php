@@ -1,0 +1,178 @@
+@extends('nurse.layouts.layout')
+
+@section('css')
+<style>
+    .subscription-container{
+        padding:40px;
+        background:#f5f7fb;
+        text-align:center;
+    }
+
+    .title{
+        font-size:28px;
+        margin-bottom:35px;
+    }
+
+    .plan-wrapper{
+        display:flex;
+        justify-content:center;
+        gap:30px;
+        flex-wrap:wrap;
+    }
+
+    .plan-card{
+        background:#fff;
+        width:320px;
+        padding:30px;
+        border-radius:12px;
+        box-shadow:0 4px 20px rgba(0,0,0,0.05);
+        position:relative;
+    }
+
+    .highlight{
+        border:2px solid #2563eb;
+    }
+
+    .badge{
+        position:absolute;
+        top:-12px;
+        left:50%;
+        transform:translateX(-50%);
+        background:#2563eb;
+        color:#fff;
+        padding:4px 12px;
+        border-radius:20px;
+        font-size:12px;
+    }
+
+    .plan-name{
+        font-size:20px;
+        margin-bottom:10px;
+    }
+
+    .plan-price{
+        font-size:34px;
+        font-weight:700;
+        margin-bottom:10px;
+    }
+
+    .plan-price span{
+        font-size:14px;
+        color:#777;
+    }
+
+    .plan-desc{
+        font-size:14px;
+        color:#666;
+        margin-bottom:20px;
+    }
+
+    .plan-features{
+        list-style:none;
+        padding:0;
+        text-align:left;
+        margin-bottom:25px;
+    }
+
+    .plan-features li{
+        margin-bottom:8px;
+    }
+
+    .btn-plan{
+        border:1px solid #2563eb;
+        background:#fff;
+        color:#2563eb;
+        padding:10px 20px;
+        border-radius:6px;
+        cursor:pointer;
+    }
+
+    .btn-plan.primary{
+        background:#2563eb;
+        color:#fff;
+    }
+</style>
+@endsection
+
+@section('content')
+<main class="main">
+    <section class="section-box mt-0">
+        <div class="">
+            <div class="row m-0 profile-wrapper">
+                <div class="col-lg-3 col-md-4 col-sm-12 p-0 left_menu">
+
+                    @include('healthcare.settings.sidebar')
+                </div>
+                <div class="col-lg-9 col-md-8 col-sm-12 col-12 right_content">
+                    <div class="subscription-container">
+
+                        <h2 class="title">Subscription Plans</h2>
+
+                        <div class="plan-wrapper">
+
+                            <!-- Starter Plan -->
+                            @foreach($plan_data as $plandata)
+                            <div class="plan-card">
+                                <h3 class="plan-name">{{ $plandata->plan_name }}</h3>
+
+                                <div class="plan-price">
+                                    ${{ $plandata->monthly_price }} <span>/month</span>
+                                </div>
+
+                                <p class="plan-desc">
+                                    Small clinics, aged-care homes, local agencies
+                                </p>
+
+                                <!-- <ul class="plan-features">
+                                    <li>Up to 10 active jobs</li>
+                                    <li>Smart ranking & matching</li>
+                                    <li>Access verified nurse profiles</li>
+                                    <li>Instant Connect</li>
+                                    <li>Compliance tracking insights</li>
+                                    <li>In-app messaging</li>
+                                    <li>Basic support</li>
+                                </ul> -->
+                                <div class="plan-features">
+                                    {!! $plandata->features !!}
+                                </div>
+                                
+
+                                <button class="btn-plan">Choose Plan</button>
+                            </div>
+                            @endforeach
+
+                            <!-- Professional Plan -->
+                            <!-- <div class="plan-card highlight">
+
+                                <div class="badge">Most Popular</div>
+
+                                <h3 class="plan-name">Professional</h3>
+
+                                <div class="plan-price">
+                                    $500 <span>/month</span>
+                                </div>
+
+                                <p class="plan-desc">
+                                    Hospitals and agencies with ongoing recruitment
+                                </p>
+
+                                <ul class="plan-features">
+                                    <li>Unlimited jobs</li>
+                                    <li>Multi-site hiring support</li>
+                                    <li>Team access (multiple recruiters)</li>
+                                    <li>Priority support</li>
+                                </ul>
+
+                                <button class="btn-plan primary">Choose Plan</button>
+
+                            </div> -->
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+@endsection

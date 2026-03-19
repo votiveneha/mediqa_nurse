@@ -230,8 +230,11 @@ input:checked + .slider_remote:before {
                                 <input type="hidden" name="job_id" value="{{ $job_id }}">
                                 <label class="form-label" for="input-1">Country
                                 </label>
-                                <input class="country_code" type="hidden" name="country_code" id="country_code" value="AU">
-                                <input class="form-control job_country" type="text" name="job_country" id="job_country" readonly value="Australia">
+                                @php
+                                  $country_data = DB::table("country")->where("iso2",Auth::guard('healthcare_facilities')->user()->country_iso)->first();
+                                @endphp
+                                <input class="country_code" type="hidden" name="country_code" id="country_code" value="{{ Auth::guard('healthcare_facilities')->user()->country_iso }}">
+                                <input class="form-control job_country" type="text" name="job_country" id="job_country" readonly value="{{ $country_data->name }}">
                                 <span id='reqhoursweek' class='reqError text-danger valley'></span>
                             </div>      
                             <div class="form-group level-drp">

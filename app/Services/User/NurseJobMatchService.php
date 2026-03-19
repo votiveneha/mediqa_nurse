@@ -5,7 +5,7 @@ namespace App\Services\User;
 class NurseJobMatchService
 {
 
-    public function calculateMatch($nurseTypes, $nurseSpecialties, $experience_data, $nurseVaccines, $eligibility, $policeCheck, $workingChildren, $ndisCheck, $preferences, $job)
+    public function calculateMatch($user,$nurseTypes, $nurseSpecialties, $experience_data, $nurseVaccines, $eligibility, $policeCheck, $workingChildren, $ndisCheck, $preferences, $job)
     {
         $score = 0;
 
@@ -21,18 +21,114 @@ class NurseJobMatchService
             $job
         );
         $score += $this->workPreferenceScore($preferences, $job);
-
+        $score += $this->educationBlockScore($user, $job);
         return round($score, 2);
     }
+    private function toArray($data)
+    {
+        if (is_string($data)) {
+            return json_decode($data, true);
+        }
+        return $data ?? [];
+    }
+    private function educationBlockScore($user, $job)
+    {
+        $score = 0;
 
-    
+        $score += $this->educationScore($user, $job);   // 5
+        $score += $this->trainingScore($user, $job);    // 5
+        $score += $this->languageScore($user, $job);    // 5
+
+        return $score;
+    }
+    private function educationScore($user, $job)
+    {
+        $weight = 5;
+
+        $jobDegrees = $this->toArray($job->degree_req);
+
+        if (empty($jobDegrees) || in_array('no_minimum', $jobDegrees)) {
+            return $weight;
+        }
+
+        // Rank mapping (based on your table)
+        $rankMap = [
+            'certificate' => 1,
+            'bachelor' => 2,
+            'postgraduate' => 3,
+            'masters' => 4,
+            'doctorate' => 5,
+        ];
+
+        // Get user rank
+        $userDegree = $user->degree;
+        $userRank = DB::table('degree')->where('id', $userDegree)->value('rank');
+
+        if (!$userRank || !isset($rankMap[$userRank])) {
+            return 0;
+        }
+
+        $userRankValue = $rankMap[$userRank];
+
+        // Check against job requirement
+        foreach ($jobDegrees as $degree) {
+            if (isset($rankMap[$degree]) && $userRankValue >= $rankMap[$degree]) {
+                return $weight;
+            }
+        }
+
+        return 0;
+    }
+    private function trainingScore($user, $job)
+    {
+        $weight = 5;
+
+        $jobTrainings = $this->toArray($job->mandatory_training_req);
+        $userTrainings = $this->toArray($user->degree);
+
+        if (empty($jobTrainings)) {
+            return $weight;
+        }
+
+        $jobFlat = $this->flattenArray($jobTrainings);
+        $userKeys = array_keys($userTrainings);
+
+        $matched = array_intersect($jobFlat, $userKeys);
+
+        if (count($jobFlat) == 0) return $weight;
+
+        return (count($matched) / count($jobFlat)) * $weight;
+    }
+    private function languageScore($user, $job)
+    {
+        $weight = 5;
+
+        $jobLang = $this->toArray($job->sub_languages_req);
+        $userLang = $this->toArray($user->langprof_level);
+
+        if (empty($jobLang)) {
+            return $weight;
+        }
+
+        $jobKeys = array_keys($jobLang);
+        $userKeys = array_keys($userLang);
+
+        $matched = array_intersect($jobKeys, $userKeys);
+
+        if (count($jobKeys) == 0) return $weight;
+
+        return (count($matched) / count($jobKeys)) * $weight;
+    }
+
     private function workPreferenceScore($preferences, $job)
     {
         $score = 0;
 
         $score += $this->sectorScore($preferences, $job);
         $score += $this->shiftScore($preferences, $job);
+
         $score += $this->employmentScore($preferences, $job);
+
         $score += $this->benefitsScore($preferences, $job);
         $score += $this->locationSalaryScore($preferences, $job);
 
@@ -110,8 +206,10 @@ class NurseJobMatchService
 
         // Handle job data
         $jobType = $job->emplyeement_type;
+
         if (is_string($jobType)) {
-            $jobType = json_decode($jobType, true);
+            $decoded = json_decode($jobType, true);
+            $jobType = is_array($decoded) ? $decoded : [$jobType]; // ✅ force array
         }
 
         if (empty($user) || empty($jobType)) {
@@ -122,6 +220,7 @@ class NurseJobMatchService
 
         return count(array_intersect($userFlat, $jobType)) > 0 ? $weight : 0;
     }
+
     private function benefitsScore($preferences, $job)
     {
         $weight = 5;
@@ -325,24 +424,5 @@ class NurseJobMatchService
         $ratio = min($nurseExperience / $job->experience_level, 1);
         return $ratio * $weight;
     }
-    // private function specialtyScore($nurseSpecialties, $job)
-    // {
-    //     $weight = 15;
 
-    //     // $nurseSpecialties = $nurseData->pluck('specialties')->toArray();
-
-    //     $jobSpecialties = $job->specialties;
-
-    //     if (is_string($jobSpecialties)) {
-    //         $jobSpecialties = json_decode($jobSpecialties, true);
-    //     }
-
-    //     $matched = array_intersect($nurseSpecialties, $jobSpecialties);
-
-    //     if (count($jobSpecialties) == 0) {
-    //         return 0;
-    //     }
-
-    //     return (count($matched) / count($jobSpecialties)) * $weight;
-    // }
 }
