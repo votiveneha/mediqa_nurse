@@ -67,6 +67,7 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
     Route::post('/inviteUser', 'SettingsController@inviteUser')->name('inviteUser');
     Route::get('/deactivateUser', 'SettingsController@deactivate_user')->name('deactivateUser');
     Route::get('/deleteUser', 'SettingsController@delete_user')->name('deleteUser');
+    Route::get('/billing', 'SettingsController@billing')->name('billing');
     Route::get('/job_posting', 'JobPostingController@job_posting')->name('job_posting');
     Route::get('/contract_pay', 'JobPostingController@contract_pay')->name('contract_pay');
     Route::post('/updateContractPay', 'JobPostingController@updateContractPay')->name('updateContractPay');
@@ -163,6 +164,8 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
     Route::get('/my-profile', 'HomeController@manage_profile')->name('my-profile');
     Route::get('/dashboard', 'HomeController@dashboard')->name('dashboard');
     Route::post('/filter-jobs', 'HomeController@filterJobs')->name('filter.jobs');
+    Route::post('/jobs-like', 'HomeController@like_Jobs')->name('jobs.like');
+
 
     Route::get('/dashboard1', 'HomeController@dashboard1')->name('dashboard1');
     Route::post('/changepassword', 'HomeController@changepassword')->name('changepassword');
