@@ -71,6 +71,10 @@ Route::prefix('/admin')->name('admin.')->namespace('App\Http\Controllers\admin')
     Route::get('/customer-list', 'NurseController@customerList')->name('customer-list');
     Route::get('/healthcare-list', 'HealthcareController@index')->name('healthcareList');
     Route::get('/healthcare-detail/{id}', 'HealthcareController@healthcare_details')->name('healthcare_details');
+    Route::get('/plan_management', 'HealthcareController@plan_list')->name('plan_list');
+    Route::get('/add_plans', 'HealthcareController@add_plans')->name('add_plans');
+    Route::post('/updatePlan', 'HealthcareController@update_plan')->name('updatePlan');
+    Route::get('/update_plans/{id}', 'HealthcareController@update_plans')->name('update_plans');
     Route::get('/recruiter-list', 'HealthcareController@recruiter_list')->name('recruiter_list');
     Route::get('/incoming-nurse-list', 'NurseController@incommingNurseList')->name('incoming-nurse-list');
     Route::get('/unverified-nurse-list', 'NurseController@unverified_nurse_list')->name('unverified-nurse-list');
