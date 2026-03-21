@@ -846,7 +846,7 @@ class JobsController extends Controller{
         }
 
         // 🔹 Insert into nurse_applications table
-        $apply = DB::table('nurse_applications')->insert([
+        $applicationId = DB::table('nurse_applications')->insertGetId([
             'nurse_id'     => $user_id,
             'job_id'       => $job->id,
             'employer_id'  => $job->healthcare_id ?? null,
@@ -857,10 +857,59 @@ class JobsController extends Controller{
             'updated_at'   => now(),
         ]);
 
-        if ($apply) {
+        if ($applicationId) {
+            // 🔹 Auto-create chat conversation for this application
+            try {
+                $nurse = \App\Models\User::find($user_id);
+                $healthcare = \App\Models\User::find($job->healthcare_id);
+                
+                if ($nurse && $healthcare) {
+                    // Check if conversation already exists
+                    $existingConversation = \App\Models\Conversation::where('nurse_id', $nurse->id)
+                        ->where('healthcare_id', $healthcare->id)
+                        ->where('job_id', $job_id)
+                        ->first();
+
+                    if (!$existingConversation) {
+                        // Create new conversation
+                        $conversation = \App\Models\Conversation::create([
+                            'subject' => 'Job Application: ' . ($job->job_title ?? 'Position'),
+                            'job_id' => $job_id,
+                            'nurse_id' => $nurse->id,
+                            'healthcare_id' => $healthcare->id,
+                            'status' => 'active',
+                        ]);
+
+                        // Create initial system message
+                        \App\Models\Message::create([
+                            'conversation_id' => $conversation->id,
+                            'sender_id' => $nurse->id,
+                            'sender_type' => 'nurse',
+                            'message' => 'You have submitted your application for the position of ' . ($job->job_title ?? 'this role') . '. The healthcare facility will review your application.',
+                            'message_type' => 'system',
+                        ]);
+
+                        // Create participants
+                        \App\Models\ConversationParticipant::create([
+                            'conversation_id' => $conversation->id,
+                            'user_id' => $nurse->id,
+                        ]);
+
+                        \App\Models\ConversationParticipant::create([
+                            'conversation_id' => $conversation->id,
+                            'user_id' => $healthcare->id,
+                        ]);
+                    }
+                }
+            } catch (\Exception $e) {
+                // Log error but don't fail the application
+                \Log::error('Failed to create chat conversation: ' . $e->getMessage());
+            }
+
             return response()->json([
                 'status' => true,
-                'message' => 'Job applied successfully.'
+                'message' => 'Job applied successfully. You can now chat with the healthcare facility.',
+                'application_id' => $applicationId
             ]);
         }
 

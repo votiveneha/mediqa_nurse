@@ -55,7 +55,7 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
   Route::get('/getEmpData', 'JobPostingController@getEmpData')->name('getEmpData');
   Route::get('/getStates', 'JobPostingController@getStates')->name('getStates');
   Route::get('/getLanguagesData', 'JobPostingController@getLanguagesData')->name('getLanguagesData');
-  
+
   Route::get('/getAccreditationsData', 'HomeController@getAccreditationsData')->name('getAccreditationsData');
   Route::get('/email-verification/{token}', 'HomeController@email_verification')->name('email-verification');
   Route::get('/profile-under-reviewed', 'HomeController@profileUnderReviewed')->name('profile-under-reviewed');
@@ -63,7 +63,7 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
     Route::get('/my-profile', 'HomeController@manage_profile')->name('my-profile');
     Route::get('/users', 'SettingsController@index')->name('users');
     Route::get('/invite_users', 'SettingsController@invite_users')->name('invite_users');
-    
+
     Route::post('/inviteUser', 'SettingsController@inviteUser')->name('inviteUser');
     Route::get('/deactivateUser', 'SettingsController@deactivate_user')->name('deactivateUser');
     Route::get('/deleteUser', 'SettingsController@delete_user')->name('deleteUser');
@@ -75,7 +75,7 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
     Route::post('/updateJobRequirements', 'JobPostingController@updateJobRequirements')->name('updateJobRequirements');
     Route::post('/updateBasicJobs', 'JobPostingController@updateBasicJobs')->name('updateBasicJobs');
     Route::get('/change_password', 'JobPostingController@change_password')->name('change_password');
-    
+
     Route::get('/shift_scheduling', 'JobPostingController@shift_scheduling')->name('shift_scheduling');
     Route::post('/updateShiftScheduling', 'JobPostingController@updateShiftScheduling')->name('updateShiftScheduling');
     Route::get('/job_benefits', 'JobPostingController@job_benefits')->name('job_benefits');
@@ -203,10 +203,10 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
     Route::post('/updateInterview', 'HomeController@updateInterview')->name('updateInterview');
     Route::post('/updatePreferences', 'HomeController@updatePreferences')->name('updatePreferences');
     Route::post('/updateWorkPreference', 'HomeController@updateWorkPreference')->name('updateWorkPreference');
-    
+
     Route::post('/updateAdditionalInfo', 'HomeController@updateAdditionalInfo')->name('updateAdditionalInfo');
     Route::post('/updateReference', 'HomeController@updateReference')->name('updateReference');
-    
+
     Route::post('/deleteReferee', 'HomeController@deleteReferee')->name('deleteReferee');
     Route::post('/deleteCertification', 'HomeController@deleteCertification')->name('deleteCertification');
     Route::post('/deleteOtherTraining', 'HomeController@deleteOtherTraining')->name('deleteOtherTraining');
@@ -227,7 +227,7 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
     Route::post('/deletecertification_img', 'HomeController@deletecertification_img')->name('deletecertification_img');
     Route::post('/getSkillsData', 'HomeController@getSkillsData')->name('getSkillsData');
 	  Route::post('/deleteevidence', 'HomeController@deleteEvidence')->name('deleteEvidence');
-	
+
 	/**************[Profile Vaccination]**************/
 	Route::post('/vaccinationForm', 'HomeController@vaccinationForm')->name('vaccinationForm');
     Route::any('/profileVaccination', 'HomeController@profileVaccination')->name('profileVaccination');
@@ -266,7 +266,7 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   /**************[Setting & Availability]**************/
   Route::get('/setting_availablity', 'HomeController@setting_availablity')->name('setting_availablity');
   Route::post('/update-profession-profile-setting', 'HomeController@update_profession_profile_setting')->name('update-profession-profile-setting');
-  
+
   /**************[Mandatory Training]**************/
   Route::get('/mandatory_training', 'MandatortrainingController@mandatory_training')->name('mandatory_training');
   Route::post('/uploadTrainingEvidenceImgs', 'MandatortrainingController@uploadTrainingEvidenceImgs')->name('uploadTrainingEvidenceImgs');
@@ -274,7 +274,7 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::get('/getMandatoryCoursesName', 'MandatortrainingController@getMandatoryCoursesName')->name('getMandatoryCoursesName');
   Route::post('/deleteTrainingEvidenceImg', 'MandatortrainingController@deleteTrainingEvidenceImg')->name('deleteTrainingEvidenceImg');
   Route::post('/updateMandatoryTraining', 'MandatortrainingController@updateMandatoryTraining')->name('updateMandatoryTraining');
-  
+
   /**************[Professional Membership]**************/
   Route::any('/professionalMembership','ProfessionalController@professionalMembership')->name('professionalMembership');
   Route::any('/getCountryOrgnizations','ProfessionalController@getCountryOrgnizations')->name('getCountryOrgnizations');
@@ -287,7 +287,7 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::post('/uploadAwardImgs', 'ProfessionalController@uploadAwardImgs')->name('uploadAwardImgs');
   Route::post('/deleteEvidenceImg', 'ProfessionalController@deleteEvidenceImg')->name('deleteEvidenceImg');
   Route::post('/deleteAwardEvidenceImg', 'ProfessionalController@deleteAwardEvidenceImg')->name('deleteAwardEvidenceImg');
-  
+
   /**************[Language Skills]**************/
   Route::get('/language_skills', 'LanguageSkillsContoller@index')->name('language_skills');
   Route::get('/getLanguagesData', 'LanguageSkillsContoller@getLanguagesData')->name('getLanguagesData');
@@ -343,22 +343,22 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::post('/updateLocationPreferences', 'WorkPreferencesController@updateLocationPreferences')->name('updateLocationPreferences');
   Route::get('/salaryExpectations', 'WorkPreferencesController@salaryExpectations')->name('salaryExpectations');
   Route::post('/updatesalaryExpectations', 'WorkPreferencesController@updatesalaryExpectations')->name('updatesalaryExpectations');
-  
+
   /**************[Interview Preferences]**************/
   Route::any('/interview','ProfessionalController@interview')->name('interview');
-  
+
   /**************[Find Jobs]**************/
   Route::get('/find_jobs', 'JobsController@index')->name('find_jobs');
   Route::get('/job_details/{job_id}', 'JobsController@job_details')->name('job_details');
   Route::get('/healthcare_details/{id}', 'JobsController@healthcare_details')->name('healthcare_details');
-  Route::post('/getWorkFlexiblityData', 'JobsController@getWorkFlexiblityData')->name('getWorkFlexiblityData');  
-  Route::post('/getWorkEnvironmentData', 'JobsController@getWorkEnvironmentData')->name('getWorkEnvironmentData');  
-  Route::post('/getNurseData', 'JobsController@getNurseData')->name('getNurseData'); 
-  Route::post('/getSpecialityData', 'JobsController@getSpecialityData')->name('getSpecialityData'); 
-  Route::post('/getFilterData', 'JobsController@getFilterData')->name('getFilterData');  
-  Route::post('/getExperienceData', 'JobsController@getExperienceData')->name('getExperienceData');  
+  Route::post('/getWorkFlexiblityData', 'JobsController@getWorkFlexiblityData')->name('getWorkFlexiblityData');
+  Route::post('/getWorkEnvironmentData', 'JobsController@getWorkEnvironmentData')->name('getWorkEnvironmentData');
+  Route::post('/getNurseData', 'JobsController@getNurseData')->name('getNurseData');
+  Route::post('/getSpecialityData', 'JobsController@getSpecialityData')->name('getSpecialityData');
+  Route::post('/getFilterData', 'JobsController@getFilterData')->name('getFilterData');
+  Route::post('/getExperienceData', 'JobsController@getExperienceData')->name('getExperienceData');
   Route::post('/getFilterNurseData', 'JobsController@getFilterNurseData')->name('getFilterNurseData');
-  Route::post('/getFilterSpecialityData', 'JobsController@getFilterSpecialityData')->name('getFilterSpecialityData');  
+  Route::post('/getFilterSpecialityData', 'JobsController@getFilterSpecialityData')->name('getFilterSpecialityData');
   Route::post('/updateSectorData', 'JobsController@updateSectorData')->name('updateSectorData');
   Route::post('/getJobsSorting', 'JobsController@getJobsSorting')->name('getJobsSorting');
   Route::post('/applyJobs', 'JobsController@applyJobs')->name('applyJobs');
@@ -378,4 +378,12 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::get('getSpecialityDatas', 'WorkPreferencesController@getSpecialityDatas')->name('getSpecialityDatas');
   Route::get('deleteSpecialityRows', 'HomeController@deleteSpecialityRows')->name('deleteSpecialityRows');
   });
+  // ==========================================
+  // Healthcare Chat Routes
+  // ==========================================
+  Route::prefix('chat')->name('chat.')->group(function () {
+    Route::get('/', 'ChatController@index')->name('index');
+    Route::get('/conversation/{id}', 'ChatController@showConversation')->name('show');
+    // Route::get('/nurses', 'ChatController@getNurses')->name('nurses');
+    });
 });
