@@ -230,7 +230,7 @@
     <!-- Sidebar -->
     <div class="chat-sidebar">
         <div class="chat-sidebar-header">
-            <button class="btn-back" onclick="window.location.href='/nurse/chat'">
+            <button class="btn-back" onclick="window.location.href='{{ route('nurse.chat.index') }}'">
                 <i class="fas fa-arrow-left"></i> Back
             </button>
         </div>
@@ -252,7 +252,7 @@
                         $unread = $conv->unreadCount(Auth::guard('nurse_middle')->id());
                     @endphp
                     <div class="conversation-item-compact {{ $conv->id == $conversation->id ? 'active' : '' }}"
-                         onclick="window.location.href='/nurse/chat/conversation/{{ $conv->id }}'">
+                         onclick="window.location.href='{{ route('nurse.chat.show', $conv->id) }}'">
                         <img src="{{ asset($other->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
                              alt="{{ $other->name }}" class="conversation-avatar-compact">
                         <div class="conversation-info-compact">
@@ -281,11 +281,11 @@
                      alt="{{ $otherParticipant->name }}" class="chat-user-avatar">
                 <div>
                     <div class="chat-header-title">{{ $otherParticipant->name }} {{ $otherParticipant->lastname ?? '' }}
-                        @if($conversation->job)
+                        <!-- @if($conversation->job)
                             <span style="font-size: 14px; color: #888; font-weight: normal; margin-left: 10px;">
                                 - {{ $conversation->job->title ?? $conversation->job->job_title ?? '' }}
                             </span>
-                        @endif
+                        @endif -->
                     </div>
                     <div class="chat-header-subtitle">
                         <i class="fas fa-circle" style="font-size: 8px;"></i> {{ $isOnline ? 'Online' : 'Offline' }}
@@ -329,95 +329,89 @@
 @push('scripts')
 <script src="{{ asset('js/chat.js') }}"></script>
 <script>
-window.Laravel = {
-    userId: {{ Auth::guard('nurse_middle')->id() }},
-    userName: '{{ Auth::guard('nurse_middle')->user()->name }}',
-    userRole: {{ Auth::guard('nurse_middle')->user()->role }},
-    csrfToken: '{{ csrf_token() }}',
-    conversationId: {{ $conversation->id }}
-};
+(function() {
+    'use strict';
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize chat manager if exists
-    if (typeof ChatManager !== 'undefined') {
-        window.chatManager = new ChatManager({{ $conversation->id }});
-    }
-    
-    // Scroll to bottom
-    const chatMessages = document.getElementById('chatMessages');
-    if (chatMessages) {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-    
-    // Setup form handler
-    const messageForm = document.getElementById('messageForm');
-    if (messageForm) {
-        messageForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const formData = new FormData(this);
-            const messageInput = document.getElementById('messageInput');
-            const submitBtn = document.querySelector('.btn-send');
-            const messagesContainer = document.getElementById('chatMessages');
-            
-            if (!messageInput || !submitBtn || !messagesContainer) {
-                console.error('Required elements not found');
-                return;
-            }
-            
-            // Disable button while sending
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            
-            console.log('Sending message...');
-            
-            fetch('/nurse/chat/send', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Response data:', data);
-                
-                if (data.success && data.message) {
-                    const messageHtml = `
-                        <div class="message" data-message-id="${data.message.id}">
-                            <img src="${data.message.sender.profile_img || '/nurse/assets/imgs/nurse06.png'}" alt="${data.message.sender.name}" class="message-avatar">
-                            <div class="message-content">
-                                <p class="message-text">${data.message.message}</p>
-                            </div>
-                        </div>
-                    `;
-                    
-                    messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                    messageInput.value = '';
-                } else {
-                    console.error('Error:', data);
-                    alert(data.error || data.message || 'Failed to send message');
-                }
-            })
-            .catch(error => {
-                console.error('Fetch error:', error);
-                alert('Failed to send message. Please try again.');
-            })
-            .finally(() => {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Send';
-            });
+    window.Laravel = {
+        userId: {{ Auth::guard('nurse_middle')->id() }},
+        userName: '{{ Auth::guard('nurse_middle')->user()->name }}',
+        userRole: {{ Auth::guard('nurse_middle')->user()->role }},
+        csrfToken: '{{ csrf_token() }}',
+        conversationId: {{ $conversation->id }}
+    };
+
+    // Wait for everything to load
+    setTimeout(function() {
+        const messageForm = document.getElementById('messageForm');
+        const messageInput = document.getElementById('messageInput');
+        const submitBtn = document.querySelector('.btn-send');
+        const messagesContainer = document.getElementById('chatMessages');
+
+        console.log('Chat elements found:', {
+            form: !!messageForm,
+            input: !!messageInput,
+            btn: !!submitBtn,
+            container: !!messagesContainer
         });
-    }
-});
+
+        if (messageForm && messageInput && submitBtn && messagesContainer) {
+            messageForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                console.log('Form submitted');
+
+                const formData = new FormData(this);
+
+                // Disable button while sending
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                fetch('/nurse/chat/send', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Response:', data);
+
+                    if (data.success && data.message) {
+                        const messageHtml = `
+                            <div class="message" data-message-id="${data.message.id}">
+                                <img src="${data.message.sender.profile_img || '/nurse/assets/imgs/nurse06.png'}" alt="${data.message.sender.name}" class="message-avatar">
+                                <div class="message-content">
+                                    <p class="message-text">${data.message.message}</p>
+                                </div>
+                            </div>
+                        `;
+
+                        messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        messageInput.value = '';
+                    } else {
+                        alert(data.error || 'Failed to send message');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to send message');
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Send';
+                });
+            });
+
+            console.log('Chat form handler attached');
+        } else {
+            console.error('Chat elements not found');
+        }
+    }, 500);
+})();
 </script>
 @endpush
 @endsection

@@ -225,16 +225,16 @@
                     $unreadCount = $conv->unreadCount(Auth::guard('nurse_middle')->id());
                 @endphp
                 <div class="conversation-item {{ request()->route('id') == $conv->id ? 'active' : '' }}"
-                     onclick="window.location.href='/nurse/chat/conversation/{{ $conv->id }}'">
+                     onclick="window.location.href='{{ route('nurse.chat.show', $conv->id) }}'">
                     <img src="{{ asset($otherParticipant->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
                          alt="{{ $otherParticipant->name }}" class="conversation-avatar">
                     <div class="conversation-info">
                         <div class="conversation-name">{{ $otherParticipant->name }} {{ $otherParticipant->lastname ?? '' }}</div>
-                        @if($conv->job)
+                        <!-- @if($conv->job)
                             <div style="font-size: 11px; color: #007bff; margin-bottom: 3px;">
                                 📋 {{ $conv->job->title ?? $conv->job->job_title ?? '' }}
                             </div>
-                        @endif
+                        @endif -->
                         @if($conv->latestMessage)
                             <div class="conversation-last-message">
                                 @if($conv->latestMessage->message_type === 'file')

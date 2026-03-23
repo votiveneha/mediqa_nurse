@@ -210,7 +210,7 @@
                     $unreadCount = $conv->unreadCount(Auth::guard('healthcare_facilities')->id());
                 @endphp
                 <div class="conversation-item {{ request()->route('id') == $conv->id ? 'active' : '' }}"
-                     onclick="window.location.href='/healthcare-facilities/chat/conversation/{{ $conv->id }}'">
+                     onclick="window.location.href='{{ route('healthcare.chat.show', $conv->id) }}'">
                     <img src="{{ asset($otherParticipant->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
                          alt="{{ $otherParticipant->name }}" class="conversation-avatar">
                     <div class="conversation-info">

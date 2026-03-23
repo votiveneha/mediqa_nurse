@@ -5,7 +5,7 @@
     margin-top: 10px;
   }
   .live_chat_btn a{
-   
+
     width: 90px;
     padding: 0.375rem 0.2rem !important;
   }
@@ -55,7 +55,7 @@
         <div class="col-lg-12 mb-40">
           <div class="user_btns">
             <a href="#" class="btn btn-default btn-shadow hover-up">Nurses & Midwives</a>
-            <a href="#" class="btn btn-default btn-shadow hover-up">Healthcare Facilities</a>
+            <a href="{{ route('nurse.chat.index')}}" class="btn btn-default btn-shadow hover-up">Healthcare Facilities</a>
             <a href="#" class="btn btn-default btn-shadow hover-up">Agencies</a>
             <a href="#" class="btn btn-default btn-shadow hover-up">CPD/CE Providers</a>
           </div>
@@ -76,7 +76,7 @@
       nextEl: ".swiper-button-next",
       prevEl: ".swiper-button-prev",
     },
-  }); 
+  });
 
 <script> -->
   <script>
@@ -125,7 +125,7 @@
         var email = document.getElementById("email").value;
         var message = document.getElementById("message").value;
         var phone_no = document.getElementById("phone_no").value;
-        
+
         if (name == '') {
             $('#nameErr').text(error.responseJSON.errors.name);
 
@@ -144,7 +144,7 @@
         } else {
             $('#emailErr').text('');
         }
-       
+
         if (message == '') {
             $('#messageErr').text(error.responseJSON.errors.message);
 
@@ -162,5 +162,5 @@
 
             return false;
         }
-</script> 
+</script>
 @endsection
