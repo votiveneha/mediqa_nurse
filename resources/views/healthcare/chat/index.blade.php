@@ -194,6 +194,14 @@
     margin-bottom: 20px;
     color: #ddd;
 }
+.chat-btn {
+    background: #000;
+    color: #fff;
+    display: inline-flex;
+    transition: all ease-in-out .3s;
+    font-size: 13px;
+    padding: 10px 12px;
+}
 </style>
 
 <div class="chat-wrapper">
@@ -267,7 +275,7 @@
                     @csrf
                     <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
                     <input type="text" name="message" class="chat-input" placeholder="Type message" id="messageInput" autocomplete="off">
-                    <button type="submit" class="btn-send">Send</button>
+                    <button type="submit" class="chat-btn">Send</button>
                 </form>
             </div>
         @else
