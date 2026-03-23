@@ -1,363 +1,378 @@
-@extends('layouts.app')
+@extends('nurse.layouts.layout')
 
 @section('title', 'Chat - ' . ($otherParticipant->name ?? 'Conversation'))
 
 @section('content')
-<div class="chat-container" data-conversation-id="{{ $conversation->id }}">
-    <div class="row no-gutters chat-wrapper">
-        <!-- Sidebar - Conversation List (Compact) -->
-        <div class="col-md-4 col-lg-3 chat-sidebar-compact">
-            <div class="conversation-header">
-                <a href="{{ route('healthcare.chat.index') }}" class="btn btn-back">
-                    <i class="fas fa-arrow-left"></i> Back
-                </a>
-                <h4>Messages</h4>
-            </div>
-            
-            <div class="conversation-search-compact">
-                <input type="text" class="form-control" placeholder="Search..." id="searchConversations">
-            </div>
+<style>
+.chat-wrapper {
+    display: flex;
+    height: calc(100vh - 60px);
+    background: #f5f7fa;
+}
 
-            <div class="conversation-list-compact" id="conversationList">
-                @php
-                    $allConversations = \App\Models\Conversation::with(['nurse', 'latestMessage'])
-                        ->where('healthcare_id', Auth::id())
-                        ->where('healthcare_deleted', 0)
-                        ->orderBy('last_message_at', 'desc')
-                        ->limit(10)
-                        ->get();
-                @endphp
-                
-                @foreach($allConversations as $conv)
-                    @if($conv->id !== $conversation->id)
-                        @php
-                            $other = $conv->getOtherParticipant(Auth::id());
-                            $unread = $conv->unreadCount(Auth::id());
-                        @endphp
-                        <div class="conversation-item-compact {{ $conv->id == $conversation->id ? 'active' : '' }}"
-                             onclick="window.location.href='{{ route('healthcare.chat.show', $conv->id) }}'">
-                            <div class="conversation-avatar-compact">
-                                <img src="{{ asset($other->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}" alt="{{ $other->name }}">
-                            </div>
-                            <div class="conversation-info-compact">
-                                <h6>{{ $other->name }} {{ $other->lastname ?? '' }}</h6>
-                                @if($conv->latestMessage)
-                                    <p class="last-message-compact">
-                                        {{ Str::limit($conv->latestMessage->message, 25) }}
-                                    </p>
-                                @endif
-                            </div>
-                            @if($unread > 0)
-                                <span class="badge badge-primary unread-badge-compact">{{ $unread }}</span>
-                            @endif
-                        </div>
-                    @endif
-                @endforeach
-            </div>
-            
-            <div class="sidebar-footer">
-                <a href="{{ route('healthcare.chat.nurses') }}" class="btn btn-primary btn-block">
-                    <i class="fas fa-user-nurse"></i> Browse Nurses
-                </a>
-            </div>
+.chat-sidebar {
+    width: 320px;
+    background: #fff;
+    border-right: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-sidebar-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.btn-back {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-back:hover {
+    color: #0056b3;
+}
+
+.chat-search {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.chat-search:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.conversation-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.conversation-item-compact {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.conversation-item-compact:hover {
+    background: #f8f9fa;
+}
+
+.conversation-item-compact.active {
+    background: #007bff;
+    color: #fff;
+}
+
+.conversation-avatar-compact {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+    object-fit: cover;
+}
+
+.conversation-info-compact {
+    flex: 1;
+    overflow: hidden;
+}
+
+.conversation-name-compact {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 3px;
+}
+
+.conversation-last-message-compact {
+    color: #888;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.conversation-item-compact.active .conversation-last-message-compact {
+    color: #e0e0e0;
+}
+
+.chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+}
+
+.chat-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.chat-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.chat-user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.chat-header-title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.chat-header-subtitle {
+    font-size: 13px;
+    color: #28a745;
+    margin-top: 3px;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    background: #fff;
+}
+
+.message {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.message-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    margin-right: 12px;
+    object-fit: cover;
+}
+
+.message-content {
+    background: #f1f3f4;
+    padding: 12px 16px;
+    border-radius: 12px;
+    max-width: 60%;
+}
+
+.message-text {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.chat-input-area {
+    padding: 20px 30px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.chat-input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.btn-send {
+    background: #28a745;
+    color: #fff;
+    padding: 12px 30px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-send:hover {
+    background: #218838;
+}
+
+.typing-indicator {
+    display: none;
+    padding: 10px 30px;
+    font-size: 13px;
+    color: #888;
+    font-style: italic;
+}
+</style>
+
+<div class="chat-wrapper">
+    <!-- Sidebar -->
+    <div class="chat-sidebar">
+        <div class="chat-sidebar-header">
+            <button class="btn-back" onclick="window.location.href='/{{ Auth::guard('healthcare_facilities')->user()->role === 2 ? 'healthcare-facilities' : 'nurse' }}/chat'">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
         </div>
 
-        <!-- Main Chat Area -->
-        <div class="col-md-8 col-lg-9 chat-main">
-            <!-- Chat Header -->
-            <div class="chat-header">
-                <div class="chat-user-info">
-                    <img src="{{ asset($otherParticipant->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}" alt="{{ $otherParticipant->name }}">
-                    <div>
-                        <h5>{{ $otherParticipant->name }} {{ $otherParticipant->lastname ?? '' }}</h5>
-                        <span class="online-status {{ $isOnline ? 'online' : 'offline' }}">
-                            <i class="fas fa-circle"></i> {{ $isOnline ? 'Online' : 'Offline' }}
-                        </span>
-                    </div>
-                </div>
-                <div class="chat-actions">
-                    <button class="btn btn-sm btn-outline-info" title="View Profile" onclick="viewProfile({{ $otherParticipant->id }})">
-                        <i class="fas fa-user"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-secondary" title="Block User" data-toggle="modal" data-target="#blockUserModal">
-                        <i class="fas fa-ban"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" title="Delete Conversation" data-toggle="modal" data-target="#deleteConversationModal">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="conversation-list-compact" id="conversationList">
+            @php
+                $allConversations = \App\Models\Conversation::with(['nurse', 'latestMessage'])
+                    ->where('healthcare_id', Auth::guard('healthcare_facilities')->id())
+                    ->where('healthcare_deleted', 0)
+                    ->orderBy('last_message_at', 'desc')
+                    ->limit(10)
+                    ->get();
+            @endphp
 
-            <!-- Chat Messages -->
-            <div class="chat-messages" id="chatMessages">
-                @foreach($conversation->messages as $message)
-                    @if(!$message->deleted_by_sender && !$message->deleted_by_receiver)
-                        <div class="message {{ $message->sender_id === Auth::id() ? 'sent' : 'received' }}" 
-                             data-message-id="{{ $message->id }}">
-                            @if($message->sender_id !== Auth::id())
-                                <div class="message-avatar">
-                                    <img src="{{ asset($message->sender->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}" alt="{{ $message->sender->name }}">
+            @foreach($allConversations as $conv)
+                @if($conv->id !== $conversation->id)
+                    @php
+                        $other = $conv->getOtherParticipant(Auth::guard('healthcare_facilities')->id());
+                        $unread = $conv->unreadCount(Auth::guard('healthcare_facilities')->id());
+                    @endphp
+                    <div class="conversation-item-compact {{ $conv->id == $conversation->id ? 'active' : '' }}"
+                         onclick="window.location.href='/healthcare-facilities/chat/conversation/{{ $conv->id }}'">
+                        <img src="{{ asset($other->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
+                             alt="{{ $other->name }}" class="conversation-avatar-compact">
+                        <div class="conversation-info-compact">
+                            <div class="conversation-name-compact">{{ $other->name }} {{ $other->lastname ?? '' }}</div>
+                            @if($conv->latestMessage)
+                                <div class="conversation-last-message-compact">
+                                    {{ Str::limit($conv->latestMessage->message, 30) }}
                                 </div>
                             @endif
-                            <div class="message-content">
-                                <div class="message-header">
-                                    @if($message->sender_id !== Auth::id())
-                                        <span class="sender-name">{{ $message->sender->name }}</span>
-                                    @endif
-                                    <span class="message-time">{{ $message->created_at->format('g:i A') }}</span>
-                                </div>
-                                
-                                @if($message->message_type === 'file')
-                                    <div class="message-file">
-                                        <i class="fas fa-file"></i>
-                                        <a href="{{ asset($message->file_url) }}" download target="_blank">
-                                            {{ $message->file_name }}
-                                        </a>
-                                        <span class="file-size">({{ $message->formatted_file_size }})</span>
-                                    </div>
-                                @elseif($message->message_type === 'image')
-                                    <div class="message-image">
-                                        <img src="{{ asset($message->file_url) }}" alt="Image" class="img-fluid">
-                                    </div>
-                                @else
-                                    <p class="message-text">{{ nl2br(e($message->message)) }}</p>
-                                @endif
-
-                                @if($message->edited)
-                                    <span class="edited-label">(edited)</span>
-                                @endif
-
-                                @if($message->sender_id === Auth::id())
-                                    <div class="message-status">
-                                        @if($message->is_read)
-                                            <i class="fas fa-check-double text-primary" title="Read"></i>
-                                        @else
-                                            <i class="fas fa-check" title="Sent"></i>
-                                        @endif
-                                    </div>
-                                @endif
-
-                                <!-- Message Actions -->
-                                <div class="message-actions">
-                                    <button class="btn-action" onclick="replyToMessage({{ $message->id }})" title="Reply">
-                                        <i class="fas fa-reply"></i>
-                                    </button>
-                                    @if($message->sender_id === Auth::id())
-                                        <button class="btn-action" onclick="deleteMessage({{ $message->id }})" title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
                         </div>
-                    @endif
-                @endforeach
-
-                <!-- Typing Indicator -->
-                <div class="typing-indicator" id="typingIndicator" style="display: none;">
-                    <div class="typing-bubble">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
+                        @if($unread > 0)
+                            <span style="background: #007bff; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 10px;">{{ $unread }}</span>
+                        @endif
                     </div>
-                    <span class="typing-text">{{ $otherParticipant->name }} is typing...</span>
-                </div>
-            </div>
-
-            <!-- Chat Input -->
-            <div class="chat-input-container">
-                <div id="replyPreview" class="reply-preview" style="display: none;">
-                    <span>Replying to: <strong id="replyToText"></strong></span>
-                    <button type="button" class="btn-close" onclick="cancelReply()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-
-                <form id="messageForm" enctype="multipart/form-data">
-                    @csrf
-                    <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
-                    
-                    <div class="chat-input-wrapper">
-                        <button type="button" class="btn btn-attachment" id="attachFileBtn" title="Attach file">
-                            <i class="fas fa-paperclip"></i>
-                        </button>
-                        <input type="file" name="file" id="fileInput" style="display: none;" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx">
-                        
-                        <textarea name="message" class="form-control chat-input" 
-                                  placeholder="Type a message..." rows="1" id="messageInput"
-                                  autocomplete="off"></textarea>
-                        
-                        <button type="button" class="btn btn-emoji" title="Add emoji">
-                            <i class="far fa-smile"></i>
-                        </button>
-                        <button type="submit" class="btn btn-send" id="sendBtn">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
+                @endif
+            @endforeach
         </div>
     </div>
-</div>
 
-<!-- Block User Modal -->
-<div class="modal fade" id="blockUserModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Block User</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <form id="blockUserForm">
-                @csrf
-                <div class="modal-body">
-                    <p>Are you sure you want to block <strong>{{ $otherParticipant->name }}</strong>?</p>
-                    <p class="text-muted small">They won't be able to send you messages anymore.</p>
-                    <div class="form-group">
-                        <label for="block_reason">Reason (Optional)</label>
-                        <textarea class="form-control" name="reason" id="block_reason" rows="3" placeholder="Why are you blocking this user?"></textarea>
+    <!-- Main Chat Area -->
+    <div class="chat-main">
+        <!-- Chat Header -->
+        <div class="chat-header">
+            <div class="chat-user-info">
+                <img src="{{ asset($otherParticipant->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
+                     alt="{{ $otherParticipant->name }}" class="chat-user-avatar">
+                <div>
+                    <div class="chat-header-title">{{ $otherParticipant->name }} {{ $otherParticipant->lastname ?? '' }}</div>
+                    <div class="chat-header-subtitle">
+                        <i class="fas fa-circle" style="font-size: 8px;"></i> {{ $isOnline ? 'Online' : 'Offline' }}
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Block User</button>
-                </div>
+            </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="chat-messages" id="chatMessages">
+            @foreach($conversation->messages as $message)
+                @if(!$message->deleted_by_sender && !$message->deleted_by_receiver)
+                    <div class="message">
+                        <img src="{{ asset($message->sender->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
+                             alt="{{ $message->sender->name }}" class="message-avatar">
+                        <div class="message-content">
+                            <p class="message-text">{{ nl2br(e($message->message)) }}</p>
+                        </div>
+                    </div>
+                @endif
+            @endforeach
+
+            <!-- Typing Indicator -->
+            <div class="typing-indicator" id="typingIndicator">
+                <i class="fas fa-circle"></i> {{ $otherParticipant->name }} is typing...
+            </div>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="chat-input-area">
+            <form id="messageForm" style="display: flex; gap: 15px; width: 100%;">
+                @csrf
+                <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
+                <input type="text" name="message" class="chat-input" placeholder="Type message" id="messageInput" autocomplete="off">
+                <button type="submit" class="btn-send">Send</button>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Delete Conversation Modal -->
-<div class="modal fade" id="deleteConversationModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Delete Conversation</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete this conversation?</p>
-                <p class="text-muted small">This will only delete the conversation from your view.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="deleteConversation()">Delete</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-@push('styles')
-<link rel="stylesheet" href="{{ asset('css/chat.css') }}">
-@endpush
-
 @push('scripts')
 <script src="{{ asset('js/chat.js') }}"></script>
 <script>
 window.Laravel = {
-    userId: {{ Auth::id() }},
-    userName: '{{ Auth::user()->name }}',
-    userRole: {{ Auth::user()->role }},
+    userId: {{ Auth::guard('healthcare_facilities')->id() }},
+    userName: '{{ Auth::guard('healthcare_facilities')->user()->name }}',
+    userRole: {{ Auth::guard('healthcare_facilities')->user()->role }},
     csrfToken: '{{ csrf_token() }}',
     conversationId: {{ $conversation->id }}
 };
 
-// Initialize chat manager
 document.addEventListener('DOMContentLoaded', function() {
     window.chatManager = new ChatManager({{ $conversation->id }});
-    
-    // Scroll to bottom
+
     const chatMessages = document.getElementById('chatMessages');
     chatMessages.scrollTop = chatMessages.scrollHeight;
 });
 
-// Block user form handler
-$('#blockUserForm').on('submit', function(e) {
+document.getElementById('messageForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    
-    $.ajax({
-        url: '{{ route("healthcare.chat.block") }}',
-        type: 'POST',
-        data: {
-            conversation_id: {{ $conversation->id }},
-            reason: $('#block_reason').val(),
-            _token: '{{ csrf_token() }}'
+
+    const formData = new FormData(this);
+    const messageInput = document.getElementById('messageInput');
+
+    fetch('/healthcare-facilities/chat/send', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
         },
-        success: function(response) {
-            if (response.success) {
-                window.location.href = '{{ route("healthcare.chat.index") }}';
-            }
-        },
-        error: function(xhr) {
-            alert('Failed to block user');
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const messagesContainer = document.getElementById('chatMessages');
+
+            const messageHtml = `
+                <div class="message">
+                    <img src="${data.message.sender.profile_img}" alt="${data.message.sender.name}" class="message-avatar">
+                    <div class="message-content">
+                        <p class="message-text">${data.message.message}</p>
+                    </div>
+                </div>
+            `;
+
+            messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            messageInput.value = '';
         }
-    });
+    })
+    .catch(error => console.error('Error:', error));
 });
-
-// Delete conversation
-function deleteConversation() {
-    $.ajax({
-        url: '{{ route("healthcare.chat.delete_conversation") }}',
-        type: 'POST',
-        data: {
-            conversation_id: {{ $conversation->id }},
-            _token: '{{ csrf_token() }}'
-        },
-        success: function(response) {
-            if (response.success) {
-                window.location.href = '{{ route("healthcare.chat.index") }}';
-            }
-        },
-        error: function(xhr) {
-            alert('Failed to delete conversation');
-        }
-    });
-}
-
-// Delete message
-function deleteMessage(messageId) {
-    if (!confirm('Are you sure you want to delete this message?')) return;
-    
-    $.ajax({
-        url: '{{ route("healthcare.chat.delete") }}',
-        type: 'POST',
-        data: {
-            message_id: messageId,
-            _token: '{{ csrf_token() }}'
-        },
-        success: function(response) {
-            if (response.success) {
-                $(`[data-message-id="${messageId}"]`).fadeOut(300, function() {
-                    $(this).remove();
-                });
-            }
-        }
-    });
-}
-
-// Reply to message
-let replyToMessageId = null;
-function replyToMessage(messageId) {
-    const message = $(`[data-message-id="${messageId}"] .message-text`).text();
-    replyToMessageId = messageId;
-    $('#replyToText').text(message.substring(0, 50) + '...');
-    $('#replyPreview').fadeIn();
-    $('#messageInput').focus();
-}
-
-function cancelReply() {
-    replyToMessageId = null;
-    $('#replyPreview').fadeOut();
-}
-
-// View profile
-function viewProfile(userId) {
-    window.open('/nurse/profile/' + userId, '_blank');
-}
 </script>
 @endpush
 @endsection
