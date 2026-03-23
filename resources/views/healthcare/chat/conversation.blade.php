@@ -332,46 +332,85 @@ window.Laravel = {
 };
 
 document.addEventListener('DOMContentLoaded', function() {
-    window.chatManager = new ChatManager({{ $conversation->id }});
-
+    // Initialize chat manager if exists
+    if (typeof ChatManager !== 'undefined') {
+        window.chatManager = new ChatManager({{ $conversation->id }});
+    }
+    
+    // Scroll to bottom
     const chatMessages = document.getElementById('chatMessages');
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-});
-
-document.getElementById('messageForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const formData = new FormData(this);
-    const messageInput = document.getElementById('messageInput');
-
-    fetch('/healthcare-facilities/chat/send', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
+    if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // Setup form handler
+    const messageForm = document.getElementById('messageForm');
+    if (messageForm) {
+        messageForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const formData = new FormData(this);
+            const messageInput = document.getElementById('messageInput');
+            const submitBtn = document.querySelector('.btn-send');
             const messagesContainer = document.getElementById('chatMessages');
-
-            const messageHtml = `
-                <div class="message">
-                    <img src="${data.message.sender.profile_img}" alt="${data.message.sender.name}" class="message-avatar">
-                    <div class="message-content">
-                        <p class="message-text">${data.message.message}</p>
-                    </div>
-                </div>
-            `;
-
-            messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            messageInput.value = '';
-        }
-    })
-    .catch(error => console.error('Error:', error));
+            
+            if (!messageInput || !submitBtn || !messagesContainer) {
+                console.error('Required elements not found');
+                return;
+            }
+            
+            // Disable button while sending
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            console.log('Sending message...');
+            
+            fetch('/healthcare-facilities/chat/send', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                
+                if (data.success && data.message) {
+                    const messageHtml = `
+                        <div class="message" data-message-id="${data.message.id}">
+                            <img src="${data.message.sender.profile_img || '/nurse/assets/imgs/nurse06.png'}" alt="${data.message.sender.name}" class="message-avatar">
+                            <div class="message-content">
+                                <p class="message-text">${data.message.message}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    messageInput.value = '';
+                } else {
+                    console.error('Error:', data);
+                    alert(data.error || data.message || 'Failed to send message');
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                alert('Failed to send message. Please try again.');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Send';
+            });
+        });
+    }
 });
 </script>
 @endpush

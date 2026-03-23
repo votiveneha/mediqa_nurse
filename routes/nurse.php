@@ -377,13 +377,5 @@ Route::prefix('nurse')->name('nurse.')->namespace('App\Http\Controllers\nurse')-
   Route::get('getEmptypeData', 'JobsController@getEmptypeData')->name('getEmptypeData');
   Route::get('getSpecialityDatas', 'WorkPreferencesController@getSpecialityDatas')->name('getSpecialityDatas');
   Route::get('deleteSpecialityRows', 'HomeController@deleteSpecialityRows')->name('deleteSpecialityRows');
-  });
-  // ==========================================
-  // Healthcare Chat Routes
-  // ==========================================
-  Route::prefix('chat')->name('chat.')->group(function () {
-    Route::get('/', 'ChatController@index')->name('index');
-    Route::get('/conversation/{id}', 'ChatController@showConversation')->name('show');
-    // Route::get('/nurses', 'ChatController@getNurses')->name('nurses');
-    });
+});
 });
