@@ -160,6 +160,25 @@
             margin-bottom: 20px;
         }
 
+        .message.sent {
+            flex-direction: row-reverse;
+        }
+
+        .message.sent .message-avatar {
+            margin-right: 0;
+            margin-left: 12px;
+        }
+
+        .message.sent .message-content {
+            background: #f1f3f4;
+            color: #fff;
+        }
+
+        .message.received .message-content {
+            background: #f1f3f4;
+            color: #333;
+        }
+
         .message-avatar {
             width: 35px;
             height: 35px;
@@ -169,7 +188,6 @@
         }
 
         .message-content {
-            background: #f1f3f4;
             padding: 12px 16px;
             border-radius: 12px;
             max-width: 60%;
@@ -326,12 +344,21 @@
             <div class="chat-messages" id="chatMessages">
                 @foreach($conversation->messages as $message)
                     @if(!$message->deleted_by_sender && !$message->deleted_by_receiver)
-                        <div class="message">
-                            <img src="{{ asset($message->sender->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
-                                alt="{{ $message->sender->name }}" class="message-avatar">
+                        @php
+                            $isSent = $message->sender_id == Auth::id();
+                        @endphp
+                        <div class="message {{ $isSent ? 'sent' : 'received' }}">
+                            @if(!$isSent)
+                                <img src="{{ asset($message->sender->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
+                                    alt="{{ $message->sender->name }}" class="message-avatar">
+                            @endif
                             <div class="message-content">
                                 <p class="message-text">{{ nl2br(e($message->message)) }}</p>
                             </div>
+                            @if($isSent)
+                                <img src="{{ asset(Auth::user()->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
+                                    alt="{{ Auth::user()->name }}" class="message-avatar">
+                            @endif
                         </div>
                     @endif
                 @endforeach
@@ -409,9 +436,10 @@
                                     console.log('Response:', data);
 
                                     if (data.success && data.message) {
+                                        const userAvatar = '{{ Auth::user()->profile_img ?? 'nurse/assets/imgs/nurse06.png' }}';
                                         const messageHtml = `
-                                    <div class="message" data-message-id="${data.message.id}">
-                                        <img src="${data.message.sender.profile_img || '/nurse/assets/imgs/nurse06.png'}" alt="${data.message.sender.name}" class="message-avatar">
+                                    <div class="message sent" data-message-id="${data.message.id}">
+                                        <img src="${userAvatar}" alt="${data.message.sender.name}" class="message-avatar">
                                         <div class="message-content">
                                             <p class="message-text">${data.message.message}</p>
                                         </div>
@@ -485,7 +513,8 @@ window.addEventListener('load', function() {
                 .then(data => {
                     console.log('Response:', data);
                     if (data.success && data.message) {
-                        const msgHtml = '<div class="message"><img src="' + (data.message.sender.profile_img || '/nurse/assets/imgs/nurse06.png') + '" class="message-avatar"><div class="message-content"><p class="message-text">' + data.message.message + '</p></div></div>';
+                        const userAvatar = '{{ Auth::user()->profile_img ?? 'nurse/assets/imgs/nurse06.png' }}';
+                        const msgHtml = '<div class="message sent"><img src="' + userAvatar + '" class="message-avatar"><div class="message-content"><p class="message-text">' + data.message.message + '</p></div></div>';
                         messagesContainer.insertAdjacentHTML('beforeend', msgHtml);
                         messagesContainer.scrollTop = messagesContainer.scrollHeight;
                         messageInput.value = '';
