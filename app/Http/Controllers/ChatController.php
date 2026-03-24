@@ -98,12 +98,19 @@ class ChatController extends Controller
      */
     public function sendMessage(Request $request)
     {
+        \Log::info('Chat message request:', $request->all());
         $request->validate([
             'conversation_id' => 'required|exists:conversations,id',
             'message' => 'required|string|max:5000',
         ]);
 
-        $user = Auth::guard('nurse_middle')->user();
+        // Detect which guard is authenticated
+        $user = Auth::guard('nurse_middle')->check() ? Auth::guard('nurse_middle')->user() : Auth::guard('healthcare_facilities')->user();
+        
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
         $conversation = Conversation::findOrFail($request->conversation_id);
 
         // Check if user is part of conversation
@@ -142,8 +149,14 @@ class ChatController extends Controller
                 $participant->incrementUnread();
             });
 
-        // Broadcast event
-        broadcast(new MessageSent($message))->toOthers();
+        // Broadcast event only if Pusher is configured
+        if (config('broadcasting.default') !== 'null') {
+            try {
+                broadcast(new MessageSent($message))->toOthers();
+            } catch (\Exception $e) {
+                \Log::error('Broadcast failed: ' . $e->getMessage());
+            }
+        }
 
         return response()->json([
             'success' => true,

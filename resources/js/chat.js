@@ -68,6 +68,7 @@ class ChatManager {
     listenForMessages() {
         Echo.private(`conversation.${this.conversationId}`)
             .listen('.message.sent', (event) => {
+                console.log('Message received:', event);
                 this.appendMessage(event);
                 this.playNotificationSound();
                 this.updateTitleNotification();
@@ -552,36 +553,36 @@ class ChatManager {
      * Get send URL based on user role
      */
     getSendUrl() {
-        return window.Laravel.userRole === 1 
-            ? '/nurse/chat/send' 
-            : '/healthcare/chat/send';
+        return window.Laravel.userRole === 1
+            ? '/nurse/chat/send'
+            : '/healthcare-facilities/chat/send';
     }
 
     /**
      * Get upload URL
      */
     getUploadUrl() {
-        return window.Laravel.userRole === 1 
-            ? '/nurse/chat/upload' 
-            : '/healthcare/chat/upload';
+        return window.Laravel.userRole === 1
+            ? '/nurse/chat/upload'
+            : '/healthcare-facilities/chat/upload';
     }
 
     /**
      * Get mark as read URL
      */
     getMarkAsReadUrl() {
-        return window.Laravel.userRole === 1 
-            ? '/nurse/chat/mark-as-read' 
-            : '/healthcare/chat/mark-as-read';
+        return window.Laravel.userRole === 1
+            ? '/nurse/chat/mark-as-read'
+            : '/healthcare-facilities/chat/mark-as-read';
     }
 
     /**
      * Get delete message URL
      */
     getDeleteMessageUrl() {
-        return window.Laravel.userRole === 1 
-            ? '/nurse/chat/delete' 
-            : '/healthcare/chat/delete';
+        return window.Laravel.userRole === 1
+            ? '/nurse/chat/delete'
+            : '/healthcare-facilities/chat/delete';
     }
 
     /**

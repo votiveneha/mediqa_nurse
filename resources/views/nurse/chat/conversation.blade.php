@@ -327,7 +327,7 @@
 </div>
 
 @push('scripts')
-<script src="{{ asset('js/chat.js') }}"></script>
+<script src="{{ asset('build/assets/chat-baaabaae.js') }}"></script>
 <script>
 (function() {
     'use strict';

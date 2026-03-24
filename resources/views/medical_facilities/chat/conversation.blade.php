@@ -256,7 +256,7 @@
 @endpush
 
 @push('scripts')
-<script src="{{ asset('js/chat.js') }}"></script>
+<script src="{{ asset('build/assets/chat-baaabaae.js') }}"></script>
 <script>
 window.Laravel = {
     userId: {{ Auth::id() }},

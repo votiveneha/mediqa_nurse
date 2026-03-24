@@ -356,7 +356,7 @@
     </div>
 
     @push('scripts')
-        <script src="{{ asset('js/chat.js') }}"></script>
+        <script src="{{ asset('build/assets/chat-baaabaae.js') }}"></script>
         <script>
             (function () {
                 'use strict';
@@ -444,3 +444,69 @@
         </script>
     @endpush
 @endsection
+
+<script>
+window.addEventListener('load', function() {
+    console.log('Page loaded, initializing chat...');
+    
+    setTimeout(function() {
+        const messageForm = document.getElementById('messageForm');
+        const messageInput = document.getElementById('messageInput');
+        const submitBtn = document.querySelector('.chat-btn');
+        const messagesContainer = document.getElementById('chatMessages');
+        
+        console.log('Elements found:', {
+            form: messageForm ? 'YES' : 'NO',
+            input: messageInput ? 'YES' : 'NO',
+            btn: submitBtn ? 'YES' : 'NO',
+            container: messagesContainer ? 'YES' : 'NO'
+        });
+        
+        if (messageForm && messageInput && submitBtn && messagesContainer) {
+            messageForm.onsubmit = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log('Sending message...');
+                
+                const formData = new FormData(this);
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = 'Sending...';
+                
+                fetch('/healthcare-facilities/chat/send', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                })
+                .then(r => r.json())
+                .then(data => {
+                    console.log('Response:', data);
+                    if (data.success && data.message) {
+                        const msgHtml = '<div class="message"><img src="' + (data.message.sender.profile_img || '/nurse/assets/imgs/nurse06.png') + '" class="message-avatar"><div class="message-content"><p class="message-text">' + data.message.message + '</p></div></div>';
+                        messagesContainer.insertAdjacentHTML('beforeend', msgHtml);
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        messageInput.value = '';
+                    } else {
+                        alert(data.error || 'Failed');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error sending message');
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Send';
+                });
+                return false;
+            };
+            console.log('Chat handler attached!');
+        } else {
+            console.error('Some elements not found');
+        }
+    }, 500);
+});
+</script>
