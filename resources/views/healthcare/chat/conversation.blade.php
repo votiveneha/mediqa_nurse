@@ -396,7 +396,7 @@
                             submitBtn.disabled = true;
                             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-                            fetch('/healthcare-facilities/chat/send', {
+                            fetch('/mediqa_nurse/healthcare-facilities/chat/send', {
                                 method: 'POST',
                                 body: formData,
                                 headers: {
@@ -448,32 +448,32 @@
 <script>
 window.addEventListener('load', function() {
     console.log('Page loaded, initializing chat...');
-    
+
     setTimeout(function() {
         const messageForm = document.getElementById('messageForm');
         const messageInput = document.getElementById('messageInput');
         const submitBtn = document.querySelector('.chat-btn');
         const messagesContainer = document.getElementById('chatMessages');
-        
+
         console.log('Elements found:', {
             form: messageForm ? 'YES' : 'NO',
             input: messageInput ? 'YES' : 'NO',
             btn: submitBtn ? 'YES' : 'NO',
             container: messagesContainer ? 'YES' : 'NO'
         });
-        
+
         if (messageForm && messageInput && submitBtn && messagesContainer) {
             messageForm.onsubmit = function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 console.log('Sending message...');
-                
+
                 const formData = new FormData(this);
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = 'Sending...';
-                
-                fetch('/healthcare-facilities/chat/send', {
+
+                fetch('/mediqa_nurse/healthcare-facilities/chat/send', {
                     method: 'POST',
                     body: formData,
                     headers: {
