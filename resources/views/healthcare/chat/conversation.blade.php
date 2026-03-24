@@ -383,10 +383,26 @@
     </div>
 
     @push('scripts')
-        <script src="{{ asset('build/assets/chat-baaabaae.js') }}"></script>
+        <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.10.0/dist/echo.iife.js"></script>
         <script>
             (function () {
                 'use strict';
+
+                // Setup Laravel Echo with Pusher
+                window.Echo = new Echo({
+                    broadcaster: 'pusher',
+                    key: '{{ env("PUSHER_APP_KEY") }}',
+                    cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
+                    forceTLS: true,
+                    encrypted: true,
+                    authEndpoint: '/mediqa_nurse/broadcasting/auth',
+                    auth: {
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    }
+                });
 
                 window.Laravel = {
                     userId: {{ Auth::guard('healthcare_facilities')->id() }},
@@ -395,6 +411,38 @@
                     csrfToken: '{{ csrf_token() }}',
                     conversationId: {{ $conversation->id }}
             };
+
+                // Listen for real-time messages
+                Echo.private('conversation.' + window.Laravel.conversationId)
+                    .listen('.message.sent', function(data) {
+                        console.log('Real-time message received:', data);
+                        
+                        const messagesContainer = document.getElementById('chatMessages');
+                        const isSentByMe = data.sender_id == window.Laravel.userId;
+                        
+                        const messageHtml = `
+                            <div class="message ${isSentByMe ? 'sent' : 'received'}" data-message-id="${data.id}">
+                                ${!isSentByMe ? `
+                                <img src="${data.sender_avatar || '/nurse/assets/imgs/nurse06.png'}" alt="${data.sender_name}" class="message-avatar">
+                                ` : ''}
+                                <div class="message-content">
+                                    <p class="message-text">${data.message}</p>
+                                </div>
+                                ${isSentByMe ? `
+                                <img src="${data.sender_avatar || '/nurse/assets/imgs/nurse06.png'}" alt="${data.sender_name}" class="message-avatar">
+                                ` : ''}
+                            </div>
+                        `;
+                        
+                        messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        
+                        // Play notification sound if message is from someone else
+                        if (!isSentByMe) {
+                            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQQAKZXZ8NOmdhoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBo=');
+                            audio.play().catch(() => {});
+                        }
+                    });
 
                 // Wait for everything to load
                 setTimeout(function () {

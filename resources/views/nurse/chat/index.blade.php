@@ -257,9 +257,9 @@
                         <i class="fas fa-inbox"></i>
                         <p>No conversations yet</p>
                         <p class="small text-muted">Apply to jobs to start chatting with healthcare facilities</p>
-                        <a href="{{ route('jobList') }}" class="btn-new-chat">
+                        <!-- <a href="" class="btn-new-chat">
                             <i class="fas fa-search"></i> Browse Jobs
-                        </a>
+                        </a> -->
                     </div>
                 @else
                     <div class="no-conversations">

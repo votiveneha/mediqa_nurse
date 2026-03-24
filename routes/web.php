@@ -4,16 +4,34 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\nurse\HomeController;
 use App\Http\Controllers\admin\NurseController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Broadcast;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 |
 | Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
+| are loaded by the RouteServiceProvider and all of them will
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+// Custom Broadcasting Auth for multiple guards
+Route::post('/broadcasting/auth', function (Request $request) {
+    // Check which guard is authenticated and authorize
+    if (Auth::guard('nurse_middle')->check()) {
+        return Broadcast::auth($request);
+    } elseif (Auth::guard('healthcare_facilities')->check()) {
+        return Broadcast::auth($request);
+    } elseif (Auth::check()) {
+        return Broadcast::auth($request);
+    }
+    
+    return response()->json(['error' => 'Unauthorized'], 401);
+})->middleware('web');
+
 // ===========
 // Admin Route
 // ===========
