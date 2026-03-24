@@ -326,8 +326,7 @@
     </div>
 </div>
 
-@push('scripts')
-<script src="{{ asset('build/assets/chat-baaabaae.js') }}"></script>
+@section('js')
 <script>
 (function() {
     'use strict';
@@ -340,8 +339,8 @@
         conversationId: {{ $conversation->id }}
     };
 
-    // Wait for everything to load
-    setTimeout(function() {
+    // Attach handler when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
         const messageForm = document.getElementById('messageForm');
         const messageInput = document.getElementById('messageInput');
         const submitBtn = document.querySelector('.btn-send');
@@ -355,19 +354,21 @@
         });
 
         if (messageForm && messageInput && submitBtn && messagesContainer) {
-            messageForm.addEventListener('submit', function(e) {
+            // Attach submit handler directly to form
+            messageForm.onsubmit = function(e) {
                 e.preventDefault();
                 e.stopPropagation();
 
                 console.log('Form submitted');
 
                 const formData = new FormData(this);
+                console.log('Form data:', Object.fromEntries(formData));
 
                 // Disable button while sending
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-                fetch('/nurse/chat/send', {
+                fetch('/mediqa_nurse/nurse/chat/send', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -375,9 +376,12 @@
                         'X-Requested-With': 'XMLHttpRequest',
                     },
                 })
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
                 .then(data => {
-                    console.log('Response:', data);
+                    console.log('Response data:', data);
 
                     if (data.success && data.message) {
                         const messageHtml = `
@@ -393,25 +397,25 @@
                         messagesContainer.scrollTop = messagesContainer.scrollHeight;
                         messageInput.value = '';
                     } else {
+                        console.error('Error from server:', data);
                         alert(data.error || 'Failed to send message');
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to send message');
+                    console.error('Fetch error:', error);
+                    alert('Failed to send message: ' + error.message);
                 })
                 .finally(() => {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = 'Send';
                 });
-            });
+            };
 
             console.log('Chat form handler attached');
         } else {
             console.error('Chat elements not found');
         }
-    }, 500);
+    });
 })();
 </script>
-@endpush
 @endsection
