@@ -258,6 +258,32 @@
        <li class="sidebar-item">
          <a class="sidebar-link has-arrow" href="#" aria-expanded="false">
            <span class="d-flex">
+             <i class="ti ti-building-store"></i>
+           </span>
+           <span class="hide-menu">Billing</span>
+         </a>
+         <ul aria-expanded="false" class="collapse first-level">
+            <li class="sidebar-item">
+              <a href="{{route('admin.plan_list')}}" class="sidebar-link">
+                <div class="round-16 d-flex align-items-center justify-content-center">
+                 <i class="ti ti-circle"></i>
+                </div>
+                <span class="hide-menu">Subscription Plan</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="#" class="sidebar-link">
+                <div class="round-16 d-flex align-items-center justify-content-center">
+                 <i class="ti ti-circle"></i>
+                </div>
+                <span class="hide-menu">Customers</span>
+              </a>
+            </li>
+         </ul>
+        </li> 
+       <li class="sidebar-item">
+         <a class="sidebar-link has-arrow" href="#" aria-expanded="false">
+           <span class="d-flex">
              <i class="ti ti-star"></i>
            </span>
            <span class="hide-menu">Verification Management</span>

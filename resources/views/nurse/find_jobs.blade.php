@@ -1,7 +1,17 @@
 @extends('nurse.layouts.layout')
 @section('css')
-
+@php
+use Carbon\Carbon;
+@endphp
 <style>
+  .agency_filter_show .select2-container {
+  width: 100% !important;
+  }
+  
+  .agency_filter_show .select2-selection--multiple {
+  min-height: 42px;
+  border-radius: 6px;
+  }
   /* Search bar */
   .search-bar {
     display: flex;
@@ -731,7 +741,7 @@
     color: #666666;
   }
 
-  .top_filter.agency_filter select#agency {
+  .top_filter.agency_filter_show select#agency {
     background: #fff;
     height: 43px;
     color: #666666;
@@ -760,11 +770,30 @@
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
-    padding-right: 8px;
+    /* padding-right: 8px; */
     margin-left: -10px;
     justify-content: space-between;
+    width: 100% !important;
   }
-
+  /* 23/03  */
+  .top_filter{
+    width: 100% !important;
+  }
+  .top_filter.keywords_filter input#keywords{
+    width: 100% !important;
+  }
+  .form-group .top_filter .location_filter{
+    width: 100% !important;
+  }
+  .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #000;
+    border: 1px solid #000;
+    color: #fff;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: #fff !important;
+}
+/* ==================== */
   .job-card.item {
     margin-top: 0px;
   }
@@ -1114,6 +1143,13 @@
     opacity: 1;
     visibility: visible;
   }
+  .facility_dropdown .select2-container{
+  padding:0 !important;
+  border:0 !important;
+  }
+  /* .jobTitle_filter{
+    width: auto !important;
+  } */
 </style>
 @endsection
 @section('content')
@@ -1196,30 +1232,44 @@
         </div>
         <!-- Horizontal Search Bar with Labels -->
         <div class="search-bar">
-          <div class="top_filter keywords_filter">
-            <label for="keywords">Keywords</label>
-            <input type="text" id="keywords" placeholder="e.g. ICU, aged care, night shift">
+          <div class="top_filter keywords_filter jobTitle_filter">
+            <label for="keywords">Job Title</label>
+            <input type="text" id="keywords" placeholder="Search by role or specialty">
           </div>
 
           <div class="form-group top_filter location_filter">
-            <label for="agency">Location</label>
-            <div class="custom-multiselect">
-              <div class="select-box">Select Location</div>
-              <div class="checkbox-options">
-                @if(!empty($registered_countries))
-                @foreach ($registered_countries as $code)
-                <label>
-                  <input type="checkbox" class="location-checkbox" value="{{ $code }}">{{ country_name($code) }}
-                </label>
-
-                @endforeach
-                @endif
-              </div>
-            </div>
+            <label for="job_start">Job Start</label>
+              <select id="job_start" >
+                <option value="any">Any</option>
+                <option value="instant">Instant Connect</option>
+                <option value="last_minute">Last Minute</option>
+                <option value="immediate">Immediate Start</option>
+              </select>
           </div>
           <!-- Hidden input to store selected values -->
           <input type="hidden" id="selectedLocations" name="locations">
-          <div class="top_filter agency_filter">
+
+          <div class="top_filter agency_filter_show facility_dropdown">
+            <label for="agency">Facility / Agency</label>
+            <ul id="agency_filter" style="display:none;">
+                             
+              @if(!empty($agencies_list))
+              @foreach ($agencies_list as $agency)
+              <li data-value="{{ $agency->healthcare_id }}">{{ $agency->health_care_name }}</li>
+              @endforeach
+              @endif
+            </ul>
+            <select class="js-example-basic-multiple addAll_removeAll_btn" data-list-id="agency_filter" name="agency_ids[]" multiple></select>
+            <!-- <select class="js-example-basic-multiple addAll_removeAll_btn" id="agency" name="agency_ids[]" multiple="multiple"
+              style="width:100%">
+              @foreach ($agencies_list as $agency)
+              <option value="{{ $agency->healthcare_id }}">
+                {{ $agency->health_care_name }}
+              </option>
+              @endforeach
+            </select> -->
+          </div>
+          {{-- <div class="top_filter agency_filter">
             <label for="agency">Facility/Agency</label>
             <select id="agency">
               <option value="">Select Agency</option>
@@ -1227,10 +1277,10 @@
                 <option value="{{ $agency->healthcare_id }}">{{ $agency->health_care_name }}</option>
                 @endforeach
             </select>
-          </div>
+          </div> --}}
           <?php 
-                   $find_job_sort =  DB::table('find_job_sort')->where('status',1)->get();
-                ?>
+              $find_job_sort =  DB::table('find_job_sort')->where('status',1)->get();
+          ?>
           <div class="top_filter sort_by_filter">
             <label for="sort">Sort By</label>
             <select onchange="sortBy(this.value)">
@@ -1248,9 +1298,9 @@
                 <li class="filter-item">
                   <label for="toggleRegisteredPreferences" class="toggle-label">
                     Use My Registered Preferences
-                    <div class="auto_fill_message">Filters are Auto-filled from your preferences</div>
+                    {{-- <div class="auto_fill_message">Filters are Auto-filled from your preferences</div>
                     <div class="auto_empty_message">Filters are empty/default and not Auto-filled<br> from your
-                      preferences</div>
+                      preferences</div> --}}
                   </label>
                   &nbsp;
                   <label class="switch">
@@ -1259,7 +1309,7 @@
                   </label>
                 </li>
                 <li class="filter-item">
-                  <label for="toggleRegisteredPreferences" class="toggle-label">
+                  <label for="toggleUpdatePreferences" class="toggle-label">
                     Update My Preferences
                     <!-- <div class="tooltip_preferences" id="tooltipPref">
                                   Temporary filtering, your current filter choices are not saved
@@ -1610,12 +1660,26 @@
                         == 1 ? 'st' : ($job->experience_level == 2 ? 'nd' : ($job->experience_level == 3 ? 'rd' : 'th'))
                         }} Year</div>
                       <div>
-                        <span class="salary"><strong>Salary:</strong> ${{ $job->per_salary_min }}/hr </span>
+                        @php
+                        if ($job->main_emp_type == 1) {
+                        $min = $job->per_salary_min;
+                        $max = $job->per_salary_max;
+                        $per = $job->salary_permanent;
+                        } elseif ($job->main_emp_type == 2) {
+                        $min = $job->fixed_term_salary_min;
+                        $max = $job->fixed_term_salary_max;
+                        $per = $job->salary_range_fix_term;
+                        } elseif ($job->main_emp_type == 3) {
+                        $min = $job->temporary_salary_min;
+                        $max = $job->temporary_salary_max;
+                        $per = $job->salary_range_temporary;
+                        }
+                        @endphp
+                        <span class="salary"><strong>Salary:</strong> ${{ $min }} - {{ $max }} {{ $per }} </span>
                       </div>
-                      <div class="last-date"><strong> Last Date:</strong>
-                        <?php
-                                    echo $formattedDate = date("d M Y", strtotime($job->application_deadline));
-                                  ?>
+
+                      <div class="last-date"><strong>Last Date :</strong>
+                       {{ \Carbon\Carbon::parse($job->custom_expiry_date)->format('d M Y') ?? "N/A"}}
                       </div>
                     </div>
 
@@ -1832,8 +1896,6 @@
                     <a href="#" class="btn-readmore" data-id="{{ $saved_searches->searches_id }}"
                       data-filters='{{ $saved_searches->filters }}'>Read More</a>
                     @endif
-
-
                   </div>
                 </td>
                 <td>
@@ -1878,8 +1940,8 @@
                     </div>
 
                     <button class="btn-run" data-id="{{ $saved_searches->searches_id }}">Run</button>
-                    <button class="btn-edit" data-id="{{ $saved_searches->searches_id }}">Edit</button>
-                    <button class="btn-duplicate">Duplicate</button>
+                    <button class="btn-edit {{ ($saved_searches->status_my_preference == 1 && $i != 0) ? 'edit-search-btn' : '' }}"  data-id="{{ $saved_searches->searches_id }}"> Edit </button>                    
+                   <button class="btn-duplicate">Duplicate</button>
                     @if($saved_searches->status_my_preference != 1 && $i != 0)
                     <button class="btn-delete" data-name="single-delete">Delete</button>
                     @endif
@@ -1941,6 +2003,121 @@
   <!-- Save Search Modal -->
   <div class="toast" id="toast"></div>
 </main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js"></script>
+<script>
+      $('.addAll_removeAll_btn').on('select2:open', function() {
+        var $dropdown = $(this);
+        var searchBoxHtml = `
+            
+            <div class="extra-buttons">
+                <button class="select-all-button" type="button">Select All</button>
+                <button class="remove-all-button" type="button">Remove All</button>
+            </div>`;
+
+        // Remove any existing extra buttons before adding new ones
+        $('.select2-results .extra-search-container').remove();
+        $('.select2-results .extra-buttons').remove();
+
+        // Append the new extra buttons and search box
+        $('.select2-results').prepend(searchBoxHtml);
+
+        // Handle Select All button for the current dropdown
+        $('.select-all-button').on('click', function() {
+            
+            var $currentDropdown = $dropdown;
+            
+            var allValues = $currentDropdown.find('option').map(function() {
+                return $(this).val();
+            }).get();
+            console.log("dropdown",$currentDropdown);
+            $currentDropdown.val(allValues).trigger('change');
+        });
+
+        // Handle Remove All button for the current dropdown
+        $('.remove-all-button').on('click', function() {
+            var $currentDropdown = $dropdown;
+            $currentDropdown.val(null).trigger('change');
+        });
+    });
+    $('.js-example-basic-multiple').on('select2:open', function() {
+        var searchBoxHtml = `
+            <div class="extra-search-container">
+                <input type="text" class="extra-search-box" placeholder="Search...">
+                <button class="clear-button" type="button">&times;</button>
+            </div>`;
+        
+        if ($('.select2-results').find('.extra-search-container').length === 0) {
+            $('.select2-results').prepend(searchBoxHtml);
+        }
+
+        var $searchBox = $('.extra-search-box');
+        var $clearButton = $('.clear-button');
+
+        $searchBox.on('input', function() {
+
+            var searchTerm = $(this).val().toLowerCase();
+            $('.select2-results__option').each(function() {
+                var text = $(this).text().toLowerCase();
+                if (text.includes(searchTerm)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+
+            $clearButton.toggle($searchBox.val().length > 0);
+        });
+
+        $clearButton.on('click', function() {
+            $searchBox.val('');
+            $searchBox.trigger('input');
+        });
+    });
+
+    $('.js-example-basic-multiple').select2();
+
+    // Dynamically add the clear button
+    const clearButton = $('<span class="clear-btn">✖</span>');
+    $('.select2-container').append(clearButton);
+
+    // Handle the visibility of the clear button
+    function toggleClearButton() {
+
+        const selectedOptions = $('.js-example-basic-multiple').val();
+        if (selectedOptions && selectedOptions.length > 0) {
+            clearButton.show();
+        } else {
+            clearButton.hide();
+        }
+    }
+
+    // Attach change event to select2
+    $('.js-example-basic-multiple').on('change', toggleClearButton);
+
+    // Clear button click event
+    clearButton.click(function() {
+
+        $('.js-example-basic-multiple').val(null).trigger('change');
+        toggleClearButton();
+    });
+
+    // Initial check
+    toggleClearButton();
+    $('.js-example-basic-multiple').each(function() {
+        let listId = $(this).data('list-id');
+
+        let items = [];
+        console.log("listId",listId);
+        $('#' + listId + ' li').each(function() {
+            console.log("value",$(this).data('value'));
+            items.push({ id: $(this).data('value'), text: $(this).text() });
+        });
+        console.log("items",items);
+        $(this).select2({
+            data: items
+        });
+    });
+</script>
 <script>
   $(document).on('click','.job-like-btn',function(){
 
@@ -2609,8 +2786,8 @@ $('#renameCancel').click(function() {
 
       let filters = {
           keywords: '',
-          locations: [],
-          agency: '',
+          job_start: '',
+          agency: [],
           sort_by: '',
           searchId:''
       };
@@ -2633,7 +2810,7 @@ $('#renameCancel').click(function() {
             data: {
                 keywords: filters.keywords,
                 filters_data: filtersData,
-                locations: filters.locations,
+                job_start: filters.job_start,
                 agency: filters.agency,
                 sort_name: filters.sort_by,
                 search_id: filters.searchId,
@@ -2658,17 +2835,18 @@ $('#renameCancel').click(function() {
         filters.keywords = $(this).val();
         fetchJobs(1);
     });
-    $(document).on("change", ".location-checkbox", function () {
-        filters.locations = [];
 
-        $(".location-checkbox:checked").each(function () {
-            filters.locations.push($(this).val());
-        });
-
+    // $("#agency").on("change", function () {
+    //   filters.agency = $(this).val();
+    //   fetchJobs(1);
+    // });
+    $(document).on("change", '[data-list-id="agency_filter"]', function () {
+        filters.agency = $(this).val() || [];
         fetchJobs(1);
     });
-    $("#agency").on("change", function () {
-        filters.agency = $(this).val();
+   
+    $("#job_start").on("change", function () {
+        filters.job_start = $(this).val();
         fetchJobs(1);
     });
 
@@ -2926,17 +3104,25 @@ $('#renameCancel').click(function() {
   //  console.log(selected); 
    
    
-   $("#toggleRegisteredPreferences").click(function(){
-     if ($("#toggleRegisteredPreferences").is(":checked")) {
-       
-       $(".auto_fill_message").show();
-       $(".auto_empty_message").hide();
-     } else {
-       
-       $(".auto_fill_message").hide();
-       $(".auto_empty_message").show();
-     }
-   }); 
+   $(document).on('change','#toggleUpdatePreferences',function(){
+
+    if($(this).is(':checked')){
+        // Toggle ON → show edit
+        $('.edit-search-btn').show();
+    }
+    else{
+        // Toggle OFF → hide edit
+        $('.edit-search-btn').hide();
+    }
+
+  });
+    $(document).ready(function(){
+
+      if(!$('#toggleUpdatePreferences').is(':checked')){
+          $('.edit-search-btn').hide();
+      }
+
+  });
    
    
    $('#toggleUpdatePreferences').on('change', function() {
@@ -2961,6 +3147,72 @@ $('#renameCancel').click(function() {
    $('.dropdown-toggle').on('click', function() {
    $(this).next('.dropdown-menu').toggle();
    });
+
+     $(document).on('change', '#toggleRegisteredPreferences', function () {
+
+      let toggle = $(this);
+      let isChecked = toggle.is(':checked');
+      let message = isChecked 
+          ? "Filters will be auto-filled from your registered preferences."
+          : "Filters will be cleared and not linked to your saved preferences.";
+      Swal.fire({
+          title: 'Confirm Change',
+          text: message,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, continue',
+          cancelButtonText: 'Cancel'
+      }).then((result) => {
+          if (result.isConfirmed) {
+              if (isChecked) {
+                  $('.auto_fill_message').show();
+                  $('.auto_empty_message').hide();
+                  fetchFilters('prefill'); // common ajax
+              } else {
+                  $('.auto_fill_message').hide();
+                  $('.auto_empty_message').show();
+                  fetchFilters('clear'); // common ajax
+              }
+          } else {
+              toggle.prop('checked', !isChecked);
+          }
+      });
+  });
+
+  function fetchFilters(mode)
+  {
+      $.ajax({
+          url: "{{ url('/nurse/fetch-job-filters') }}",
+          type: "POST",
+          data: {
+              mode: mode,
+              _token: $('meta[name="csrf-token"]').attr('content')
+          },
+          success: function(res){
+
+              if(res.status === 'success')
+              {
+    
+                  Swal.fire({
+                      icon: 'success',
+                      title: 'Success',
+                      text: res.message,
+                      timer: 2000,
+                      showConfirmButton: false
+                  });
+              }
+              else
+              {
+                  Swal.fire({
+                      icon: 'warning',
+                      title: 'Notice',
+                      text: res.message
+                  });
+              }
+
+          }
+      });
+  }
    
    // Close dropdown if clicked outside
    $(document).on('click', function(e) {

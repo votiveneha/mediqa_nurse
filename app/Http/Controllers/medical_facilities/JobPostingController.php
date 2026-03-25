@@ -452,6 +452,18 @@ class JobPostingController extends Controller
         return json_encode($states_data);
     }
 
+    public function getCities(Request $request){
+        $cities_data = DB::table("master_city")->where("city_state_id",$request->state_code_value)->get();
+        //print_r($states_data);
+        return json_encode($cities_data);
+    }
+
+    public function getCitiesLat(Request $request){
+        $cities_data = DB::table("master_city")->where("city_id",$request->city_code_value)->first();
+        //print_r($states_data);
+        return json_encode($cities_data);
+    }
+
     public function updateLocationModel(Request $request)
     {
         $user_id = $request->user_id;
@@ -465,6 +477,8 @@ class JobPostingController extends Controller
         $remote_teleneath_component = $request->has('remote_teleneath_component')?1:0;
         $remote_teleneath_modal = $request->remote_teleneath_modal;
         $remote_percent = $request->remote_percent;
+        $city_lat = $request->city_lat;
+        $city_long = $request->city_long;
 
         $user_data = User::where("id",$user_id)->first();
         
@@ -497,6 +511,8 @@ class JobPostingController extends Controller
             $job_post->location_country = $country_code;
             $job_post->location_state = $job_state;
             $job_post->location_city = $city_suburb;
+            $job_post->city_lat = $city_lat;
+            $job_post->city_long = $city_long;
             $job_post->location_primary_hiring_site = $primary_hiring_site;
             $job_post->multi_site_rotation = $site_rotation;
             $job_post->additional_sites = $additional_sites;
@@ -513,6 +529,8 @@ class JobPostingController extends Controller
             $job_post->location_country = $country_code;
             $job_post->location_state = $job_state;
             $job_post->location_city = $city_suburb;
+            $job_post->city_lat = $city_lat;
+            $job_post->city_long = $city_long;
             $job_post->location_primary_hiring_site = $primary_hiring_site;
             $job_post->multi_site_rotation = $site_rotation;
             $job_post->additional_sites = $additional_sites;

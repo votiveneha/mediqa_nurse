@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,4 +16,82 @@ use Illuminate\Support\Facades\Broadcast;
 
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
+});
+
+// ==========================================
+// Chat System Broadcast Channels
+// ==========================================
+
+// Conversation channel - only participants can access
+Broadcast::channel('conversation.{conversationId}', function ($user, $conversationId) {
+    // The $user parameter is null for custom guards, so we need to check all guards
+    $authenticatedUser = Auth::guard('nurse_middle')->user()
+        ?? Auth::guard('healthcare_facilities')->user()
+        ?? $user;
+
+    if (!$authenticatedUser) {
+        return false;
+    }
+
+    $conversation = App\Models\Conversation::find($conversationId);
+
+    if (!$conversation) {
+        return false;
+    }
+
+    return in_array($authenticatedUser->id, [$conversation->nurse_id, $conversation->healthcare_id]);
+});
+
+// User online status channel
+Broadcast::channel('user.{userId}.online', function ($user, $userId) {
+    return (int) $user->id === (int) $userId;
+});
+
+// Typing status channel - only conversation participants
+Broadcast::channel('conversation.{conversationId}.typing', function ($user, $conversationId) {
+    // The $user parameter is null for custom guards, so we need to check all guards
+    $authenticatedUser = Auth::guard('nurse_middle')->user()
+        ?? Auth::guard('healthcare_facilities')->user()
+        ?? $user;
+
+    if (!$authenticatedUser) {
+        return false;
+    }
+
+    $conversation = App\Models\Conversation::find($conversationId);
+
+    if (!$conversation) {
+        return false;
+    }
+
+    return in_array($authenticatedUser->id, [$conversation->nurse_id, $conversation->healthcare_id]);
+});
+
+// Presence channel for conversation
+Broadcast::channel('conversation.{conversationId}.presence', function ($user, $conversationId) {
+    // The $user parameter is null for custom guards, so we need to check all guards
+    $authenticatedUser = Auth::guard('nurse_middle')->user()
+        ?? Auth::guard('healthcare_facilities')->user()
+        ?? $user;
+
+    if (!$authenticatedUser) {
+        return false;
+    }
+
+    $conversation = App\Models\Conversation::find($conversationId);
+
+    if (!$conversation) {
+        return false;
+    }
+
+    if (!in_array($authenticatedUser->id, [$conversation->nurse_id, $conversation->healthcare_id])) {
+        return false;
+    }
+
+    return [
+        'id' => $authenticatedUser->id,
+        'name' => $authenticatedUser->name . ' ' . ($authenticatedUser->lastname ?? ''),
+        'avatar' => $authenticatedUser->profile_img,
+        'role' => $authenticatedUser->role,
+    ];
 });

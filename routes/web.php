@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\nurse\HomeController;
 use App\Http\Controllers\admin\NurseController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Broadcast;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -14,6 +16,20 @@ use App\Http\Controllers\admin\NurseController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+// Custom Broadcasting Auth for multiple guards
+Route::post('/broadcasting/auth', function (Request $request) {
+    // Check which guard is authenticated and authorize
+    if (Auth::guard('nurse_middle')->check()) {
+        return Broadcast::auth($request);
+    } elseif (Auth::guard('healthcare_facilities')->check()) {
+        return Broadcast::auth($request);
+    } elseif (Auth::check()) {
+        return Broadcast::auth($request);
+    }
+
+    return response()->json(['error' => 'Unauthorized'], 401);
+})->middleware('web');
 // ===========
 // Admin Route
 // ===========
@@ -185,7 +201,7 @@ Route::prefix('/admin')->name('admin.')->namespace('App\Http\Controllers\admin')
     Route::post('/delete-seo', 'SeoController@deleteSeo')->name('deleteSeo');
     Route::post('/get-seo', 'SeoController@getSeo')->name('getSeo');
 
-    //Mandatory Training  and Education 
+    //Mandatory Training  and Education
     Route::get('/training-education-list', 'MantrainingController@mantrainingList')->name('traeductionList');
     Route::post('/add-man-training', 'MantrainingController@addManTraining')->name('addManTraining');
     Route::post('/update-man-training', 'MantrainingController@updateManTraining')->name('updateManTraining');
@@ -274,12 +290,12 @@ Route::prefix('/admin')->name('admin.')->namespace('App\Http\Controllers\admin')
     Route::post('/getCountry', 'ProfessionalMembership@getCountry')->name('getCountry');
     Route::post('/updateCountry', 'ProfessionalMembership@updateCountry')->name('updateCountry');
     Route::post('/deleteCountry', 'ProfessionalMembership@deleteCountry')->name('deleteCountry');
-    Route::get('/suborganization_country_list/{id}','ProfessionalMembership@subcountryList')->name('suborganization_country_list'); 
+    Route::get('/suborganization_country_list/{id}','ProfessionalMembership@subcountryList')->name('suborganization_country_list');
     Route::get('/suborganization_country/{id}/{country_id}','ProfessionalMembership@subcountry')->name('suborganization_country');
-    Route::get('/membershipType', 'ProfessionalMembership@membershipType')->name('membershipType'); 
-    Route::get('/submembershipType/{id}', 'ProfessionalMembership@subMemberList')->name('submembershipType'); 
+    Route::get('/membershipType', 'ProfessionalMembership@membershipType')->name('membershipType');
+    Route::get('/submembershipType/{id}', 'ProfessionalMembership@subMemberList')->name('submembershipType');
     Route::post('/addMembershipType', 'ProfessionalMembership@addMembershipType')->name('addMembershipType');
-    Route::post('/getMembership', 'ProfessionalMembership@getMembership')->name('getMembership'); 
+    Route::post('/getMembership', 'ProfessionalMembership@getMembership')->name('getMembership');
     Route::post('/updateMembership', 'ProfessionalMembership@updateMembership')->name('updateMembership');
     Route::post('/deleteMembership', 'ProfessionalMembership@deleteMembership')->name('deleteMembership');
     Route::get('/awards_list','ProfessionalMembership@awards_list')->name('awards_list');
@@ -338,9 +354,55 @@ Route::prefix('/admin')->name('admin.')->namespace('App\Http\Controllers\admin')
     Route::get('/jobList', 'JobsController@jobList')->name('jobList');
     Route::get('/edit_jobs/{id}','JobsController@edit_jobs')->name('edit_jobs');
     Route::get('/view_jobs/{id}','JobsController@job_details')->name('view_jobs');
-    
+
   });
- 
+
 Route::get('/nurse/email-verification/{token}', [HomeController::class, 'email_verification'])
     ->name('legacy.verify.token');
+});
+
+
+// ==========================================
+// Chat System Routes
+// ==========================================
+
+// Nurse Chat Routes
+Route::prefix('nurse/chat')->name('nurse.chat.')->middleware('auth:nurse_middle')->group(function () {
+    Route::get('/', 'App\Http\Controllers\nurse\ChatController@index')->name('index');
+    Route::get('/conversation/{id}', 'App\Http\Controllers\nurse\ChatController@showConversation')->name('show');
+    Route::get('/start/{jobId}', 'App\Http\Controllers\nurse\ChatController@chatFromJob')->name('from_job');
+    Route::get('/healthcare-list', 'App\Http\Controllers\nurse\ChatController@healthcareList')->name('healthcare_list');
+    Route::get('/get-healthcare-facilities', 'App\Http\Controllers\nurse\ChatController@getHealthcareFacilities')->name('get_healthcare');
+    Route::post('/create-from-application/{applicationId}', 'App\Http\Controllers\nurse\ChatController@createConversationFromApplication')->name('create_from_application');
+    Route::post('/send', 'App\Http\Controllers\ChatController@sendMessage')->name('send');
+    Route::post('/start', 'App\Http\Controllers\ChatController@startConversation')->name('start');
+    Route::post('/upload', 'App\Http\Controllers\ChatController@uploadAttachment')->name('upload');
+    Route::post('/delete', 'App\Http\Controllers\ChatController@deleteMessage')->name('delete');
+    Route::post('/block', 'App\Http\Controllers\ChatController@blockUser')->name('block');
+    Route::post('/delete-conversation', 'App\Http\Controllers\ChatController@deleteConversation')->name('delete_conversation');
+    Route::post('/archive', 'App\Http\Controllers\ChatController@archiveConversation')->name('archive');
+    Route::post('/mark-as-read', 'App\Http\Controllers\ChatController@markAsRead')->name('mark_as_read');
+    Route::post('/typing', 'App\Http\Controllers\ChatController@typingStatus')->name('typing');
+    Route::get('/search', 'App\Http\Controllers\ChatController@search')->name('search');
+    Route::get('/unread-count', 'App\Http\Controllers\ChatController@unreadCount')->name('unread_count');
+});
+
+// Healthcare Chat Routes
+Route::prefix('healthcare-facilities/chat')->name('healthcare.chat.')->middleware('auth:healthcare_facilities')->group(function () {
+    Route::get('/', 'App\Http\Controllers\medical_facilities\ChatController@index')->name('index');
+    Route::get('/conversation/{id}', 'App\Http\Controllers\medical_facilities\ChatController@showConversation')->name('show');
+    Route::get('/nurses', 'App\Http\Controllers\medical_facilities\ChatController@nursesList')->name('nurses');
+    Route::get('/start/{nurseId}', 'App\Http\Controllers\medical_facilities\ChatController@chatFromNurseProfile')->name('from_profile');
+    Route::get('/job/{jobId}/conversations', 'App\Http\Controllers\medical_facilities\ChatController@jobConversations')->name('job_conversations');
+    Route::post('/send', 'App\Http\Controllers\ChatController@sendMessage')->name('send');
+    Route::post('/start', 'App\Http\Controllers\ChatController@startConversation')->name('start');
+    Route::post('/upload', 'App\Http\Controllers\ChatController@uploadAttachment')->name('upload');
+    Route::post('/delete', 'App\Http\Controllers\ChatController@deleteMessage')->name('delete');
+    Route::post('/block', 'App\Http\Controllers\ChatController@blockUser')->name('block');
+    Route::post('/delete-conversation', 'App\Http\Controllers\ChatController@deleteConversation')->name('delete_conversation');
+    Route::post('/archive', 'App\Http\Controllers\ChatController@archiveConversation')->name('archive');
+    Route::post('/mark-as-read', 'App\Http\Controllers\ChatController@markAsRead')->name('mark_as_read');
+    Route::post('/typing', 'App\Http\Controllers\ChatController@typingStatus')->name('typing');
+    Route::get('/search', 'App\Http\Controllers\ChatController@search')->name('search');
+    Route::get('/unread-count', 'App\Http\Controllers\ChatController@unreadCount')->name('unread_count');
 });
