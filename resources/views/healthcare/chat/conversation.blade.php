@@ -396,7 +396,7 @@
                     cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
                     forceTLS: true,
                     encrypted: true,
-                    authEndpoint: '/mediqa_nurse/broadcasting/auth',
+                    authEndpoint: '{{ url('/broadcasting/auth') }}',
                     auth: {
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -416,10 +416,10 @@
                 Echo.private('conversation.' + window.Laravel.conversationId)
                     .listen('.message.sent', function(data) {
                         console.log('Real-time message received:', data);
-                        
+
                         const messagesContainer = document.getElementById('chatMessages');
                         const isSentByMe = data.sender_id == window.Laravel.userId;
-                        
+
                         const messageHtml = `
                             <div class="message ${isSentByMe ? 'sent' : 'received'}" data-message-id="${data.id}">
                                 ${!isSentByMe ? `
@@ -433,10 +433,10 @@
                                 ` : ''}
                             </div>
                         `;
-                        
+
                         messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
                         messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                        
+
                         // Play notification sound if message is from someone else
                         if (!isSentByMe) {
                             const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQQAKZXZ8NOmdhoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBo=');
@@ -471,7 +471,7 @@
                             submitBtn.disabled = true;
                             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-                            fetch('/mediqa_nurse/healthcare-facilities/chat/send', {
+                            fetch('{{ route('healthcare.chat.send') }}', {
                                 method: 'POST',
                                 body: formData,
                                 headers: {
@@ -549,7 +549,7 @@ window.addEventListener('load', function() {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = 'Sending...';
 
-                fetch('/mediqa_nurse/healthcare-facilities/chat/send', {
+                fetch('{{ route('healthcare.chat.send') }}', {
                     method: 'POST',
                     body: formData,
                     headers: {
