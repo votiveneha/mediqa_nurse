@@ -173,4 +173,26 @@ class HealthcareController extends Controller
 
         echo json_encode($json);
     }
+
+    public function show_invoice()
+    {
+        
+
+        $invoices = DB::table('invoices')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return view('admin.healthcare.show_invoice', compact('invoices'));
+    }
+
+    public function show_customer()
+    {
+        
+
+        $invoices = DB::table('invoices')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return view('admin.healthcare.show_customers', compact('invoices'));
+    }
 }

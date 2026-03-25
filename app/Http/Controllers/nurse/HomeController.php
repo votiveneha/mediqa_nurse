@@ -387,11 +387,44 @@ class HomeController extends Controller
     {
         if (!Auth::guard('nurse_middle')->check()) {
             $title = "Login";
-            $practitioner_data = SpecialityModel::where("status",'1')->get();
+
+            $jobs = [];
+
+            // Permanent
+            $jobs['permanent'] = JobsModel::where('save_draft', 2)
+                ->where('main_emp_type', 1)
+                ->orderBy('id', 'desc')
+                ->first();
+
+            // Fixed
+            $jobs['fixed'] = JobsModel::where('save_draft', 2)
+                ->where('main_emp_type', 2)
+                ->orderBy('id', 'desc')
+                ->first();
+
+            // Temporary
+            $jobs['temporary'] = JobsModel::where('save_draft', 2)
+                ->where('main_emp_type', 3)
+                ->orderBy('id', 'desc')
+                ->first();
+
+
+            // If any job type is missing
+            foreach ($jobs as $key => $job) {
+
+                if (!$job) {
+
+                    $jobs[$key] = JobsModel::where('save_draft', 2)
+                        ->orderBy('id', 'desc')
+                        ->first();
+                }
+            }
+
+            $practitioner_data = SpecialityModel::where("status", '1')->get();
             //print_r($practitioner_data);die;
-            $speciality_data = PractitionerTypeModel::where("status",'1')->get();
+            $speciality_data = PractitionerTypeModel::where("status", '1')->get();
             $work_preferences_data = WorkPreferModel::get();
-            return view('nurse.home', compact('message','practitioner_data','speciality_data','work_preferences_data'));
+            return view('nurse.home', compact('jobs', 'message', 'practitioner_data', 'speciality_data', 'work_preferences_data'));
         } else {
 
 

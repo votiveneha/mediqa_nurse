@@ -227,7 +227,7 @@ img, iframe, video {
                   </div>
                 </div>
               </li> -->
-              <li class="has-children mega-dropdown">
+              <!-- <li class="has-children mega-dropdown">
 
                 <a class='{{ request()->is('contact') ?"active":"" }} hover-up' href='#'>CPD/CE Providers</a>
                 <div class="mega-dropdown-content">
@@ -240,7 +240,7 @@ img, iframe, video {
                     </ul>
                   </div>
                 </div>
-              </li>
+              </li> -->
             </ul>
           </nav>
           <!-- <div class="burger-icon burger-icon-white" id="openDrawer">

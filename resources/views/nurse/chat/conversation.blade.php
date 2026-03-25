@@ -353,7 +353,7 @@
     </div>
 </div>
 
-@section('js')
+@endsection
 <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.10.0/dist/echo.iife.js"></script>
 <script>
@@ -372,7 +372,7 @@
         cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
         forceTLS: true,
         encrypted: true,
-        authEndpoint: '/mediqa_nurse/broadcasting/auth',
+        authEndpoint: '{{ url('/broadcasting/auth') }}',
         auth: {
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -458,7 +458,7 @@
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-                fetch('/mediqa_nurse/nurse/chat/send', {
+                fetch('{{ route('nurse.chat.send') }}', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -509,4 +509,3 @@
     });
 })();
 </script>
-@endsection

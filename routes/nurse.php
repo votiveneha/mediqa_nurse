@@ -72,6 +72,10 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
     Route::get('/deactivateUser', 'SettingsController@deactivate_user')->name('deactivateUser');
     Route::get('/deleteUser', 'SettingsController@delete_user')->name('deleteUser');
     Route::get('/billing', 'SettingsController@billing')->name('billing');
+    Route::get('/payment_page/{product_id}', 'SettingsController@payment_page')->name('payment_page');
+    Route::post('/payment/process', 'SettingsController@process')->name('process');
+    Route::get('/invoices', 'SettingsController@invoices')->name('invoices');
+    Route::get('/invoice/download/{id}', 'SettingsController@downloadInvoice')->name('invoice.download');
     Route::get('/job_posting', 'JobPostingController@job_posting')->name('job_posting');
     Route::get('/contract_pay', 'JobPostingController@contract_pay')->name('contract_pay');
     Route::post('/updateContractPay', 'JobPostingController@updateContractPay')->name('updateContractPay');

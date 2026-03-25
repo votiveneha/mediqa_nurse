@@ -396,7 +396,7 @@
                     cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
                     forceTLS: true,
                     encrypted: true,
-                    authEndpoint: '/mediqa_nurse/broadcasting/auth',
+                    authEndpoint: '{{ url('/broadcasting/auth') }}',
                     auth: {
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -471,7 +471,7 @@
                             submitBtn.disabled = true;
                             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-                            fetch('/mediqa_nurse/healthcare-facilities/chat/send', {
+                            fetch('{{ route('healthcare.chat.send') }}', {
                                 method: 'POST',
                                 body: formData,
                                 headers: {
@@ -530,11 +530,6 @@ window.addEventListener('load', function() {
         const messageInput = document.getElementById('messageInput');
         const submitBtn = document.querySelector('.chat-btn');
         const messagesContainer = document.getElementById('chatMessages');
-        const sendUrl = "{{ route(
-                            Auth::guard('healthcare_facilities')->check()
-                                ? 'healthcare.chat.send'
-                                : 'nurse.chat.send'
-                        ) }}";
 
         console.log('Elements found:', {
             form: messageForm ? 'YES' : 'NO',
@@ -554,7 +549,7 @@ window.addEventListener('load', function() {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = 'Sending...';
 
-                fetch(sendUrl, {
+                fetch('{{ route('healthcare.chat.send') }}', {
                     method: 'POST',
                     body: formData,
                     headers: {

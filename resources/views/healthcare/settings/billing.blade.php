@@ -120,6 +120,9 @@
                                 </div>
 
                                 <p class="plan-desc">
+                                    @php
+
+                                    @endphp
                                     Small clinics, aged-care homes, local agencies
                                 </p>
 
@@ -137,7 +140,7 @@
                                 </div>
                                 
 
-                                <button class="btn-plan">Choose Plan</button>
+                                <a href="{{ route('medical-facilities.payment_page',['product_id'=>$plandata->product_id]) }}" class="btn-plan">Choose Plan</a>
                             </div>
                             @endforeach
 
@@ -168,11 +171,58 @@
                             </div> -->
 
                         </div>
+                        <hr style="margin:50px 0;">
 
+                            <h2 class="title">Invoices</h2>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered" style="background:#fff;">
+                                    <thead style="background:#f1f1f1;">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Invoice</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        @forelse($invoices as $invoice)
+                                            <tr>
+                                                <td>{{ date('d M Y', strtotime($invoice->created_at)) }}</td>
+
+                                                <td>
+                                                    ${{ number_format($invoice->total_amount / 100, 2) }}
+                                                </td>
+
+                                                <td>
+                                                    @if($invoice->status == 'paid')
+                                                        <span style="color:green; font-weight:bold;">Paid</span>
+                                                    @else
+                                                        <span style="color:red; font-weight:bold;">Pending</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <a href="{{ route('medical-facilities.invoice.download', $invoice->id) }}" target="_blank" 
+                            style="background:#2563eb;color:#fff;padding:6px 12px;border-radius:5px;text-decoration:none;">
+                            PDF
+                            </a>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center">No invoices found</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>    
                     </div>
+                    
                 </div>
             </div>
         </div>
+        
     </section>
 </main>
 @endsection

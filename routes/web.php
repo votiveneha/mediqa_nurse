@@ -17,19 +17,101 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-// Custom Broadcasting Auth for multiple guards
+// Route::post('/broadcasting/auth', function (Request $request) {
+//     // Manually handle authentication for custom guards
+//     if (Auth::guard('nurse_middle')->check()) {
+//         $guard = 'nurse_middle';
+//     } elseif (Auth::guard('healthcare_facilities')->check()) {
+//         $guard = 'healthcare_facilities';
+//     } elseif (Auth::check()) {
+//         $guard = 'web';
+//     } else {
+//         return response()->json(['error' => 'Unauthorized'], 401);
+//     }
+
+//     // Use the standard broadcast auth with the correct guard context
+//     return Broadcast::auth($request);
+// })->middleware(['web']);
+
+// Route::post('/broadcasting/auth', function (Request $request) {
+//     if (Auth::guard('nurse_middle')->check()) {
+//         $user = Auth::guard('nurse_middle')->user();
+//     } elseif (Auth::guard('healthcare_facilities')->check()) {
+//         $user = Auth::guard('healthcare_facilities')->user();
+//     } elseif (Auth::check()) {
+//         $user = Auth::user();
+//     } else {
+//         return response()->json(['error' => 'Unauthorized'], 401);
+//     }
+
+//     // Temporarily set the user on the request so Broadcast::auth can find them
+//     $request->setUserResolver(fn() => $user);
+
+//     return Broadcast::auth($request);
+// })->middleware(['web']);
+
+// Route::post('/broadcasting/auth', function (Request $request) {
+//     if (Auth::guard('nurse_middle')->check()) {
+//         $user = Auth::guard('nurse_middle')->user();
+//     } elseif (Auth::guard('healthcare_facilities')->check()) {
+//         $user = Auth::guard('healthcare_facilities')->user();
+//     } elseif (Auth::check()) {
+//         $user = Auth::user();
+//     } else {
+//         return response()->json(['error' => 'Unauthorized'], 401);
+//     }
+
+//     $pusher = new \Pusher\Pusher(
+//         config('broadcasting.connections.pusher.key'),
+//         config('broadcasting.connections.pusher.secret'),
+//         config('broadcasting.connections.pusher.app_id'),
+//         ['cluster' => config('broadcasting.connections.pusher.options.cluster')]
+//     );
+
+//     $channelName = $request->channel_name;
+//     $socketId    = $request->socket_id;
+
+//     // For private channels
+//     $auth = $pusher->authorizeChannel($channelName, $socketId);
+
+//     return response($auth, 200)->header('Content-Type', 'application/json');
+// })->middleware(['web']);
+
 Route::post('/broadcasting/auth', function (Request $request) {
-    // Check which guard is authenticated and authorize
     if (Auth::guard('nurse_middle')->check()) {
-        return Broadcast::auth($request);
+        $user = Auth::guard('nurse_middle')->user();
     } elseif (Auth::guard('healthcare_facilities')->check()) {
-        return Broadcast::auth($request);
+        $user = Auth::guard('healthcare_facilities')->user();
     } elseif (Auth::check()) {
-        return Broadcast::auth($request);
+        $user = Auth::user();
+    } else {
+        return response()->json(['error' => 'Unauthorized'], 401);
     }
 
-    return response()->json(['error' => 'Unauthorized'], 401);
-})->middleware('web');
+    $pusherConfig = config('broadcasting.connections.pusher');
+
+    $pusher = new \Pusher\Pusher(
+        $pusherConfig['key'],
+        $pusherConfig['secret'],
+        $pusherConfig['app_id'],
+        [
+            'host'      => $pusherConfig['options']['host'],
+            'port'      => $pusherConfig['options']['port'],
+            'scheme'    => $pusherConfig['options']['scheme'],
+            'encrypted' => true,
+            'useTLS'    => $pusherConfig['options']['useTLS'],
+        ]
+    );
+
+    $auth = $pusher->authorizeChannel(
+        $request->channel_name,
+        $request->socket_id
+    );
+
+    return response($auth, 200)->header('Content-Type', 'application/json');
+
+})->middleware(['web']);
+
 // ===========
 // Admin Route
 // ===========
@@ -91,6 +173,8 @@ Route::prefix('/admin')->name('admin.')->namespace('App\Http\Controllers\admin')
     Route::get('/add_plans', 'HealthcareController@add_plans')->name('add_plans');
     Route::post('/updatePlan', 'HealthcareController@update_plan')->name('updatePlan');
     Route::get('/update_plans/{id}', 'HealthcareController@update_plans')->name('update_plans');
+    Route::get('/show_invoice', 'HealthcareController@show_invoice')->name('show_invoice');
+    Route::get('/show_customer', 'HealthcareController@show_customer')->name('show_customer');
     Route::get('/recruiter-list', 'HealthcareController@recruiter_list')->name('recruiter_list');
     Route::get('/incoming-nurse-list', 'NurseController@incommingNurseList')->name('incoming-nurse-list');
     Route::get('/unverified-nurse-list', 'NurseController@unverified_nurse_list')->name('unverified-nurse-list');
