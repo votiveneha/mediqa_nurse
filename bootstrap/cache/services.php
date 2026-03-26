@@ -32,9 +32,10 @@
     28 => 'Spatie\\LaravelIgnition\\IgnitionServiceProvider',
     29 => 'App\\Providers\\AppServiceProvider',
     30 => 'App\\Providers\\AuthServiceProvider',
-    31 => 'App\\Providers\\EventServiceProvider',
-    32 => 'App\\Providers\\RouteServiceProvider',
-    33 => 'App\\Providers\\ZeptoMailServiceProvider',
+    31 => 'App\\Providers\\BroadcastServiceProvider',
+    32 => 'App\\Providers\\EventServiceProvider',
+    33 => 'App\\Providers\\RouteServiceProvider',
+    34 => 'App\\Providers\\ZeptoMailServiceProvider',
   ),
   'eager' => 
   array (
@@ -55,9 +56,10 @@
     14 => 'Spatie\\LaravelIgnition\\IgnitionServiceProvider',
     15 => 'App\\Providers\\AppServiceProvider',
     16 => 'App\\Providers\\AuthServiceProvider',
-    17 => 'App\\Providers\\EventServiceProvider',
-    18 => 'App\\Providers\\RouteServiceProvider',
-    19 => 'App\\Providers\\ZeptoMailServiceProvider',
+    17 => 'App\\Providers\\BroadcastServiceProvider',
+    18 => 'App\\Providers\\EventServiceProvider',
+    19 => 'App\\Providers\\RouteServiceProvider',
+    20 => 'App\\Providers\\ZeptoMailServiceProvider',
   ),
   'deferred' => 
   array (
