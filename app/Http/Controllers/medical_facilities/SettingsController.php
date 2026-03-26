@@ -295,4 +295,9 @@ class SettingsController extends Controller
         return $pdf->download('invoice-'.$invoice->invoice_number.'.pdf');
     }
 
+    public function compliance_security()
+    {
+        return view('healthcare.settings.compliance_security');
+    }
+
 }
