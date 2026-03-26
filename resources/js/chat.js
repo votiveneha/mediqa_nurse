@@ -28,7 +28,7 @@ class ChatManager {
         this.typingTimeout = null;
         this.isTyping = false;
         this.lastScrollTop = 0;
-        
+
         this.init();
     }
 
@@ -70,6 +70,7 @@ class ChatManager {
             .listen('.message.sent', (event) => {
                 console.log('Message received:', event);
                 this.appendMessage(event);
+                this.scrollToBottom();
                 this.playNotificationSound();
                 this.updateTitleNotification();
             });
@@ -112,7 +113,7 @@ class ChatManager {
 
         this.messageForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const message = this.messageInput.value.trim();
             if (!message && !this.fileInput.files[0]) return;
 
@@ -152,7 +153,7 @@ class ChatManager {
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 this.appendMessage({
                     ...data.message,
@@ -199,7 +200,7 @@ class ChatManager {
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 this.appendMessage({
                     ...data.message,
@@ -307,13 +308,13 @@ class ChatManager {
     appendMessage(event) {
         const isSent = event.sender_id === window.Laravel.userId;
         const messageClass = isSent ? 'sent' : 'received';
-        const time = new Date(event.created_at).toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit' 
+        const time = new Date(event.created_at).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
         });
 
         let messageContent = '';
-        
+
         if (event.message_type === 'file') {
             messageContent = `
                 <div class="message-file">
@@ -466,7 +467,7 @@ class ChatManager {
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
                 if (messageElement) {
@@ -486,10 +487,10 @@ class ChatManager {
     replyToMessage(messageId) {
         const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
         const messageText = messageElement?.querySelector('.message-text')?.textContent || '';
-        
+
         const replyPreview = document.getElementById('replyPreview');
         const replyToText = document.getElementById('replyToText');
-        
+
         if (replyPreview && replyToText) {
             window.replyToMessageId = messageId;
             replyToText.textContent = messageText.substring(0, 50) + (messageText.length > 50 ? '...' : '');

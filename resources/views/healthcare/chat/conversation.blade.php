@@ -581,6 +581,12 @@ window.addEventListener('load', function() {
                 return false;
             };
             console.log('Chat handler attached!');
+
+            // Scroll to bottom on page load
+            const messagesContainer = document.getElementById('chatMessages');
+            if (messagesContainer) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
         } else {
             console.error('Some elements not found');
         }

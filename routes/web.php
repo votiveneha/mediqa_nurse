@@ -20,17 +20,21 @@ use Illuminate\Support\Facades\Broadcast;
 
 // Custom Broadcasting Auth for multiple guards
 Route::post('/broadcasting/auth', function (Request $request) {
-    // Check which guard is authenticated and authorize
     if (Auth::guard('nurse_middle')->check()) {
-        return Broadcast::auth($request);
+        $user = Auth::guard('nurse_middle')->user();
     } elseif (Auth::guard('healthcare_facilities')->check()) {
-        return Broadcast::auth($request);
+        $user = Auth::guard('healthcare_facilities')->user();
     } elseif (Auth::check()) {
-        return Broadcast::auth($request);
+        $user = Auth::user();
+    } else {
+        return response()->json(['error' => 'Unauthorized'], 401);
     }
-    
-    return response()->json(['error' => 'Unauthorized'], 401);
-})->middleware('web');
+
+    // Temporarily set the user on the request so Broadcast::auth can find them
+    $request->setUserResolver(fn() => $user);
+
+    return Broadcast::auth($request);
+})->middleware(['web']);
 
 // ===========
 // Admin Route

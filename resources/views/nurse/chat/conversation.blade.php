@@ -503,6 +503,9 @@
             };
 
             console.log('Chat form handler attached');
+
+            // Scroll to bottom on page load
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         } else {
             console.error('Chat elements not found');
         }
