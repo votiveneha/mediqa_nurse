@@ -52,7 +52,7 @@ img, iframe, video {
 .tooltip-link::after {
   content: attr(data-tooltip);
   position: absolute;
-  
+
   left: 50%;
   transform: translateX(-50%);
   background: #111827;
@@ -98,7 +98,7 @@ img, iframe, video {
 
       // Open drawer
       $('#openDrawer').on('click', function(){
-        
+
         $drawer.addClass('open');
         $overlay.addClass('open');
         showPage('main');
@@ -153,7 +153,7 @@ img, iframe, video {
 
                 <a class='hover-up' href='{{ route("nurse.home") }}'>Nurses & Midwives</a>
                 <div class="mega-dropdown-content">
-    
+
                   <!-- Column 1: Get Started -->
                   <div class="mega-column">
                     <h4><a href="{{ route('nurse.home') }}" class="get_started">Get Started</a></h4>
@@ -172,13 +172,13 @@ img, iframe, video {
                     <p class="helper-text">Combine these filters & more in your profile & Find Jobs</p>
                     <ul>
                       <li class="browse_menu flyout" data-open="specialtyModal">Specialty & Patient group ▸
-                        
+
                       </li>
                       <li class="browse_menu flyout" data-open="nurseModal">Type of nurse ▸
-                        
+
                       </li>
                       <li class="browse_menu flyout" data-open="workPreferModal">Work Preferences & Flexibility ▸
-                        
+
                       </li>
                     </ul>
                   </div>
@@ -285,7 +285,7 @@ img, iframe, video {
           <li data-target="cpd_ce_providers"><a href="#">CPD/CE Providers <i class="fa-solid fa-angle-right mobile_angle"></i></a></li>
           <li><a href='{{ route("nurse.login") }}'>Log in</a></li>
           <li><a href='{{ route("nurse.nurse-register") }}'>Sign up</a></li>
-          
+
         </ul>
       </div>
 
@@ -316,7 +316,7 @@ img, iframe, video {
           <li data-target="speciality_patient"><a href="#">Specialty & Patient group <i class="fa-solid fa-angle-right mobile_angle"></i></a></li>
           <li data-target="type_of_nurse"><a href="#">Type of nurse <i class="fa-solid fa-angle-right mobile_angle"></i></a></li>
           <li data-target="work_preferences"><a href="#">Work Preferences & Flexibility <i class="fa-solid fa-angle-right mobile_angle"></i></a></li>
-          
+
         </ul>
       </div>
       <div class="drawer-page-mobile" data-page="speciality_patient">
@@ -329,7 +329,7 @@ img, iframe, video {
           @foreach($speciality_data as $key => $speciality)
           <li><a href="{{ route('nurse.nurse-register') }}">{{ $speciality->name }}</a></li>
           @endforeach
-          
+
         </ul>
       </div>
       <div class="drawer-page-mobile" data-page="type_of_nurse">
@@ -342,7 +342,7 @@ img, iframe, video {
           @foreach($practitioner_data as $key=>$prac_data)
           <li><a href="{{ route('nurse.nurse-register') }}">{{ $prac_data->name }}</a></li>
           @endforeach
-          
+
         </ul>
       </div>
       <div class="drawer-page-mobile" data-page="work_preferences">
@@ -365,7 +365,7 @@ img, iframe, video {
             <li><a href="{{ route('nurse.nurse-register') }}">Experience</a></li>
             <li class="more-btn"><a href="{{ route('nurse.nurse-register') }}">+ Set More Preferences in Your Profile</a></li>
           </ul>
-          
+
         </ul>
       </div>
       <div class="drawer-page-mobile" data-page="health_care_facilities">
@@ -381,7 +381,7 @@ img, iframe, video {
           <li><a href="#">How it works</a></li>
           <li><a href="#">Compliance & Screening</a></li>
           <li><a href="{{ route('medical-facilities.login') }}">Sign in Employers</a></li>
-          
+
         </ul>
       </div>
       <div class="drawer-page-mobile" data-page="agencies">
@@ -397,7 +397,7 @@ img, iframe, video {
           <li><a href="#">How it works</a></li>
           <li><a href="#">Compliance & Screening</a></li>
           <li><a href="{{ route('agencies.login') }}">Sign in Agencies</a></li>
-          
+
         </ul>
       </div>
       <div class="drawer-page-mobile" data-page="cpd_ce_providers">
@@ -411,7 +411,7 @@ img, iframe, video {
           <li><a href="#">Pricing & Plans</a></li>
           <li><a href="#">Benefits</a></li>
           <li><a href="{{ route('cpd_providers.login') }}">Sign in CPD/CE Providers</a></li>
-          
+
         </ul>
       </div>
     </div>
@@ -426,7 +426,7 @@ img, iframe, video {
 
     $speciality_data = DB::table("speciality")->where("parent",'0')->get();
     $work_preferences_data = DB::table("work_shift_preferences")->where("shift_id",'0')->get();
-    
+
   @endphp
   <!-- Nurse Types Modal -->
 <div id="nurseModal" class="side-modal">
@@ -440,9 +440,9 @@ img, iframe, video {
       @foreach($sub_practitioner_data as $key=>$prac_data)
       <li class="hidden-speciality"><a href="{{ route('nurse.nurse-register') }}">{{ $prac_data->name }}</a></li>
       @endforeach
-      
+
       <li class="toggle_nurse more-btn"><a href="#">+ All Type of Nurse</a></li>
-      
+
     </ul>
   </div>
 </div>
@@ -455,9 +455,9 @@ img, iframe, video {
       @foreach($speciality_data as $key => $speciality)
       <li><a href="{{ route('nurse.nurse-register') }}">{{ $speciality->name }}</a></li>
       @endforeach
-      
+
       <li class="more-btn"><a href="{{ route('nurse.nurse-register') }}">+ All Specialties</a></li>
-      
+
     </ul>
   </div>
 </div>
@@ -517,31 +517,31 @@ img, iframe, video {
               <li>
                 <a class="hover-up " href='#'>Hiring</a>
               </li>
-              
+
             </ul>
           </nav>
           <div class="header-right">
-          <div class="block-signin d-flex align-items-center gap-2 justify-content-end">
+          <div class="block-signin d-flex align-items-center gap-2 justify-content-end" data-user-id="{{ Auth::guard('nurse_middle')->id() }}">
             <!-- <a class='text-link-bd-btom hover-up' href='nurse_signup.php'>Become a Nurse</a> -->
             <div class="dropdown d-inline-block nurse-notification">
-              <a class="btn btn-notify" id="dropdownNotify" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-display="static">
+              <a class="btn btn-notify position-relative" id="dropdownNotify" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-display="static" style="cursor: pointer;">
                 <i class="fa-regular fa-bell"></i>
               </a>
               <ul class="dropdown-menu dropdown-menu-light dropdown-menu-end" aria-labelledby="dropdownNotify">
-                <li><a class="dropdown-item active" href="#">0 notifications</a></li>
-                <li><a class="dropdown-item" href="#">0 messages</a></li>
-                <li><a class="dropdown-item" href="#">0 replies</a></li>
+                <li><a class="dropdown-item active" href="{{ route('nurse.chat.index') }}">0 notifications</a></li>
+                <li><a class="dropdown-item" href="{{ route('nurse.chat.index') }}">0 messages</a></li>
+                <li><a class="dropdown-item" href="{{ route('nurse.chat.index') }}">0 replies</a></li>
               </ul>
             </div>
 
 
             <div class="member-login d-flex align-items-center gap-1">
-             
+
               <div class="info-member">
                 <div class="dropdown">
 
                   <a class="font-xs color-text-paragraph-2 icon-down" data-bs-toggle="dropdown" style="cursor:pointer;">
-                  @if($user_data->profile_img != "nurse/assets/imgs/nurse06.png" && $user_data->profile_img != "") 
+                  @if($user_data->profile_img != "nurse/assets/imgs/nurse06.png" && $user_data->profile_img != "")
                   <img alt="{{  Auth::guard('healthcare_facilities')->user()->name }}" src="{{ asset( '/healthcareimg/uploads')}}/{{ Auth::guard('healthcare_facilities')->user()->profile_img }}">
                   @else
                   <img alt="{{  Auth::guard('healthcare_facilities')->user()->name }}" src="{{ asset( 'https://mediqa.com/public/nurse/assets/imgs/nurse06.png')}}">
@@ -560,7 +560,7 @@ img, iframe, video {
         </div>
         </div>
       </div>
-    </div>  
+    </div>
   </header>
   @else
   @if (Auth::guard('agencies')->check())
@@ -583,7 +583,7 @@ img, iframe, video {
           </nav>
         </div>
       </div>
-    </div>  
+    </div>
   </header>
   @else
   <header class="header sticky-bar  border-bottom">
@@ -606,9 +606,9 @@ img, iframe, video {
                             'Experience',
                             'References'
                         ])
-                        ->get();   
-                        
-                $all_tabs = DB::table("updated_tab_name")->where('user_id', $user_id)->get();           
+                        ->get();
+
+                $all_tabs = DB::table("updated_tab_name")->where('user_id', $user_id)->get();
 
                 @endphp
                 @if(count($tabs) == 3)
@@ -617,7 +617,7 @@ img, iframe, video {
                 </li>
                 @else
                 <li class="tooltip-link" data-tooltip="Please complete the profile first"><a class="disabled-link hover-up" href='#'>Work Preferences</a></li>
-                @endif 
+                @endif
               <li class="@if(count($all_tabs) < 15) tooltip-link @endif" @if(count($all_tabs) < 15) data-tooltip="Please complete the profile first" @endif>
                 <a class='@if(count($all_tabs) < 15) disabled-link @endif menu-link hover-up' href='{{ route("nurse.find_jobs") }}'>Find Jobs</a>
               </li>
@@ -626,7 +626,7 @@ img, iframe, video {
               </li>
               <li class="@if(count($all_tabs) < 15) tooltip-link @endif" @if(count($all_tabs) < 15) data-tooltip="Please complete the profile first" @endif>
                 <a class='@if(count($all_tabs) < 15) disabled-link @endif menu-link hover-up {{ request()->is('nurse/match_percentage') ?'active':'' }} {{ request()->is('nurse/application') ?'active':'' }} {{ request()->is('nurse/interviews') ?'active':'' }} {{ request()->is('nurse/MyJobs') ?'active':'' }}' href='{{ route("nurse.application") }} '>My Career</i></a>
-                
+
               </li>
               <!-- <li class="">
                 <a class='hover-up' href='{{ route("nurse.dashboard") }}'>My Jobs / MyApplications</a>
@@ -671,7 +671,7 @@ img, iframe, video {
 
 
             <div class="member-login d-flex align-items-center gap-1">
-             
+
               <div class="info-member">
                 <div class="dropdown">
 
@@ -714,16 +714,16 @@ img, iframe, video {
           </li>
           <li class="mega-dropdown career_dropdown" data-target="my_career">
             <a class="menu-link hover-up" href="http://localhost/mediqa/nurse/match_percentage">My Career</a>
-            
+
           </li>
-          
+
           <li class="">
             <a class=" hover-up" href="http://localhost/mediqa/nurse/dashboard">Community</a>
           </li>
           <li class="">
             <a class="link-red font-md" href="{{ route('nurse.logout') }}"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Log Out</a>
           </li>
-          
+
         </ul>
       </div>
 
@@ -735,7 +735,7 @@ img, iframe, video {
   @endif
   @endif
   @endif
-  
+
   <script>
 document.addEventListener("DOMContentLoaded", function () {
   const burger = document.querySelector(".burger-icon");
@@ -779,7 +779,7 @@ document.addEventListener("DOMContentLoaded", function () {
         hiddenItems.forEach(li => li.style.display = "list-item");
         toggleBtn.textContent = "− Show Less";
         expanded = true;
-        
+
       } else {
         hiddenItems.forEach(li => li.style.display = "none");
         toggleBtn.textContent = "+ More Specialties";
@@ -849,5 +849,5 @@ document.addEventListener("DOMContentLoaded", function () {
     overlay.style.display = "none";
   });
 
-  
+
 </script>

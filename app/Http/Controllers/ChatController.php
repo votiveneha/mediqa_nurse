@@ -23,7 +23,7 @@ class ChatController extends Controller
     {
         $user = Auth::guard('nurse_middle')->user();
         $conversations = $this->getUserConversations($user->id);
-        
+
         return view('chat.index', compact('conversations'));
     }
 
@@ -33,7 +33,7 @@ class ChatController extends Controller
     private function getUserConversations($userId)
     {
         $user = User::find($userId);
-        
+
         if ($user->role === 1) { // Nurse
             return Conversation::with(['healthcare', 'latestMessage'])
                 ->where('nurse_id', $userId)
@@ -55,7 +55,7 @@ class ChatController extends Controller
     public function getConversation($conversationId)
     {
         $user = Auth::guard('nurse_middle')->user();
-        
+
         $conversation = Conversation::with(['nurse', 'healthcare', 'messages.sender', 'job'])
             ->where('id', $conversationId)
             ->where(function($query) use ($user) {
@@ -82,7 +82,7 @@ class ChatController extends Controller
         $participant = ConversationParticipant::where('conversation_id', $conversation->id)
             ->where('user_id', $user->id)
             ->first();
-        
+
         if ($participant) {
             $participant->updateLastSeen();
         }
@@ -106,7 +106,7 @@ class ChatController extends Controller
 
         // Detect which guard is authenticated
         $user = Auth::guard('nurse_middle')->check() ? Auth::guard('nurse_middle')->user() : Auth::guard('healthcare_facilities')->user();
-        
+
         if (!$user) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
@@ -152,7 +152,21 @@ class ChatController extends Controller
         // Broadcast event only if Pusher is configured
         if (config('broadcasting.default') !== 'null') {
             try {
+                // Broadcast to conversation channel
                 broadcast(new MessageSent($message))->toOthers();
+
+                // Broadcast to recipient's private channel for notification
+                $otherParticipants = ConversationParticipant::where('conversation_id', $conversation->id)
+                    ->where('user_id', '!=', $user->id)
+                    ->get();
+
+                foreach ($otherParticipants as $participant) {
+                    broadcast(new \App\Events\NewMessageNotification(
+                        $participant->user_id,
+                        $conversation->id,
+                        $message
+                    ));
+                }
             } catch (\Exception $e) {
                 \Log::error('Broadcast failed: ' . $e->getMessage());
             }
@@ -376,8 +390,8 @@ class ChatController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $blockedUserId = $user->id === $conversation->nurse_id 
-            ? $conversation->healthcare_id 
+        $blockedUserId = $user->id === $conversation->nurse_id
+            ? $conversation->healthcare_id
             : $conversation->nurse_id;
 
         BlockedUser::create([
@@ -429,7 +443,7 @@ class ChatController extends Controller
         ]);
 
         $user = Auth::guard('nurse_middle')->user();
-        
+
         $this->markMessagesAsRead($request->conversation_id, $user->id);
 
         return response()->json(['success' => true]);

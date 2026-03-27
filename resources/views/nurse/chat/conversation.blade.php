@@ -552,6 +552,12 @@
 
                 console.log('Chat form handler attached');
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                // Mark messages as read when viewing conversation
+                if (window.NotifCounter) {
+                    console.log('📖 Marking messages as read for conversation:', {{ $conversation->id }});
+                    window.NotifCounter.markAsRead({{ $conversation->id }});
+                }
             } else {
                 console.error('Chat elements not found');
             }
