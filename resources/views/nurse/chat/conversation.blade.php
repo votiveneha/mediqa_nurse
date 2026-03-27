@@ -296,8 +296,11 @@
             <!-- Chat Header -->
             <div class="chat-header">
                 <div class="chat-user-info">
-                    <img src="{{ asset($otherParticipant->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
-                        alt="{{ $otherParticipant->name }}" class="chat-user-avatar">
+                    <img src="{{ $otherParticipant->profile_img
+                        ? asset('healthcareimg/uploads/' . $otherParticipant->profile_img)
+                        : 'nurse/assets/imgs/nurse06.png' }}"
+                        alt="{{ $otherParticipant->name }}"
+                        class="chat-user-avatar">
                     <div>
                         <div class="chat-header-title">{{ $otherParticipant->name }} {{ $otherParticipant->lastname ?? '' }}
                             <!-- @if($conversation->job)
@@ -322,7 +325,9 @@
                         @endphp
                         <div class="message {{ $isSent ? 'sent' : 'received' }}">
                             @if(!$isSent)
-                                <img src="{{ asset($message->sender->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
+                                <img src="{{ $message->sender->profile_img
+                                    ? asset('healthcareimg/uploads/' . $message->sender->profile_img)
+                                    : 'nurse/assets/imgs/nurse06.png' }}"
                                     alt="{{ $message->sender->name }}" class="message-avatar">
                             @endif
                             <div class="message-content">
@@ -415,6 +420,7 @@
                 console.error('Chat messages container not found!');
                 return;
             }
+            const baseUrl = "{{ asset('') }}";
 
             const isSentByMe = data.sender_id == window.Laravel.userId;
 
@@ -424,15 +430,27 @@
                 return;
             }
 
+            const avatar = isSentByMe
+                ? window.Laravel.userAvatar
+                : (data.sender_avatar
+                    ? baseUrl + 'healthcareimg/uploads/' + data.sender_avatar
+                    : baseUrl + 'nurse/assets/imgs/nurse06.png');
+
             const messageHtml = `
             <div class="message ${isSentByMe ? 'sent' : 'received'}" data-message-id="${data.id}">
+
                 ${!isSentByMe ? `
-                <img src="${data.sender_avatar || window.Laravel.userAvatar}" alt="${data.sender_name}" class="message-avatar">
+                <img src="${avatar}" alt="${data.sender_name}" class="message-avatar">
                 ` : ''}
+
                 <div class="message-content">
                     <p class="message-text">${escapeHtml(data.message)}</p>
-                    <span class="message-time">${formatTime(data.created_at)}</span>
                 </div>
+
+                ${isSentByMe ? `
+                <img src="${avatar}" alt="${data.sender_name}" class="message-avatar">
+                ` : ''}
+
             </div>
         `;
 
@@ -487,7 +505,7 @@
                     console.log('Form data:', Object.fromEntries(formData));
 
                     submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    submitBtn.innerHTML = 'Sending...';
 
                     fetch('{{ route("nurse.chat.send") }}', {
                         method: 'POST',
@@ -510,7 +528,6 @@
                                 <img src="${window.Laravel.userAvatar}" alt="${data.message.sender.name}" class="message-avatar">
                                 <div class="message-content">
                                     <p class="message-text">${escapeHtml(data.message.message)}</p>
-                                    <span class="message-time">${formatTime(data.message.created_at)}</span>
                                 </div>
                             </div>
                         `;

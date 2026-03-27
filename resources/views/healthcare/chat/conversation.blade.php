@@ -348,17 +348,25 @@
                             $isSent = $message->sender_id == Auth::id();
                         @endphp
                         <div class="message {{ $isSent ? 'sent' : 'received' }}">
+
                             @if(!$isSent)
-                                <img src="{{ asset($message->sender->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
+                                <img src="{{ $message->sender->profile_img
+                                    ? asset('/' . $message->sender->profile_img)
+                                    : 'nurse/assets/imgs/nurse06.png' }}"
                                     alt="{{ $message->sender->name }}" class="message-avatar">
                             @endif
+
                             <div class="message-content">
                                 <p class="message-text">{{ nl2br(e($message->message)) }}</p>
                             </div>
+
                             @if($isSent)
-                                <img src="{{ asset(Auth::user()->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
+                                <img src="{{ Auth::user()->profile_img
+                                    ? asset('healthcareimg/uploads/' . Auth::user()->profile_img)
+                                    : 'nurse/assets/imgs/nurse06.png' }}"
                                     alt="{{ Auth::user()->name }}" class="message-avatar">
                             @endif
+
                         </div>
                     @endif
                 @endforeach
@@ -371,12 +379,12 @@
 
             <!-- Chat Input -->
             <div class="chat-input-area">
-                <form id="messageForm" style="" class="chat__input">
+                <form id="messageForm" style="" class="chat__input" method="POST" onsubmit="return false;">
                     @csrf
                     <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
                     <input type="text" name="message" class="chat-input" placeholder="Type message" id="messageInput"
                         autocomplete="off">
-                    <button type="submit" class="chat-btn">Send</button>
+                    <button type="button" class="chat-btn">Send</button>
                 </form>
             </div>
         </div>
@@ -386,10 +394,14 @@
 <script src="https://js.pusher.com/8.4/pusher.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.3/dist/echo.iife.min.js"></script>
 <script>
-    (function () {
-        'use strict';
+(function () {
+    'use strict';
 
-        // Setup Laravel Echo with Pusher
+    document.addEventListener('DOMContentLoaded', function () {
+
+        console.log('Initializing chat...');
+
+        // ✅ Setup Laravel Echo (Pusher)
         window.Echo = new Echo({
             broadcaster: 'pusher',
             key: '{{ config("broadcasting.connections.pusher.key") }}',
@@ -404,189 +416,113 @@
             }
         });
 
+        // ✅ Global Laravel user data
         window.Laravel = {
             userId: {{ Auth::guard('healthcare_facilities')->id() }},
             userName: '{{ Auth::guard('healthcare_facilities')->user()->name }}',
             userRole: {{ Auth::guard('healthcare_facilities')->user()->role }},
             csrfToken: '{{ csrf_token() }}',
             conversationId: {{ $conversation->id }}
-    };
+        };
 
-        // Listen for real-time messages
+        const messageForm = document.getElementById('messageForm');
+        const messageInput = document.getElementById('messageInput');
+        const submitBtn = document.querySelector('.chat-btn');
+        const messagesContainer = document.getElementById('chatMessages');
+        const baseUrl = "{{ asset('') }}";
+
+        if (!messageForm || !messageInput || !submitBtn || !messagesContainer) {
+            console.error('Chat elements not found');
+            return;
+        }
+
+        console.log('Chat elements ready');
+
+        // ✅ Listen for real-time messages
         Echo.private('conversation.' + window.Laravel.conversationId)
-            .listen('.message.sent', function(data) {
-                console.log('=== Real-time Message Received ===', data);
-
-                const messagesContainer = document.getElementById('chatMessages');
+            .listen('.message.sent', function (data) {
+                console.log(data.sender_id, window.Laravel.userId);
                 const isSentByMe = data.sender_id == window.Laravel.userId;
+                console.log('Sent by me:', isSentByMe);
+
+                const avatar = isSentByMe
+                    ? (data.sender_avatar
+                        ? baseUrl + 'healthcareimg/uploads/' + data.sender_avatar
+                        : baseUrl + 'nurse/assets/imgs/nurse06.png')
+                    : baseUrl + 'nurse/assets/imgs/nurse06.png';
+
+                console.log('Avatar:', avatar);
 
                 const messageHtml = `
                     <div class="message ${isSentByMe ? 'sent' : 'received'}" data-message-id="${data.id}">
-                        ${!isSentByMe ? `
-                        <img src="${data.sender_avatar || '/nurse/assets/imgs/nurse06.png'}" alt="${data.sender_name}" class="message-avatar">
-                        ` : ''}
+                        ${!isSentByMe ? `<img src="${avatar}" class="message-avatar">` : ''}
                         <div class="message-content">
                             <p class="message-text">${data.message}</p>
                         </div>
-                        ${isSentByMe ? `
-                        <img src="${data.sender_avatar || '/nurse/assets/imgs/nurse06.png'}" alt="${data.sender_name}" class="message-avatar">
-                        ` : ''}
+                        ${isSentByMe ? `<img src="${avatar}" class="message-avatar">` : ''}
                     </div>
                 `;
 
                 messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-                // Play notification sound if message is from someone else
+                // 🔔 Notification sound
                 if (!isSentByMe) {
-                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQQAKZXZ8NOmdhoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBo=');
+                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQQAKZXZ8NOmdhoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBo=');
                     audio.play().catch(() => {});
                 }
             });
 
-        // Wait for everything to load
-        setTimeout(function () {
-            const messageForm = document.getElementById('messageForm');
-            const messageInput = document.getElementById('messageInput');
-            const submitBtn = document.querySelector('.btn-send');
-            const messagesContainer = document.getElementById('chatMessages');
+        // ✅ Send message (ONLY ONE HANDLER)
+        // Replace messageForm.addEventListener('submit', ...) with:
+        submitBtn.addEventListener('click', function () {
 
-            console.log('Chat elements found:', {
-                form: !!messageForm,
-                input: !!messageInput,
-                btn: !!submitBtn,
-                container: !!messagesContainer
-            });
+        const formData = new FormData(messageForm);
 
-            if (messageForm && messageInput && submitBtn && messagesContainer) {
-                messageForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Sending...';
 
-                    console.log('Form submitted');
-
-                    const formData = new FormData(this);
-
-                    // Disable button while sending
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-                    fetch('{{ route('healthcare.chat.send') }}', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest',
-                        },
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log('Response:', data);
-
-                            if (data.success && data.message) {
-                                const userAvatar = '{{ Auth::user()->profile_img ?? 'nurse/assets/imgs/nurse06.png' }}';
-                                const messageHtml = `
-                            <div class="message sent" data-message-id="${data.message.id}">
-                                <img src="${userAvatar}" alt="${data.message.sender.name}" class="message-avatar">
-                                <div class="message-content">
-                                    <p class="message-text">${data.message.message}</p>
-                                </div>
-                            </div>
-                        `;
-
-                                messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
-                                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                                messageInput.value = '';
-                            } else {
-                                alert(data.error || 'Failed to send message');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Failed to send message');
-                        })
-                        .finally(() => {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = 'Send';
-                        });
-                });
-
-                console.log('Chat form handler attached');
+        fetch('{{ route('healthcare.chat.send') }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            },
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(data => {
+            if (data.success) {
+                messageInput.value = ''; // ✅ Just clear input, Pusher will append the message
             } else {
-                console.error('Chat elements not found');
+                alert(data.error || 'Failed to send message');
             }
-        }, 500);
-    })();
-</script>
-<script>
-window.addEventListener('load', function() {
-    console.log('Page loaded, initializing chat...');
+        })
+        .catch(err => {
+            console.error('Send error:', err);
+            alert('Error: ' + err.message);
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Send';
+        });
+    });
 
-    setTimeout(function() {
-        const messageForm = document.getElementById('messageForm');
-        const messageInput = document.getElementById('messageInput');
-        const submitBtn = document.querySelector('.chat-btn');
-        const messagesContainer = document.getElementById('chatMessages');
-
-        console.log('Elements found:', {
-            form: messageForm ? 'YES' : 'NO',
-            input: messageInput ? 'YES' : 'NO',
-            btn: submitBtn ? 'YES' : 'NO',
-            container: messagesContainer ? 'YES' : 'NO'
+        // Also allow sending with Enter key
+        messageInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                submitBtn.click();
+            }
         });
 
-        if (messageForm && messageInput && submitBtn && messagesContainer) {
-            messageForm.onsubmit = function(e) {
-                e.preventDefault();
-                e.stopPropagation();
+        // ✅ Scroll to bottom on load
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-                console.log('Sending message...');
+    });
 
-                const formData = new FormData(this);
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = 'Sending...';
-
-                fetch('{{ route('healthcare.chat.send') }}', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                })
-                .then(r => r.json())
-                .then(data => {
-                    console.log('Response:', data);
-                    if (data.success && data.message) {
-                        const userAvatar = '{{ Auth::user()->profile_img ?? 'nurse/assets/imgs/nurse06.png' }}';
-                        const msgHtml = '<div class="message sent"><img src="' + userAvatar + '" class="message-avatar"><div class="message-content"><p class="message-text">' + data.message.message + '</p></div></div>';
-                        messagesContainer.insertAdjacentHTML('beforeend', msgHtml);
-                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                        messageInput.value = '';
-                    } else {
-                        alert(data.error || 'Failed');
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert('Error sending message');
-                })
-                .finally(() => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'Send';
-                });
-                return false;
-            };
-            console.log('Chat handler attached!');
-
-            // Scroll to bottom on page load
-            const messagesContainer = document.getElementById('chatMessages');
-            if (messagesContainer) {
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
-        } else {
-            console.error('Some elements not found');
-        }
-    }, 500);
-});
+})();
 </script>
