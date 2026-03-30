@@ -527,12 +527,12 @@ img, iframe, video {
               <a class="btn btn-notify" id="dropdownNotify" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-display="static">
                 <i class="fa-regular fa-bell"></i>
                 @if($unreadMessagesCount > 0)
-                <span class="notify-badge badge rounded-pill bg-danger" id="notification-badge">{{ $unreadMessagesCount }}</span>
+                <span class="notify-badge badge rounded-pill bg-danger notification-badge">{{ $unreadMessagesCount }}</span>
                 @endif
               </a>
               <ul class="dropdown-menu dropdown-menu-light dropdown-menu-end" aria-labelledby="dropdownNotify">
-                <li><a class="dropdown-item active" href="#">{{ $unreadMessagesCount }} notifications</a></li>
-                <li><a class="dropdown-item" href="#">{{ $unreadMessagesCount }} messages</a></li>
+                <li><a class="dropdown-item active notification-count-text" href="#">{{ $unreadMessagesCount }} notifications</a></li>
+                <li><a class="dropdown-item message-count-text" href="#">{{ $unreadMessagesCount }} messages</a></li>
                 <li><a class="dropdown-item" href="#">0 replies</a></li>
               </ul>
             </div>
