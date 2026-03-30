@@ -42,6 +42,19 @@ Broadcast::channel('conversation.{conversationId}', function ($user, $conversati
     return in_array($authenticatedUser->id, [$conversation->nurse_id, $conversation->healthcare_id]);
 });
 
+// User notification channel
+Broadcast::channel('user.{userId}', function ($user, $userId) {
+    $authenticatedUser = Auth::guard('nurse_middle')->user() 
+        ?? Auth::guard('healthcare_facilities')->user() 
+        ?? $user;
+    
+    if (!$authenticatedUser) {
+        return false;
+    }
+    
+    return (int) $authenticatedUser->id === (int) $userId;
+});
+
 // User online status channel
 Broadcast::channel('user.{userId}.online', function ($user, $userId) {
     return (int) $user->id === (int) $userId;

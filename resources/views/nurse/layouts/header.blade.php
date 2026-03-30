@@ -526,10 +526,13 @@ img, iframe, video {
             <div class="dropdown d-inline-block nurse-notification">
               <a class="btn btn-notify" id="dropdownNotify" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-display="static">
                 <i class="fa-regular fa-bell"></i>
+                @if($unreadMessagesCount > 0)
+                <span class="notify-badge badge rounded-pill bg-danger" id="notification-badge">{{ $unreadMessagesCount }}</span>
+                @endif
               </a>
               <ul class="dropdown-menu dropdown-menu-light dropdown-menu-end" aria-labelledby="dropdownNotify">
-                <li><a class="dropdown-item active" href="#">0 notifications</a></li>
-                <li><a class="dropdown-item" href="#">0 messages</a></li>
+                <li><a class="dropdown-item active" href="#">{{ $unreadMessagesCount }} notifications</a></li>
+                <li><a class="dropdown-item" href="#">{{ $unreadMessagesCount }} messages</a></li>
                 <li><a class="dropdown-item" href="#">0 replies</a></li>
               </ul>
             </div>
@@ -661,10 +664,13 @@ img, iframe, video {
             <div class="dropdown d-inline-block">
               <a class="btn btn-notify" id="dropdownNotify" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-display="static">
                 <i class="fa-regular fa-bell"></i>
+                @if($unreadMessagesCount > 0)
+                <span class="notify-badge badge rounded-pill bg-danger notification-badge">{{ $unreadMessagesCount }}</span>
+                @endif
               </a>
               <ul class="dropdown-menu dropdown-menu-light dropdown-menu-end" aria-labelledby="dropdownNotify">
-                <li><a class="dropdown-item active" href="#">0 notifications</a></li>
-                <li><a class="dropdown-item" href="#">0 messages</a></li>
+                <li><a class="dropdown-item active notification-count-text" href="#">{{ $unreadMessagesCount }} notifications</a></li>
+                <li><a class="dropdown-item message-count-text" href="#">{{ $unreadMessagesCount }} messages</a></li>
                 <li><a class="dropdown-item" href="#">0 replies</a></li>
               </ul>
             </div>
@@ -848,6 +854,100 @@ document.addEventListener("DOMContentLoaded", function () {
   overlay.addEventListener("click", () => {
     overlay.style.display = "none";
   });
+</script>
 
-  
+<!-- Real-time Notifications Script -->
+@auth('nurse_middle')
+<script>
+    window.addEventListener('DOMContentLoaded', function() {
+        if (typeof Echo !== 'undefined') {
+            Echo.private('user.{{ Auth::guard("nurse_middle")->id() }}')
+                .listen('.message.sent', (e) => {
+                    updateNotificationCount();
+                    showBrowserNotification(e);
+                });
+        }
+    });
+</script>
+@endauth
+
+@auth('healthcare_facilities')
+<script>
+    window.addEventListener('DOMContentLoaded', function() {
+        if (typeof Echo !== 'undefined') {
+            Echo.private('user.{{ Auth::guard("healthcare_facilities")->id() }}')
+                .listen('.message.sent', (e) => {
+                    updateNotificationCount();
+                    showBrowserNotification(e);
+                });
+        }
+    });
+</script>
+@endauth
+
+<script>
+    function updateNotificationCount() {
+        const badges = document.querySelectorAll('.notification-badge');
+        const countTexts = document.querySelectorAll('.notification-count-text');
+        const messageCountTexts = document.querySelectorAll('.message-count-text');
+        
+        let currentCount = 0;
+        if (badges.length > 0) {
+            currentCount = parseInt(badges[0].textContent) || 0;
+        }
+        
+        const newCount = currentCount + 1;
+        
+        badges.forEach(badge => {
+            badge.textContent = newCount;
+            badge.style.display = 'inline-block';
+        });
+
+        // If no badges exist (count was 0), we might need to create them or just refresh
+        if (badges.length === 0) {
+            // Find the bell icons and append badge
+            const bells = document.querySelectorAll('#dropdownNotify');
+            bells.forEach(bell => {
+                const badge = document.createElement('span');
+                badge.className = 'notify-badge badge rounded-pill bg-danger notification-badge';
+                badge.textContent = newCount;
+                bell.appendChild(badge);
+            });
+        }
+        
+        countTexts.forEach(text => {
+            text.textContent = newCount + ' notifications';
+        });
+        
+        messageCountTexts.forEach(text => {
+            text.textContent = newCount + ' messages';
+        });
+
+        // Update page title
+        const originalTitle = document.title.replace(/^\(\d+\)\s/, '');
+        document.title = '(' + newCount + ') ' + originalTitle;
+    }
+
+    function showBrowserNotification(e) {
+        if (!("Notification" in window)) return;
+        
+        if (Notification.permission === "granted") {
+            const notification = new Notification("New Message from " + e.sender_name, {
+                body: e.message,
+                icon: e.sender_avatar || '/nurse/assets/imgs/nurse06.png'
+            });
+            
+            notification.onclick = function() {
+                window.focus();
+                @auth('nurse_middle')
+                window.location.href = '/nurse/chat/conversation/' + e.conversation_id;
+                @endauth
+                @auth('healthcare_facilities')
+                window.location.href = '/healthcare-facilities/chat/conversation/' + e.conversation_id;
+                @endauth
+            };
+        } else if (Notification.permission !== "denied") {
+            Notification.requestPermission();
+        }
+    }
 </script>
