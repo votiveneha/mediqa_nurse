@@ -91,6 +91,11 @@
         background:#2563eb;
         color:#fff;
     }
+
+    .active-plan {
+    border: 2px solid #000;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.10);
+}
 </style>
 @endsection
 
@@ -112,18 +117,32 @@
 
                             <!-- Starter Plan -->
                             @foreach($plan_data as $plandata)
-                            <div class="plan-card">
-                                <h3 class="plan-name">{{ $plandata->plan_name }}</h3>
+                            @php
+                                $user_id = Auth::guard("healthcare_facilities")->user()->id;
+                                $invoice_data = DB::table("invoices")->where("user_id",$user_id)->where("product_id",$plandata->stripe_product_id)->first();
+                                $price_data = DB::table("stripe_prices")->where("stripe_price_id",$plandata->default_price_id)->first();    
 
-                                <div class="plan-price">
-                                    ${{ $plandata->monthly_price }} <span>/month</span>
-                                </div>
+                                
+                            @endphp
+                            <div class="plan-card @if(!empty($invoice_data)) active-plan @endif">
+                                <h3 class="plan-name">{{ $plandata->name }}</h3>
+                                
+                                    
+                                    <div class="plan-price">
+                                    ${{ $price_data->unit_amount/100 }} <span>/{{ $price_data->interval }}</span>
+                                    </div>
 
                                 <p class="plan-desc">
                                     @php
+                                        $employer_types = json_decode($plandata->employer_types);
 
+                                        $emp_name_arr = [];
+                                        foreach($employer_types as $emp_type){
+                                            $emp_name = DB::table("employer_type")->where("id",$emp_type)->first();
+                                            $emp_name_arr[] = $emp_name->name;
+                                        }
+                                        echo implode(",",$emp_name_arr);
                                     @endphp
-                                    Small clinics, aged-care homes, local agencies
                                 </p>
 
                                 <!-- <ul class="plan-features">
@@ -139,8 +158,10 @@
                                     {!! $plandata->features !!}
                                 </div>
                                 
-
-                                <a href="{{ route('medical-facilities.payment_page',['product_id'=>$plandata->product_id]) }}" class="btn-plan">Choose Plan</a>
+                                @if(empty($invoice_data))
+                                <a href="{{ route('medical-facilities.payment_page',['product_id'=>$plandata->stripe_product_id]) }}" class="btn-plan">Choose Plan</a>
+                               
+                                @endif
                             </div>
                             @endforeach
 

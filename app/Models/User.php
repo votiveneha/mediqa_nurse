@@ -13,5 +13,24 @@ class User extends Authenticatable
     
     use HasApiTokens, HasFactory, Notifiable; 
     protected $table = 'users'; 
-    protected $guarded =[]; 
+    protected $guarded =[];
+
+    public function getCountryNameAttribute()
+    {
+        if (!$this->location_country) {
+            return null;
+        }
+
+        return CountryModel::where('iso2', $this->country)
+            ->value('name');
+    }
+    // public function getStateNameAttribute()
+    // {
+    //     if (!$this->location_state) {
+    //         return null;
+    //     }
+
+    //     return StateModel::where('id', $this->location_state)
+    //         ->value('name');
+    // }
 }

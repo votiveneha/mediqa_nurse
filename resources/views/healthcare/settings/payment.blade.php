@@ -78,9 +78,9 @@
     <h2>💳 Secure Payment</h2>
 
     <form id="payment-form">
-        <input type="hidden" name="product_id" id="product_id" value="{{ $plan_data->product_id }}">
+        <input type="hidden" name="product_id" id="product_id" value="{{ $plan_data->stripe_product_id }}">
         <label>Cardholder Name</label>
-        <input type="text" id="name" class="input-box" placeholder="John Doe" required>
+        <input type="text" id="name" class="input-box" value placeholder="John Doe" required>
 
         <label>Card Number</label>
         <div id="card-number" class="input-box"></div>
@@ -102,7 +102,7 @@
         <div id="card-errors"></div>
     </form>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     const stripe = Stripe("{{ env('STRIPE_KEY') }}");
     const elements = stripe.elements();
@@ -147,13 +147,19 @@
                 },
                 body: JSON.stringify({
                     payment_method_id: paymentMethod.id,
-                    product_id: '{{ $plan_data->product_id }}'
+                    product_id: '{{ $plan_data->stripe_product_id }}'
                 })
             })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    alert('✅ Payment Successful');
+                    Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: "Payment Successful. Please check email to download invoice",
+                    }).then(function() {
+                    window.location.href = '{{ route("medical-facilities.billing") }}';
+                    }); 
                 } else {
                     alert(data.message);
                 }

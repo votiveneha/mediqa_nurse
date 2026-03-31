@@ -28,7 +28,7 @@ class ChatManager {
         this.typingTimeout = null;
         this.isTyping = false;
         this.lastScrollTop = 0;
-        
+
         this.init();
     }
 
@@ -40,6 +40,7 @@ class ChatManager {
         this.listenForMessages();
         this.listenForTyping();
         this.listenForPresence();
+        this.listenForGlobalPresence();
         this.setupMessageForm();
         this.setupTypingDetection();
         this.setupFileUpload();
@@ -66,10 +67,13 @@ class ChatManager {
      * Listen for incoming messages
      */
     listenForMessages() {
+        if (!this.conversationId) return;
+
         Echo.private(`conversation.${this.conversationId}`)
             .listen('.message.sent', (event) => {
                 console.log('Message received:', event);
                 this.appendMessage(event);
+                this.scrollToBottom();
                 this.playNotificationSound();
                 this.updateTitleNotification();
             });
@@ -79,6 +83,8 @@ class ChatManager {
      * Listen for typing events
      */
     listenForTyping() {
+        if (!this.conversationId) return;
+
         Echo.join(`conversation.${this.conversationId}.presence`)
             .here((users) => {
                 console.log('Users in conversation:', users);
@@ -86,13 +92,22 @@ class ChatManager {
             })
             .joining((user) => {
                 console.log('User joined:', user);
-                this.showUserOnline(user);
+                if (user.id == window.Laravel.otherParticipantId) {
+                    this.showUserOnline(true);
+                    this.showNotification(user.name + ' is now online');
+                }
             })
             .leaving((user) => {
                 console.log('User left:', user);
-                this.showUserOffline(user);
+                if (user.id == window.Laravel.otherParticipantId) {
+                    this.showUserOnline(false);
+                }
             })
-            .listen('.user.typing', (event) => {
+            .error((error) => {
+                console.error('Presence channel error:', error);
+                this.showUserOnline(false);
+            })
+            .listen('.UserTyping', (event) => {
                 this.toggleTypingIndicator(event);
             });
     }
@@ -105,6 +120,90 @@ class ChatManager {
     }
 
     /**
+     * Listen for global presence
+     */
+    listenForGlobalPresence() {
+        console.log('Subscribing to global online status channel...');
+
+        // Subscribe to global presence channel
+        Echo.join('users.online')
+            .here((users) => {
+                console.log('Global Online Users:', users);
+                users.forEach(user => {
+                    this.updateUserStatusIndicator(user.id, true);
+                });
+            })
+            .joining((user) => {
+                console.log('Global User Joined:', user);
+                this.updateUserStatusIndicator(user.id, true);
+
+                // If it's the other participant in current conversation
+                if (window.Laravel?.otherParticipantId == user.id) {
+                    this.showUserOnline(true);
+                    this.showNotification(user.name + ' is now online');
+                }
+            })
+            .leaving((user) => {
+                console.log('Global User Left:', user);
+                this.updateUserStatusIndicator(user.id, false);
+
+                if (window.Laravel?.otherParticipantId == user.id) {
+                    this.showUserOnline(false);
+                }
+            })
+            .error((error) => {
+                console.error('Global presence channel error:', error);
+            });
+
+        // Also listen to global online status channel for real-time updates
+        Echo.channel('users.online.global')
+            .listen('.user.status', (data) => {
+                console.log('Global user status update:', data);
+                if (data.user_id == window.Laravel?.otherParticipantId) {
+                    this.showUserOnline(data.is_online);
+                }
+            });
+
+        // Also listen to specific user's presence channel
+        if (window.Laravel?.otherParticipantId) {
+            Echo.join('user.' + window.Laravel.otherParticipantId + '.online')
+                .here((users) => {
+                    console.log('Users in presence channel for ' + window.Laravel.otherParticipantId + ':', users);
+                    const isOnline = users.length > 0;
+                    this.showUserOnline(isOnline);
+                })
+                .joining((user) => {
+                    console.log('User joined presence channel:', user);
+                    if (user.id == window.Laravel.otherParticipantId) {
+                        this.showUserOnline(true);
+                    }
+                })
+                .leaving((user) => {
+                    console.log('User left presence channel:', user);
+                    if (user.id == window.Laravel.otherParticipantId) {
+                        this.showUserOnline(false);
+                    }
+                });
+        }
+    }
+
+    /**
+     * Update status indicator for a specific user ID
+     */
+    updateUserStatusIndicator(userId, isOnline) {
+        const indicators = document.querySelectorAll(`.online-status[data-user-id="${userId}"]`);
+        indicators.forEach(indicator => {
+            if (isOnline) {
+                indicator.classList.remove('offline');
+                indicator.classList.add('online');
+            } else {
+                indicator.classList.remove('online');
+                indicator.classList.add('offline');
+            }
+        });
+    }
+
+    /**
      * Setup message form submission
      */
     setupMessageForm() {
@@ -112,7 +211,7 @@ class ChatManager {
 
         this.messageForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const message = this.messageInput.value.trim();
             if (!message && !this.fileInput.files[0]) return;
 
@@ -152,7 +251,7 @@ class ChatManager {
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 this.appendMessage({
                     ...data.message,
@@ -199,7 +298,7 @@ class ChatManager {
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 this.appendMessage({
                     ...data.message,
@@ -307,13 +406,13 @@ class ChatManager {
     appendMessage(event) {
         const isSent = event.sender_id === window.Laravel.userId;
         const messageClass = isSent ? 'sent' : 'received';
-        const time = new Date(event.created_at).toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit' 
+        const time = new Date(event.created_at).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
         });
 
         let messageContent = '';
-        
+
         if (event.message_type === 'file') {
             messageContent = `
                 <div class="message-file">
@@ -466,7 +565,7 @@ class ChatManager {
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
                 if (messageElement) {
@@ -486,10 +585,10 @@ class ChatManager {
     replyToMessage(messageId) {
         const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
         const messageText = messageElement?.querySelector('.message-text')?.textContent || '';
-        
+
         const replyPreview = document.getElementById('replyPreview');
         const replyToText = document.getElementById('replyToText');
-        
+
         if (replyPreview && replyToText) {
             window.replyToMessageId = messageId;
             replyToText.textContent = messageText.substring(0, 50) + (messageText.length > 50 ? '...' : '');
@@ -589,39 +688,116 @@ class ChatManager {
      * Update online status
      */
     updateOnlineStatus(users) {
-        // Update online indicators for users in the conversation
+        const isOtherOnline = users.some(u => u.id == window.Laravel.otherParticipantId);
+        this.showUserOnline(isOtherOnline);
     }
 
     /**
-     * Show user online
+     * Show user online/offline
      */
-    showUserOnline(user) {
-        const statusElement = document.querySelector('.online-status');
-        if (statusElement) {
-            statusElement.classList.add('online');
-            statusElement.innerHTML = '<i class="fas fa-circle"></i> Online';
+    showUserOnline(isOnline) {
+        const statusIcon = document.getElementById('status-icon');
+        const statusText = document.getElementById('status-text');
+        const statusContainer = document.getElementById('userStatusContainer');
+
+        if (statusIcon && statusText) {
+            if (isOnline) {
+                statusIcon.style.color = '#28a745';
+                statusText.textContent = 'Online';
+                statusText.style.color = '#28a745';
+
+                if (statusContainer) {
+                    statusContainer.classList.remove('offline');
+                    statusContainer.classList.add('online');
+                    statusContainer.style.color = '#28a745';
+                }
+            } else {
+                statusIcon.style.color = '#888';
+                statusText.textContent = 'Offline';
+                statusText.style.color = '#888';
+
+                if (statusContainer) {
+                    statusContainer.classList.remove('online');
+                    statusContainer.classList.add('offline');
+                    statusContainer.style.color = '#888';
+                }
+            }
+            console.log('User status updated:', isOnline ? 'Online' : 'Offline');
         }
+    }
+
+    /**
+     * Show notification toast
+     */
+    showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'status-notification';
+        notification.textContent = message;
+        notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 10px 20px; border-radius: 5px; z-index: 9999; animation: slideIn 0.3s ease-out;';
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     }
 
     /**
      * Show user offline
      */
     showUserOffline(user) {
-        const statusElement = document.querySelector('.online-status');
-        if (statusElement) {
-            statusElement.classList.remove('online');
-            statusElement.innerHTML = '<i class="fas fa-circle"></i> Offline';
-        }
+        this.showUserOnline(false);
     }
 
     /**
      * Start heartbeat to keep connection alive
      */
     startHeartbeat() {
-        setInterval(() => {
-            // Send heartbeat to keep connection alive
-            this.markAsRead();
-        }, 60000); // Every minute
+        const self = this;
+
+        // Send initial heartbeat
+        this.sendHeartbeat();
+
+        // Send heartbeat every 30 seconds
+        const heartbeatInterval = setInterval(() => {
+            this.sendHeartbeat();
+        }, 30000);
+
+        // Send offline status when leaving page
+        window.addEventListener('beforeunload', function() {
+            self.sendOfflineStatus();
+            clearInterval(heartbeatInterval);
+        });
+    }
+
+    /**
+     * Send heartbeat to mark user as online
+     */
+    sendHeartbeat() {
+        const url = window.Laravel.userRole === 1
+            ? '/nurse/chat/online-status'
+            : '/healthcare-facilities/chat/online-status';
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || window.Laravel.csrfToken,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ is_online: true })
+        }).catch(err => console.error('Heartbeat failed:', err));
+    }
+
+    /**
+     * Send offline status
+     */
+    sendOfflineStatus() {
+        const url = window.Laravel.userRole === 1
+            ? '/nurse/chat/online-status'
+            : '/healthcare-facilities/chat/online-status';
+
+        navigator.sendBeacon(url, JSON.stringify({ is_online: false }));
     }
 }
 

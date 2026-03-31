@@ -9,6 +9,7 @@ use App\Models\BlockedUser;
 use App\Models\User;
 use App\Events\MessageSent;
 use App\Events\UserTyping;
+use App\Events\UserOnlineStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -17,13 +18,23 @@ use Illuminate\Support\Facades\DB;
 class ChatController extends Controller
 {
     /**
+     * Get authenticated user from any guard
+     */
+    private function getAuthenticatedUser()
+    {
+        return Auth::guard('nurse_middle')->check() ? Auth::guard('nurse_middle')->user() :
+               (Auth::guard('healthcare_facilities')->check() ? Auth::guard('healthcare_facilities')->user() :
+               (Auth::check() ? Auth::user() : null));
+    }
+
+    /**
      * Display chat interface
      */
     public function index()
     {
         $user = Auth::guard('nurse_middle')->user();
         $conversations = $this->getUserConversations($user->id);
-        
+
         return view('chat.index', compact('conversations'));
     }
 
@@ -33,7 +44,7 @@ class ChatController extends Controller
     private function getUserConversations($userId)
     {
         $user = User::find($userId);
-        
+
         if ($user->role === 1) { // Nurse
             return Conversation::with(['healthcare', 'latestMessage'])
                 ->where('nurse_id', $userId)
@@ -55,7 +66,7 @@ class ChatController extends Controller
     public function getConversation($conversationId)
     {
         $user = Auth::guard('nurse_middle')->user();
-        
+
         $conversation = Conversation::with(['nurse', 'healthcare', 'messages.sender', 'job'])
             ->where('id', $conversationId)
             ->where(function($query) use ($user) {
@@ -82,7 +93,7 @@ class ChatController extends Controller
         $participant = ConversationParticipant::where('conversation_id', $conversation->id)
             ->where('user_id', $user->id)
             ->first();
-        
+
         if ($participant) {
             $participant->updateLastSeen();
         }
@@ -106,7 +117,7 @@ class ChatController extends Controller
 
         // Detect which guard is authenticated
         $user = Auth::guard('nurse_middle')->check() ? Auth::guard('nurse_middle')->user() : Auth::guard('healthcare_facilities')->user();
-        
+
         if (!$user) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
@@ -376,8 +387,8 @@ class ChatController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $blockedUserId = $user->id === $conversation->nurse_id 
-            ? $conversation->healthcare_id 
+        $blockedUserId = $user->id === $conversation->nurse_id
+            ? $conversation->healthcare_id
             : $conversation->nurse_id;
 
         BlockedUser::create([
@@ -428,8 +439,12 @@ class ChatController extends Controller
             'conversation_id' => 'required|exists:conversations,id',
         ]);
 
-        $user = Auth::guard('nurse_middle')->user();
-        
+        $user = $this->getAuthenticatedUser();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
         $this->markMessagesAsRead($request->conversation_id, $user->id);
 
         return response()->json(['success' => true]);
@@ -445,7 +460,12 @@ class ChatController extends Controller
             'is_typing' => 'boolean',
         ]);
 
-        $user = Auth::guard('nurse_middle')->user();
+        $user = $this->getAuthenticatedUser();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
         $conversation = Conversation::findOrFail($request->conversation_id);
 
         if (!$conversation->isParticipant($user->id)) {
@@ -466,11 +486,60 @@ class ChatController extends Controller
     }
 
     /**
+     * Update online status
+     */
+    public function updateOnlineStatus(Request $request)
+    {
+        $request->validate([
+            'is_online' => 'boolean',
+        ]);
+
+        $user = $this->getAuthenticatedUser();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $isOnline = $request->is_online ?? true;
+
+        // Update cache with user's online status
+        if ($isOnline) {
+            cache()->set("user_{$user->id}_online", true, now()->addMinutes(5));
+        } else {
+            cache()->forget("user_{$user->id}_online");
+        }
+
+        // Broadcast status to all relevant channels
+        broadcast(new UserOnlineStatus($user->id, $isOnline, $isOnline ? null : now()))->toOthers();
+
+        return response()->json(['success' => true, 'is_online' => $isOnline]);
+    }
+
+    /**
+     * Check user online status
+     */
+    public function checkUserStatus($userId)
+    {
+        $isOnline = cache()->get("user_{$userId}_online", false);
+
+        return response()->json([
+            'success' => true,
+            'user_id' => $userId,
+            'is_online' => $isOnline,
+            'last_seen' => $isOnline ? null : now()->toIso8601String()
+        ]);
+    }
+
+    /**
      * Get unread count
      */
     public function unreadCount()
     {
-        $user = Auth::guard('nurse_middle')->user();
+        $user = $this->getAuthenticatedUser();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
 
         $count = ConversationParticipant::where('user_id', $user->id)
             ->sum('unread_count');
@@ -487,7 +556,12 @@ class ChatController extends Controller
             'conversation_id' => 'required|exists:conversations,id',
         ]);
 
-        $user = Auth::guard('nurse_middle')->user();
+        $user = $this->getAuthenticatedUser();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
         $conversation = Conversation::findOrFail($request->conversation_id);
 
         if (!$conversation->isParticipant($user->id)) {
@@ -521,7 +595,12 @@ class ChatController extends Controller
             'conversation_id' => 'required|exists:conversations,id',
         ]);
 
-        $user = Auth::guard('nurse_middle')->user();
+        $user = $this->getAuthenticatedUser();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
         $conversation = Conversation::findOrFail($request->conversation_id);
 
         if (!$conversation->isParticipant($user->id)) {

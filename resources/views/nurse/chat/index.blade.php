@@ -209,6 +209,12 @@
 .btn-new-chat:hover {
     background: #0056b3;
 }
+.online-status.online {
+    background-color: #28a745;
+}
+.online-status.offline {
+    background-color: #888;
+}
 </style>
 
 <div class="chat-wrapper">
@@ -226,8 +232,15 @@
                 @endphp
                 <div class="conversation-item {{ request()->route('id') == $conv->id ? 'active' : '' }}"
                      onclick="window.location.href='{{ route('nurse.chat.show', $conv->id) }}'">
-                    <img src="{{ asset($otherParticipant->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
-                         alt="{{ $otherParticipant->name }}" class="conversation-avatar">
+                    <div style="position: relative;">
+                        <img src="{{ $otherParticipant->profile_img
+                            ? asset('healthcareimg/uploads/' . $otherParticipant->profile_img)
+                            : 'nurse/assets/imgs/nurse06.png' }}"
+                             alt="{{ $otherParticipant->name }}" class="conversation-avatar">
+                        <span class="online-status {{ cache()->get('user_'.$otherParticipant->id.'_online', false) ? 'online' : 'offline' }}"
+                              data-user-id="{{ $otherParticipant->id }}"
+                              style="position: absolute; bottom: 0; right: 15px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff;"></span>
+                    </div>
                     <div class="conversation-info">
                         <div class="conversation-name">{{ $otherParticipant->name }} {{ $otherParticipant->lastname ?? '' }}</div>
                         <!-- @if($conv->job)
@@ -384,14 +397,15 @@
 </div>
 
 @push('scripts')
-<script src="{{ asset('build/assets/chat-baaabaae.js') }}"></script>
+@vite(['resources/js/chat.js'])
 <script>
 window.Laravel = {
     userId: {{ Auth::guard('nurse_middle')->id() }},
     userName: '{{ Auth::guard('nurse_middle')->user()->name }}',
     userEmail: '{{ Auth::guard('nurse_middle')->user()->email }}',
     userRole: {{ Auth::guard('nurse_middle')->user()->role }},
-    csrfToken: '{{ csrf_token() }}'
+    csrfToken: '{{ csrf_token() }}',
+    conversationId: {{ request()->route('id') ?? 'null' }}
 };
 
 // Load healthcare facilities when modal opens
@@ -464,12 +478,17 @@ $('#newConversationForm').on('submit', function(e) {
     });
 });
 
+// Initialize chat manager
+document.addEventListener('DOMContentLoaded', function() {
+    window.chatManager = new ChatManager(window.Laravel.conversationId || null);
+});
+
 @if(request()->route('id'))
 document.addEventListener('DOMContentLoaded', function() {
-    window.chatManager = new ChatManager({{ $conversation->id }});
-
     const chatMessages = document.getElementById('chatMessages');
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
 });
 
 document.getElementById('messageForm').addEventListener('submit', function(e) {

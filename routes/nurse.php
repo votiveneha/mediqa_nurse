@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\nurse\HomeController;
 use Illuminate\Http\Request;
+use App\Http\Controllers\medical_facilities\StripeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,15 +68,22 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
     Route::get('/my-profile', 'HomeController@manage_profile')->name('my-profile');
     Route::get('/users', 'SettingsController@index')->name('users');
     Route::get('/invite_users', 'SettingsController@invite_users')->name('invite_users');
-
+    Route::get('/find-nurse', 'FindNurseController@index')->name('job.find_nurse');
+    Route::post('/stripe/webhook', [StripeController::class, 'webhook']);
     Route::post('/inviteUser', 'SettingsController@inviteUser')->name('inviteUser');
+    Route::get('/compliance_security', 'SettingsController@compliance_security')->name('compliance_security');
     Route::get('/deactivateUser', 'SettingsController@deactivate_user')->name('deactivateUser');
     Route::get('/deleteUser', 'SettingsController@delete_user')->name('deleteUser');
     Route::get('/billing', 'SettingsController@billing')->name('billing');
     Route::get('/payment_page/{product_id}', 'SettingsController@payment_page')->name('payment_page');
     Route::post('/payment/process', 'SettingsController@process')->name('process');
+    Route::get('/subscribe/{price_id}', 'SettingsController@subscribe')->name('subscribe');
+    Route::get('/payment-success', 'SettingsController@success')->name('payment.success');
+    Route::get('/payment-cancel', 'SettingsController@cancel')->name('payment.cancel');
     Route::get('/invoices', 'SettingsController@invoices')->name('invoices');
     Route::get('/invoice/download/{id}', 'SettingsController@downloadInvoice')->name('invoice.download');
+    Route::get('/compliance_security', 'SettingsController@compliance_security')->name('compliance_security');
+    Route::get('/support', 'SettingsController@support')->name('support');
     Route::get('/job_posting', 'JobPostingController@job_posting')->name('job_posting');
     Route::get('/contract_pay', 'JobPostingController@contract_pay')->name('contract_pay');
     Route::post('/updateContractPay', 'JobPostingController@updateContractPay')->name('updateContractPay');

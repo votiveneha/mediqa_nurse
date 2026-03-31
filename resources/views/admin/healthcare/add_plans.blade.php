@@ -73,16 +73,19 @@
                             $price_id = "";
                         }
                     @endphp
+                    <input type="hidden" name="plan_id" value="@if(!empty($product)) {{ $product->plan_id }} @endif">
+                    <input type="hidden" name="product_id" value="@if(!empty($product)) {{ $product->stripe_product_id }} @endif">
+                    <input type="hidden" name="price_id" value="{{ $price_id }}">
                     <div class="form-group">
-                        <input type="hidden" name="product_id" value="@if(!empty($product)) {{ $product->id }} @endif">
-                        <input type="hidden" name="price_id" value="{{ $price_id }}">
+                        <input type="hidden" name="product_id" value="@if(!empty($product)) {{ $product->stripe_product_id }} @endif">
+                        
                         <label for="skill" class="d-flex gap-3 flex-wrap"><strong>Plan Name</strong></label>
                         <input type="text" class="form-control" placeholder="Plan Name" name="plan_name" id="plan_name" value="@if(!empty($product)) {{ $product->name }}@endif">
                         <span id="date_error" class="reqError text-danger valley "></span>
                     </div>
                     <div class="form-group mt-2">
                         <label for="skill" class="d-flex gap-3 flex-wrap"><strong>Slug</strong></label>
-                        <input type="text" class="form-control" placeholder="Slug" name="slug" id="slug" value="@if(!empty($product)) {{ $product->metadata->slug }}@endif">
+                        <input type="text" class="form-control" placeholder="Slug" name="slug" id="slug" value="@if(!empty($product)) {{ $product->slug }}@endif">
                         <span id="date_error" class="reqError text-danger valley "></span>
                     </div>
                     <div class="form-group mt-2">
@@ -92,19 +95,28 @@
                         <span id="date_error" class="reqError text-danger valley "></span>
                     </div>
                     <div class="form-group mt-2">
-                        
+                        @php
+                            if(!empty($product)){
+                                $price_data = DB::table("stripe_prices")->where("stripe_price_id",$product->default_price_id)->first();
+                                $unit_amount = $price_data->unit_amount/100;
+                            }else{
+                                $price_data = "";
+                                $unit_amount = "";
+                            }
+                            
+                        @endphp
                         <label for="skill" class="d-flex gap-3 flex-wrap"><strong>Monthly Price ($)</strong></label>
-                        <input type="number" class="form-control" placeholder="Monthly Price ($)" name="plan_monthly_price" id="plan_monthly_price" value="{{ $price1 }}">
+                        <input type="number" class="form-control" placeholder="Monthly Price ($)" name="plan_monthly_price" id="plan_monthly_price" value="@if(!empty($product)){{ $unit_amount }}@endif">
                         <span id="date_error" class="reqError text-danger valley "></span>
                     </div>
                     <div class="form-group mt-2">
                         <label for="skill" class="d-flex gap-3 flex-wrap"><strong>Yearly Price ($)</strong></label>
-                        <input type="number" class="form-control" placeholder="Yearly Price ($)" name="plan_yearly_price" id="plan_yearly_price">
+                        <input type="number" class="form-control" placeholder="Yearly Price ($)" name="plan_yearly_price" id="plan_yearly_price" value="@if(!empty($product)){{ $product->yearly_price }}@endif">
                         <span id="date_error" class="reqError text-danger valley "></span>
                     </div>
                     <div class="form-group mt-2">
                         <label for="skill" class="d-flex gap-3 flex-wrap"><strong>Trial Days</strong></label>
-                        <input type="number" class="form-control" placeholder="Trial Days" name="trial_days" id="trial_days" value="@if(!empty($product)){{ $product->metadata->trial_days }}@endif">
+                        <input type="number" class="form-control" placeholder="Trial Days" name="trial_days" id="trial_days" value="@if(!empty($product)){{ $product->trial_days }}@endif">
                         <span id="date_error" class="reqError text-danger valley "></span>
                     </div>
 
@@ -114,18 +126,18 @@
                                $employer_data = DB::table("employer_type")->where("status","1")->get(); 
 
                                if(!empty($product)){
-                                $employer_types = $product->metadata->employer_types;
+                                $employer_types = json_decode($product->employer_types);
 
-                                $emp_arr = explode(",",$employer_types);
-
-                                $emp_id_arr = [];
-
-                                foreach($emp_arr as $emparr){
-                                    $employername_data = DB::table("employer_type")->where("name",$emparr)->first();  
-                                    $emp_id_arr[] = $employername_data->id;
+                                $emp_name_arr = [];
+                                if(!empty($employer_types)){
+                                    foreach($employer_types as $emp_type){
+                                    
+                                        $emp_name_arr[] = $emp_type;
+                                    }
                                 }
+                                
 
-                                $emparrjson = json_encode($emp_id_arr);
+                                $emparrjson = json_encode($emp_name_arr);
                                }else{
                                 $emparrjson = "";
                                }     
@@ -152,12 +164,12 @@
                     </div>
                     <div class="form-group mt-2">
                         <label for="skill" class="d-flex gap-3 flex-wrap"><strong>Job Limit</strong></label>
-                        <input type="number" class="form-control" placeholder="Job Limit" name="job_limit" id="job_limit" value="@if(!empty($product)){{ $product->metadata->job_limit }}@endif">
+                        <input type="number" class="form-control" placeholder="Job Limit" name="job_limit" id="job_limit" value="@if(!empty($product)){{ $product->job_limits }}@endif">
                         <span id="date_error" class="reqError text-danger valley "></span>
                     </div>
                     <div class="form-group mt-2">
                         <label for="skill" class="d-flex gap-3 flex-wrap">
-                            <input type="checkbox" name="unlimited_jobs">
+                            <input type="checkbox" name="unlimited_jobs" @if(!empty($product) && $product->unlimited_jobs == 1) checked @endif>
                             <strong>Unlimited Jobs</strong>
                         </label>
                         
@@ -165,12 +177,12 @@
                     </div>
                     <div class="form-group mt-2">
                         <label for="skill" class="d-flex gap-3 flex-wrap"><strong>Recruiter Limit</strong></label>
-                        <input type="number" class="form-control" placeholder="Recruiter Limit" name="recruiter_limit" id="recruiter_limit" value="@if(!empty($product) && isset($product->metadata->recruiter_limit)){{ $product->metadata->recruiter_limit }} @endif">
+                        <input type="number" class="form-control" placeholder="Recruiter Limit" name="recruiter_limit" id="recruiter_limit" value="@if(!empty($product)){{ $product->recruiter_limits }}@endif">
                         <span id="date_error" class="reqError text-danger valley "></span>
                     </div>
                     <div class="form-group mt-2">
                         <label for="skill" class="d-flex gap-3 flex-wrap">
-                            <input type="checkbox" name="unlimited_recruiters">
+                            <input type="checkbox" name="unlimited_recruiters" @if(!empty($product) && $product->unlimited_recruiter == 1) checked @endif>
                             <strong>Unlimited Recruiters</strong>
                         </label>
                         
@@ -179,8 +191,8 @@
                     <div class="form-group mt-2">
                         <label for="skill" class="d-flex gap-3 flex-wrap"><strong>Status</strong></label>
                         <select name="status" class="form-control">
-                            <option value="true" @if(!empty($product) && $product->active == true) selected @endif>Active</option>
-                            <option value="false" @if(!empty($product) && $product->active == false) selected @endif>Inactive</option>
+                            <option value="1" @if(!empty($product) && $product->active == 1) selected @endif>Active</option>
+                            <option value="0" @if(!empty($product) && $product->active == 0) selected @endif>Inactive</option>
                         </select>
                         <span id="date_error" class="reqError text-danger valley "></span>
                     </div>
@@ -190,7 +202,11 @@
                         <span id="date_error" class="reqError text-danger valley "></span>
                     </div> -->
                     @php
-                        $selectedInterval = $prices->data[0]->recurring->interval ?? '';
+                        if(!empty($product)){
+                            $selectedInterval = $price_data->interval;
+                        }else{
+                            $selectedInterval = "";
+                        }
                     @endphp
                     <div class="form-group mt-2">
                         <label for="skill" class="d-flex gap-3 flex-wrap"><strong>Billing Cycle Enabled</strong></label>
@@ -339,7 +355,7 @@
         }
     });
 
-    editor_key_features.root.innerHTML = "@if(!empty($product) && isset($product->metadata->key_features)){!! $product->metadata->key_features !!} @endif";
+    editor_key_features.root.innerHTML = "@if(!empty($product) && isset($product->features)){!! $product->features !!} @endif";
     $('#key_features').val(editor_key_features.root.innerHTML);
 
     
@@ -384,7 +400,13 @@
                         title: 'Success',
                         text: "Plan added successfully",
                     }).then(function() {
-                        window.location.href = '{{ route("admin.add_plans") }}';
+                        if(res.product_id){
+                            var product_id = res.product_id;
+                            //.location.href = '{{ route("admin.update_plans",["id"=>'+product_id+']) }}';
+                        }else{
+                            window.location.href = '{{ route("admin.add_plans") }}';
+                        }
+                        
                     });
                 } else {
                     Swal.fire({

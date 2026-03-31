@@ -7,22 +7,31 @@ use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class MessageSent implements ShouldBroadcastNow
+class MessageSent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $message;
+    public $recipientId;
 
     /**
      * Create a new event instance.
      */
     public function __construct(Message $message)
     {
-        $this->message = $message->load('sender');
+        $this->message = $message->load('sender', 'conversation');
+
+        // Determine the recipient ID
+        $conversation = $this->message->conversation;
+        if ($this->message->sender_id == $conversation->nurse_id) {
+            $this->recipientId = $conversation->healthcare_id;
+        } else {
+            $this->recipientId = $conversation->nurse_id;
+        }
     }
 
     /**
@@ -34,6 +43,7 @@ class MessageSent implements ShouldBroadcastNow
     {
         return [
             new PrivateChannel('conversation.' . $this->message->conversation_id),
+            new PrivateChannel('user.' . $this->recipientId),
         ];
     }
 

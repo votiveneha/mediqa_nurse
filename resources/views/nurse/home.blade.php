@@ -161,6 +161,9 @@ body {
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .job-content {
@@ -409,6 +412,7 @@ body {
 .score-cards {
     padding: 20px;
     border-radius: 10px;
+    width: 100%;
 }
 
 .tooltip-circle {
@@ -615,7 +619,7 @@ body {
 
 /* Footer */
 .job-footer {
-    margin-top: 12px;
+    margin-top: auto;
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -665,6 +669,140 @@ body {
 
 .icon_modalRight i {
     font-size: 10px;
+}
+
+.box-image-job .img-job-2 {
+    position: absolute;
+    bottom: -70px;
+    right: -80px;
+    width: 300px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+    border-radius: 16px;
+}
+
+.sec-essential {
+    padding: 48px 0 100px;
+}
+
+.matching-hover {
+    padding: 0 !important;
+    width: auto !important;
+}
+
+.feature-card .tooltip_speciality_status li::after {
+    top: 14px !important;
+
+}
+
+/* card section 30/3/26  */
+/* SECTION */
+.section-card {
+    border-top: 1px solid #eee;
+    /* padding: 12px 0; */
+    transition: all ease-in-out .3s;
+}
+
+.section-card p {
+    position: relative;
+    padding-left: 22px;
+    margin-bottom: 6px;
+    color: #666;
+    /* display: inline-block; */
+    text-align: left;
+    font-weight: 500;
+}
+
+.section-card p::after {
+    content: "\f00c";
+    font-family: "FontAwesome";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    /* color: #50b5a3; */
+    color: #000;
+}
+
+/* HEADER */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.section-header i {
+    font-size: 10px;
+    /* margin-right: 10px; */
+}
+
+.section-title {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    font-size: 16px;
+    margin-right: 8px;
+}
+
+/* CHEVRON */
+.chevron {
+    transition: 0.3s;
+}
+
+.rotate {
+    transform: rotate(90deg);
+}
+
+/* CONTENT */
+.section-content {
+    max-height: 0;
+    overflow: hidden;
+    margin-top: 0;
+    background: #fff;
+    border-radius: 10px;
+    padding: 0 20px;
+    /* remove vertical padding initially */
+    opacity: 0;
+
+    transition:
+        max-height 0.4s ease,
+        opacity 0.3s ease,
+        padding 0.3s ease,
+        margin 0.3s ease;
+}
+
+/* OPEN STATE */
+.section-card.active .section-content {
+    max-height: fit-content;
+    /* adjust if needed */
+    opacity: 1;
+    margin-top: 10px;
+    padding: 10px 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+}
+
+.section-content p {
+    margin: 4px 0;
+    font-size: 14px;
+}
+
+.section-card.active .chevron {
+    transform: rotate(90deg);
+}
+
+/* CTA */
+.cta-btn {
+    background: #000;
+    color: #fff;
+    padding: 12px 30px;
+    border-radius: 8px;
+    margin-top: 30px;
+    display: inline-block;
+    font-weight: 600;
 }
 </style>
 <main class="main">
@@ -1113,9 +1251,12 @@ body {
                                                 <h1 class="hero-title">Find Jobs That Actually Match You</h1>
                                                 <p class="hero-text"> Powered by your preferences, credentials, and
                                                     flexibility.</p>
-                                                <p class="hero-text mt-4">No more endless scrolling. Mediqa uses your
+                                                <p class="hero-text mt-2">
+                                                    <!-- No more endless scrolling. Mediqa uses your
                                                     profile, compliance, and availability to show the roles you’re most
-                                                    likely to get. </p>
+                                                    likely to get.  -->
+                                                    No more endless scrolling or applying to jobs that don’t fit. 
+                                                </p>
                                                 <a class="btn btn-default btn-shadow hover-up mt-3">Create Your Free
                                                     Profile</a>
                                             </div>
@@ -1263,61 +1404,56 @@ body {
                         <div class="feature-card">
                             <div class="text-center">
                                 <svg width="90" height="90" viewBox="0 0 120 120">
-                                    <!-- Shield background -->
+
                                     <path d="M60 10 L100 28 V60 C100 85 78 104 60 110 C42 104 20 85 20 60 V28 Z"
                                         fill="#9fd6d3" stroke="#6fb8b5" stroke-width="4" />
-                                    <!-- Inner shield -->
+
                                     <path d="M60 25 L85 36 V58 C85 72 72 85 60 90 C48 85 35 72 35 58 V36 Z"
                                         fill="#2b7c84" />
-                                    <!-- Medical cross -->
+
                                     <circle cx="80" cy="70" r="10" fill="#ffffff" />
                                     <rect x="78" y="64" width="4" height="12" fill="#2b7c84" />
                                     <rect x="74" y="68" width="12" height="4" fill="#2b7c84" />
                                 </svg>
                             </div>
-                            <!-- <h4>Your Specialty. Your Growth. Your Environment.</h4> -->
+
                             <h4>Your Role, Growth & Environment </h4>
 
                             <div class="nurse-card">
-                                <!-- <h5>
-                                    <i class="fa fa-user-md mr-2" aria-hidden="true"></i> Type of Nurse
-                                </h5> -->
                                 <ul>
-                                    <li>Type of Nurse
+                                    <li class="d-flex gap-2 justify-content-between">Type of Nurse
                                         <span>
                                             <a href="javascript:void(0)" class="browse_menu flyout icon_modalRight"
                                                 data-open="typeOfNurseModal">
-                                                <!-- + see more -->
+
                                                 <i class="fa fa-play" aria-hidden="true"></i>
                                             </a>
                                         </span>
 
                                     </li>
-                                    <li class="d-flex gap-2">Primary Specialty
-                                        
-                                            <a href="javascript:void(0)" class="browse_menu flyout icon_modalRight"
-                                                data-open="primarySpecialty">
-                                                <!-- + see more -->
-                                                <i class="fa fa-play" aria-hidden="true"></i>
-                                            </a>
-                                        
-                                    </li>
-                                    {{-- <li>Primary Specialty
+                                    <li class="d-flex gap-2 justify-content-between">Primary Specialty
 
-                                  
-                                    </li> --}}
+                                        <a href="javascript:void(0)" class="browse_menu flyout icon_modalRight"
+                                            data-open="primarySpecialty">
+
+                                            <i class="fa fa-play" aria-hidden="true"></i>
+                                        </a>
+
+                                    </li>
+                                    <li class="d-flex gap-2 justify-content-between">Willing to Upskill
+                                        <a href="javascript:void(0)" class="browse_menu flyout icon_modalRight"
+                                            data-open="willingtoUpskill">
+
+                                            <i class="fa fa-play" aria-hidden="true"></i>
+                                        </a>
+                                    </li>
                                     {{-- <a href="#" data-toggle="modal" data-target="#filterModal">
                                             see more
                                         </a> --}}
-                                    <!-- <div class="more-btn">
-                                        <a href="javascript:void(0)" class="browse_menu flyout"
-                                            data-open="typeOfNurseModal">
-                                             <i class="fa fa-play" aria-hidden="true"></i>
-                                        </a>
-                                    </div> -->
+
                                 </ul>
                             </div>
-                            <hr class="hr-bg">
+                            <!-- <hr class="hr-bg">
                             <div class="nurse-card">
                                 <h5>
                                     <i class="fa fa-level-up" aria-hidden="true"></i> Willing to Upskill
@@ -1326,43 +1462,70 @@ body {
                                     <li>Location </li>
                                     <li>Primary Specialty</li>
                                 </ul>
-                            </div>
+                            </div> -->
 
                             <hr class="hr-bg">
 
                             <div class="nurse-card">
-                                <h5>
-                                    <i class="fa fa-graduation-cap" aria-hidden="true"></i> Graduate Friendly
-                                </h5>
-                                <ul>
+                                <!-- <div class="section-header" onclick="toggle(this)">
+                                    <h5>
+                                        <i class="fa fa-graduation-cap" aria-hidden="true"></i> Graduate Friendly
+                                    </h5>
+                                    <i class="fa fa-play" aria-hidden="true"></i>
+                                </div>
+                                <ul class="section-content">
                                     <li>Residencies</li>
                                     <li>Fellowships</li>
                                     <li>Sponsorship</li>
-                                </ul>
+                                </ul> -->
+                                <div class="section-card">
+                                    <div class="section-header" onclick="toggle(this)">
+                                        <div class="section-title">
+                                            <i class="fas fa-globe"></i> International Opportunities
+                                        </div>
+                                        <i class="fa fa-play chevron"></i>
+                                    </div>
+                                    <div class="section-content">
+                                        <p>Countries of interest</p>
+                                        <p>Sponsorship</p>
+                                        <p>Bridging program</p>
+                                        <p>Supervised practice</p>
+                                    </div>
+                                </div>
                             </div>
                             <hr class="hr-bg">
                             <div class="nurse-card">
-                                <h5>
+                                <!-- <h5>
                                     <i class="fa fa-users" aria-hidden="true"></i> Work Environment
                                 </h5>
                                 <ul>
                                     <li>Location Preferences
-                                         <span>
+                                        <span>
                                             <a href="javascript:void(0)" class="browse_menu flyout icon_modalRight"
                                                 data-open="workEnvironment">
-                                                <!-- + see more -->
                                                 <i class="fa fa-play" aria-hidden="true"></i>
                                             </a>
                                         </span>
 
                                     </li>
-                                    {{-- <li>Preferences</li> --}}
-                                </ul>
-                                <!-- <div class="more-btn">
-                                    <a href="javascript:void(0)" class="browse_menu flyout" data-open="workEnvironment">
-                                        + see more
-                                    </a>
-                                </div> -->
+                                 
+                                </ul> -->
+                                <div class="section-card">
+                                    <div class="section-header" onclick="toggle(this)">
+                                        <div class="section-title">
+                                            <i class="fa fa-graduation-cap" aria-hidden="true"></i> Career Growth
+                                        </div>
+                                        <i class="fa fa-play chevron"></i>
+                                    </div>
+                                    <div class="section-content">
+                                        <p>Graduate Positions </p>
+                                        <p>Student Positions </p>
+                                        <p>Residencies </p>
+                                        <p>Fellowships </p>
+                                        <p>Paid CPD </p>
+                                        <p>Willing to Upskill </p>
+                                    </div>
+                                </div>
                             </div>
 
                             {{-- <ul>
@@ -1377,7 +1540,6 @@ body {
                         <div class="feature-card">
                             <div class="text-center">
                                 <svg width="90" height="90" viewBox="0 0 120 120">
-                                    <!-- Heart -->
                                     <path
                                         d="M60 22
                                                                                                                                     C60 18 55 14 50 18
@@ -1385,42 +1547,69 @@ body {
                                                                                                                                     C72 30 75 22 70 18
                                                                                                                                     C65 14 60 18 60 22Z"
                                         fill="#ff6b6b" />
-                                    <!-- Briefcase -->
+
                                     <rect x="25" y="45" width="70" height="45" rx="6" fill="#4a5f73" />
-                                    <!-- Handle -->
+
                                     <rect x="45" y="35" width="30" height="12" rx="4" fill="#4a5f73" />
-                                    <!-- Lock -->
+
                                     <rect x="56" y="65" width="8" height="8" fill="#f6c64f" />
                                 </svg>
                             </div>
                             <div class="nurse-card">
                                 <h4>Work That Fits Your Life</h4>
-                                <div class="d-flex gap-3 flex-wrap">
-                                    <div class="nurse-card">
-                                        <h5>
+                                <!-- <div class="d-flex gap-3 flex-wrap"> -->
+                                <div class="nurse-card">
+                                    <!-- <h5>
                                             <i class="fa fa-plus-square" aria-hidden="true"></i>Sector
                                         </h5>
                                         <ul>
                                             <li>Public</li>
                                             <li>Government</li>
                                             <li>Private</li>
-                                        </ul>
+                                        </ul> -->
+                                    <div class="section-card">
+                                        <div class="section-header" onclick="toggle(this)">
+                                            <div class="section-title">
+                                                <i class="fa fa-graduation-cap" aria-hidden="true"></i> Career
+                                                Growth
+                                            </div>
+                                            <i class="fa fa-play chevron"></i>
+                                        </div>
+                                        <div class="section-content">
+                                            <p>Public / Government </p>
+                                            <p>Private</p>
+                                        </div>
                                     </div>
-                                    <div class="nurse-card">
-                                        <h5>
+                                </div>
+                                <hr class="hr-bg">
+                                <div class="nurse-card">
+                                    <!-- <h5>
                                             <i class="fa fa-file-text-o" aria-hidden="true"></i> Employment Type
                                         </h5>
                                         <ul>
                                             <li>Permanent </li>
                                             <li>Fixed-term </li>
                                             <li>Temporary </li>
-                                        </ul>
+                                        </ul> -->
+                                    <div class="section-card">
+                                        <div class="section-header" onclick="toggle(this)">
+                                            <div class="section-title">
+                                                <i class="fa fa-file-text-o" aria-hidden="true"></i> Employment Type
+                                            </div>
+                                            <i class="fa fa-play chevron"></i>
+                                        </div>
+                                        <div class="section-content">
+                                            <p>Permanent </p>
+                                            <p>Fixed-term </p>
+                                            <p>Temporary </p>
+                                        </div>
                                     </div>
                                 </div>
-                                <!-- <hr class="hr-bg"> -->
+                                <!-- </div> -->
+
                                 <hr class="hr-bg">
                                 <div class="nurse-card">
-                                    <h5>
+                                    <!-- <h5>
                                         <i class="fa fa-bars" aria-hidden="true"></i>Shift Structure
                                     </h5>
                                     <ul class="shift-list">
@@ -1434,12 +1623,31 @@ body {
                                         <li class="extra-shift">Maternity & Midwifery Shift</li>
                                         <li class="extra-shift">Days Off</li>
                                         <li class="extra-shift">Specific Days Off</li>
-                                    </ul>
-                                    <div class="more-btn">
-                                        <a href="javascript:void(0)" class="show-more-btn">+ See more</a>
+                                    </ul> -->
+                                    <div class="section-card">
+                                        <div class="section-header" onclick="toggle(this)">
+                                            <div class="section-title">
+                                                <i class="fa fa-bars" aria-hidden="true"></i> Shift Structure
+                                            </div>
+                                            <i class="fa fa-play chevron"></i>
+                                        </div>
+                                        <div class="section-content">
+                                            <p>Shift Types </p>
+                                            <p>Shift Length </p>
+                                            <p>Schedule Model </p>
+                                            <p>Weekly Work Patterns </p>
+                                            <p>Shift Rotation & Cycle</p>
+                                            <p>Non-Traditional Shift</p>
+                                            <p>Maternity & Midwifery Shift </p>
+                                            <p>Days Off </p>
+                                            <p>Specific Days Off</p>
+                                        </div>
                                     </div>
+                                    <!-- <div class="more-btn">
+                                        <a href="javascript:void(0)" class="show-more-btn">+ See more</a>
+                                    </div> -->
                                 </div>
-                                <!-- <ul><li>Public / Government / Private</li><li>Permanent / Temporary</li><li>Shift Structure</li><li>Schedule Model</li></ul> -->
+
                             </div>
                         </div>
                     </div>
@@ -1447,25 +1655,25 @@ body {
                         <div class="feature-card">
                             <div class="text-center">
                                 <svg width="90" height="90" viewBox="0 0 120 120">
-                                    <!-- Clipboard -->
+
                                     <rect x="35" y="30" width="55" height="70" rx="8" fill="#eef1f5" stroke="#b8c0cc"
                                         stroke-width="3" />
-                                    <!-- Clip -->
+
                                     <rect x="50" y="20" width="25" height="15" rx="4" fill="#5a6573" />
-                                    <!-- Paper lines -->
+
                                     <line x1="45" y1="55" x2="80" y2="55" stroke="#8a94a3" stroke-width="3" />
                                     <line x1="45" y1="68" x2="80" y2="68" stroke="#8a94a3" stroke-width="3" />
                                     <line x1="45" y1="81" x2="70" y2="81" stroke="#8a94a3" stroke-width="3" />
-                                    <!-- Coin -->
+
                                     <circle cx="40" cy="60" r="15" fill="#f6c64f" />
                                     <text x="40" y="65" text-anchor="middle" font-size="16" fill="#2c3e50">$</text>
                                 </svg>
                             </div>
                             <div class="nurse-card">
                                 <h4>Extra Tags</h4>
-                                <div class="d-flex gap-3 flex-wrap">
-                                    <div class="nurse-card">
-                                        <h5>
+                                <!-- <div class="d-flex gap-3 flex-wrap"> -->
+                                <div class="nurse-card">
+                                    <!-- <h5>
                                             <i class="fa fa-suitcase" aria-hidden="true"></i>Financial
                                         </h5>
                                         <ul class="shift-list">
@@ -1476,10 +1684,26 @@ body {
                                         </ul>
                                         <div class="more-btn">
                                             <a href="javascript:void(0)" class="show-more-btn">+ See more</a>
+                                        </div> -->
+                                    <div class="section-card">
+                                        <div class="section-header" onclick="toggle(this)">
+                                            <div class="section-title">
+                                                <i class="fa fa-suitcase" aria-hidden="true"></i>Financial
+                                            </div>
+                                            <i class="fa fa-play chevron"></i>
+                                        </div>
+                                        <div class="section-content">
+                                            <p>Overtime</p>
+                                            <p>Shift Loading </p>
+                                            <p>Bonuses</p>
+                                            <p>Sign-On Bonus </p>
+                                            <p>Leave Benefits </p>
                                         </div>
                                     </div>
-                                    <div class="nurse-card">
-                                        <h5>
+                                </div>
+                                <hr class="hr-bg">
+                                <div class="nurse-card">
+                                    <!-- <h5>
                                             <i class="fa fa-file" aria-hidden="true"></i> Work-Life:
                                         </h5>
                                         <ul class="shift-list">
@@ -1491,62 +1715,109 @@ body {
                                         </ul>
                                         <div class="more-btn">
                                             <a href="javascript:void(0)" class="show-more-btn">+ See more</a>
+                                        </div> -->
+                                    <div class="section-card">
+                                        <div class="section-header" onclick="toggle(this)">
+                                            <div class="section-title">
+                                                <i class="fa fa-file" aria-hidden="true"></i> Work-Life:
+                                            </div>
+                                            <i class="fa fa-play chevron"></i>
+                                        </div>
+                                        <div class="section-content">
+                                            <p>Flexible Rosters </p>
+                                            <p>Self-Scheduling</p>
+                                            <p>Paid Time Off</p>
+                                            <p>Work-from-Home</p>
+                                            <p>Childcare</p>
                                         </div>
                                     </div>
+
                                 </div>
+                                <!-- </div> -->
                                 <hr class="hr-bg">
-                                <div class="d-flex gap-3 flex-wrap">
-                                    <div class="nurse-card">
-                                        <h5>
-                                            <i class="fa fa-sun-o" aria-hidden="true"></i> Career Growth
-                                        </h5>
-                                        <ul class="shift-list">
-                                            <li>Paid CPD </li>
-                                            <li>Residencies </li>
-                                            <li class="extra-shift">Fellowships </li>
-                                            <li class="extra-shift">Graduate </li>
-                                            <li class="extra-shift">Friendly</li>
-                                            <li class="extra-shift">Student Friendly </li>
-                                        </ul>
-                                        <div class="more-btn">
-                                            <a href="javascript:void(0)" class="show-more-btn">+ See more</a>
+                                <!-- <div class="d-flex gap-3 flex-wrap"> -->
+                                <!-- <div class="nurse-card">
+                                    <h5>
+                                        <i class="fa fa-sun-o" aria-hidden="true"></i> Career Growth
+                                    </h5>
+                                    <ul class="shift-list">
+                                        <li>Paid CPD </li>
+                                        <li>Residencies </li>
+                                        <li class="extra-shift">Fellowships </li>
+                                        <li class="extra-shift">Graduate </li>
+                                        <li class="extra-shift">Friendly</li>
+                                        <li class="extra-shift">Student Friendly </li>
+                                    </ul>
+                                    <div class="more-btn">
+                                        <a href="javascript:void(0)" class="show-more-btn">+ See more</a>
+                                    </div>
+                                </div> -->
+                                <div class="nurse-card">
+                                    <!-- <h5>
+                                        <i class="fa fa-globe" aria-hidden="true"></i> Travel & Support
+                                    </h5>
+                                    <ul class="shift-list">
+                                        <li>Relocation </li>
+                                        <li>Housing</li>
+                                        <li class="extra-shift">Travel Allowance</li>
+                                        <li class="extra-shift">Sponsorship</li>
+                                        <li class="extra-shift">Paid Flights </li>
+                                        <li class="extra-shift">Car allowance</li>
+                                        <li class="extra-shift">Fuel allowance </li>
+                                    </ul>
+                                    <div class="more-btn">
+                                        <a href="javascript:void(0)" class="show-more-btn">+ See more</a>
+                                    </div> -->
+                                    <div class="section-card">
+                                        <div class="section-header" onclick="toggle(this)">
+                                            <div class="section-title">
+                                                <i class="fa fa-globe" aria-hidden="true"></i> Travel & Support
+                                            </div>
+                                            <i class="fa fa-play chevron"></i>
+                                        </div>
+                                        <div class="section-content">
+                                            <p>Relocation</p>
+                                            <p>Housing</p>
+                                            <p>Travel Allowance </p>
+                                            <p>Sponsorship</p>
+                                            <p>Paid Flights </p>
+                                            <p>Car allowance </p>
+                                            <p>Fuel allowance </p>
                                         </div>
                                     </div>
-                                    <div class="nurse-card">
-                                        <h5>
-                                            <i class="fa fa-globe" aria-hidden="true"></i> Travel & Support
-                                        </h5>
-                                        <ul class="shift-list">
-                                            <li>Relocation </li>
-                                            <li>Housing</li>
-                                            <li class="extra-shift">Travel Allowance</li>
-                                            <li class="extra-shift">Sponsorship</li>
-                                            <li class="extra-shift">Paid Flights </li>
-                                            <li class="extra-shift">Car allowance</li>
-                                            <li class="extra-shift">Fuel allowance </li>
-                                        </ul>
-                                        <div class="more-btn">
-                                            <a href="javascript:void(0)" class="show-more-btn">+ See more</a>
-                                        </div>
-                                    </div>
+
                                 </div>
+                                <!-- </div> -->
                                 <hr class="hr-bg">
-                                <div class="d-flex gap-3 flex-wrap">
-                                    <div class="nurse-card">
-                                        <h5>
+                                <!-- <div class="d-flex gap-3 flex-wrap"> -->
+                                <div class="nurse-card">
+                                    <!-- <h5>
                                             <i class="fa fa-lock" aria-hidden="true"></i> Protection
                                         </h5>
                                         <ul>
                                             <li>PII</li>
                                             <li>EAP</li>
                                             <li>PPE Provided</li>
-                                        </ul>
+                                        </ul> -->
+                                    <div class="section-card">
+                                        <div class="section-header" onclick="toggle(this)">
+                                            <div class="section-title">
+                                                <i class="fa fa-lock" aria-hidden="true"></i> Protection
+                                            </div>
+                                            <i class="fa fa-play chevron"></i>
+                                        </div>
+                                        <div class="section-content">
+                                            <p>PII </p>
+                                            <p>EAP</p>
+                                            <p>PPE Provided </p>
+                                        </div>
                                     </div>
+
                                 </div>
+                                <!-- </div> -->
                             </div>
                         </div>
                     </div>
-
                     <div class="text-center">
                         <a href='#' class="btn btn-default btn-shadow hover-up mt-15">Create Your Free Profile</a>
                     </div>
@@ -1564,10 +1835,10 @@ body {
                             <div class="d-flex mb-3">
                                 <div class="ml-3">
                                     <h5>Build Your Profile - 100% Free</h5>
-                                    <div class="mt-2">
+                                    <!-- <div class="mt-2">
                                         <p>Your qualifications and preferences become your matching blueprint</p>
                                         <p>Data securely stored and ready: </p>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
                             <div class="card-box">
@@ -1575,14 +1846,14 @@ body {
                                     {{-- </span> --}}
                                     {{-- <label class="form-label"> --}}
                                     Specialty Status
-                                    <span class="tooltip-container">
+                                    <span class="tooltip-container feature-card matching-hover">
                                         <span class="info tooltip-btn tooltip-circle">
                                             <i class="fa fa-info info-icon" aria-hidden="true"></i>
                                         </span>
-                                        <div class="tooltip_speciality_status">
+                                        <div class="tooltip_speciality_status ">
                                             <ul>
-                                                <li><strong>For every specialty you choose, tell us how it fits into
-                                                        your career today: </strong></li>
+                                                <!-- <li><strong>For every specialty you choose, tell us how it fits into
+                                                        your career today: </strong></li> -->
                                                 <li><strong>Principal :</strong> Your main area of practice </li>
                                                 <li><strong>Current :</strong> Actively practising in this specialty
                                                 </li>
@@ -1602,7 +1873,7 @@ body {
                                 <div class="list-item">
                                     {{-- <label class="form-label"> --}}
                                     Registration & Licences
-                                    <span class="tooltip-container">
+                                    <span class="tooltip-container feature-card matching-hover">
                                         <span class="info tooltip-btn tooltip-circle">
                                             <i class="fa fa-info info-icon" aria-hidden="true"></i>
                                         </span>
@@ -1626,7 +1897,7 @@ body {
                                 </div>
                                 <div class="list-item">
                                     Checks & Clearances
-                                    <span class="tooltip-container">
+                                    <span class="tooltip-container feature-card matching-hover">
                                         <span class="info tooltip-btn tooltip-circle">
                                             <i class="fa fa-info info-icon" aria-hidden="true"></i>
                                         </span>
@@ -1647,7 +1918,7 @@ body {
                                 </div>
                                 <div class="list-item">
                                     General Certifications
-                                    <span class="tooltip-container">
+                                    <span class="tooltip-container feature-card matching-hover">
                                         <span class="info tooltip-btn tooltip-circle">
                                             <i class="fa fa-info info-icon" aria-hidden="true"></i>
                                         </span>
@@ -1670,14 +1941,34 @@ body {
                                     </span>
                                 </div>
                                 <div class="list-item">
-                                    Vaccination
-                                    <span class="tooltip-container">
+                                    Mandatory Training
+                                    <span class="tooltip-container feature-card matching-hover">
                                         <span class="info tooltip-btn tooltip-circle">
                                             <i class="fa fa-info info-icon" aria-hidden="true"></i>
                                         </span>
                                         <div class="tooltip_speciality_status">
                                             <ul>
-                                                <li>State-specific: Each state has a predefined vaccination profile.
+                                                <li>Clinical Skills
+                                                </li>
+                                                <li>Midwifery </li>
+                                                <li>Leadership </li>
+                                                <li>Technology </li>
+                                                <li>Wellness </li>
+                                                <li>NDIS </li>
+                                            </ul>
+                                        </div>
+                                    </span>
+                                </div>
+                                <div class="list-item">
+                                    Vaccination
+                                    <span class="tooltip-container feature-card matching-hover">
+                                        <span class="info tooltip-btn tooltip-circle">
+                                            <i class="fa fa-info info-icon" aria-hidden="true"></i>
+                                        </span>
+                                        <div class="tooltip_speciality_status">
+                                            <ul>
+                                                <li>State-specific
+                                                    <!-- Each state has a predefined vaccination profile. -->
                                                 </li>
                                                 <li>System-defined</li>
                                             </ul>
@@ -1686,28 +1977,35 @@ body {
                                 </div>
                                 <div class="list-item">
                                     Shift & Lifestyle Preferences
-                                    <span class="tooltip-container">
+                                    <span class="tooltip-container feature-card matching-hover">
                                         <span class="info tooltip-btn tooltip-circle">
                                             <i class="fa fa-info info-icon" aria-hidden="true"></i>
                                         </span>
                                         <div class="tooltip_speciality_status">
                                             <ul>
-                                                <li>Day or night shifts? Fixed roster? Self-scheduling? Weekends off?
-                                                    Your flexibility shapes your opportunities. </li>
+                                                <li>Shift Types </li>
+                                                <li>Shift Length</li>
+                                                <li>Schedule Model </li>
+                                                <li>Weekly Patterns</li>
+                                                <li>Shift Rotation & Cycle </li>
+                                                <li>Specialty & Non-Traditional Shift </li>
+                                                <li>Maternity & Midwifery Shift </li>
+                                                <li>Days Off </li>
                                             </ul>
                                         </div>
                                     </span>
                                 </div>
                                 <div class="list-item">
                                     Location Radius
-                                    <span class="tooltip-container">
+                                    <span class="tooltip-container feature-card matching-hover">
                                         <span class="info tooltip-btn tooltip-circle">
                                             <i class="fa fa-info info-icon" aria-hidden="true"></i>
                                         </span>
                                         <div class="tooltip_speciality_status">
                                             <ul>
-                                                <li>Choose where you’re willing to work: suburb, state, relocation, or
-                                                    international. </li>
+                                                <li>Suburb </li>
+                                                <li>State </li>
+                                                <li>International </li>
                                             </ul>
                                         </div>
                                     </span>
@@ -1721,7 +2019,7 @@ body {
                             <div class="bg-white score-cards flex-fill ">
                                 <div class="d-flex mb-3">
                                     <div class="ml-3">
-                                        <h5>Intelligent Match % scoring</h5>
+                                        <h5>Intelligent Match Scoring</h5>
                                     </div>
                                 </div>
                                 <div class="card-box">
@@ -1729,9 +2027,12 @@ body {
                                         {{-- </span> --}}
                                         {{-- <label class="form-label"> --}}
                                         Every job is scored against your real profile, not keywords.
+                                        We don’t rely on CV text. We measure alignment across 7 key factors
+                                        Each factor is weighted.
+                                        Each job is evaluated in real time.
 
-                                        We don’t guess based on CV text
-                                        <span class="tooltip-container">
+                                        <!-- We don’t guess based on CV text -->
+                                        <span class="tooltip-container feature-card matching-hover">
                                             <span class="info tooltip-btn tooltip-circle">
                                                 <i class="fa fa-info info-icon" aria-hidden="true"></i>
                                             </span>
@@ -1756,6 +2057,29 @@ body {
                                         </span>
                                         {{-- </label> --}}
                                     </div>
+                                     <div class="list-item">
+                                        {{-- </span> --}}
+                                        {{-- <label class="form-label"> --}}
+                                       When you see a high match, you know why. 
+                                        <span class="tooltip-container feature-card matching-hover">
+                                            <span class="info tooltip-btn tooltip-circle">
+                                                <i class="fa fa-info info-icon" aria-hidden="true"></i>
+                                            </span>
+                                            <div class="tooltip_speciality_status">
+                                                <ul>
+                                                    <li>Specialty & role fit 
+                                                    </li>
+                                                    <li>Experience by specialty </li>
+                                                    <li>Registration & endorsements</li>
+                                                    <li>Compliance readiness (vaccines, checks, training) </li>
+                                                    <li>Shift compatibility </li>
+                                                    <li>Location & travel radius </li>
+                                                    <li>Benefits alignment </li>
+                                                </ul>
+                                            </div>
+                                        </span>
+                                        {{-- </label> --}}
+                                    </div>
                                 </div>
                             </div>
                             <div class="bg-white score-cards mt-4 flex-fill">
@@ -1769,30 +2093,34 @@ body {
                                         {{-- </span> --}}
                                         {{-- <label class="form-label"> --}}
                                         Move Faster, High-match candidates stand out immediately
-                                        <span class="tooltip-container">
+                                        <span class="tooltip-container feature-card matching-hover">
                                             <span class="info tooltip-btn tooltip-circle">
                                                 <i class="fa fa-info info-icon" aria-hidden="true"></i>
                                             </span>
                                             <div class="tooltip_speciality_status">
                                                 <ul>
-                                                    <li><Strong>Medical facilities and Agencies can see your: </Strong>
-                                                    </li>
+                                                    <!-- <li><Strong>Medical facilities and Agencies can see your: </Strong>
+                                                    </li> -->
                                                     <li>Verified registration </li>
                                                     <li>Compliance readiness </li>
                                                     <li>Specialty alignment </li>
                                                     <li>Shift compatibility </li>
-                                                    <li>That means fewer delays, and faster decisions. </li>
+                                                    <!-- <li>That means fewer delays, and faster decisions. </li> -->
                                                 </ul>
                                             </div>
                                         </span>
                                         {{-- </label> --}}
                                     </div>
-                                    <p>Receive Instant Opportunities </p>
+                                    <!-- <p>Receive Instant Opportunities </p> -->
+                                     <div class="ml-3 mb-3">
+                                        <h5>Receive Instant Opportunities</h5>
+                                    </div>
+                                    
                                     <div class="list-item">
                                         {{-- </span> --}}
                                         {{-- <label class="form-label"> --}}
                                         When timing matters, MediQa makes it visible.
-                                        <span class="tooltip-container">
+                                        <span class="tooltip-container feature-card matching-hover">
                                             <span class="info tooltip-btn tooltip-circle">
                                                 <i class="fa fa-info info-icon" aria-hidden="true"></i>
                                             </span>
@@ -1815,7 +2143,7 @@ body {
             </div>
 
         </section>
-        <section class="bg-white overflow-visible py-5">
+        <!-- <section class="bg-white overflow-visible py-5">
             <div class="container">
                 <h2 class="text-center"> Create Your Professional Profile </h2>
                 <div class="row align-items-center pt-scroll">
@@ -1847,14 +2175,14 @@ body {
                     </div>
                 </div>
             </div>
-        </section>
-  <!-- LATEST JOBS -->
-        <section class="jobs py-5">
+        </section> -->
+        <!-- LATEST JOBS -->
+        <section class="bg-white jobs py-5">
             <div class="container">
                 <h2 class="text-center">Latest Jobs</h2>
                 <div class="row mt-15">
                     <!-- JOB CARD -->
-        
+
                     <div class="col-lg-4 col-md-6 d-flex">
                         <div class="job-card w-100 mb-4">
                             <!-- Header -->
@@ -1874,7 +2202,7 @@ body {
                                         <i class="far fa-circle"></i> {{ $jobs['permanent']->employment_type }}
                                     </span>
                                 </div>
-        
+
                             </div>
                             <div class="nurse-salary mt-2">
                                 @php
@@ -1897,7 +2225,7 @@ body {
                                 <span>{{ $min }} - {{ $max }} {{ $per }}</span>
                                 @endif
                             </div>
-        
+
                             <!-- Shift Dates -->
                             @php
                             $startDate = Carbon::parse($jobs['permanent']->created_at);
@@ -1929,7 +2257,7 @@ body {
                                 {{ $date_range }}
                             </div>
                             <!-- Bullet Details -->
-        
+
                             <!-- Footer -->
                             <div class="job-footer">
                                 <a href="{{route('nurse.login')}}"> <button class="btn nurse-apply-btn text-white">
@@ -1946,43 +2274,43 @@ body {
                     </div>
                     <div class="col-lg-4 col-md-6 d-flex">
                         <div class="job-card w-100 mb-4">
-        
+
                             <div class="d-flex justify-content-between gap-2">
                                 <div class="job-title mb-0">{{$jobs['fixed']->job_title}}</div>
                                 <span class="badge badge-fixed-term">Fixed Term</span>
                             </div>
-        
+
                             <div class="d-flex justify-content-between align-items-center mt-2">
                                 <div class="d-flex gap-4">
                                     <span class="job-meta mr-3">
                                         <i class="fas fa-map-marker-alt"></i>
                                         {{ $jobs['fixed']->state_name }},{{ $jobs['fixed']->country_name }}
                                     </span>
-        
+
                                     <span class="job-meta">
                                         <i class="far fa-circle"></i> {{ $jobs['fixed']->employment_type }}
                                     </span>
                                 </div>
                             </div>
-        
+
                             <div class="nurse-salary mt-2">
-        
+
                                 @php
                                 $min = $jobs['fixed']->fixed_term_salary_min;
                                 $max = $jobs['fixed']->fixed_term_salary_max;
                                 $per = $jobs['fixed']->salary_range_fix_term;
                                 @endphp
-        
+
                                 @if(!empty($min))
                                 <span class="salary">$</span>
                                 <span>{{ $min }} - {{ $max }} {{ $per }}</span>
                                 @endif
-        
+
                             </div>
-        
+
                             @php
                             $startDate = Carbon::parse($jobs['fixed']->created_at);
-        
+
                             switch ($jobs['fixed']->expiry_date) {
                             case 1: $endDate = $startDate->copy()->addDays(7); break;
                             case 2: $endDate = $startDate->copy()->addDays(14); break;
@@ -1991,73 +2319,73 @@ body {
                             case 5: $endDate = Carbon::parse($jobs['fixed']->custom_expiry_date); break;
                             default: $endDate = null;
                             }
-        
+
                             $start = $startDate->format('d M Y');
                             $end = $endDate ? $endDate->format('d M Y') : '';
                             @endphp
-        
+
                             <div class="job-meta mt-1">
                                 {{ $start }} – {{ $end }}
                             </div>
-        
+
                             <div class="job-footer">
                                 <a href="{{route('nurse.login')}}">
                                     <button class="btn nurse-apply-btn text-white">
                                         Complete Credentials to Apply
                                     </button>
                                 </a>
-        
+
                                 <div>
                                     <a href="#" class="d-flex gap-2">
                                         <span><i class="fa fa-bookmark-o"></i></span>
                                         Details
                                     </a>
                                 </div>
-        
+
                             </div>
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 d-flex">
                         <div class="job-card w-100 mb-4">
-        
+
                             <div class="d-flex justify-content-between gap-2">
                                 <div class="job-title mb-0">{{$jobs['temporary']->job_title}}</div>
                                 <span class="badge badge-temporary">Temporary</span>
                             </div>
-        
+
                             <div class="d-flex justify-content-between align-items-center mt-2">
                                 <div class="d-flex gap-4">
-        
+
                                     <span class="job-meta mr-3">
                                         <i class="fas fa-map-marker-alt"></i>
                                         {{ $jobs['temporary']->state_name }},{{ $jobs['temporary']->country_name }}
                                     </span>
-        
+
                                     <span class="job-meta">
                                         <i class="far fa-circle"></i> {{ $jobs['temporary']->employment_type }}
                                     </span>
-        
+
                                 </div>
                             </div>
-        
+
                             <div class="nurse-salary mt-2">
-        
+
                                 @php
                                 $min = $jobs['temporary']->temporary_salary_min;
                                 $max = $jobs['temporary']->temporary_salary_max;
                                 $per = $jobs['temporary']->salary_range_temporary;
                                 @endphp
-        
+
                                 @if(!empty($min))
                                 <span class="salary">$</span>
                                 <span>{{ $min }} - {{ $max }} {{ $per }}</span>
                                 @endif
-        
+
                             </div>
-        
+
                             @php
                             $startDate = Carbon::parse($jobs['temporary']->created_at);
-        
+
                             switch ($jobs['temporary']->expiry_date) {
                             case 1: $endDate = $startDate->copy()->addDays(7); break;
                             case 2: $endDate = $startDate->copy()->addDays(14); break;
@@ -2066,29 +2394,29 @@ body {
                             case 5: $endDate = Carbon::parse($jobs['temporary']->custom_expiry_date); break;
                             default: $endDate = null;
                             }
-        
+
                             $start = $startDate->format('d M Y');
                             $end = $endDate ? $endDate->format('d M Y') : '';
                             @endphp
-        
+
                             <div class="job-meta mt-1">
                                 {{ $start }} – {{ $end }}
                             </div>
-        
+
                             <div class="job-footer">
                                 <a href="{{route('nurse.login')}}">
                                     <button class="btn nurse-apply-btn text-white">
                                         Complete Credentials to Apply
                                     </button>
                                 </a>
-        
+
                                 <div>
                                     <a href="#" class="d-flex gap-2">
                                         <span><i class="fa fa-bookmark-o"></i></span>
                                         Details
                                     </a>
                                 </div>
-        
+
                             </div>
                         </div>
                     </div>
@@ -2096,15 +2424,17 @@ body {
             </div>
         </section>
 
-        <section class="section-box overflow-visible  mb-100">
+        <section class="section-box overflow-visible sec-essential">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-6 col-sm-12">
                         <div class="box-image-job">
                             {{-- <!-- <img class="img-job-1" alt="jobBox" src="{{ asset('nurse/assets/imgs/page/homepage1/img-chart.png') }}">
                             --> --}}
+                            <!-- src="{{ asset('nurse/assets/imgs/page/homepage1/img-chart.png') }} -->
+                            <!-- src="{{ asset('nurse/assets/imgs/page/homepage1/shift-shield1.png') }} -->
                             <img class="img-job-2" alt="jobBox"
-                                src="{{ asset('nurse/assets/imgs/page/homepage1/img-chart.png') }}">
+                                src="{{ asset('nurse/assets/imgs/page/homepage1/shift-shield1.png') }}">
                             <figure class="wow animate__ animate__fadeIn animated"
                                 style="visibility: visible; animation-name: fadeIn;">
                                 <img alt="jobBox" src="{{ asset('nurse/assets/imgs/img1.png') }}">
@@ -2114,18 +2444,19 @@ body {
                     <div class="col-lg-6 col-sm-12">
                         <div class="content-job-inner">
                             <h2 class="text-30 wow animate__ animate__fadeInUp animated"
-                                style="visibility: visible; animation-name: fadeInUp;">You’re Crucial. Your Career
-                                Should Be Precise. </h2>
+                                style="visibility: visible; animation-name: fadeInUp;">You’re Essential. Your Career
+                                Should Fit You.</h2>
                             <div class="mt-20 pr-50 text-md-lh28 wow animate__ animate__fadeInUp animated"
                                 style="visibility: visible; animation-name: fadeInUp;">
                                 <div class="credential">
-                                    <p><i class="fa fa-check-circle" aria-hidden="true"></i> Your credentials matter
+                                    <p><i class="fa fa-check-circle" aria-hidden="true"></i> Your skills and experience
+                                        matter
                                     </p>
                                     <p><i class="fa fa-check-circle" aria-hidden="true"></i> Your flexibility matters
                                     </p>
                                     <p><i class="fa fa-check-circle" aria-hidden="true"></i> Your preferences matter
                                     </p>
-                                    <h4>Mediqa makes sure the right facilities see that.</h4>
+                                    <h4>Mediqa connects you with the right opportunities.</h4>
                                 </div>
 
 
@@ -2133,8 +2464,7 @@ body {
                             <div class="mt-20">
                                 <div class="wow animate__ animate__fadeInUp animated"
                                     style="visibility: visible; animation-name: fadeInUp;">
-                                    <a class="btn btn-default" href='{{ route('nurse.login') }}'>Create Your
-                                        Professional Profile</a>
+                                    <a class="btn btn-default" href='{{ route('nurse.login') }}'>Create Your Free Profile</a>
                                 </div>
                             </div>
                         </div>
@@ -2173,12 +2503,12 @@ body {
 
         </div>
     </div>
-     <div id="primarySpecialty" class="side-modal">
+    <div id="primarySpecialty" class="side-modal">
         <div class="side-modal-content">
 
             <div class="modal-header">
                 <h3>Primary Specialty</h3>
-                <span class="close-btn" data-close="typeOfNurseModal">&times;</span>
+                <span class="close-btn" data-close="primarySpecialty">&times;</span>
             </div>
 
         </div>
@@ -2195,6 +2525,19 @@ body {
 
         </div>
     </div>
+
+    {{-- modal 3 Work environment  --}}
+    <div id="willingtoUpskill" class="side-modal">
+        <div class="side-modal-content">
+
+            <div class="modal-header">
+                <h3>Willing to Upskill</h3>
+                <span class="close-btn" data-close="willingtoUpskill">&times;</span>
+            </div>
+
+        </div>
+    </div>
+
     <script src="{{ asset('nurse/assets/js/plugins/counterup.js') }}"></script>
 </main>
 @endsection @section('js')
@@ -2267,5 +2610,30 @@ document.querySelectorAll('.show-more-btn').forEach(function(btn) {
         }
     });
 });
+
+// cards toggle 
+function toggle(el) {
+    let content = el.nextElementSibling;
+    let icon = el.querySelector(".chevron");
+
+    if (content) {
+        content.style.display = content.style.display === "block" ? "none" : "block";
+        icon.classList.toggle("rotate");
+    }
+}
+</script>
+<script>
+function toggle(el) {
+    const parent = el.closest(".section-card");
+
+    // OPTIONAL: close others (accordion behavior)
+    document.querySelectorAll(".section-card").forEach(card => {
+        if (card !== parent) {
+            card.classList.remove("active");
+        }
+    });
+
+    parent.classList.toggle("active");
+}
 </script>
 @endsection

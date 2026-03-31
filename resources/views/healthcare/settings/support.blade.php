@@ -58,9 +58,8 @@
         margin: 0 0 16px !important;
         padding: 0 !important;
         font-size: 18px !important;
-        line-height: 0.5 !important;
+        
         color: #000 !important;
-        padding-left: 24px !important;
     }
 
     /* UL bullet list */
@@ -75,8 +74,7 @@
         padding: 0 !important;
         margin: 0 0 12px !important;
         font-size: 18px !important;
-        /* line-height: 1.8 !important; */
-        line-height: 20px;
+        line-height: 1.8 !important;
         color: #000 !important;
         white-space: normal !important;
         list-style-type: disc !important;
@@ -169,10 +167,91 @@
 
                                 <div class="card shadow-sm border-0 p-4 mt-30">
 
-                                    <h3 class="mt-0 color-brand-1 mb-2">Compliance & Security</h3>
+                                    <h3 class="mt-0 color-brand-1 mb-2">Support</h3>
                                     
                                     <div class="quill_rendered_content compliance_content">
-                                        {!! $content->compliance_content !!}
+                                        <div class="support_content_page">
+
+                                            
+                                            <p>
+                                                Need help using Mediqa? We’re here to support you.
+                                            </p>
+
+                                            <p>
+                                                Whether you have questions about your account, profile setup, document uploads, 
+                                                job applications, subscriptions, or general platform use, our team is available to help.
+                                            </p>
+
+                                            <p>
+                                                If you need assistance, please contact us at:
+                                            </p>
+
+                                            <p>
+                                                <a href="mailto:support@mediqa.com"><strong>support@mediqa.com</strong></a>
+                                            </p>
+
+                                            <p>
+                                                Our support team will do their best to respond as quickly as possible during business hours.
+                                            </p>
+
+                                            <h6 class="emergency_text">Help &amp; Resources</h6>
+
+                                            <p>
+                                                We’ve created helpful resources to make using Mediqa simple and straightforward.
+                                            </p>
+
+                                            <h6 class="emergency_text">FAQs / Help Centre</h6>
+
+                                            <p>
+                                                Visit our Help Centre to find answers to commonly asked questions, including:
+                                            </p>
+
+                                            <ul>
+                                                <li>Creating and managing your account</li>
+                                                <li>Completing your profile</li>
+                                                <li>Uploading compliance documents</li>
+                                                <li>Applying for jobs</li>
+                                                <li>Managing subscriptions and billing</li>
+                                                <li>Troubleshooting common issues</li>
+                                            </ul>
+
+                                            <p>
+                                                Our FAQ section is designed to help you quickly find the information you need.
+                                            </p>
+
+                                            <h6 class="emergency_text">“How Mediqa Works” Guides</h6>
+
+                                            <p>
+                                                Our step-by-step guides explain how to use the platform effectively, including:
+                                            </p>
+
+                                            <ul>
+                                                <li>How to register and create your account</li>
+                                                <li>How to build and update your profile</li>
+                                                <li>How to upload and manage required documents</li>
+                                                <li>How to search and apply for jobs</li>
+                                                <li>How to manage your subscription and account settings</li>
+                                            </ul>
+
+                                            <p>
+                                                These guides are designed to help you get started with confidence and make the most of the Mediqa platform.
+                                            </p>
+
+                                            <h6 class="emergency_text">Still Need Help?</h6>
+
+                                            <p>
+                                                If you can’t find the answer you’re looking for, please reach out to our support team at:
+                                            </p>
+
+                                            <p>
+                                                <a href="mailto:support@mediqa.com"><strong>support@mediqa.com</strong></a>
+                                            </p>
+
+                                            <p>
+                                                We’re here to help.
+                                            </p>
+
+                                        </div>
                                     </div>
 
 

@@ -20,8 +20,8 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-	
-    
+
+
      <title>{{ env('APP_NAME') }}</title>
      <style>
       span.d-flex.align-items-center.justify-content-center {
@@ -37,9 +37,16 @@
              @yield('css')
             @include('nurse.layouts.style')
             @yield('content')
-        
+
         @include('nurse.layouts.footer')
         @include('nurse.layouts.js')
+        <!-- Bootstrap-select JS (load after all jQuery instances) -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"></script>
+        <script>
+          $(document).ready(function() {
+            $('.selectpicker').selectpicker();
+          });
+        </script> -->
         @yield('js')
       </body>
 

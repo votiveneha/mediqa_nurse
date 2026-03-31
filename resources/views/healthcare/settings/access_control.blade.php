@@ -194,7 +194,7 @@
                                                         <div class="form-check form-switch">
                                                         <input class="form-check-input statusToggle"
                                                                 type="checkbox"
-                                                                data-id="{{ $recruit_data->id }}" onclick="deactivateUser({{ $recruit_data->id }})"
+                                                                data-id="{{ $recruit_data->id }}" onclick="deactivateUser({{ $recruit_data->id }})" style="margin-top:12px;"
                                                                 {{ $recruit_data->status == 1 ? 'checked' : '' }}>
                                                         </div>
                                                         @endif

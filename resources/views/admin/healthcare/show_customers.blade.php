@@ -115,11 +115,13 @@
                            <tr>
                                 <th>Sno</th>
                                 
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Plan Name</th>
-                                <th>Invoice Amount</th>
+                                <th>Organisation Type</th>
+                                
+                                <th>Plan</th>
                                 <th>Status</th>
+                                <th>Price</th>
+                                <th>Billing Cycle</th>
+                                <th>Next Billing</th>
                                 <th class="text-end">Actions</th>
                             </tr>
                         </thead>
@@ -129,12 +131,20 @@
                             <!-- User Row -->
                             <tr>
                                 <td>{{ $loop->index+1 }}</td>
-                                <td>{{ $invoice->billing_name }}</td>
-                                <td>{{ $invoice->billing_email }}</td>
+                                <td>
+                                    @php
+                                    $user_data = DB::table("users")->where("id",$invoice->user_id)->first();
+                                    if($user_data->role == 2){
+                                        echo "HealthCare Facility";
+                                    }else{
+                                        if($user_data->role == 3){
+                                            echo "Agency";
+                                        }
+                                    }
+                                    @endphp
+                                </td>
+                                
                                 <td>{{ $invoice->plan_name }}</td>
-                                
-                                <td>${{ number_format($invoice->total_amount / 100, 2) }}</td>
-                                
                                 <td>
                                     @if($invoice->status == 'paid')
                                         <span style="color:green; font-weight:bold;">Paid</span>
@@ -142,10 +152,39 @@
                                         <span style="color:red; font-weight:bold;">Pending</span>
                                     @endif
                                 </td>
+                                <td>${{ number_format($invoice->total_amount / 100, 2) }}</td>
+                                <td>
+                                    @php
+                                       $plan_data = DB::table('plan_management')->where("stripe_product_id",$invoice->product_id)->first();
+                                       $price_data = DB::table("stripe_prices")->where("stripe_price_id",$plan_data->default_price_id)->first();
+                                       if($price_data->interval == "month"){
+                                            echo "Monthly";        
+                                       }else{
+                                            echo "Yearly";
+                                       }
+                                           
+                                    @endphp
+                                </td>
+                                <td>
+                                    @php
+                                        $start_date = $invoice->created_at;
+                                        
+
+                                        
+                                        if($price_data->interval == "month"){
+                                                $expiry_date = date('Y-m-d', strtotime($start_date . ' +30 days'));      
+                                        }else{
+                                                $expiry_date = date('Y-m-d', strtotime($start_date . ' +365 days'));
+                                        }
+                                        echo strtolower(date('d M Y', strtotime($expiry_date)));
+                                        
+                                           
+                                    @endphp
+                                </td>
                                
                                 <td>
                                     <button class="btn btn-danger">
-                                        Delete
+                                        Cancel Subscription
                                     </button>
                                 </td>
                                 

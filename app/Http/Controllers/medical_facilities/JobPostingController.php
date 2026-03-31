@@ -722,14 +722,43 @@ class JobPostingController extends Controller
         $listing_expiry = $request->listing_expiry;
         $custom_date = $request->custom_date;
         $priority_tags = isset($request->priority_tags)?1:0;
+        $job_id = $request->job_id;
+
+        $job_data = DB::table("job_boxes")->where("id",$job_id)->first();
+
+        $date_only = date('Y-m-d', strtotime($job_data->updated_at));
+
+        //$today_date = date('Y-m-d');
+
+        if($listing_expiry == 1){
+            $custom_date1 = date('Y-m-d', strtotime($date_only . ' +7 days'));
+        }
+
+        if($listing_expiry == 2){
+            $custom_date1 = date('Y-m-d', strtotime($date_only . ' +14 days'));
+        }
+
+        if($listing_expiry == 3){
+            $custom_date1 = date('Y-m-d', strtotime($date_only . ' +30 days'));
+        }
+
+        if($listing_expiry == 4){
+            $custom_date1 = date('Y-m-d', strtotime($date_only . ' +60 days'));
+        }
+
+        if($listing_expiry == 5){
+            $custom_date1 = $custom_date;
+        }
+
+        //echo $custom_date1;die;
 
         //$job_id = Session::get('jobId');
-        $job_id = $request->job_id;
+        
         $job_post = JobsModel::find($job_id);
         $job_post->visiblity = $visiblity_mode;
         $job_post->application_deadline = $application_deadline;
         $job_post->expiry_date = $listing_expiry;
-        $job_post->custom_expiry_date = $custom_date;
+        $job_post->custom_expiry_date = $custom_date1;
         $job_post->urgent_hire = $priority_tags;
         
         
@@ -773,9 +802,10 @@ class JobPostingController extends Controller
         if($job_post->save_draft == $request->save){
             return response()->json(['status'=>2]);
         }
-
+        $today_date = date('Y-m-d H:i:s');
         // update state
         $job_post->save_draft = $request->save;
+        $job_post->updated_at = $today_date;
         $job_post->save();
 
         // return based on action

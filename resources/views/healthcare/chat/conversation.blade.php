@@ -37,10 +37,10 @@
             gap: 5px;
         }
 
-        /*
-    .btn-back:hover {
-        color: #0056b3;
-    } */
+                /*
+            .btn-back:hover {
+                color: #0056b3;
+            } */
 
         .chat-search {
             width: 100%;
@@ -333,8 +333,9 @@
                     <div>
                         <div class="chat-header-title">{{ $otherParticipant->name }} {{ $otherParticipant->lastname ?? '' }}
                         </div>
-                        <div class="chat-header-subtitle">
-                            <i class="fas fa-circle" style="font-size: 8px;"></i> {{ $isOnline ? 'Online' : 'Offline' }}
+                        <div class="chat-header-subtitle" id="userStatusContainer" data-user-id="{{ $otherParticipant->id }}">
+                            <i class="fas fa-circle" id="status-icon" style="font-size: 8px; color: {{ $isOnline ? '#28a745' : '#888' }};"></i>
+                            <span id="status-text">{{ $isOnline ? 'Online' : 'Offline' }}</span>
                         </div>
                     </div>
                 </div>
@@ -348,17 +349,25 @@
                             $isSent = $message->sender_id == Auth::id();
                         @endphp
                         <div class="message {{ $isSent ? 'sent' : 'received' }}">
+
                             @if(!$isSent)
-                                <img src="{{ asset($message->sender->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
+                                <img src="{{ $message->sender->profile_img
+                                    ? asset('/' . $message->sender->profile_img)
+                                    : 'nurse/assets/imgs/nurse06.png' }}"
                                     alt="{{ $message->sender->name }}" class="message-avatar">
                             @endif
+
                             <div class="message-content">
                                 <p class="message-text">{{ nl2br(e($message->message)) }}</p>
                             </div>
+
                             @if($isSent)
-                                <img src="{{ asset(Auth::user()->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
+                                <img src="{{ Auth::user()->profile_img
+                                    ? asset('healthcareimg/uploads/' . Auth::user()->profile_img)
+                                    : 'nurse/assets/imgs/nurse06.png' }}"
                                     alt="{{ Auth::user()->name }}" class="message-avatar">
                             @endif
+
                         </div>
                     @endif
                 @endforeach
@@ -371,219 +380,262 @@
 
             <!-- Chat Input -->
             <div class="chat-input-area">
-                <form id="messageForm" style="" class="chat__input">
+                <form id="messageForm" style="" class="chat__input" method="POST" onsubmit="return false;">
                     @csrf
                     <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
                     <input type="text" name="message" class="chat-input" placeholder="Type message" id="messageInput"
                         autocomplete="off">
-                    <button type="submit" class="chat-btn">Send</button>
+                    <button type="button" class="chat-btn">Send</button>
                 </form>
             </div>
         </div>
     </div>
 
-    @push('scripts')
-        <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.10.0/dist/echo.iife.js"></script>
-        <script>
-            (function () {
-                'use strict';
-
-                // Setup Laravel Echo with Pusher
-                window.Echo = new Echo({
-                    broadcaster: 'pusher',
-                    key: '{{ env("PUSHER_APP_KEY") }}',
-                    cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
-                    forceTLS: true,
-                    encrypted: true,
-                    authEndpoint: '{{ url('/broadcasting/auth') }}',
-                    auth: {
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        }
-                    }
-                });
-
-                window.Laravel = {
-                    userId: {{ Auth::guard('healthcare_facilities')->id() }},
-                    userName: '{{ Auth::guard('healthcare_facilities')->user()->name }}',
-                    userRole: {{ Auth::guard('healthcare_facilities')->user()->role }},
-                    csrfToken: '{{ csrf_token() }}',
-                    conversationId: {{ $conversation->id }}
-            };
-
-                // Listen for real-time messages
-                Echo.private('conversation.' + window.Laravel.conversationId)
-                    .listen('.message.sent', function(data) {
-                        console.log('Real-time message received:', data);
-
-                        const messagesContainer = document.getElementById('chatMessages');
-                        const isSentByMe = data.sender_id == window.Laravel.userId;
-
-                        const messageHtml = `
-                            <div class="message ${isSentByMe ? 'sent' : 'received'}" data-message-id="${data.id}">
-                                ${!isSentByMe ? `
-                                <img src="${data.sender_avatar || '/nurse/assets/imgs/nurse06.png'}" alt="${data.sender_name}" class="message-avatar">
-                                ` : ''}
-                                <div class="message-content">
-                                    <p class="message-text">${data.message}</p>
-                                </div>
-                                ${isSentByMe ? `
-                                <img src="${data.sender_avatar || '/nurse/assets/imgs/nurse06.png'}" alt="${data.sender_name}" class="message-avatar">
-                                ` : ''}
-                            </div>
-                        `;
-
-                        messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
-                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-                        // Play notification sound if message is from someone else
-                        if (!isSentByMe) {
-                            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQQAKZXZ8NOmdhoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBo=');
-                            audio.play().catch(() => {});
-                        }
-                    });
-
-                // Wait for everything to load
-                setTimeout(function () {
-                    const messageForm = document.getElementById('messageForm');
-                    const messageInput = document.getElementById('messageInput');
-                    const submitBtn = document.querySelector('.btn-send');
-                    const messagesContainer = document.getElementById('chatMessages');
-
-                    console.log('Chat elements found:', {
-                        form: !!messageForm,
-                        input: !!messageInput,
-                        btn: !!submitBtn,
-                        container: !!messagesContainer
-                    });
-
-                    if (messageForm && messageInput && submitBtn && messagesContainer) {
-                        messageForm.addEventListener('submit', function (e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-
-                            console.log('Form submitted');
-
-                            const formData = new FormData(this);
-
-                            // Disable button while sending
-                            submitBtn.disabled = true;
-                            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-                            fetch('{{ route('healthcare.chat.send') }}', {
-                                method: 'POST',
-                                body: formData,
-                                headers: {
-                                    'Accept': 'application/json',
-                                    'X-Requested-With': 'XMLHttpRequest',
-                                },
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    console.log('Response:', data);
-
-                                    if (data.success && data.message) {
-                                        const userAvatar = '{{ Auth::user()->profile_img ?? 'nurse/assets/imgs/nurse06.png' }}';
-                                        const messageHtml = `
-                                    <div class="message sent" data-message-id="${data.message.id}">
-                                        <img src="${userAvatar}" alt="${data.message.sender.name}" class="message-avatar">
-                                        <div class="message-content">
-                                            <p class="message-text">${data.message.message}</p>
-                                        </div>
-                                    </div>
-                                `;
-
-                                        messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
-                                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                                        messageInput.value = '';
-                                    } else {
-                                        alert(data.error || 'Failed to send message');
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                                    alert('Failed to send message');
-                                })
-                                .finally(() => {
-                                    submitBtn.disabled = false;
-                                    submitBtn.innerHTML = 'Send';
-                                });
-                        });
-
-                        console.log('Chat form handler attached');
-                    } else {
-                        console.error('Chat elements not found');
-                    }
-                }, 500);
-            })();
-        </script>
-    @endpush
 @endsection
-
+<script src="https://js.pusher.com/8.4/pusher.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.3/dist/echo.iife.min.js"></script>
 <script>
-window.addEventListener('load', function() {
-    console.log('Page loaded, initializing chat...');
+(function () {
+    'use strict';
 
-    setTimeout(function() {
+    document.addEventListener('DOMContentLoaded', function () {
+
+        console.log('Initializing chat...');
+
+        // ✅ Setup Laravel Echo (Pusher)
+        window.Echo = new Echo({
+            broadcaster: 'pusher',
+            key: '{{ config("broadcasting.connections.pusher.key") }}',
+            cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
+            forceTLS: true,
+            encrypted: true,
+            authEndpoint: '{{ url('/broadcasting/auth') }}',
+            auth: {
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            }
+        });
+
+        // ✅ Global Laravel user data
+        window.Laravel = {
+            userId: {{ Auth::guard('healthcare_facilities')->id() }},
+            userName: '{{ Auth::guard('healthcare_facilities')->user()->name }}',
+            userRole: {{ Auth::guard('healthcare_facilities')->user()->role }},
+            csrfToken: '{{ csrf_token() }}',
+            conversationId: {{ $conversation->id }},
+            otherParticipantId: {{ $otherParticipant->id }},
+            userAvatar: '{{ Auth::guard('healthcare_facilities')->user()->profile_img ?? 'nurse/assets/imgs/nurse06.png' }}'
+        };
+
         const messageForm = document.getElementById('messageForm');
         const messageInput = document.getElementById('messageInput');
         const submitBtn = document.querySelector('.chat-btn');
         const messagesContainer = document.getElementById('chatMessages');
+        const baseUrl = "{{ asset('') }}";
 
-        console.log('Elements found:', {
-            form: messageForm ? 'YES' : 'NO',
-            input: messageInput ? 'YES' : 'NO',
-            btn: submitBtn ? 'YES' : 'NO',
-            container: messagesContainer ? 'YES' : 'NO'
+        if (!messageForm || !messageInput || !submitBtn || !messagesContainer) {
+            console.error('Chat elements not found');
+            return;
+        }
+
+        console.log('Chat elements ready');
+
+        // ✅ Listen for real-time messages
+        Echo.private('conversation.' + window.Laravel.conversationId)
+            .listen('.message.sent', function (data) {
+                console.log(data.sender_id, window.Laravel.userId);
+                const isSentByMe = data.sender_id == window.Laravel.userId;
+                console.log('Sent by me:', isSentByMe);
+
+                const avatar = isSentByMe
+                    ? (data.sender_avatar
+                        ? baseUrl + 'healthcareimg/uploads/' + data.sender_avatar
+                        : baseUrl + 'nurse/assets/imgs/nurse06.png')
+                    : baseUrl + 'nurse/assets/imgs/nurse06.png';
+
+                console.log('Avatar:', avatar);
+
+                const messageHtml = `
+                    <div class="message ${isSentByMe ? 'sent' : 'received'}" data-message-id="${data.id}">
+                        ${!isSentByMe ? `<img src="${avatar}" class="message-avatar">` : ''}
+                        <div class="message-content">
+                            <p class="message-text">${data.message}</p>
+                        </div>
+                        ${isSentByMe ? `<img src="${avatar}" class="message-avatar">` : ''}
+                    </div>
+                `;
+
+                messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                // 🔔 Notification sound
+                if (!isSentByMe) {
+                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQQAKZXZ8NOmdhoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBo=');
+                    audio.play().catch(() => {});
+                }
+            });
+
+        // ✅ Send message (ONLY ONE HANDLER)
+        // Replace messageForm.addEventListener('submit', ...) with:
+        submitBtn.addEventListener('click', function () {
+
+        const formData = new FormData(messageForm);
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Sending...';
+
+        fetch('{{ route('healthcare.chat.send') }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            },
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(data => {
+            if (data.success) {
+                messageInput.value = ''; // ✅ Just clear input, Pusher will append the message
+            } else {
+                alert(data.error || 'Failed to send message');
+            }
+        })
+        .catch(err => {
+            console.error('Send error:', err);
+            alert('Error: ' + err.message);
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Send';
+        });
+    });
+
+        // Also allow sending with Enter key
+        messageInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                submitBtn.click();
+            }
         });
 
-        if (messageForm && messageInput && submitBtn && messagesContainer) {
-            messageForm.onsubmit = function(e) {
-                e.preventDefault();
-                e.stopPropagation();
+        // ✅ Scroll to bottom on load
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-                console.log('Sending message...');
+        // ========== ONLINE STATUS TRACKING ==========
 
-                const formData = new FormData(this);
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = 'Sending...';
+        // Listen to global online status channel (for broadcast events)
+        Echo.channel('users.online.global')
+            .listen('.user.status', function(data) {
+                console.log('Global status update:', data);
+                if (data.user_id == window.Laravel.otherParticipantId) {
+                    updateOnlineStatusUI(data.is_online);
+                }
+            });
 
-                fetch('{{ route('healthcare.chat.send') }}', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                })
-                .then(r => r.json())
-                .then(data => {
-                    console.log('Response:', data);
-                    if (data.success && data.message) {
-                        const userAvatar = '{{ Auth::user()->profile_img ?? 'nurse/assets/imgs/nurse06.png' }}';
-                        const msgHtml = '<div class="message sent"><img src="' + userAvatar + '" class="message-avatar"><div class="message-content"><p class="message-text">' + data.message.message + '</p></div></div>';
-                        messagesContainer.insertAdjacentHTML('beforeend', msgHtml);
-                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                        messageInput.value = '';
-                    } else {
-                        alert(data.error || 'Failed');
+        // Listen to users.online presence channel (for real-time presence)
+        Echo.join('users.online')
+            .here(function(users) {
+                console.log('Users in online presence:', users);
+                users.forEach(function(user) {
+                    if (user.id == window.Laravel.otherParticipantId) {
+                        updateOnlineStatusUI(true);
                     }
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert('Error sending message');
-                })
-                .finally(() => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'Send';
                 });
-                return false;
-            };
-            console.log('Chat handler attached!');
-        } else {
-            console.error('Some elements not found');
+            })
+            .joining(function(user) {
+                console.log('User joined online:', user);
+                if (user.id == window.Laravel.otherParticipantId) {
+                    updateOnlineStatusUI(true);
+                }
+            })
+            .leaving(function(user) {
+                console.log('User left online:', user);
+                if (user.id == window.Laravel.otherParticipantId) {
+                    updateOnlineStatusUI(false);
+                }
+            });
+
+        // Listen to specific user's presence channel
+        Echo.join('user.' + window.Laravel.otherParticipantId + '.online')
+            .here(function(users) {
+                console.log('Users in presence channel:', users);
+                const isOnline = users.length > 0;
+                updateOnlineStatusUI(isOnline);
+            })
+            .joining(function(user) {
+                if (user.id == window.Laravel.otherParticipantId) {
+                    updateOnlineStatusUI(true);
+                }
+            })
+            .leaving(function(user) {
+                if (user.id == window.Laravel.otherParticipantId) {
+                    updateOnlineStatusUI(false);
+                }
+            });
+
+        // Function to update online status UI
+        function updateOnlineStatusUI(isOnline) {
+            console.log('updateOnlineStatusUI called:', isOnline ? 'Online' : 'Offline');
+
+            const statusIcon = document.getElementById('status-icon');
+            const statusText = document.getElementById('status-text');
+            const statusContainer = document.getElementById('userStatusContainer');
+
+            console.log('Elements found:', {
+                statusIcon: !!statusIcon,
+                statusText: !!statusText,
+                statusContainer: !!statusContainer
+            });
+
+            if (statusIcon && statusText) {
+                if (isOnline) {
+                    statusIcon.style.color = '#28a745';
+                    statusText.textContent = 'Online';
+                    if (statusContainer) {
+                        statusContainer.classList.remove('offline');
+                        statusContainer.classList.add('online');
+                    }
+                } else {
+                    statusIcon.style.color = '#888';
+                    statusText.textContent = 'Offline';
+                    if (statusContainer) {
+                        statusContainer.classList.remove('online');
+                        statusContainer.classList.add('offline');
+                    }
+                }
+                console.log('✅ Status updated successfully:', isOnline ? 'Online' : 'Offline');
+            } else {
+                console.error('❌ Status elements not found!');
+            }
         }
-    }, 500);
-});
+
+        // Send heartbeat to keep user online
+        function sendHeartbeat() {
+            fetch('{{ route("healthcare.chat.online_status") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ is_online: true })
+            }).catch(err => console.error('Heartbeat failed:', err));
+        }
+
+        // Send initial heartbeat and then every 2 minutes
+        sendHeartbeat();
+        setInterval(sendHeartbeat, 120000);
+
+        // Send offline status when leaving page
+        window.addEventListener('beforeunload', function() {
+            navigator.sendBeacon('{{ route("healthcare.chat.online_status") }}', JSON.stringify({ is_online: false }));
+        });
+
+    });
+
+})();
 </script>

@@ -89,11 +89,11 @@
             <div class="card-body px-4 py-3">
                 <div class="row align-items-center">
                     <div class="col-9">
-                        <h4 class="fw-semibold mb-8">Recruiter List</h4>
+                        <h4 class="fw-semibold mb-8">Invoice List</h4>
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a class="text-muted " href="{{route('admin.dashboard')}}">Dashboard</a></li>
-                                <li class="breadcrumb-item" aria-current="page">Recruiter List</li>
+                                <li class="breadcrumb-item" aria-current="page">Invoice List</li>
                             </ol>
                         </nav>
                     </div>

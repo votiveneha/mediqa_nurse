@@ -30,11 +30,13 @@ use Mail;
 use Validator;
 use DB;
 use URL;
-use Session;
+use Illuminate\Support\Facades\Session;
 use Helpers;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Barryvdh\DomPDF\Facade\Pdf;
+
+use Stripe\Customer;
 
 
 class SettingsController extends Controller
@@ -174,7 +176,7 @@ class SettingsController extends Controller
     public function billing(Request $request)
     {
         $user = Auth::guard('healthcare_facilities')->user();
-        $data['plan_data'] = DB::table("plan_management")->where("status","true")->get();
+        $data['plan_data'] = DB::table("plan_management")->where("active",1)->get();
 
         $data['invoices'] = DB::table('invoices')
         ->where('user_id', $user->id)
@@ -188,7 +190,8 @@ class SettingsController extends Controller
     {
         
         $product_id = $request->product_id;
-        $data['plan_data'] = DB::table("plan_management")->where("product_id",$product_id)->first();
+        $data['plan_data'] = DB::table("plan_management")->where("stripe_product_id",$product_id)->first();
+        
         return view('healthcare.settings.payment')->with($data);
     }
 
@@ -196,11 +199,11 @@ class SettingsController extends Controller
     {
         Stripe::setApiKey(env('STRIPE_SECRET'));
         //echo $request->product_id;die;
-        $payment_data = DB::table("plan_management")->where("product_id",$request->product_id)->first();
-        
+        $payment_data = DB::table("plan_management")->where("stripe_product_id",$request->product_id)->first();
+        $price_data = DB::table("stripe_prices")->where("stripe_price_id",$payment_data->default_price_id)->first();
         try {
             $paymentIntent = PaymentIntent::create([
-                'amount' => (int) ($payment_data->monthly_price*100), // ₹500 (in paise)
+                'amount' => (int) ($price_data->unit_amount*100), // ₹500 (in paise)
                 'currency' => 'USD',
                 'payment_method' => $request->payment_method_id,
                 
@@ -216,7 +219,7 @@ class SettingsController extends Controller
                 $payment_id = DB::table("payments")->insertGetId([
                     'payment_intent_id' => $paymentIntent->id,
                     'product_id' => $request->product_id,
-                    'amount' => $paymentIntent->amount,
+                    'amount' => $paymentIntent->amount/100,
                     'currency' => $paymentIntent->currency,
                     'status' => $paymentIntent->status,
                     'payment_method' => $paymentIntent->payment_method,
@@ -224,15 +227,15 @@ class SettingsController extends Controller
 
                 $user = Auth::guard('healthcare_facilities')->user();
                 // ✅ Create Invoice
-                DB::table("invoices")->insert([
+                $invoice_id = DB::table("invoices")->insertGetId([
                     'invoice_number' => 'INV-' . strtoupper(Str::random(8)),
                     'user_id' => $user->id,
                     'payment_id' => $payment_id,
                     'product_id' => $request->product_id,
-                    'plan_name' => $payment_data->plan_name, // ✅ ADD THIS
-                    'amount' => $paymentIntent->amount,
+                    'plan_name' => $payment_data->name, // ✅ ADD THIS
+                    'amount' => $paymentIntent->amount/100,
                     'tax' => 0,
-                    'total_amount' => $paymentIntent->amount,
+                    'total_amount' => $paymentIntent->amount/100,
                     'currency' => $paymentIntent->currency,
                     'billing_name' => $user->name,
                     'billing_email' => $user->email,
@@ -240,20 +243,25 @@ class SettingsController extends Controller
                     'updated_at' => now(),
                 ]);
 
-            // try {
-            //     \App\Helpers\ZeptoMailHelper::sendMail(
-            //         $r->email,
-            //         "Payment Confirmation - Mediqa",
-            //         $htmlBody
-            //     );
+            $data['invoice'] = DB::table("invoices")->where("id",$invoice_id)->first();   
+            $data['user'] = Auth::guard('healthcare_facilities')->user();    
 
-            //     \Log::info("Payment Confirmation email sent", ['user_id' => $r->id]);
-            // } catch (\Throwable $ex) {
-            //     \Log::error("Failed to send Payment Confirmation email", [
-            //         'user_id' => $r->id,
-            //         'error'   => $ex->getMessage()
-            //     ]);
-            // }
+            $htmlBody = view('email.payment_success', $data)->render();    
+
+            try {
+                \App\Helpers\ZeptoMailHelper::sendMail(
+                    $data['user']->email,
+                    "Payment Confirmation - Mediqa",
+                    $htmlBody
+                );
+
+                \Log::info("Payment Confirmation email sent", ['user_id' => $data['user']->id]);
+            } catch (\Throwable $ex) {
+                \Log::error("Failed to send Payment Confirmation email", [
+                    'user_id' => $data['user']->id,
+                    'error'   => $ex->getMessage()
+                ]);
+            }
             }
 
             return response()->json([
@@ -295,9 +303,82 @@ class SettingsController extends Controller
         return $pdf->download('invoice-'.$invoice->invoice_number.'.pdf');
     }
 
+    public function subscribe($price_id)
+{
+    Stripe::setApiKey(env('STRIPE_SECRET'));
+
+    $user = Auth::guard("healthcare_facilities")->user();
+
+    // Create Stripe customer if not exists
+    if (!$user->stripe_customer_id) {
+        $customer = Customer::create([
+            'name'  => $user->name,
+            'email' => $user->email,
+        ]);
+
+        $user->stripe_customer_id = $customer->id;
+        $user->save();
+    }
+
+    // Optional: get your local plan data
+    $plan = DB::table('plan_management')->where('default_price_id', $price_id)->first();
+
+    $session = \Stripe\Checkout\Session::create([
+        'mode' => 'subscription',
+        'customer' => $user->stripe_customer_id,
+
+        'line_items' => [[
+            'price' => $price_id,
+            'quantity' => 1,
+        ]],
+
+        'payment_method_types' => ['card', 'au_becs_debit'],
+
+        'success_url' => url('/healthcare-facilities/payment-success?session_id={CHECKOUT_SESSION_ID}'),
+        'cancel_url' => url('/payment-cancel'),
+
+        // Checkout session metadata
+        'metadata' => [
+            'user_id'   => $user->id,
+            'user_type' => 'healthcare_facilities',
+            'plan_id'   => $plan->id ?? '',
+            'plan_name' => $plan->plan_name ?? '',
+        ],
+
+        // Subscription metadata
+        'subscription_data' => [
+            'metadata' => [
+                'user_id'   => $user->id,
+                'user_type' => 'healthcare_facilities',
+                'plan_id'   => $plan->id ?? '',
+                'plan_name' => $plan->plan_name ?? '',
+            ],
+        ],
+    ]);
+
+    return redirect($session->url);
+}
+
+    public function success(Request $request)
+    {
+        return view('payment-success');
+    }
+
+    public function cancel()
+    {
+        return view('payment-cancel');
+    }
+
     public function compliance_security()
     {
-        return view('healthcare.settings.compliance_security');
+        $data['content'] = DB::table("compliance_security")->first();
+        return view('healthcare.settings.compliance_security')->with($data);
+    }
+
+    public function support()
+    {
+        //$data['content'] = DB::table("compliance_security")->where('tab_name', "support")->first();
+        return view('healthcare.settings.support');
     }
 
 }

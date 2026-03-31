@@ -7,10 +7,11 @@ use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class UserOnlineStatus implements ShouldBroadcast
+class UserOnlineStatus implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -37,6 +38,7 @@ class UserOnlineStatus implements ShouldBroadcast
     {
         return [
             new PresenceChannel('user.' . $this->userId . '.online'),
+            new Channel('users.online.global'),
         ];
     }
 

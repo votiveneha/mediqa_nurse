@@ -6,6 +6,7 @@ use App\Http\Controllers\nurse\HomeController;
 use App\Http\Controllers\admin\NurseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
+use App\Http\Controllers\admin\StripeWebhookController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -17,66 +18,7 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-// Route::post('/broadcasting/auth', function (Request $request) {
-//     // Manually handle authentication for custom guards
-//     if (Auth::guard('nurse_middle')->check()) {
-//         $guard = 'nurse_middle';
-//     } elseif (Auth::guard('healthcare_facilities')->check()) {
-//         $guard = 'healthcare_facilities';
-//     } elseif (Auth::check()) {
-//         $guard = 'web';
-//     } else {
-//         return response()->json(['error' => 'Unauthorized'], 401);
-//     }
-
-//     // Use the standard broadcast auth with the correct guard context
-//     return Broadcast::auth($request);
-// })->middleware(['web']);
-
-// Route::post('/broadcasting/auth', function (Request $request) {
-//     if (Auth::guard('nurse_middle')->check()) {
-//         $user = Auth::guard('nurse_middle')->user();
-//     } elseif (Auth::guard('healthcare_facilities')->check()) {
-//         $user = Auth::guard('healthcare_facilities')->user();
-//     } elseif (Auth::check()) {
-//         $user = Auth::user();
-//     } else {
-//         return response()->json(['error' => 'Unauthorized'], 401);
-//     }
-
-//     // Temporarily set the user on the request so Broadcast::auth can find them
-//     $request->setUserResolver(fn() => $user);
-
-//     return Broadcast::auth($request);
-// })->middleware(['web']);
-
-// Route::post('/broadcasting/auth', function (Request $request) {
-//     if (Auth::guard('nurse_middle')->check()) {
-//         $user = Auth::guard('nurse_middle')->user();
-//     } elseif (Auth::guard('healthcare_facilities')->check()) {
-//         $user = Auth::guard('healthcare_facilities')->user();
-//     } elseif (Auth::check()) {
-//         $user = Auth::user();
-//     } else {
-//         return response()->json(['error' => 'Unauthorized'], 401);
-//     }
-
-//     $pusher = new \Pusher\Pusher(
-//         config('broadcasting.connections.pusher.key'),
-//         config('broadcasting.connections.pusher.secret'),
-//         config('broadcasting.connections.pusher.app_id'),
-//         ['cluster' => config('broadcasting.connections.pusher.options.cluster')]
-//     );
-
-//     $channelName = $request->channel_name;
-//     $socketId    = $request->socket_id;
-
-//     // For private channels
-//     $auth = $pusher->authorizeChannel($channelName, $socketId);
-
-//     return response($auth, 200)->header('Content-Type', 'application/json');
-// })->middleware(['web']);
-
+// Custom Broadcasting Auth for multiple guards
 Route::post('/broadcasting/auth', function (Request $request) {
     if (Auth::guard('nurse_middle')->check()) {
         $user = Auth::guard('nurse_middle')->user();
@@ -88,33 +30,17 @@ Route::post('/broadcasting/auth', function (Request $request) {
         return response()->json(['error' => 'Unauthorized'], 401);
     }
 
-    $pusherConfig = config('broadcasting.connections.pusher');
+    // Temporarily set the user on the request so Broadcast::auth can find them
+    $request->setUserResolver(fn() => $user);
 
-    $pusher = new \Pusher\Pusher(
-        $pusherConfig['key'],
-        $pusherConfig['secret'],
-        $pusherConfig['app_id'],
-        [
-            'host'      => $pusherConfig['options']['host'],
-            'port'      => $pusherConfig['options']['port'],
-            'scheme'    => $pusherConfig['options']['scheme'],
-            'encrypted' => true,
-            'useTLS'    => $pusherConfig['options']['useTLS'],
-        ]
-    );
-
-    $auth = $pusher->authorizeChannel(
-        $request->channel_name,
-        $request->socket_id
-    );
-
-    return response($auth, 200)->header('Content-Type', 'application/json');
-
+    return Broadcast::auth($request);
 })->middleware(['web']);
 
 // ===========
 // Admin Route
 // ===========
+ Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('handleWebhook');
+Route::get('/sync-stripe-products', [StripeWebhookController::class, 'syncStripeProducts']);
 Route::get('/ahepra_lookup', 'App\Http\Controllers\nurse\LicencesContoller@myFunction')->name('myFunction');
 Route::prefix('/admin')->name('admin.')->namespace('App\Http\Controllers\admin')->group(function () {
   Route::match(['get', 'post'], '/', 'AuthController@login')->name('login');
@@ -173,9 +99,13 @@ Route::prefix('/admin')->name('admin.')->namespace('App\Http\Controllers\admin')
     Route::get('/add_plans', 'HealthcareController@add_plans')->name('add_plans');
     Route::post('/updatePlan', 'HealthcareController@update_plan')->name('updatePlan');
     Route::get('/update_plans/{id}', 'HealthcareController@update_plans')->name('update_plans');
+   
+    
     Route::get('/show_invoice', 'HealthcareController@show_invoice')->name('show_invoice');
-    Route::get('/show_customer', 'HealthcareController@show_customer')->name('show_customer');
+    Route::get('/show_customers', 'HealthcareController@show_customers')->name('show_customers');
     Route::get('/recruiter-list', 'HealthcareController@recruiter_list')->name('recruiter_list');
+    Route::get('/add_compliance_security', 'HealthcareController@add_compliance_security')->name('add_compliance_security');
+    Route::post('/update_compliance_security', 'HealthcareController@update_compliance_security')->name('update_compliance_security');
     Route::get('/incoming-nurse-list', 'NurseController@incommingNurseList')->name('incoming-nurse-list');
     Route::get('/unverified-nurse-list', 'NurseController@unverified_nurse_list')->name('unverified-nurse-list');
     Route::post('/send_remainder', 'NurseController@send_remainder')->name('send_remainder');
@@ -445,13 +375,12 @@ Route::get('/nurse/email-verification/{token}', [HomeController::class, 'email_v
     ->name('legacy.verify.token');
 });
 
-
 // ==========================================
 // Chat System Routes
 // ==========================================
 
 // Nurse Chat Routes
-Route::prefix('nurse/chat')->name('nurse.chat.')->middleware('auth:nurse_middle')->group(function () {
+Route::prefix('nurse/chat')->name('nurse.chat.')->middleware(['auth:nurse_middle', 'user.online'])->group(function () {
     Route::get('/', 'App\Http\Controllers\nurse\ChatController@index')->name('index');
     Route::get('/conversation/{id}', 'App\Http\Controllers\nurse\ChatController@showConversation')->name('show');
     Route::get('/start/{jobId}', 'App\Http\Controllers\nurse\ChatController@chatFromJob')->name('from_job');
@@ -467,12 +396,14 @@ Route::prefix('nurse/chat')->name('nurse.chat.')->middleware('auth:nurse_middle'
     Route::post('/archive', 'App\Http\Controllers\ChatController@archiveConversation')->name('archive');
     Route::post('/mark-as-read', 'App\Http\Controllers\ChatController@markAsRead')->name('mark_as_read');
     Route::post('/typing', 'App\Http\Controllers\ChatController@typingStatus')->name('typing');
+    Route::post('/online-status', 'App\Http\Controllers\ChatController@updateOnlineStatus')->name('online_status');
+    Route::get('/check-status/{userId}', 'App\Http\Controllers\ChatController@checkUserStatus')->name('check_status');
     Route::get('/search', 'App\Http\Controllers\ChatController@search')->name('search');
     Route::get('/unread-count', 'App\Http\Controllers\ChatController@unreadCount')->name('unread_count');
 });
 
 // Healthcare Chat Routes
-Route::prefix('healthcare-facilities/chat')->name('healthcare.chat.')->middleware('auth:healthcare_facilities')->group(function () {
+Route::prefix('healthcare-facilities/chat')->name('healthcare.chat.')->middleware(['auth:healthcare_facilities', 'user.online'])->group(function () {
     Route::get('/', 'App\Http\Controllers\medical_facilities\ChatController@index')->name('index');
     Route::get('/conversation/{id}', 'App\Http\Controllers\medical_facilities\ChatController@showConversation')->name('show');
     Route::get('/nurses', 'App\Http\Controllers\medical_facilities\ChatController@nursesList')->name('nurses');
@@ -487,6 +418,8 @@ Route::prefix('healthcare-facilities/chat')->name('healthcare.chat.')->middlewar
     Route::post('/archive', 'App\Http\Controllers\ChatController@archiveConversation')->name('archive');
     Route::post('/mark-as-read', 'App\Http\Controllers\ChatController@markAsRead')->name('mark_as_read');
     Route::post('/typing', 'App\Http\Controllers\ChatController@typingStatus')->name('typing');
+    Route::post('/online-status', 'App\Http\Controllers\ChatController@updateOnlineStatus')->name('online_status');
+    Route::get('/check-status/{userId}', 'App\Http\Controllers\ChatController@checkUserStatus')->name('check_status');
     Route::get('/search', 'App\Http\Controllers\ChatController@search')->name('search');
     Route::get('/unread-count', 'App\Http\Controllers\ChatController@unreadCount')->name('unread_count');
 });

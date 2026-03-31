@@ -272,7 +272,7 @@
               </a>
             </li>
             <li class="sidebar-item">
-              <a href="{{route('admin.show_customer')}}" class="sidebar-link">
+              <a href="{{route('admin.show_customers')}}" class="sidebar-link">
                 <div class="round-16 d-flex align-items-center justify-content-center">
                  <i class="ti ti-circle"></i>
                 </div>
@@ -289,6 +289,14 @@
             </li>
          </ul>
         </li> 
+        <li class="sidebar-item">
+          <a class="sidebar-link" href="{{route('admin.add_compliance_security')}}" aria-expanded="false">
+            <span class="d-flex">
+              <i class="ti ti-building-store"></i>
+            </span>
+            <span class="hide-menu">Compliance & Security</span>
+          </a>
+       </li>  
        <li class="sidebar-item">
          <a class="sidebar-link has-arrow" href="#" aria-expanded="false">
            <span class="d-flex">
