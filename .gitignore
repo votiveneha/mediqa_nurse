@@ -2,7 +2,6 @@
 .env
 vendor/
 /node_modules
-/public/
 # IDE/Editor specific
 .idea/
 *.sublime-workspace

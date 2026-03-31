@@ -90,14 +90,19 @@ protected $middlewareAliases = [
 
 3. **Heartbeat Mechanism**
    - Nurse chat: Sends heartbeat every 2 minutes
-   - Healthcare chat: Sends heartbeat every 30 seconds
+   - Healthcare chat: Sends heartbeat every 2 minutes
    - Cache expires after 5 minutes of inactivity
    - If heartbeat stops, user is automatically marked offline
 
-4. **User Leaves Page**
+4. **User Leaves Page (Browser Close/Tab Close)**
    - `beforeunload` event triggers
    - `navigator.sendBeacon` sends offline status
    - Other user sees status change to "Offline"
+
+5. **User Logs Out**
+   - Logout function clears cache key
+   - Broadcasts offline status event
+   - Other user sees status change to "Offline" immediately
 
 ## UI Updates
 
@@ -180,7 +185,10 @@ fetch('/nurse/chat/check-status/{userId}')
 - `app/Http/Kernel.php` - Added middleware alias
 - `routes/web.php` - Added online status routes and middleware
 - `resources/views/nurse/chat/conversation.blade.php` - Added real-time status tracking
+- `resources/views/healthcare/chat/conversation.blade.php` - Added real-time status tracking
 - `resources/js/chat.js` - Enhanced presence tracking for healthcare
+- `app/Http/Controllers/nurse/HomeController.php` - Added offline broadcast on logout
+- `app/Http/Controllers/medical_facilities/HomeController.php` - Added offline broadcast on logout
 
 ## Security Considerations
 

@@ -1,0 +1,22 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-4ed993c7.js",
+    "isEntry": true,
+    "src": "resources/css/app.css"
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-0cb48c9c.js",
+    "isEntry": true,
+    "src": "resources/js/app.js"
+  },
+  "resources/js/chat-notification-counter.js": {
+    "file": "assets/chat-notification-counter-44491cb4.js",
+    "isEntry": true,
+    "src": "resources/js/chat-notification-counter.js"
+  },
+  "resources/js/chat.js": {
+    "file": "assets/chat-a73be422.js",
+    "isEntry": true,
+    "src": "resources/js/chat.js"
+  }
+}
