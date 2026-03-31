@@ -271,8 +271,10 @@
                         @endphp
                         <div class="conversation-item-compact {{ $conv->id == $conversation->id ? 'active' : '' }}"
                             onclick="window.location.href='{{ route('nurse.chat.show', $conv->id) }}'">
-                            <img src="{{ asset($other->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}" alt="{{ $other->name }}"
+                            <img src="{{ $other->profile_img ? asset('healthcareimg/uploads/' . $other->profile_img)
+                            : 'nurse/assets/imgs/nurse06.png' }}" alt="{{ $other->name }}"
                                 class="conversation-avatar-compact">
+
                             <div class="conversation-info-compact">
                                 <div class="conversation-name-compact">{{ $other->name }} {{ $other->lastname ?? '' }}</div>
                                 @if($conv->latestMessage)
@@ -309,8 +311,9 @@
                                 </span>
                             @endif -->
                         </div>
-                        <div class="chat-header-subtitle">
-                            <i class="fas fa-circle" style="font-size: 8px;"></i> {{ $isOnline ? 'Online' : 'Offline' }}
+                        <div class="chat-header-subtitle online-status" id="userStatusContainer" data-user-id="{{ $otherParticipant->id }}">
+                            <i class="fas fa-circle" id="status-icon" style="font-size: 8px; color: {{ $isOnline ? '#28a745' : '#888' }};"></i>
+                            <span id="status-text">{{ $isOnline ? 'Online' : 'Offline' }}</span>
                         </div>
                     </div>
                 </div>
@@ -369,7 +372,7 @@
     (function () {
         'use strict';
 
-        console.log('=== Initializing Pusher & Laravel Echo ===');
+        console.log('%c=== Initializing Pusher & Laravel Echo ===', 'color: blue; font-weight: bold; font-size: 14px');
         console.log('Pusher Key:', '{{ config("broadcasting.connections.pusher.key") }}');
         console.log('Cluster:', '{{ env("PUSHER_APP_CLUSTER") }}');
         console.log('Conversation ID:', {{ $conversation->id }});
@@ -399,11 +402,90 @@
             userRole: {{ Auth::guard('nurse_middle')->user()->role }},
             csrfToken: '{{ csrf_token() }}',
             conversationId: {{ $conversation->id }},
+            otherParticipantId: {{ $otherParticipant->id }},
             userAvatar: '{{ Auth::guard('nurse_middle')->user()->profile_img ?? 'nurse/assets/imgs/nurse06.png' }}'
         };
 
         console.log('Laravel data:', window.Laravel);
-        console.log('Echo initialized, subscribing to channel...');
+        console.log('Echo initialized, subscribing to channels...');
+
+        // ========== REAL-TIME ONLINE STATUS TRACKING ==========
+
+        // Listen on global online channel for all users
+        Echo.channel('users.online.global')
+            .listen('.user.status', (data) => {
+                console.log('Global user status update:', data);
+                if (data.user_id == window.Laravel.otherParticipantId) {
+                    updateOnlineStatusUI(data.is_online);
+                }
+            });
+
+        // Also listen on specific user's presence channel
+        Echo.join('user.' + window.Laravel.otherParticipantId + '.online')
+            .here((users) => {
+                console.log('Users in presence channel:', users);
+                // If there are users in the channel, the other participant is online
+                const isOnline = users.length > 0;
+                updateOnlineStatusUI(isOnline);
+            })
+            .joining((user) => {
+                console.log('User joined presence channel:', user);
+                if (user.id == window.Laravel.otherParticipantId) {
+                    updateOnlineStatusUI(true);
+                }
+            })
+            .leaving((user) => {
+                console.log('User left presence channel:', user);
+                if (user.id == window.Laravel.otherParticipantId) {
+                    updateOnlineStatusUI(false);
+                }
+            });
+
+        // Function to update online status UI
+        function updateOnlineStatusUI(isOnline) {
+            const statusIcon = document.getElementById('status-icon');
+            const statusText = document.getElementById('status-text');
+            const statusContainer = document.getElementById('userStatusContainer');
+
+            if (statusIcon && statusText) {
+                if (isOnline) {
+                    statusIcon.style.color = '#28a745';
+                    statusText.textContent = 'Online';
+                    statusContainer.classList.remove('offline');
+                    statusContainer.classList.add('online');
+                } else {
+                    statusIcon.style.color = '#888';
+                    statusText.textContent = 'Offline';
+                    statusContainer.classList.remove('online');
+                    statusContainer.classList.add('offline');
+                }
+                console.log('Status updated:', isOnline ? 'Online' : 'Offline');
+            }
+        }
+
+        // Send heartbeat to keep user online
+        function sendHeartbeat() {
+            fetch('{{ route("nurse.chat.online_status") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ is_online: true })
+            }).catch(err => console.error('Heartbeat failed:', err));
+        }
+
+        // Send initial heartbeat and then every 2 minutes
+        sendHeartbeat();
+        setInterval(sendHeartbeat, 120000);
+
+        // Send offline status when leaving page
+        window.addEventListener('beforeunload', function() {
+            navigator.sendBeacon('{{ route("nurse.chat.online_status") }}', JSON.stringify({ is_online: false }));
+        });
+
+        // ========== MESSAGE LISTENERS ==========
 
         // Listen for real-time messages on private channel
         const channel = Echo.private('conversation.' + window.Laravel.conversationId);

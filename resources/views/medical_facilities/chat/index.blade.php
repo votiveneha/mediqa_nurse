@@ -41,7 +41,7 @@
                              onclick="window.location.href='/healthcare-facilities/chat/conversation/{{ $conv->id }}'">
                             <div class="conversation-avatar">
                                 <img src="{{ asset($otherParticipant->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}" alt="{{ $otherParticipant->name }}">
-                                <span class="online-status {{ cache()->get('user_'.$otherParticipant->id.'_online', false) ? 'online' : 'offline' }}"></span>
+                                <span class="online-status {{ cache()->get('user_'.$otherParticipant->id.'_online', false) ? 'online' : 'offline' }}" data-user-id="{{ $otherParticipant->id }}"></span>
                             </div>
                             <div class="conversation-info">
                                 <h5>{{ $otherParticipant->name }} {{ $otherParticipant->lastname ?? '' }}</h5>
@@ -103,14 +103,20 @@
 @endpush
 
 @push('scripts')
-<script src="{{ asset('build/assets/chat-baaabaae.js') }}"></script>
+@vite(['resources/js/chat.js'])
 <script>
 window.Laravel = {
     userId: {{ Auth::id() }},
     userName: '{{ Auth::user()->name }}',
     userRole: {{ Auth::user()->role }},
-    csrfToken: '{{ csrf_token() }}'
+    csrfToken: '{{ csrf_token() }}',
+    conversationId: {{ request()->route('id') ?? 'null' }}
 };
+
+// Initialize chat manager
+document.addEventListener('DOMContentLoaded', function() {
+    window.chatManager = new ChatManager(window.Laravel.conversationId || null);
+});
 
 // Search conversations
 $('#searchConversations').on('input', function() {

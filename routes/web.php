@@ -372,7 +372,7 @@ Route::get('/nurse/email-verification/{token}', [HomeController::class, 'email_v
 // ==========================================
 
 // Nurse Chat Routes
-Route::prefix('nurse/chat')->name('nurse.chat.')->middleware('auth:nurse_middle')->group(function () {
+Route::prefix('nurse/chat')->name('nurse.chat.')->middleware(['auth:nurse_middle', 'user.online'])->group(function () {
     Route::get('/', 'App\Http\Controllers\nurse\ChatController@index')->name('index');
     Route::get('/conversation/{id}', 'App\Http\Controllers\nurse\ChatController@showConversation')->name('show');
     Route::get('/start/{jobId}', 'App\Http\Controllers\nurse\ChatController@chatFromJob')->name('from_job');
@@ -388,12 +388,14 @@ Route::prefix('nurse/chat')->name('nurse.chat.')->middleware('auth:nurse_middle'
     Route::post('/archive', 'App\Http\Controllers\ChatController@archiveConversation')->name('archive');
     Route::post('/mark-as-read', 'App\Http\Controllers\ChatController@markAsRead')->name('mark_as_read');
     Route::post('/typing', 'App\Http\Controllers\ChatController@typingStatus')->name('typing');
+    Route::post('/online-status', 'App\Http\Controllers\ChatController@updateOnlineStatus')->name('online_status');
+    Route::get('/check-status/{userId}', 'App\Http\Controllers\ChatController@checkUserStatus')->name('check_status');
     Route::get('/search', 'App\Http\Controllers\ChatController@search')->name('search');
     Route::get('/unread-count', 'App\Http\Controllers\ChatController@unreadCount')->name('unread_count');
 });
 
 // Healthcare Chat Routes
-Route::prefix('healthcare-facilities/chat')->name('healthcare.chat.')->middleware('auth:healthcare_facilities')->group(function () {
+Route::prefix('healthcare-facilities/chat')->name('healthcare.chat.')->middleware(['auth:healthcare_facilities', 'user.online'])->group(function () {
     Route::get('/', 'App\Http\Controllers\medical_facilities\ChatController@index')->name('index');
     Route::get('/conversation/{id}', 'App\Http\Controllers\medical_facilities\ChatController@showConversation')->name('show');
     Route::get('/nurses', 'App\Http\Controllers\medical_facilities\ChatController@nursesList')->name('nurses');
@@ -408,6 +410,8 @@ Route::prefix('healthcare-facilities/chat')->name('healthcare.chat.')->middlewar
     Route::post('/archive', 'App\Http\Controllers\ChatController@archiveConversation')->name('archive');
     Route::post('/mark-as-read', 'App\Http\Controllers\ChatController@markAsRead')->name('mark_as_read');
     Route::post('/typing', 'App\Http\Controllers\ChatController@typingStatus')->name('typing');
+    Route::post('/online-status', 'App\Http\Controllers\ChatController@updateOnlineStatus')->name('online_status');
+    Route::get('/check-status/{userId}', 'App\Http\Controllers\ChatController@checkUserStatus')->name('check_status');
     Route::get('/search', 'App\Http\Controllers\ChatController@search')->name('search');
     Route::get('/unread-count', 'App\Http\Controllers\ChatController@unreadCount')->name('unread_count');
 });

@@ -22,13 +22,18 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 // Chat System Broadcast Channels
 // ==========================================
 
+// Helper function to get authenticated user from any guard
+function getBroadcastUser() {
+    return Auth::guard('nurse_middle')->check() ? Auth::guard('nurse_middle')->user() :
+           (Auth::guard('healthcare_facilities')->check() ? Auth::guard('healthcare_facilities')->user() :
+           (Auth::check() ? Auth::user() : null));
+}
+
 // Conversation channel - only participants can access
 Broadcast::channel('conversation.{conversationId}', function ($user, $conversationId) {
-    // The $user parameter is null for custom guards, so we need to check all guards
-    $authenticatedUser = Auth::guard('nurse_middle')->user() 
-        ?? Auth::guard('healthcare_facilities')->user() 
-        ?? $user;
-    
+    // The $user parameter comes from the broadcasting auth
+    $authenticatedUser = $user ?: getBroadcastUser();
+
     if (!$authenticatedUser) {
         return false;
     }
@@ -44,33 +49,34 @@ Broadcast::channel('conversation.{conversationId}', function ($user, $conversati
 
 // User notification channel
 Broadcast::channel('user.{userId}', function ($user, $userId) {
-    $authenticatedUser = Auth::guard('nurse_middle')->user() 
-        ?? Auth::guard('healthcare_facilities')->user() 
-        ?? $user;
-    
+    $authenticatedUser = $user ?: getBroadcastUser();
+
     if (!$authenticatedUser) {
         return false;
     }
-    
+
     return (int) $authenticatedUser->id === (int) $userId;
 });
 
 // User online status channel
 Broadcast::channel('user.{userId}.online', function ($user, $userId) {
-    return (int) $user->id === (int) $userId;
-});
-
-// Typing status channel - only conversation participants
-Broadcast::channel('conversation.{conversationId}.typing', function ($user, $conversationId) {
-    // The $user parameter is null for custom guards, so we need to check all guards
-    $authenticatedUser = Auth::guard('nurse_middle')->user() 
-        ?? Auth::guard('healthcare_facilities')->user() 
-        ?? $user;
+    $authenticatedUser = $user ?: getBroadcastUser();
     
     if (!$authenticatedUser) {
         return false;
     }
-    
+
+    return (int) $authenticatedUser->id === (int) $userId;
+});
+
+// Typing status channel - only conversation participants
+Broadcast::channel('conversation.{conversationId}.typing', function ($user, $conversationId) {
+    $authenticatedUser = $user ?: getBroadcastUser();
+
+    if (!$authenticatedUser) {
+        return false;
+    }
+
     $conversation = App\Models\Conversation::find($conversationId);
 
     if (!$conversation) {
@@ -82,15 +88,12 @@ Broadcast::channel('conversation.{conversationId}.typing', function ($user, $con
 
 // Presence channel for conversation
 Broadcast::channel('conversation.{conversationId}.presence', function ($user, $conversationId) {
-    // The $user parameter is null for custom guards, so we need to check all guards
-    $authenticatedUser = Auth::guard('nurse_middle')->user() 
-        ?? Auth::guard('healthcare_facilities')->user() 
-        ?? $user;
-    
+    $authenticatedUser = $user ?: getBroadcastUser();
+
     if (!$authenticatedUser) {
         return false;
     }
-    
+
     $conversation = App\Models\Conversation::find($conversationId);
 
     if (!$conversation) {
@@ -105,6 +108,21 @@ Broadcast::channel('conversation.{conversationId}.presence', function ($user, $c
         'id' => $authenticatedUser->id,
         'name' => $authenticatedUser->name . ' ' . ($authenticatedUser->lastname ?? ''),
         'avatar' => $authenticatedUser->profile_img,
+        'role' => $authenticatedUser->role,
+    ];
+});
+
+// Global online users channel
+Broadcast::channel('users.online', function ($user) {
+    $authenticatedUser = $user ?: getBroadcastUser();
+
+    if (!$authenticatedUser) {
+        return false;
+    }
+
+    return [
+        'id' => $authenticatedUser->id,
+        'name' => $authenticatedUser->name . ' ' . ($authenticatedUser->lastname ?? ''),
         'role' => $authenticatedUser->role,
     ];
 });

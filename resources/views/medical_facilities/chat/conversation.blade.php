@@ -70,8 +70,9 @@
                     <img src="{{ asset($otherParticipant->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}" alt="{{ $otherParticipant->name }}">
                     <div>
                         <h5>{{ $otherParticipant->name }} {{ $otherParticipant->lastname ?? '' }}</h5>
-                        <span class="online-status {{ $isOnline ? 'online' : 'offline' }}">
-                            <i class="fas fa-circle"></i> {{ $isOnline ? 'Online' : 'Offline' }}
+                        <span class="online-status {{ $isOnline ? 'online' : 'offline' }}" id="userStatusContainer" data-user-id="{{ $otherParticipant->id }}">
+                            <i class="fas fa-circle" id="status-icon" style="color: {{ $isOnline ? '#28a745' : '#888' }};"></i> 
+                            <span id="status-text">{{ $isOnline ? 'Online' : 'Offline' }}</span>
                         </span>
                     </div>
                 </div>
@@ -256,14 +257,16 @@
 @endpush
 
 @push('scripts')
-<script src="{{ asset('build/assets/chat-baaabaae.js') }}"></script>
+@vite(['resources/js/chat.js'])
 <script>
 window.Laravel = {
-    userId: {{ Auth::id() }},
-    userName: '{{ Auth::user()->name }}',
-    userRole: {{ Auth::user()->role }},
+    userId: {{ Auth::guard('healthcare_facilities')->id() }},
+    userName: '{{ Auth::guard('healthcare_facilities')->user()->name }}',
+    userRole: {{ Auth::guard('healthcare_facilities')->user()->role }},
     csrfToken: '{{ csrf_token() }}',
-    conversationId: {{ $conversation->id }}
+    conversationId: {{ $conversation->id }},
+    otherParticipantId: {{ $otherParticipant->id }},
+    userAvatar: '{{ Auth::guard('healthcare_facilities')->user()->profile_img ?? 'nurse/assets/imgs/nurse06.png' }}'
 };
 
 // Initialize chat manager
