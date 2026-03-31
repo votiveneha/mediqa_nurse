@@ -389,9 +389,28 @@ class HomeController extends Controller
 
      public function logout(Request $request)
     {
+        // Get user before logout
+        $user = Auth::guard('healthcare_facilities')->user();
+        
+        if ($user) {
+            // Clear online status from cache
+            cache()->forget("user_{$user->id}_online");
+            
+            // Broadcast offline status BEFORE logging out
+            try {
+                // Use broadcast() without toOthers() to ensure it's sent
+                broadcast(new \App\Events\UserOnlineStatus($user->id, false, now()));
+                \Log::info('Healthcare logout: Broadcasted offline status for user ' . $user->id);
+            } catch (\Exception $e) {
+                \Log::error('Failed to broadcast offline status on healthcare logout: ' . $e->getMessage());
+            }
+        }
+        
+        // Now logout and destroy session
         Auth::guard('healthcare_facilities')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        
         return redirect('healthcare-facilities');
     }
 

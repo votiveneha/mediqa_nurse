@@ -85,6 +85,19 @@ img, iframe, video {
 }
 .nurse-notification .btn-notify{
   width: auto !important;
+  padding: 8px 12px !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+
+.nurse-notification .btn-notify i {
+  font-size: 20px !important;
+  color: #333 !important;
 }
 
  </style>

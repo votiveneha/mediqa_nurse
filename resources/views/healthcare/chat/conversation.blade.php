@@ -333,8 +333,9 @@
                     <div>
                         <div class="chat-header-title">{{ $otherParticipant->name }} {{ $otherParticipant->lastname ?? '' }}
                         </div>
-                        <div class="chat-header-subtitle">
-                            <i class="fas fa-circle" style="font-size: 8px;"></i> {{ $isOnline ? 'Online' : 'Offline' }}
+                        <div class="chat-header-subtitle" id="userStatusContainer" data-user-id="{{ $otherParticipant->id }}">
+                            <i class="fas fa-circle" id="status-icon" style="font-size: 8px; color: {{ $isOnline ? '#28a745' : '#888' }};"></i>
+                            <span id="status-text">{{ $isOnline ? 'Online' : 'Offline' }}</span>
                         </div>
                     </div>
                 </div>
@@ -422,7 +423,9 @@
             userName: '{{ Auth::guard('healthcare_facilities')->user()->name }}',
             userRole: {{ Auth::guard('healthcare_facilities')->user()->role }},
             csrfToken: '{{ csrf_token() }}',
-            conversationId: {{ $conversation->id }}
+            conversationId: {{ $conversation->id }},
+            otherParticipantId: {{ $otherParticipant->id }},
+            userAvatar: '{{ Auth::guard('healthcare_facilities')->user()->profile_img ?? 'nurse/assets/imgs/nurse06.png' }}'
         };
 
         const messageForm = document.getElementById('messageForm');
@@ -521,6 +524,116 @@
 
         // ✅ Scroll to bottom on load
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // ========== ONLINE STATUS TRACKING ==========
+        
+        // Listen to global online status channel (for broadcast events)
+        Echo.channel('users.online.global')
+            .listen('.user.status', function(data) {
+                console.log('Global status update:', data);
+                if (data.user_id == window.Laravel.otherParticipantId) {
+                    updateOnlineStatusUI(data.is_online);
+                }
+            });
+
+        // Listen to users.online presence channel (for real-time presence)
+        Echo.join('users.online')
+            .here(function(users) {
+                console.log('Users in online presence:', users);
+                users.forEach(function(user) {
+                    if (user.id == window.Laravel.otherParticipantId) {
+                        updateOnlineStatusUI(true);
+                    }
+                });
+            })
+            .joining(function(user) {
+                console.log('User joined online:', user);
+                if (user.id == window.Laravel.otherParticipantId) {
+                    updateOnlineStatusUI(true);
+                }
+            })
+            .leaving(function(user) {
+                console.log('User left online:', user);
+                if (user.id == window.Laravel.otherParticipantId) {
+                    updateOnlineStatusUI(false);
+                }
+            });
+
+        // Listen to specific user's presence channel
+        Echo.join('user.' + window.Laravel.otherParticipantId + '.online')
+            .here(function(users) {
+                console.log('Users in presence channel:', users);
+                const isOnline = users.length > 0;
+                updateOnlineStatusUI(isOnline);
+            })
+            .joining(function(user) {
+                if (user.id == window.Laravel.otherParticipantId) {
+                    updateOnlineStatusUI(true);
+                }
+            })
+            .leaving(function(user) {
+                if (user.id == window.Laravel.otherParticipantId) {
+                    updateOnlineStatusUI(false);
+                }
+            });
+
+        // Function to update online status UI
+        function updateOnlineStatusUI(isOnline) {
+            console.log('updateOnlineStatusUI called:', isOnline ? 'Online' : 'Offline');
+            
+            const statusIcon = document.getElementById('status-icon');
+            const statusText = document.getElementById('status-text');
+            const statusContainer = document.getElementById('userStatusContainer');
+            
+            console.log('Elements found:', {
+                statusIcon: !!statusIcon,
+                statusText: !!statusText,
+                statusContainer: !!statusContainer
+            });
+
+            if (statusIcon && statusText) {
+                if (isOnline) {
+                    statusIcon.style.color = '#28a745';
+                    statusText.textContent = 'Online';
+                    if (statusContainer) {
+                        statusContainer.classList.remove('offline');
+                        statusContainer.classList.add('online');
+                    }
+                } else {
+                    statusIcon.style.color = '#888';
+                    statusText.textContent = 'Offline';
+                    if (statusContainer) {
+                        statusContainer.classList.remove('online');
+                        statusContainer.classList.add('offline');
+                    }
+                }
+                console.log('✅ Status updated successfully:', isOnline ? 'Online' : 'Offline');
+            } else {
+                console.error('❌ Status elements not found!');
+            }
+        }
+
+        // Send heartbeat to keep user online
+        function sendHeartbeat() {
+            fetch('{{ route("healthcare.chat.online_status") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ is_online: true })
+            }).catch(err => console.error('Heartbeat failed:', err));
+        }
+
+        // Send initial heartbeat and then every 2 minutes
+        sendHeartbeat();
+        setInterval(sendHeartbeat, 120000);
+
+        // Send offline status when leaving page
+        window.addEventListener('beforeunload', function() {
+            navigator.sendBeacon('{{ route("healthcare.chat.online_status") }}', JSON.stringify({ is_online: false }));
+        });
 
     });
 

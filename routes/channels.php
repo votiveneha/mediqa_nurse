@@ -126,3 +126,11 @@ Broadcast::channel('users.online', function ($user) {
         'role' => $authenticatedUser->role,
     ];
 });
+
+// Global online status channel (public channel for broadcasts)
+Broadcast::channel('users.online.global', function ($user) {
+    $authenticatedUser = $user ?: getBroadcastUser();
+
+    // Allow all authenticated users
+    return $authenticatedUser !== null;
+});

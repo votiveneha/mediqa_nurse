@@ -411,12 +411,35 @@
 
         // ========== REAL-TIME ONLINE STATUS TRACKING ==========
 
-        // Listen on global online channel for all users
+        // Listen on global online channel for broadcast events
         Echo.channel('users.online.global')
             .listen('.user.status', (data) => {
                 console.log('Global user status update:', data);
                 if (data.user_id == window.Laravel.otherParticipantId) {
                     updateOnlineStatusUI(data.is_online);
+                }
+            });
+
+        // Listen to users.online presence channel (for real-time presence)
+        Echo.join('users.online')
+            .here((users) => {
+                console.log('Users in online presence:', users);
+                users.forEach(user => {
+                    if (user.id == window.Laravel.otherParticipantId) {
+                        updateOnlineStatusUI(true);
+                    }
+                });
+            })
+            .joining((user) => {
+                console.log('User joined online:', user);
+                if (user.id == window.Laravel.otherParticipantId) {
+                    updateOnlineStatusUI(true);
+                }
+            })
+            .leaving((user) => {
+                console.log('User left online:', user);
+                if (user.id == window.Laravel.otherParticipantId) {
+                    updateOnlineStatusUI(false);
                 }
             });
 
