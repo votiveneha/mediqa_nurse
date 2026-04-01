@@ -1303,6 +1303,8 @@ class JobsController extends Controller{
         $user_id = $request->user_id;
         $job_id  = $request->job_id;
 
+        $candidate = User::where("id",$user_id)->first();
+
         // 🔹 Check if already applied
         $alreadyApplied = DB::table('nurse_applications')
             ->where('nurse_id', $user_id)
@@ -1319,6 +1321,24 @@ class JobsController extends Controller{
 
         // 🔹 Get job details from job_boxes table
         $job = DB::table('job_boxes')->where('id', $job_id)->first();
+
+        $healthcare = User::find($job->healthcare_id);
+        $healthcare_notification = DB::table("notifications")->where("user_id",$job->healthcare_id)->first();
+
+        // Send email if healthcare has email notifications ON
+        if ($healthcare && $healthcare_notification->email_notification == 1) {
+            $htmlBody = view('email.new_job_application', [
+                'candidate' => $candidate,
+                'job' => $job,
+                'healthcare' => $healthcare
+            ])->render();
+
+            \App\Helpers\ZeptoMailHelper::sendMail(
+                $healthcare->email,
+                "New Job Application Received - Mediqa",
+                $htmlBody
+            );
+        }
 
         // print_r($job);die;
 

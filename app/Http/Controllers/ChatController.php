@@ -169,6 +169,32 @@ class ChatController extends Controller
             }
         }
 
+        if ($user->role === 1) {
+            // Sender is nurse -> receiver is healthcare
+            $receiver = DB::table("users")->find($conversation->healthcare_id);
+        } else {
+            // Sender is healthcare -> receiver is nurse
+            $receiver = DB::table("users")->find($conversation->nurse_id);
+        }
+
+        //print_r($receiver);die;
+
+        if ($receiver && $receiver->email_notification == 1) {
+
+            $htmlBody = view('email.chat_message_notification', [
+                'sender' => $user,
+                'receiver' => $receiver,
+                'messageText' => strip_tags($request->message),
+                'conversation' => $conversation,
+            ])->render();
+
+            \App\Helpers\ZeptoMailHelper::sendMail(
+                $receiver->email,
+                "New Message Received - Mediqa",
+                $htmlBody
+            );
+        }
+
         return response()->json([
             'success' => true,
             'message' => $message->load('sender')
@@ -255,6 +281,8 @@ class ChatController extends Controller
             'conversation_id' => $conversation->id,
             'user_id' => $recipient->id,
         ]);
+
+       
 
         return response()->json([
             'success' => true,

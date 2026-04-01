@@ -195,6 +195,26 @@ class SettingsController extends Controller
         return view('healthcare.settings.payment')->with($data);
     }
 
+    public function notification(Request $request)
+    {
+        $user_id = Auth::guard("healthcare_facilities")->user()->id;
+        $data['notification_data'] = DB::table("users")->where("id",$user_id)->first();
+        return view('healthcare.settings.notification')->with($data);
+    }
+
+    public function notification_switch(Request $request)
+    {
+        $user_id = Auth::guard("healthcare_facilities")->user()->id;
+        $email_notification = $request->email_notification;
+        $app_notification = $request->app_notification;
+
+        
+
+        DB::table("users")->where("id",$user_id)->update(["email_notification"=>$email_notification,"app_notification"=>$app_notification]);
+
+        
+    }
+
     public function process(Request $request)
     {
         Stripe::setApiKey(env('STRIPE_SECRET'));
