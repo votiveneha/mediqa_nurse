@@ -392,8 +392,6 @@
     </div>
 
 @endsection
-<script src="https://js.pusher.com/8.4/pusher.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.3/dist/echo.iife.min.js"></script>
 <script>
 (function () {
     'use strict';
@@ -402,20 +400,12 @@
 
         console.log('Initializing chat...');
 
-        // ✅ Setup Laravel Echo (Pusher)
-        window.Echo = new Echo({
-            broadcaster: 'pusher',
-            key: '{{ config("broadcasting.connections.pusher.key") }}',
-            cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
-            forceTLS: true,
-            encrypted: true,
-            authEndpoint: '{{ url('/broadcasting/auth') }}',
-            auth: {
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            }
-        });
+        // Echo is already initialized in layout head
+        if (!window.Echo) {
+            console.error('❌ Echo not found! Something is wrong.');
+        } else {
+            console.log('✅ Echo already available');
+        }
 
         // ✅ Global Laravel user data
         window.Laravel = {

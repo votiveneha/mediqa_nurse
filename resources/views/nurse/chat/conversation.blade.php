@@ -352,314 +352,189 @@
 
             <!-- Chat Input -->
             <div class="chat-input-area">
-                <form id="messageForm" style="display: flex; gap: 15px; width: 100%;">
-                    @csrf
+                <form id="messageForm" style="display: flex; gap: 15px; width: 100%;" onsubmit="return false;">
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}" autocomplete="off">
                     <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
-                    <input type="text" name="message" class="chat-input" placeholder="Type message" id="messageInput"
-                        autocomplete="off">
-                    <button type="submit" class="btn-send">Send</button>
+                    <input type="text" name="message" class="chat-input" placeholder="Type message" id="messageInput" autocomplete="off">
+                    <button type="button" id="sendBtn" class="btn-send">Send</button>
                 </form>
             </div>
         </div>
     </div>
 
-@endsection
-
-{{-- Load Pusher and Laravel Echo from CDN --}}
-<script src="https://js.pusher.com/8.4/pusher.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.3/dist/echo.iife.min.js"></script>
+{{-- Chat functionality - Echo already loaded in layout --}}
 <script>
-    (function () {
-        'use strict';
+(function () {
+    'use strict';
 
-        console.log('%c=== Initializing Pusher & Laravel Echo ===', 'color: blue; font-weight: bold; font-size: 14px');
-        console.log('Pusher Key:', '{{ config("broadcasting.connections.pusher.key") }}');
-        console.log('Cluster:', '{{ env("PUSHER_APP_CLUSTER") }}');
-        console.log('Conversation ID:', {{ $conversation->id }});
+    function initializeChat() {
+        const messageInput      = document.getElementById('messageInput');
+        const submitBtn         = document.getElementById('sendBtn');
+        const messagesContainer = document.getElementById('chatMessages');
 
-        // Setup Laravel Echo with Pusher
-        window.Echo = new Echo({
-            broadcaster: 'pusher',
-            key: '{{ config("broadcasting.connections.pusher.key") }}',
-            cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
-            forceTLS: true,
-            encrypted: true,
-            authEndpoint: '{{ url("/broadcasting/auth") }}',
-            auth: {
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                }
-            },
-            disableStats: true,
-            enabledTransports: ['ws', 'wss'],
-        });
-
-        // Setup Laravel data
-        window.Laravel = {
-            userId: {{ Auth::guard('nurse_middle')->id() }},
-            userName: '{{ Auth::guard('nurse_middle')->user()->name }} {{ Auth::guard('nurse_middle')->user()->lastname ?? '' }}',
-            userRole: {{ Auth::guard('nurse_middle')->user()->role }},
-            csrfToken: '{{ csrf_token() }}',
-            conversationId: {{ $conversation->id }},
-            otherParticipantId: {{ $otherParticipant->id }},
-            userAvatar: '{{ Auth::guard('nurse_middle')->user()->profile_img ?? 'nurse/assets/imgs/nurse06.png' }}'
-        };
-
-        console.log('Laravel data:', window.Laravel);
-        console.log('Echo initialized, subscribing to channels...');
-
-        // ========== REAL-TIME ONLINE STATUS TRACKING ==========
-
-        // Listen on global online channel for broadcast events
-        Echo.channel('users.online.global')
-            .listen('.user.status', (data) => {
-                console.log('Global user status update:', data);
-                if (data.user_id == window.Laravel.otherParticipantId) {
-                    updateOnlineStatusUI(data.is_online);
-                }
-            });
-
-        // Listen to users.online presence channel (for real-time presence)
-        Echo.join('users.online')
-            .here((users) => {
-                console.log('Users in online presence:', users);
-                users.forEach(user => {
-                    if (user.id == window.Laravel.otherParticipantId) {
-                        updateOnlineStatusUI(true);
-                    }
-                });
-            })
-            .joining((user) => {
-                console.log('User joined online:', user);
-                if (user.id == window.Laravel.otherParticipantId) {
-                    updateOnlineStatusUI(true);
-                }
-            })
-            .leaving((user) => {
-                console.log('User left online:', user);
-                if (user.id == window.Laravel.otherParticipantId) {
-                    updateOnlineStatusUI(false);
-                }
-            });
-
-        // Also listen on specific user's presence channel
-        Echo.join('user.' + window.Laravel.otherParticipantId + '.online')
-            .here((users) => {
-                console.log('Users in presence channel:', users);
-                // If there are users in the channel, the other participant is online
-                const isOnline = users.length > 0;
-                updateOnlineStatusUI(isOnline);
-            })
-            .joining((user) => {
-                console.log('User joined presence channel:', user);
-                if (user.id == window.Laravel.otherParticipantId) {
-                    updateOnlineStatusUI(true);
-                }
-            })
-            .leaving((user) => {
-                console.log('User left presence channel:', user);
-                if (user.id == window.Laravel.otherParticipantId) {
-                    updateOnlineStatusUI(false);
-                }
-            });
-
-        // Function to update online status UI
-        function updateOnlineStatusUI(isOnline) {
-            const statusIcon = document.getElementById('status-icon');
-            const statusText = document.getElementById('status-text');
-            const statusContainer = document.getElementById('userStatusContainer');
-
-            if (statusIcon && statusText) {
-                if (isOnline) {
-                    statusIcon.style.color = '#28a745';
-                    statusText.textContent = 'Online';
-                    statusContainer.classList.remove('offline');
-                    statusContainer.classList.add('online');
-                } else {
-                    statusIcon.style.color = '#888';
-                    statusText.textContent = 'Offline';
-                    statusContainer.classList.remove('online');
-                    statusContainer.classList.add('offline');
-                }
-                console.log('Status updated:', isOnline ? 'Online' : 'Offline');
-            }
+        if (!messageInput || !submitBtn || !messagesContainer) {
+            console.error('Chat elements not found');
+            return;
         }
 
-        // Send heartbeat to keep user online
-        function sendHeartbeat() {
-            fetch('{{ route("nurse.chat.online_status") }}', {
+        const CONVERSATION_ID = {{ $conversation->id }};
+        const MY_USER_ID      = {{ Auth::guard('nurse_middle')->id() }};
+        const CSRF_TOKEN      = '{{ csrf_token() }}';
+        const SEND_URL        = '{{ route("nurse.chat.send") }}';
+        const HEARTBEAT_URL   = '{{ route("nurse.chat.online_status") }}';
+        const OTHER_USER_ID   = {{ $otherParticipant->id }};
+        const BASE_URL        = '{{ asset("") }}';
+        const MY_AVATAR       = '{{ Auth::guard("nurse_middle")->user()->profile_img
+                                    ? asset("healthcareimg/uploads/".Auth::guard("nurse_middle")->user()->profile_img)
+                                    : asset("nurse/assets/imgs/nurse06.png") }}';
+
+        // Scroll to bottom on load
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // Append a message bubble to chat
+        function appendMessage(isSent, text, id, avatar, name) {
+            var div = document.createElement('div');
+            div.className = 'message ' + (isSent ? 'sent' : 'received');
+            if (id) div.setAttribute('data-message-id', id);
+
+            var img = document.createElement('img');
+            img.src       = avatar;
+            img.alt       = name;
+            img.className = 'message-avatar';
+
+            var bubble = document.createElement('div');
+            bubble.className = 'message-content';
+
+            var p = document.createElement('p');
+            p.className   = 'message-text';
+            p.textContent = text;
+            bubble.appendChild(p);
+
+            if (isSent) {
+                div.appendChild(bubble);
+                div.appendChild(img);
+            } else {
+                div.appendChild(img);
+                div.appendChild(bubble);
+            }
+
+            messagesContainer.appendChild(div);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Send message via fetch
+        function sendMessage() {
+            var message = messageInput.value.trim();
+            if (!message) return;
+
+            var formData = new FormData();
+            formData.append('conversation_id', CONVERSATION_ID);
+            formData.append('message', message);
+            formData.append('_token', CSRF_TOKEN);
+
+            submitBtn.disabled    = true;
+            submitBtn.textContent = 'Sending...';
+
+            fetch(SEND_URL, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(function(data) {
+                if (data.success && data.message) {
+                    appendMessage(true, data.message.message, data.message.id, MY_AVATAR, data.message.sender.name);
+                    messageInput.value = '';
+                } else {
+                    alert(data.error || 'Failed to send message');
+                }
+            })
+            .catch(function(err) {
+                alert('Send failed: ' + err.message);
+            })
+            .finally(function() {
+                submitBtn.disabled    = false;
+                submitBtn.textContent = 'Send';
+            });
+        }
+
+        // Click and Enter listeners
+        submitBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            sendMessage();
+        });
+
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Real-time incoming messages via Echo
+        if (typeof Echo !== 'undefined') {
+            Echo.private('conversation.' + CONVERSATION_ID)
+                .listen('.message.sent', function(data) {
+                    if (data.sender_id == MY_USER_ID) return;
+                    var avatar = data.sender_avatar
+                        ? BASE_URL + 'healthcareimg/uploads/' + data.sender_avatar
+                        : BASE_URL + 'nurse/assets/imgs/nurse06.png';
+                    appendMessage(false, data.message, data.id, avatar, data.sender_name);
+                });
+
+            // Online status
+            Echo.join('users.online')
+                .here(function(users) {
+                    var online = users.some(function(u) { return u.id == OTHER_USER_ID; });
+                    setStatus(online);
+                })
+                .joining(function(user) { if (user.id == OTHER_USER_ID) setStatus(true);  })
+                .leaving(function(user)  { if (user.id == OTHER_USER_ID) setStatus(false); });
+        }
+
+        function setStatus(online) {
+            var icon = document.getElementById('status-icon');
+            var text = document.getElementById('status-text');
+            if (!icon || !text) return;
+            icon.style.color = online ? '#28a745' : '#888';
+            text.textContent = online ? 'Online' : 'Offline';
+        }
+
+        // Heartbeat
+        function heartbeat() {
+            fetch(HEARTBEAT_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({ is_online: true })
-            }).catch(err => console.error('Heartbeat failed:', err));
+            }).catch(function() {});
         }
+        heartbeat();
+        setInterval(heartbeat, 120000);
 
-        // Send initial heartbeat and then every 2 minutes
-        sendHeartbeat();
-        setInterval(sendHeartbeat, 120000);
-
-        // Send offline status when leaving page
         window.addEventListener('beforeunload', function() {
-            navigator.sendBeacon('{{ route("nurse.chat.online_status") }}', JSON.stringify({ is_online: false }));
+            navigator.sendBeacon(HEARTBEAT_URL, JSON.stringify({ is_online: false }));
         });
 
-        // ========== MESSAGE LISTENERS ==========
+        console.log('✅ Chat ready, conversation: ' + CONVERSATION_ID);
+    }
 
-        // Listen for real-time messages on private channel
-        const channel = Echo.private('conversation.' + window.Laravel.conversationId);
+    // Safe init - works whether DOM is ready or not
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeChat);
+    } else {
+        initializeChat();
+    }
 
-        channel.error(function (error) {
-            console.error('=== Pusher Channel Error ===', error);
-        });
-
-        channel.listen('.message.sent', function (data) {
-            console.log('=== Real-time Message Received ===', data);
-
-            const messagesContainer = document.getElementById('chatMessages');
-            if (!messagesContainer) {
-                console.error('Chat messages container not found!');
-                return;
-            }
-            const baseUrl = "{{ asset('') }}";
-
-            const isSentByMe = data.sender_id == window.Laravel.userId;
-
-            // Don't display if it's our own message (already shown in UI)
-            if (isSentByMe) {
-                console.log('Skipping own message');
-                return;
-            }
-
-            const avatar = isSentByMe
-                ? window.Laravel.userAvatar
-                : (data.sender_avatar
-                    ? baseUrl + 'healthcareimg/uploads/' + data.sender_avatar
-                    : baseUrl + 'nurse/assets/imgs/nurse06.png');
-
-            const messageHtml = `
-            <div class="message ${isSentByMe ? 'sent' : 'received'}" data-message-id="${data.id}">
-
-                ${!isSentByMe ? `
-                <img src="${avatar}" alt="${data.sender_name}" class="message-avatar">
-                ` : ''}
-
-                <div class="message-content">
-                    <p class="message-text">${escapeHtml(data.message)}</p>
-                </div>
-
-                ${isSentByMe ? `
-                <img src="${avatar}" alt="${data.sender_name}" class="message-avatar">
-                ` : ''}
-
-            </div>
-        `;
-
-            messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-            // Play notification sound
-            playNotificationSound();
-        });
-
-        console.log('=== Message listener attached ===');
-
-        // Helper functions
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function formatTime(isoString) {
-            const date = new Date(isoString);
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function playNotificationSound() {
-            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQQAKZXZ8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBo');
-            audio.play().catch(() => { });
-        }
-
-        // Attach form handler when DOM is ready
-        document.addEventListener('DOMContentLoaded', function () {
-            const messageForm = document.getElementById('messageForm');
-            const messageInput = document.getElementById('messageInput');
-            const submitBtn = document.querySelector('.btn-send');
-            const messagesContainer = document.getElementById('chatMessages');
-
-            console.log('Chat elements found:', {
-                form: !!messageForm,
-                input: !!messageInput,
-                btn: !!submitBtn,
-                container: !!messagesContainer
-            });
-
-            if (messageForm && messageInput && submitBtn && messagesContainer) {
-                messageForm.onsubmit = function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    console.log('Form submitted');
-
-                    const formData = new FormData(this);
-                    console.log('Form data:', Object.fromEntries(formData));
-
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = 'Sending...';
-
-                    fetch('{{ route("nurse.chat.send") }}', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest',
-                        },
-                    })
-                        .then(response => {
-                            console.log('Response status:', response.status);
-                            return response.json();
-                        })
-                        .then(data => {
-                            console.log('Response data:', data);
-
-                            if (data.success && data.message) {
-                                const messageHtml = `
-                            <div class="message sent" data-message-id="${data.message.id}">
-                                <img src="${window.Laravel.userAvatar}" alt="${data.message.sender.name}" class="message-avatar">
-                                <div class="message-content">
-                                    <p class="message-text">${escapeHtml(data.message.message)}</p>
-                                </div>
-                            </div>
-                        `;
-
-                                messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
-                                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                                messageInput.value = '';
-                            } else {
-                                console.error('Error from server:', data);
-                                alert(data.error || 'Failed to send message');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Fetch error:', error);
-                            alert('Failed to send message: ' + error.message);
-                        })
-                        .finally(() => {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = 'Send';
-                        });
-                };
-
-                console.log('Chat form handler attached');
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            } else {
-                console.error('Chat elements not found');
-            }
-        });
-    })();
+})();
 </script>
+@endsection
