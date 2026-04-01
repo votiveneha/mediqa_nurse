@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\Message;
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -17,6 +18,7 @@ class MessageSent implements ShouldBroadcast
 
     public $message;
     public $recipientId;
+    public $shouldNotifyRecipient;
 
     /**
      * Create a new event instance.
@@ -24,7 +26,7 @@ class MessageSent implements ShouldBroadcast
     public function __construct(Message $message)
     {
         $this->message = $message->load('sender', 'conversation');
-        
+
         // Determine the recipient ID
         $conversation = $this->message->conversation;
         if ($this->message->sender_id == $conversation->nurse_id) {
@@ -32,6 +34,10 @@ class MessageSent implements ShouldBroadcast
         } else {
             $this->recipientId = $conversation->nurse_id;
         }
+
+        // Check if recipient has in-app notifications enabled
+        $recipient = User::find($this->recipientId);
+        $this->shouldNotifyRecipient = $recipient && $recipient->hasAppNotification();
     }
 
     /**
@@ -41,10 +47,16 @@ class MessageSent implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-        return [
+        $channels = [
             new PrivateChannel('conversation.' . $this->message->conversation_id),
-            new PrivateChannel('user.' . $this->recipientId),
         ];
+
+        // Only broadcast to user channel if recipient has app notifications enabled
+        if ($this->shouldNotifyRecipient) {
+            $channels[] = new PrivateChannel('user.' . $this->recipientId);
+        }
+
+        return $channels;
     }
 
     /**
