@@ -359,7 +359,15 @@ class ChatController extends Controller
             'file' => 'required|file|max:10240', // 10MB max
         ]);
 
-        $user = Auth::guard('nurse_middle')->user();
+        // Detect which guard is authenticated
+        $user = Auth::guard('nurse_middle')->check() ? Auth::guard('nurse_middle')->user() :
+                (Auth::guard('healthcare_facilities')->check() ? Auth::guard('healthcare_facilities')->user() :
+                (Auth::check() ? Auth::user() : null));
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
         $conversation = Conversation::findOrFail($request->conversation_id);
 
         // Check if user is participant
