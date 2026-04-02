@@ -67,7 +67,7 @@ class ChatController extends Controller
     {
         $user = Auth::guard('nurse_middle')->user();
 
-        $conversation = Conversation::with(['healthcare', 'messages.sender', 'job'])
+        $conversation = Conversation::with(['healthcare', 'messages.sender', 'messages.attachments', 'job'])
             ->where('id', $id)
             ->where('nurse_id', $user->id)
             ->firstOrFail();

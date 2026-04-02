@@ -171,7 +171,7 @@ class ChatController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => $message->load('sender')
+            'message' => $message->load(['sender', 'attachments'])
         ]);
     }
 
@@ -283,6 +283,75 @@ class ChatController extends Controller
     /**
      * Upload file attachment
      */
+    // public function uploadAttachment(Request $request)
+    // {
+    //     $request->validate([
+    //         'conversation_id' => 'required|exists:conversations,id',
+    //         'file' => 'required|file|max:10240', // 10MB max
+    //     ]);
+
+    //     $user = Auth::guard('nurse_middle')->user();
+    //     $conversation = Conversation::findOrFail($request->conversation_id);
+
+    //     // Check if user is participant
+    //     if (!$conversation->isParticipant($user->id)) {
+    //         return response()->json(['error' => 'Unauthorized'], 403);
+    //     }
+
+    //     $file = $request->file('file');
+
+    //     // Get file size before moving (temp file will be deleted after move)
+    //     $fileSize = $file->getSize();
+
+    //     // Create directory if it doesn't exist
+    //     $uploadPath = public_path('uploads/chat_file');
+    //     if (!file_exists($uploadPath)) {
+    //         mkdir($uploadPath, 0755, true);
+    //     }
+
+    //     // Generate unique filename
+    //     $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+    //     // Move file to public/uploads/chat_file (root public directory)
+    //     $file->move($uploadPath, $fileName);
+
+    //     // Store relative path from public folder
+    //     $filePath = 'uploads/chat_file/' . $fileName;
+
+    //     $message = Message::create([
+    //         'conversation_id' => $conversation->id,
+    //         'sender_id' => $user->id,
+    //         'sender_type' => $user->role === 1 ? 'nurse' : 'healthcare',
+    //         'message' => 'File: ' . $file->getClientOriginalName(),
+    //         'message_type' => 'file',
+    //         'file_url' => asset($filePath),
+    //         'file_name' => $file->getClientOriginalName(),
+    //         'file_size' => $fileSize,
+    //     ]);
+
+    //     // Create attachment record
+    //     $message->attachments()->create([
+    //         'file_name' => $file->getClientOriginalName(),
+    //         'file_path' => $filePath,
+    //         'file_type' => $file->getMimeType(),
+    //         'file_size' => $fileSize,
+    //     ]);
+
+    //     // Update conversation
+    //     $conversation->update([
+    //         'last_message_id' => $message->id,
+    //         'last_message_at' => now(),
+    //     ]);
+
+    //     // Broadcast event
+    //     broadcast(new MessageSent($message))->toOthers();
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => $message->load(['sender', 'attachments'])
+    //     ]);
+    // }
+
     public function uploadAttachment(Request $request)
     {
         $request->validate([
@@ -299,25 +368,46 @@ class ChatController extends Controller
         }
 
         $file = $request->file('file');
-        $path = $file->store('chat_attachments', 'public');
 
+        // ✅ IMPORTANT: Get all file details BEFORE moving the file
+        $fileSize = $file->getSize();
+        $fileType = $file->getMimeType();
+        $originalName = $file->getClientOriginalName();
+        $extension = $file->getClientOriginalExtension();
+
+        // Create directory if it doesn't exist
+        $uploadPath = public_path('uploads/chat_file');
+        if (!file_exists($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+        }
+
+        // Generate unique filename
+        $fileName = time() . '_' . uniqid() . '.' . $extension;
+
+        // ✅ Move file AFTER extracting info
+        $file->move($uploadPath, $fileName);
+
+        // Store relative path
+        $filePath = 'uploads/chat_file/' . $fileName;
+
+        // Create message
         $message = Message::create([
             'conversation_id' => $conversation->id,
             'sender_id' => $user->id,
             'sender_type' => $user->role === 1 ? 'nurse' : 'healthcare',
-            'message' => 'File: ' . $file->getClientOriginalName(),
+            'message' => 'File: ' . $originalName,
             'message_type' => 'file',
-            'file_url' => Storage::url($path),
-            'file_name' => $file->getClientOriginalName(),
-            'file_size' => $file->getSize(),
+            'file_url' => asset($filePath),
+            'file_name' => $originalName,
+            'file_size' => $fileSize,
         ]);
 
         // Create attachment record
         $message->attachments()->create([
-            'file_name' => $file->getClientOriginalName(),
-            'file_path' => $path,
-            'file_type' => $file->getMimeType(),
-            'file_size' => $file->getSize(),
+            'file_name' => $originalName,
+            'file_path' => $filePath,
+            'file_type' => $fileType, // ✅ use stored mime type
+            'file_size' => $fileSize,
         ]);
 
         // Update conversation

@@ -242,6 +242,101 @@
             color: #888;
             font-style: italic;
         }
+
+        .btn-attach {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .btn-attach:hover {
+            background: #f0f0f0;
+            color: #007bff;
+        }
+
+        .message-file {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            margin-top: 8px;
+            max-width: 300px;
+        }
+
+        .message-file .file-icon {
+            font-size: 24px;
+            color: #007bff;
+        }
+
+        .message-file .file-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .message-file .file-name {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .message-file .file-size {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .message-file a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .message-file a:hover {
+            text-decoration: underline;
+        }
+
+        .message-image {
+            max-width: 300px;
+            border-radius: 8px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .message-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .file-upload-progress {
+            display: none;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: #28a745;
+            width: 0%;
+            transition: width 0.3s;
+        }
     </style>
 
     <div class="chat-wrapper">
@@ -335,6 +430,28 @@
                             @endif
                             <div class="message-content">
                                 <p class="message-text">{{ nl2br(e($message->message)) }}</p>
+                                @if($message->message_type === 'file' && $message->attachments->count() > 0)
+                                    @php
+                                        $attachment = $message->attachments->first();
+                                        $isImage = str_starts_with($attachment->file_type, 'image/');
+                                    @endphp
+                                    @if($isImage)
+                                        <div class="message-image">
+                                            <img src="{{ asset($attachment->file_path) }}" alt="{{ $attachment->file_name }}" onclick="window.open(this.src)">
+                                        </div>
+                                    @else
+                                        <div class="message-file">
+                                            <i class="file-icon {{ $attachment->file_icon ?? 'fas fa-file' }}"></i>
+                                            <div class="file-info">
+                                                <div class="file-name">{{ $attachment->file_name }}</div>
+                                                <div class="file-size">{{ $attachment->formatted_file_size }}</div>
+                                            </div>
+                                            <a href="{{ asset($attachment->file_path) }}" download>
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        </div>
+                                    @endif
+                                @endif
                             </div>
                             @if($isSent)
                                 <img src="{{ asset(Auth::guard('nurse_middle')->user()->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
@@ -355,9 +472,22 @@
                 <form id="messageForm" style="display: flex; gap: 15px; width: 100%;" onsubmit="return false;">
                     <input type="hidden" name="_token" value="{{ csrf_token() }}" autocomplete="off">
                     <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
+                    <button type="button" id="attachBtn" class="btn-attach" title="Attach file">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <input type="file" id="fileInput" style="display: none;" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv">
                     <input type="text" name="message" class="chat-input" placeholder="Type message" id="messageInput" autocomplete="off">
                     <button type="button" id="sendBtn" class="btn-send">Send</button>
                 </form>
+                <div class="file-upload-progress" id="uploadProgress">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px;">
+                        <span id="uploadFileName">Uploading...</span>
+                        <span id="uploadPercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" id="progressBarFill"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -371,6 +501,12 @@
         const messageInput      = document.getElementById('messageInput');
         const submitBtn         = document.getElementById('sendBtn');
         const messagesContainer = document.getElementById('chatMessages');
+        const attachBtn         = document.getElementById('attachBtn');
+        const fileInput         = document.getElementById('fileInput');
+        const uploadProgress    = document.getElementById('uploadProgress');
+        const uploadFileName    = document.getElementById('uploadFileName');
+        const uploadPercent     = document.getElementById('uploadPercent');
+        const progressBarFill   = document.getElementById('progressBarFill');
 
         if (!messageInput || !submitBtn || !messagesContainer) {
             console.error('Chat elements not found');
@@ -381,17 +517,42 @@
         const MY_USER_ID      = {{ Auth::guard('nurse_middle')->id() }};
         const CSRF_TOKEN      = '{{ csrf_token() }}';
         const SEND_URL        = '{{ route("nurse.chat.send") }}';
+        const UPLOAD_URL      = '{{ route("nurse.chat.upload") }}';
         const HEARTBEAT_URL   = '{{ route("nurse.chat.online_status") }}';
         const OTHER_USER_ID   = {{ $otherParticipant->id }};
         const BASE_URL        = '{{ asset("") }}';
-        const MY_AVATAR       = '{{ Auth::guard("nurse_middle")->user()->profile_img
-                                    ? asset("healthcareimg/uploads/".Auth::guard("nurse_middle")->user()->profile_img)
-                                    : asset("nurse/assets/imgs/nurse06.png") }}';
+        const MY_AVATAR       = '{{ Auth::guard('nurse_middle')->user()->profile_img
+                                    && Auth::guard('nurse_middle')->user()->profile_img !== 'nurse/assets/imgs/nurse06.png'
+                                    ? asset('healthcareimg/uploads/' . Auth::guard('nurse_middle')->user()->profile_img)
+                                    : asset('nurse/assets/imgs/nurse06.png') }}';
 
         // Scroll to bottom on load
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-        // Append a message bubble to chat
+        // Get file icon class based on mime type
+        function getFileIcon(mimeType) {
+            if (mimeType.startsWith('image/')) return 'fas fa-image';
+            if (mimeType === 'application/pdf') return 'fas fa-file-pdf';
+            if (mimeType.startsWith('text/')) return 'fas fa-file-alt';
+            if (mimeType.includes('word')) return 'fas fa-file-word';
+            if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return 'fas fa-file-excel';
+            if (mimeType.includes('powerpoint')) return 'fas fa-file-powerpoint';
+            return 'fas fa-file';
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            var units = ['B', 'KB', 'MB', 'GB'];
+            var i = 0;
+            while (bytes > 1024) {
+                bytes /= 1024;
+                i++;
+            }
+            return bytes.toFixed(2) + ' ' + units[i];
+        }
+
+        // Append a text message bubble to chat
         function appendMessage(isSent, text, id, avatar, name) {
             var div = document.createElement('div');
             div.className = 'message ' + (isSent ? 'sent' : 'received');
@@ -409,6 +570,77 @@
             p.className   = 'message-text';
             p.textContent = text;
             bubble.appendChild(p);
+
+            if (isSent) {
+                div.appendChild(bubble);
+                div.appendChild(img);
+            } else {
+                div.appendChild(img);
+                div.appendChild(bubble);
+            }
+
+            messagesContainer.appendChild(div);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Append a file message to chat
+        function appendFileMessage(isSent, fileName, fileSize, fileUrl, isImage, imageUrl, id, avatar, name) {
+            var div = document.createElement('div');
+            div.className = 'message ' + (isSent ? 'sent' : 'received');
+            if (id) div.setAttribute('data-message-id', id);
+
+            var img = document.createElement('img');
+            img.src       = avatar;
+            img.alt       = name;
+            img.className = 'message-avatar';
+
+            var bubble = document.createElement('div');
+            bubble.className = 'message-content';
+
+            var p = document.createElement('p');
+            p.className   = 'message-text';
+            p.textContent = isImage ? 'Image' : 'File: ' + fileName;
+            bubble.appendChild(p);
+
+            if (isImage) {
+                var imgDiv = document.createElement('div');
+                imgDiv.className = 'message-image';
+                var innerImg = document.createElement('img');
+                innerImg.src = imageUrl;
+                innerImg.onclick = function() { window.open(this.src); };
+                imgDiv.appendChild(innerImg);
+                bubble.appendChild(imgDiv);
+            } else {
+                var fileDiv = document.createElement('div');
+                fileDiv.className = 'message-file';
+
+                var icon = document.createElement('i');
+                icon.className = 'file-icon fas fa-file';
+                fileDiv.appendChild(icon);
+
+                var fileInfo = document.createElement('div');
+                fileInfo.className = 'file-info';
+
+                var fName = document.createElement('div');
+                fName.className = 'file-name';
+                fName.textContent = fileName;
+                fileInfo.appendChild(fName);
+
+                var fSize = document.createElement('div');
+                fSize.className = 'file-size';
+                fSize.textContent = fileSize;
+                fileInfo.appendChild(fSize);
+
+                fileDiv.appendChild(fileInfo);
+
+                var downloadLink = document.createElement('a');
+                downloadLink.href = fileUrl;
+                downloadLink.download = fileName;
+                downloadLink.innerHTML = '<i class="fas fa-download"></i>';
+                fileDiv.appendChild(downloadLink);
+
+                bubble.appendChild(fileDiv);
+            }
 
             if (isSent) {
                 div.appendChild(bubble);
@@ -464,6 +696,68 @@
             });
         }
 
+        // Upload file via fetch
+        function uploadFile(file) {
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size must be less than 10MB');
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('conversation_id', CONVERSATION_ID);
+            formData.append('file', file);
+            formData.append('_token', CSRF_TOKEN);
+
+            var xhr = new XMLHttpRequest();
+
+            // Progress tracking
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    var percent = Math.round((e.loaded / e.total) * 100);
+                    uploadFileName.textContent = file.name;
+                    uploadPercent.textContent = percent + '%';
+                    progressBarFill.style.width = percent + '%';
+                }
+            });
+
+            xhr.addEventListener('load', function() {
+                uploadProgress.style.display = 'none';
+                progressBarFill.style.width = '0%';
+                uploadPercent.textContent = '0%';
+
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    if (data.success && data.message) {
+                        var msg = data.message;
+                        var isImage = msg.message_type === 'image' || (msg.attachments && msg.attachments[0] && msg.attachments[0].file_type && msg.attachments[0].file_type.startsWith('image/'));
+                        var fileUrl = msg.file_url || (msg.attachments && msg.attachments[0] ? BASE_URL + msg.attachments[0].file_path : '');
+                        var imageUrl = isImage ? fileUrl : null;
+                        var fileSize = formatFileSize(file.size);
+
+                        appendFileMessage(true, msg.file_name || file.name, fileSize, fileUrl, isImage, imageUrl, msg.id, MY_AVATAR, msg.sender.name);
+                    } else {
+                        alert(data.error || 'Failed to upload file');
+                    }
+                } catch (err) {
+                    alert('Upload failed: ' + err.message);
+                }
+            });
+
+            xhr.addEventListener('error', function() {
+                uploadProgress.style.display = 'none';
+                progressBarFill.style.width = '0%';
+                uploadPercent.textContent = '0%';
+                alert('Upload failed: Network error');
+            });
+
+            xhr.open('POST', UPLOAD_URL);
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+            uploadProgress.style.display = 'block';
+            xhr.send(formData);
+        }
+
         // Click and Enter listeners
         submitBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -477,6 +771,20 @@
             }
         });
 
+        // File upload listeners
+        if (attachBtn && fileInput) {
+            attachBtn.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    uploadFile(this.files[0]);
+                    this.value = '';
+                }
+            });
+        }
+
         // Real-time incoming messages via Echo
         if (typeof Echo !== 'undefined') {
             Echo.private('conversation.' + CONVERSATION_ID)
@@ -485,7 +793,19 @@
                     var avatar = data.sender_avatar
                         ? BASE_URL + 'healthcareimg/uploads/' + data.sender_avatar
                         : BASE_URL + 'nurse/assets/imgs/nurse06.png';
-                    appendMessage(false, data.message, data.id, avatar, data.sender_name);
+
+                    // Check if it's a file message
+                    if (data.message_type === 'file' && data.attachments && data.attachments[0]) {
+                        var attachment = data.attachments[0];
+                        var isImage = attachment.file_type && attachment.file_type.startsWith('image/');
+                        var fileUrl = attachment.file_url || (BASE_URL + attachment.file_path);
+                        var imageUrl = isImage ? fileUrl : null;
+                        var fileSize = formatFileSize(attachment.file_size);
+
+                        appendFileMessage(false, attachment.file_name, fileSize, fileUrl, isImage, imageUrl, data.id, avatar, data.sender_name);
+                    } else {
+                        appendMessage(false, data.message, data.id, avatar, data.sender_name);
+                    }
                 });
 
             // Online status
@@ -525,7 +845,7 @@
             navigator.sendBeacon(HEARTBEAT_URL, JSON.stringify({ is_online: false }));
         });
 
-        console.log('✅ Chat ready, conversation: ' + CONVERSATION_ID);
+        console.log('✅ Chat ready with file upload, conversation: ' + CONVERSATION_ID);
     }
 
     // Safe init - works whether DOM is ready or not

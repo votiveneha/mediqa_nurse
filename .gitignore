@@ -2,6 +2,7 @@
 .env
 vendor/
 /node_modules
+/public/uploads/
 # IDE/Editor specific
 .idea/
 *.sublime-workspace

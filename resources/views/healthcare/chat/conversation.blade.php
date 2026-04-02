@@ -359,6 +359,29 @@
 
                             <div class="message-content">
                                 <p class="message-text">{{ nl2br(e($message->message)) }}</p>
+                                
+                                @if($message->message_type === 'file' && $message->attachments->count() > 0)
+                                    @php
+                                        $attachment = $message->attachments->first();
+                                        $isImage = $attachment->file_type && str_starts_with($attachment->file_type, 'image/');
+                                    @endphp
+                                    @if($isImage)
+                                        <div class="message-image">
+                                            <img src="{{ asset($attachment->file_path) }}" alt="{{ $attachment->file_name }}" onclick="window.open(this.src)" style="max-width: 300px; border-radius: 8px; cursor: pointer;">
+                                        </div>
+                                    @else
+                                        <div class="message-file" style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(0, 0, 0, 0.05); border-radius: 8px; margin-top: 8px; max-width: 300px;">
+                                            <i class="file-icon {{ $attachment->file_icon ?? 'fas fa-file' }}" style="font-size: 24px; color: #007bff;"></i>
+                                            <div class="file-info" style="flex: 1; overflow: hidden;">
+                                                <div class="file-name" style="font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $attachment->file_name }}</div>
+                                                <div class="file-size" style="font-size: 11px; color: #888;">{{ $attachment->formatted_file_size }}</div>
+                                            </div>
+                                            <a href="{{ asset($attachment->file_path) }}" download style="color: #007bff; text-decoration: none;">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        </div>
+                                    @endif
+                                @endif
                             </div>
 
                             @if($isSent)

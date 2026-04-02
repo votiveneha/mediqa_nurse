@@ -413,7 +413,33 @@ class ChatManager {
 
         let messageContent = '';
 
-        if (event.message_type === 'file') {
+        // Check if message has attachments
+        if (event.message_type === 'file' && event.attachments && event.attachments[0]) {
+            const attachment = event.attachments[0];
+            const isImage = attachment.file_type && attachment.file_type.startsWith('image/');
+            
+            if (isImage) {
+                messageContent = `
+                    <div class="message-image">
+                        <img src="${attachment.file_url}" alt="${attachment.file_name}" style="max-width: 300px; border-radius: 8px; cursor: pointer;" onclick="window.open(this.src)">
+                    </div>
+                `;
+            } else {
+                const fileIcon = this.getFileIcon(attachment.file_type);
+                messageContent = `
+                    <div class="message-file">
+                        <i class="${fileIcon}"></i>
+                        <div class="file-info">
+                            <div class="file-name">${attachment.file_name}</div>
+                            <div class="file-size">${this.formatFileSize(attachment.file_size)}</div>
+                        </div>
+                        <a href="${attachment.file_url}" download>
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>
+                `;
+            }
+        } else if (event.message_type === 'file') {
             messageContent = `
                 <div class="message-file">
                     <i class="fas fa-file"></i>
@@ -632,6 +658,20 @@ class ChatManager {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    /**
+     * Get file icon class based on mime type
+     */
+    getFileIcon(mimeType) {
+        if (!mimeType) return 'fas fa-file';
+        if (mimeType.startsWith('image/')) return 'fas fa-image';
+        if (mimeType === 'application/pdf') return 'fas fa-file-pdf';
+        if (mimeType.startsWith('text/')) return 'fas fa-file-alt';
+        if (mimeType.includes('word')) return 'fas fa-file-word';
+        if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return 'fas fa-file-excel';
+        if (mimeType.includes('powerpoint')) return 'fas fa-file-powerpoint';
+        return 'fas fa-file';
     }
 
     /**
