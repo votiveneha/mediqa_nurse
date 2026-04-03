@@ -159,7 +159,10 @@
                                 </div>
                                 
                                 @if(empty($invoice_data))
-                                <a href="{{ route('medical-facilities.payment_page',['product_id'=>$plandata->stripe_product_id]) }}" class="btn-plan">Choose Plan</a>
+                                <!-- <a href="{{ route('medical-facilities.payment_page',['product_id'=>$plandata->stripe_product_id]) }}" class="btn-plan">Choose Plan</a> -->
+                                 <a href="{{ route('medical-facilities.subscribe', $plandata->default_price_id) }}" class="btn btn-dark">
+    Choose Plan
+</a>
                                
                                 @endif
                             </div>

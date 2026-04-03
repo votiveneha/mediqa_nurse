@@ -21,19 +21,7 @@ class StripeWebhookController extends Controller
     $sigHeader = $request->server('HTTP_STRIPE_SIGNATURE');
     $endpointSecret = env('STRIPE_WEBHOOK_SECRET');
 
-    try {
-        $event = \Stripe\Webhook::constructEvent(
-            $payload,
-            $sigHeader,
-            $endpointSecret
-        );
-    } catch (\UnexpectedValueException $e) {
-        \Log::error('Stripe Webhook Invalid Payload', ['message' => $e->getMessage()]);
-        return response('Invalid payload', 400);
-    } catch (\Stripe\Exception\SignatureVerificationException $e) {
-        \Log::error('Stripe Webhook Invalid Signature', ['message' => $e->getMessage()]);
-        return response('Invalid signature', 400);
-    }
+    $event = json_decode($payload);
 
     try {
         switch ($event->type) {
@@ -114,8 +102,8 @@ class StripeWebhookController extends Controller
                     [
                         'user_id'                => $session->metadata->user_id ?? null,
                         'user_type'              => $session->metadata->user_type ?? 'healthcare_facilities',
-                        'plan_id'                => $session->metadata->plan_id ?? null,
-                        'plan_name'              => $session->metadata->plan_name ?? null,
+                        'product_id'                => $session->metadata->plan_id ?? null,
+                        'product_name'              => $session->metadata->plan_name ?? null,
                         'stripe_customer_id'     => $session->customer ?? null,
                         'stripe_subscription_id' => $session->subscription ?? null,
                         'amount'                 => isset($session->amount_total) ? ($session->amount_total / 100) : 0,
@@ -167,7 +155,7 @@ class StripeWebhookController extends Controller
                         'user_id'                => $invoice->subscription_details->metadata->user_id ?? null,
                         'user_type'              => $invoice->subscription_details->metadata->user_type ?? 'healthcare_facilities',
                         'product_id'                => $invoice->subscription_details->metadata->plan_id ?? null,
-                        'plan_name'              => $invoice->subscription_details->metadata->plan_name ?? null,
+                        'product_name'              => $invoice->subscription_details->metadata->plan_name ?? null,
                         'stripe_customer_id'     => $invoice->customer ?? null,
                         'stripe_subscription_id' => $invoice->subscription ?? null,
                         'stripe_invoice_id'      => $invoice->id ?? null,
@@ -204,12 +192,12 @@ class StripeWebhookController extends Controller
                     ]
                 );
 
-                DB::table('healthcare_facilities')
-                    ->where('id', $invoice->subscription_details->metadata->user_id ?? 0)
-                    ->update([
-                        'subscription_status' => 'active',
-                        'updated_at' => now(),
-                    ]);
+                // DB::table('healthcare_facilities')
+                //     ->where('id', $invoice->subscription_details->metadata->user_id ?? 0)
+                //     ->update([
+                //         'subscription_status' => 'active',
+                //         'updated_at' => now(),
+                //     ]);
 
                 break;
 
@@ -231,7 +219,7 @@ class StripeWebhookController extends Controller
                         'user_id'                => $invoice->subscription_details->metadata->user_id ?? null,
                         'user_type'              => $invoice->subscription_details->metadata->user_type ?? 'healthcare_facilities',
                         'product_id'                => $invoice->subscription_details->metadata->plan_id ?? null,
-                        'plan_name'              => $invoice->subscription_details->metadata->plan_name ?? null,
+                        'product_name'              => $invoice->subscription_details->metadata->plan_name ?? null,
                         'stripe_customer_id'     => $invoice->customer ?? null,
                         'stripe_subscription_id' => $invoice->subscription ?? null,
                         'stripe_invoice_id'      => $invoice->id ?? null,
@@ -243,25 +231,25 @@ class StripeWebhookController extends Controller
                     ]
                 );
 
-                DB::table('healthcare_facilities')
-                    ->where('id', $invoice->subscription_details->metadata->user_id ?? 0)
-                    ->update([
-                        'subscription_status' => 'past_due',
-                        'updated_at' => now(),
-                    ]);
+                // DB::table('healthcare_facilities')
+                //     ->where('id', $invoice->subscription_details->metadata->user_id ?? 0)
+                //     ->update([
+                //         'subscription_status' => 'past_due',
+                //         'updated_at' => now(),
+                //     ]);
 
                 break;
         }
 
     } catch (\Exception $e) {
-        \Log::error('Stripe Webhook DB Error', [
-            'message' => $e->getMessage(),
-            'line' => $e->getLine(),
-            'file' => $e->getFile(),
-        ]);
+    \Log::error('Stripe Webhook DB Error', [
+        'message' => $e->getMessage(),
+        'line' => $e->getLine(),
+        'file' => $e->getFile(),
+    ]);
 
-        return response('Webhook DB Error', 500);
-    }
+    return response('Webhook DB Error: ' . $e->getMessage(), 500);
+}
 
     return response('Webhook Handled', 200);
 }

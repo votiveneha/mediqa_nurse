@@ -72,7 +72,7 @@ class MessageSent implements ShouldBroadcast
      */
     public function broadcastWith(): array
     {
-        return [
+        $data = [
             'id' => $this->message->id,
             'conversation_id' => $this->message->conversation_id,
             'sender_id' => $this->message->sender_id,
@@ -87,5 +87,24 @@ class MessageSent implements ShouldBroadcast
             'is_read' => $this->message->is_read,
             'created_at' => $this->message->created_at->toIso8601String(),
         ];
+
+        // Include attachments if present
+        if ($this->message->attachments->count() > 0) {
+            $data['attachments'] = $this->message->attachments->map(function ($attachment) {
+                return [
+                    'id' => $attachment->id,
+                    'file_name' => $attachment->file_name,
+                    'file_path' => $attachment->file_path,
+                    'file_type' => $attachment->file_type,
+                    'file_size' => $attachment->file_size,
+                    'file_url' => asset($attachment->file_path),
+                    'is_image' => $attachment->is_image,
+                    'file_icon' => $attachment->file_icon,
+                    'formatted_file_size' => $attachment->formatted_file_size,
+                ];
+            })->toArray();
+        }
+
+        return $data;
     }
 }

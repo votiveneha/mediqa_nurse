@@ -108,20 +108,29 @@
                                     <span class="message-time">{{ $message->created_at->format('g:i A') }}</span>
                                 </div>
 
-                                @if($message->message_type === 'file')
-                                    <div class="message-file">
-                                        <i class="fas fa-file"></i>
-                                        <a href="{{ asset($message->file_url) }}" download target="_blank">
-                                            {{ $message->file_name }}
-                                        </a>
-                                        <span class="file-size">({{ $message->formatted_file_size }})</span>
-                                    </div>
-                                @elseif($message->message_type === 'image')
-                                    <div class="message-image">
-                                        <img src="{{ asset($message->file_url) }}" alt="Image" class="img-fluid">
-                                    </div>
-                                @else
-                                    <p class="message-text">{{ nl2br(e($message->message)) }}</p>
+                                <p class="message-text">{{ nl2br(e($message->message)) }}</p>
+
+                                @if($message->message_type === 'file' && $message->attachments->count() > 0)
+                                    @php
+                                        $attachment = $message->attachments->first();
+                                        $isImage = $attachment->file_type && str_starts_with($attachment->file_type, 'image/');
+                                    @endphp
+                                    @if($isImage)
+                                        <div class="message-image">
+                                            <img src="{{ asset($attachment->file_path) }}" alt="{{ $attachment->file_name }}" onclick="window.open(this.src)" style="max-width: 300px; border-radius: 8px; cursor: pointer;">
+                                        </div>
+                                    @else
+                                        <div class="message-file">
+                                            <i class="file-icon {{ $attachment->file_icon ?? 'fas fa-file' }}"></i>
+                                            <div class="file-info">
+                                                <div class="file-name">{{ $attachment->file_name }}</div>
+                                                <div class="file-size">{{ $attachment->formatted_file_size }}</div>
+                                            </div>
+                                            <a href="{{ asset($attachment->file_path) }}" download>
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        </div>
+                                    @endif
                                 @endif
 
                                 @if($message->edited)

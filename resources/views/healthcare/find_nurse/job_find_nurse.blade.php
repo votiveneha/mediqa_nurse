@@ -57,15 +57,23 @@
 /* ================= FILTER BAR ================= */
 
 .search-bar {
-    display: flex;
+    /* display: flex; */
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 equal columns */
     gap: 14px;
     align-items: center;
     margin-top: 15px;
+}
+.search-bar .form-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
 
 /* Dropdown + input fields */
 .search-bar select,
 .search-bar input {
+    width: 100%; /* important */
     height: 44px;
     min-width: 223px;
     padding: 0 14px;
@@ -415,6 +423,7 @@
     /* color: #6b7280; */
     border: none;
     padding: 10px 16px;
+    white-space: nowrap;
 }
 
 .ss-table thead {
@@ -531,46 +540,74 @@
 .candidate-card p {
     color: #000;
 }
+
+.bg-delete-selected {
+    background: #e63946;
+    color: #fff;
+    border: 1px solid #e63946;
+    transition: all ease-in-out .3s;
+    font-weight: 600;
+}
+
+.bg-delete-selected:hover {
+    background: #fff;
+    color: #e63946;
+    border: 1px solid #e63946
+}
+
+.border-top {
+    border-top: 1px solid #eee !important;
+    padding: 16px 0 0;
+}
+@media (max-width: 1024px) {
+    .search-bar {
+        grid-template-columns: repeat(2, 1fr); /* 2 per row */
+    }
+}
+
+@media (max-width: 640px) {
+    .search-bar {
+        grid-template-columns: 1fr; /* 1 per row */
+    }
+}
 </style>
 @endsection
 @section('content')
 <main class="main find_job_div">
     <section class="section-box mt-30">
         <div class="container">
-            <div class="saved-searches-row" id="search-tabs">
+     <div class="saved-searches-row" id="search-tabs">
                 <div class="searchtabs">
                     <!-- Fixed left tab -->
-                    <div class="saved-search-tab">
+                    <div class="saved-search-tab" data-id="browse_all">
                         Browse All Nurse
                     </div>
-                    @if(count($jobs) <= 0) <div id="no-job-post-hf" class="saved-search-tab" data-bs-toggle="tooltip"
+                    @if(count($jobs) <= 0) 
+                    <div id="no-job-post-hf" data-bs-toggle="tooltip"
                         data-bs-placement="top" title="You don’t have active job postings yet.">
                         Post a Job
-                </div>
-                @endif
-                <!-- Scrollable center -->
-                <div class="centered-filter">
-                    @forelse ($jobs as $job)
-                    <div class="saved-search-tab" value="{{ $job->job_box_id }}">
-                        {{ $job->display_name }}
                     </div>
-                    @empty
-
-                    @endforelse
-                    {{-- @foreach ($jobs as $job)
+                     @endif
+                    <!-- Scrollable center -->
+                    <div class="centered-filter">
+                        @forelse ($jobs as $job)
+                        <div class="saved-search-tab" data-id="{{ $job->job_box_id }}">
+                            {{ $job->job_box_id }}
+                        </div> 
+                        @empty   
+                        @endforelse
+                        {{-- @foreach ($jobs as $job)
                         <div class="saved-search-tab" value="{{ $job->job_box_id }}">
-                    {{ $job->display_name }}
+                            {{ $job->display_name }}
+                        </div>
+                        @endforeach --}}              
+                    </div>          
+                    <!-- Fixed right button -->
+                    <div class="add-new">
+                        <button class="saved-add-search">+ Save New</button>
+                    </div>
                 </div>
-                @endforeach --}}
-
             </div>
-
-            <!-- Fixed right button -->
-            <div class="add-new">
-                <button class="saved-add-search">+ Save New</button>
-            </div>
-        </div>
-        </div>
         <div>
             <div class="job_tabs">
                 <ul class="tab-nav">
@@ -584,7 +621,7 @@
                     {{-- <button id="add-search-btn">+ Save Search</button> --}}
                 </div>
                 <div class="search-bar">
-                
+
                     <div class="form-group top_filter location_filter">
                         <label for="job_start">Role / Speciality</label>
                         <input type="text" id="role_speciality" placeholder="Search by Nurse type or Speciality">
@@ -601,18 +638,18 @@
                             <option value="7">Within 7 Weeks</option>
                         </select>
                     </div>
-                
+
                     <!-- <input type="hidden" id="selectedLocations" name="locations"> -->
                     <div class="form-group top_filter location_filter">
                         <label for="sort">Search Nurse</label>
                         <input type="text" id="nurse_registration" placeholder="Search by Name or Registration Number">
                     </div>
                     <div class="form-group top_filter location_filter">
-                        <label for="sort">Sort By</label>
-                        <select>
-                            <option value="">Top Matches</option>
-                            <option value="">Highest Experience</option>
-                            <option value="">Available Soonest</option>
+                        <label for="sort_by">Sort By</label>
+                        <select id="sort_by" name="sort_by" class="form-control">
+                            <option value="top_matches">Top Matches</option>
+                            <option value="highest_experience">Highest Experience</option>
+                            <option value="available_soonest">Available Soonest</option>
                         </select>
                     </div>
                     <!-- <div class="top_filter sort_by_filter"> -->
@@ -651,18 +688,20 @@
                             </ul>
                         </div>
                     </div>
-                   <!-- Job Listings -->
+                    <!-- Job Listings -->
                     <div class="job-listings col-md-8 normal-pagination">
                         @forelse($nurse_list as $list)
                         <div class="candidate-card">
                             <!-- TOP -->
-                            <div class="d-flex justify-content-between">
-                                <div class="d-flex">
-                                    <img src="https://randomuser.me/api/portraits/women/44.jpg" class="profile-img mr-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <div class="d-flex gap-3">
+                                    <img src="https://randomuser.me/api/portraits/women/44.jpg"
+                                        class="profile-img mr-3">
                                     <div>
                                         <div class="name">{{$list->name}} {{$list->lastname}}</div>
                                         <div class="sub-text">
-                                            <i class="fa fa-map-marker"></i> Los Angeles, {{ country_name($list->country) }}
+                                            <i class="fa fa-map-marker"></i> Los Angeles,
+                                            {{ country_name($list->country) }}
                                         </div>
                                         <div class="sub-text mt-1">
                                             <i class="fa fa-briefcase"></i> 15 yrs Exp · ICU · ACLS, BLS
@@ -673,9 +712,9 @@
                                     <i class="fa fa-heart-o" style="font-size:20px;"></i>
                                 </div>
                             </div>
-                            <hr>
+                            <!-- <hr> -->
                             <!-- JOB TAG -->
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-between align-items-center border-top">
                                 <div>
                                     <span class="job-tag">
                                         <i class="fa fa-briefcase"></i> ICU RN · MQ-01425
@@ -685,13 +724,16 @@
                                     </span>
                                 </div>
                             </div>
-                            <hr>
+                            <!-- <hr> -->
                             <!-- STATUS -->
                             <div class="row">
                                 <div class="col-md-10 status-list">
-                                    <p><i class="fa fa-check text-success"></i> Compliance: Verified</p>
-                                    <p><i class="fa fa-check text-success"></i> Vaccinated: Up to Date</p>
-                                    <p><i class="fa fa-check text-success"></i> Availability: Within 48h (Lat
+                                    <p><i class="fa fa-check text-success"></i> <strong>Compliance:</strong> Verified
+                                    </p>
+                                    <p><i class="fa fa-check text-success"></i> <strong> Vaccinated:</strong> Up to Date
+                                    </p>
+                                    <p><i class="fa fa-check text-success"></i> <strong> Availability: </strong> Within
+                                        48h (Last
                                         Minute)</p>
                                 </div>
                                 <div class="col-md-2">
@@ -704,9 +746,9 @@
                                     </div>
                                 </div>
                             </div>
-                            <hr>
+                            <!-- <hr> -->
                             <!-- BUTTONS -->
-                            <div class="d-flex gap-4 justify-content-end">
+                            <div class="d-flex gap-4 justify-content-end border-top">
                                 <button class="btn btn-custom mr-2">
                                     <i class="fa fa-user"></i> Invite to Apply
                                 </button>
@@ -741,143 +783,145 @@
                         <!-- <a href='#'>
                             <i class="fa fa-trash" aria-hidden="true"></i>
                         </a> -->
-                        <button class="btn ss-delete">
+                        <button class="btn ss-delete bg-delete-selected">
                             <!-- <i class="fi fi-rr-trash mr-1"></i> -->
-                             Delete Selected
+                            Delete Selected
                         </button>
                     </div>
 
                     <!-- Table -->
-                    <table class="ss-table border">
-                        <thead>
-                            <tr>
-                                <th><input type="checkbox" class="ss-checkbox"></th>
-                                <th>Name</th>
-                                <th>Search Type</th>
-                                <th>Filters Summary</th>
-                                <th>Matches</th>
-                                <!-- <th>Alert</th> -->
-                                <th>Created</th>
-                                <th>Last Run</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
+                    <div class="table-responsive">
+                        <table class="ss-table border">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" class="ss-checkbox"></th>
+                                    <th>Name</th>
+                                    <th>Search Type</th>
+                                    <th>Filters Summary</th>
+                                    <th>Matches</th>
+                                    <!-- <th>Alert</th> -->
+                                    <th>Created</th>
+                                    <th>Last Run</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
 
-                        <tbody>
+                            <tbody>
 
-                            <!-- Row -->
-                            <tr class="ss-row">
-                                <td><input type="checkbox" class="ss-checkbox"></td>
-                                <td class="ss-name">My Preferences</td>
-                                <td class="ss-type">Dynamic</td>
-                                <td>-</td>
-                                <td><span class="ss-match">0</span></td>
-                                <!-- <td><span class="ss-alert">Realtime</span></td> -->
-                                <td>Today</td>
-                                <!-- <td><span class="ss-toggle"></span></td> -->
-                                <td>
-                                    <div class="alert-toggle-wrapper">
-                                        <label class="alert-toggle">
-                                            <input type="checkbox" class="alert-toggle-input" checked>
+                                <!-- Row -->
+                                <tr class="ss-row">
+                                    <td><input type="checkbox" class="ss-checkbox"></td>
+                                    <td class="ss-name">My Preferences</td>
+                                    <td class="ss-type">Dynamic</td>
+                                    <td>-</td>
+                                    <td><span class="ss-match">0</span></td>
+                                    <!-- <td><span class="ss-alert">Realtime</span></td> -->
+                                    <td>Today</td>
+                                    <!-- <td><span class="ss-toggle"></span></td> -->
+                                    <td>
+                                        <div class="alert-toggle-wrapper">
+                                            <label class="alert-toggle">
+                                                <input type="checkbox" class="alert-toggle-input" checked>
 
-                                            <span class="alert-toggle-slider"></span>
-                                        </label>
-                                    </div>
-                                </td>
-                                <td class="ss-actions">
-                                    <button class="btn ss-run">
-                                        <!-- <i class="fi fi-rr-play mr-1"></i> -->
-                                        Run
-                                    </button>
-                                    <button class="btn ss-duplicate">
-                                        <!-- <i class="fi fi-rr-copy mr-1"></i>  -->
-                                        Duplicate
-                                    </button>
-                                </td>
-                            </tr>
+                                                <span class="alert-toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td class="ss-actions">
+                                        <button class="btn ss-run">
+                                            <!-- <i class="fi fi-rr-play mr-1"></i> -->
+                                            Run
+                                        </button>
+                                        <button class="btn ss-duplicate">
+                                            <!-- <i class="fi fi-rr-copy mr-1"></i>  -->
+                                            Duplicate
+                                        </button>
+                                    </td>
+                                </tr>
 
-                            <!-- Row -->
-                            <tr class="ss-row">
-                                <td><input type="checkbox" class="ss-checkbox"></td>
-                                <td class="ss-name">Saved Search 2</td>
-                                <td class="ss-type">Dynamic</td>
-                                <td>-</td>
-                                <td><span class="ss-match">0</span></td>
-                                <!-- <td><span class="ss-alert">Realtime</span></td> -->
-                                <td>2026-04-01</td>
-                                <!-- <td><span class="ss-toggle"></span></td> -->
-                                <td>
-                                    <div class="alert-toggle-wrapper">
-                                        <label class="alert-toggle">
-                                            <input type="checkbox" class="alert-toggle-input" checked>
+                                <!-- Row -->
+                                <tr class="ss-row">
+                                    <td><input type="checkbox" class="ss-checkbox"></td>
+                                    <td class="ss-name">Saved Search 2</td>
+                                    <td class="ss-type">Dynamic</td>
+                                    <td>-</td>
+                                    <td><span class="ss-match">0</span></td>
+                                    <!-- <td><span class="ss-alert">Realtime</span></td> -->
+                                    <td>2026-04-01</td>
+                                    <!-- <td><span class="ss-toggle"></span></td> -->
+                                    <td>
+                                        <div class="alert-toggle-wrapper">
+                                            <label class="alert-toggle">
+                                                <input type="checkbox" class="alert-toggle-input" checked>
 
-                                            <span class="alert-toggle-slider"></span>
-                                        </label>
-                                    </div>
-                                </td>
-                                <td class="ss-actions">
-                                    <button class="btn ss-run">
-                                        <!-- <i class="fi fi-rr-play mr-1"></i> -->
-                                        Run
-                                    </button>
-                                    <button class="btn ss-edit">
-                                        <!-- <i class="fi fi-rr-edit mr-1"></i> -->
-                                        Edit
-                                    </button>
-                                    <button class="btn ss-duplicate">
-                                        <!-- <i class="fi fi-rr-copy mr-1"></i>  -->
-                                        Duplicate
-                                    </button>
-                                    <button class="btn ss-delete">
-                                        <!-- <i class="fi fi-rr-trash"></i> -->
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
+                                                <span class="alert-toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td class="ss-actions">
+                                        <button class="btn ss-run">
+                                            <!-- <i class="fi fi-rr-play mr-1"></i> -->
+                                            Run
+                                        </button>
+                                        <button class="btn ss-edit">
+                                            <!-- <i class="fi fi-rr-edit mr-1"></i> -->
+                                            Edit
+                                        </button>
+                                        <button class="btn ss-duplicate">
+                                            <!-- <i class="fi fi-rr-copy mr-1"></i>  -->
+                                            Duplicate
+                                        </button>
+                                        <button class="btn ss-delete">
+                                            <!-- <i class="fi fi-rr-trash"></i> -->
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
 
-                            <!-- Row -->
-                            <tr class="ss-row">
-                                <td><input type="checkbox" class="ss-checkbox"></td>
-                                <td class="ss-name">Educational & Training</td>
-                                <td class="ss-type">-</td>
-                                <td>
-                                    -<br>
-                                    <a href="#" class="ss-read">Read More</a>
-                                </td>
-                                <td><span class="ss-match">0</span></td>
-                                <!-- <td><span class="ss-alert">Realtime</span></td> -->
-                                <td>2026-04-01</td>
-                                <!-- <td><span class="ss-toggle"></span></td> -->
-                                <td>
-                                    <div class="alert-toggle-wrapper">
-                                        <label class="alert-toggle">
-                                            <input type="checkbox" class="alert-toggle-input" checked>
+                                <!-- Row -->
+                                <tr class="ss-row">
+                                    <td><input type="checkbox" class="ss-checkbox"></td>
+                                    <td class="ss-name">Educational & Training</td>
+                                    <td class="ss-type">-</td>
+                                    <td>
+                                        -<br>
+                                        <a href="#" class="ss-read">Read More</a>
+                                    </td>
+                                    <td><span class="ss-match">0</span></td>
+                                    <!-- <td><span class="ss-alert">Realtime</span></td> -->
+                                    <td>2026-04-01</td>
+                                    <!-- <td><span class="ss-toggle"></span></td> -->
+                                    <td>
+                                        <div class="alert-toggle-wrapper">
+                                            <label class="alert-toggle">
+                                                <input type="checkbox" class="alert-toggle-input" checked>
 
-                                            <span class="alert-toggle-slider"></span>
-                                        </label>
-                                    </div>
-                                </td>
-                                <td class="ss-actions">
-                                    <button class="btn ss-run">
-                                        <!-- <i class="fi fi-rr-play mr-1"></i> -->
-                                        Run
-                                    </button>
-                                    <button class="btn ss-edit">
-                                        <!-- <i class="fi fi-rr-edit mr-1"></i> -->
-                                        Edit
-                                    </button>
-                                    <button class="btn ss-duplicate">
-                                        <!-- <i class="fi fi-rr-copy mr-1"></i>  -->
-                                        Duplicate
-                                    </button>
-                                    <button class="btn ss-delete">
-                                        <!-- <i class="fi fi-rr-trash"></i> -->
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                                <span class="alert-toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td class="ss-actions">
+                                        <button class="btn ss-run">
+                                            <!-- <i class="fi fi-rr-play mr-1"></i> -->
+                                            Run
+                                        </button>
+                                        <button class="btn ss-edit">
+                                            <!-- <i class="fi fi-rr-edit mr-1"></i> -->
+                                            Edit
+                                        </button>
+                                        <button class="btn ss-duplicate">
+                                            <!-- <i class="fi fi-rr-copy mr-1"></i>  -->
+                                            Duplicate
+                                        </button>
+                                        <button class="btn ss-delete">
+                                            <!-- <i class="fi fi-rr-trash"></i> -->
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -925,12 +969,20 @@ $(document).ready(function() {
 });
 </script>
 <script>
+    $(document).on('click', '.saved-search-tab', function() {
+      if (!$(this).hasClass('add-new')) {
+        $('.saved-search-tab').removeClass('active');
+        $(this).addClass('active');
+        $('#active-search-name').text($(this).text().trim());
+      }
+    });
+
     let filters = {
         nurse_registration: '',
         role_speciality: '',
-        // agency: [],
+        sort_by: '',
         available_to_start: '',
-        // searchId:''
+        searchId:''
         };
 
     function removePageParam() {
@@ -949,11 +1001,11 @@ $(document).ready(function() {
             url: "{{ url('/healthcare-facilities/getNurseSorting') }}",
             data: {
                 nurse_registration: filters.nurse_registration,
-                // filters_data: filtersData,
+                sort_by: filters.sort_by,
                 role_speciality: filters.role_speciality,
                 // agency: filters.agency,
                 available_to_start: filters.available_to_start,
-                // search_id: filters.searchId,
+                search_id: filters.searchId,
                 page: page,
                 _token: "{{ csrf_token() }}"
             },
@@ -985,6 +1037,16 @@ $(document).ready(function() {
         filters.available_to_start = $(this).val();
         fetchNurse(1);
      });
+
+    $("#sort_by").on("change", function () {
+        filters.sort_by = $(this).val();
+        fetchNurse(1);
+     });
+
+    $(document).on('click', '.saved-search-tab', function () {
+        filters.searchId = $(this).data('id');
+        fetchNurse(1);
+    })
 
     $(document).on("click", ".ajax-pagination .pagination a", function (e) {
         e.preventDefault();

@@ -38,7 +38,7 @@ class MessageAttachment extends Model
      */
     public function getIsImageAttribute()
     {
-        return str_starts_with($this->file_type, 'image/');
+        return $this->file_type && str_starts_with($this->file_type, 'image/');
     }
 
     /**
@@ -48,7 +48,7 @@ class MessageAttachment extends Model
     {
         $bytes = $this->file_size;
         $units = ['B', 'KB', 'MB', 'GB'];
-        
+
         for ($i = 0; $bytes > 1024; $i++) {
             $bytes /= 1024;
         }
@@ -61,6 +61,10 @@ class MessageAttachment extends Model
      */
     public function getFileIconAttribute()
     {
+        if (!$this->file_type) {
+            return 'fas fa-file';
+        }
+
         if ($this->is_image) {
             return 'fas fa-image';
         }

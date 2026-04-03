@@ -359,6 +359,29 @@
 
                             <div class="message-content">
                                 <p class="message-text">{{ nl2br(e($message->message)) }}</p>
+
+                                @if($message->message_type === 'file' && $message->attachments->count() > 0)
+                                    @php
+                                        $attachment = $message->attachments->first();
+                                        $isImage = $attachment->file_type && str_starts_with($attachment->file_type, 'image/');
+                                    @endphp
+                                    @if($isImage)
+                                        <div class="message-image">
+                                            <img src="{{ asset($attachment->file_path) }}" alt="{{ $attachment->file_name }}" onclick="window.open(this.src)" style="max-width: 300px; border-radius: 8px; cursor: pointer;">
+                                        </div>
+                                    @else
+                                        <div class="message-file" style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(0, 0, 0, 0.05); border-radius: 8px; margin-top: 8px; max-width: 300px;">
+                                            <i class="file-icon {{ $attachment->file_icon ?? 'fas fa-file' }}" style="font-size: 24px; color: #007bff;"></i>
+                                            <div class="file-info" style="flex: 1; overflow: hidden;">
+                                                <div class="file-name" style="font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $attachment->file_name }}</div>
+                                                <div class="file-size" style="font-size: 11px; color: #888;">{{ $attachment->formatted_file_size }}</div>
+                                            </div>
+                                            <a href="{{ asset($attachment->file_path) }}" download style="color: #007bff; text-decoration: none;">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        </div>
+                                    @endif
+                                @endif
                             </div>
 
                             @if($isSent)
@@ -383,10 +406,23 @@
                 <form id="messageForm" style="" class="chat__input" method="POST" onsubmit="return false;">
                     @csrf
                     <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
+                    <button type="button" id="attachBtn" class="btn-attach" title="Attach file" style="background: none; border: none; color: #666; cursor: pointer; font-size: 18px; padding: 8px; border-radius: 50%; margin-right: 10px;">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <input type="file" id="fileInput" style="display: none;" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv">
                     <input type="text" name="message" class="chat-input" placeholder="Type message" id="messageInput"
                         autocomplete="off">
-                    <button type="button" class="chat-btn">Send</button>
+                    <button type="button" class="chat-btn" id="sendBtn">Send</button>
                 </form>
+                <div class="file-upload-progress" id="uploadProgress" style="display: none; padding: 10px; background: #f0f0f0; border-radius: 8px; margin-top: 10px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px;">
+                        <span id="uploadFileName">Uploading...</span>
+                        <span id="uploadPercent">0%</span>
+                    </div>
+                    <div class="progress-bar" style="width: 100%; height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden;">
+                        <div class="progress-bar-fill" id="progressBarFill" style="height: 100%; background: #28a745; width: 0%; transition: width 0.3s;"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -420,7 +456,13 @@
 
         const messageForm = document.getElementById('messageForm');
         const messageInput = document.getElementById('messageInput');
-        const submitBtn = document.querySelector('.chat-btn');
+        const submitBtn = document.getElementById('sendBtn');
+        const attachBtn = document.getElementById('attachBtn');
+        const fileInput = document.getElementById('fileInput');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const uploadFileName = document.getElementById('uploadFileName');
+        const uploadPercent = document.getElementById('uploadPercent');
+        const progressBarFill = document.getElementById('progressBarFill');
         const messagesContainer = document.getElementById('chatMessages');
         const baseUrl = "{{ asset('') }}";
 
@@ -430,6 +472,152 @@
         }
 
         console.log('Chat elements ready');
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            var units = ['B', 'KB', 'MB', 'GB'];
+            var i = 0;
+            while (bytes > 1024) {
+                bytes /= 1024;
+                i++;
+            }
+            return bytes.toFixed(2) + ' ' + units[i];
+        }
+
+        // Append file message to chat
+        function appendFileMessage(isSent, fileName, fileSize, fileUrl, isImage, imageUrl, id, avatar, name) {
+            var div = document.createElement('div');
+            div.className = 'message ' + (isSent ? 'sent' : 'received');
+            if (id) div.setAttribute('data-message-id', id);
+
+            var img = document.createElement('img');
+            img.src = avatar;
+            img.alt = name;
+            img.className = 'message-avatar';
+
+            var bubble = document.createElement('div');
+            bubble.className = 'message-content';
+
+            var p = document.createElement('p');
+            p.className = 'message-text';
+            p.textContent = isImage ? 'Image' : 'File: ' + fileName;
+            bubble.appendChild(p);
+
+            if (isImage) {
+                var imgDiv = document.createElement('div');
+                imgDiv.className = 'message-image';
+                var innerImg = document.createElement('img');
+                innerImg.src = imageUrl;
+                innerImg.style.maxWidth = '300px';
+                innerImg.style.borderRadius = '8px';
+                innerImg.style.cursor = 'pointer';
+                innerImg.onclick = function() { window.open(this.src); };
+                imgDiv.appendChild(innerImg);
+                bubble.appendChild(imgDiv);
+            } else {
+                var fileDiv = document.createElement('div');
+                fileDiv.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(0, 0, 0, 0.05); border-radius: 8px; margin-top: 8px; max-width: 300px;';
+
+                var icon = document.createElement('i');
+                icon.className = 'fas fa-file';
+                icon.style.cssText = 'font-size: 24px; color: #007bff;';
+                fileDiv.appendChild(icon);
+
+                var fileInfo = document.createElement('div');
+                fileInfo.style.cssText = 'flex: 1; overflow: hidden;';
+
+                var fName = document.createElement('div');
+                fName.className = 'file-name';
+                fName.textContent = fileName;
+                fName.style.cssText = 'font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;';
+                fileInfo.appendChild(fName);
+
+                var fSize = document.createElement('div');
+                fSize.className = 'file-size';
+                fSize.textContent = fileSize;
+                fSize.style.cssText = 'font-size: 11px; color: #888;';
+                fileInfo.appendChild(fSize);
+
+                fileDiv.appendChild(fileInfo);
+
+                var downloadLink = document.createElement('a');
+                downloadLink.href = fileUrl;
+                downloadLink.download = fileName;
+                downloadLink.innerHTML = '<i class="fas fa-download"></i>';
+                downloadLink.style.cssText = 'color: #007bff; text-decoration: none;';
+                fileDiv.appendChild(downloadLink);
+
+                bubble.appendChild(fileDiv);
+            }
+
+            if (isSent) {
+                div.appendChild(bubble);
+                div.appendChild(img);
+            } else {
+                div.appendChild(img);
+                div.appendChild(bubble);
+            }
+
+            messagesContainer.appendChild(div);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Upload file
+        function uploadFile(file) {
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size must be less than 10MB');
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('conversation_id', window.Laravel.conversationId);
+            formData.append('file', file);
+            formData.append('_token', window.Laravel.csrfToken);
+
+            var xhr = new XMLHttpRequest();
+
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    var percent = Math.round((e.loaded / e.total) * 100);
+                    uploadFileName.textContent = file.name;
+                    uploadPercent.textContent = percent + '%';
+                    progressBarFill.style.width = percent + '%';
+                }
+            });
+
+            xhr.addEventListener('load', function() {
+                uploadProgress.style.display = 'none';
+                progressBarFill.style.width = '0%';
+                uploadPercent.textContent = '0%';
+
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    if (data.success && data.message) {
+                        // Don't append here - Pusher will handle it in real-time
+                        messageInput.value = '';
+                    } else {
+                        alert(data.error || 'Failed to upload file');
+                    }
+                } catch (err) {
+                    alert('Upload failed: ' + err.message);
+                }
+            });
+
+            xhr.addEventListener('error', function() {
+                uploadProgress.style.display = 'none';
+                progressBarFill.style.width = '0%';
+                uploadPercent.textContent = '0%';
+                alert('Upload failed: Network error');
+            });
+
+            xhr.open('POST', '{{ route('healthcare.chat.upload') }}');
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+            uploadProgress.style.display = 'block';
+            xhr.send(formData);
+        }
 
         // ✅ Listen for real-time messages
         Echo.private('conversation.' + window.Laravel.conversationId)
@@ -444,20 +632,34 @@
                         : baseUrl + 'nurse/assets/imgs/nurse06.png')
                     : baseUrl + 'nurse/assets/imgs/nurse06.png';
 
-                console.log('Avatar:', avatar);
+                // Check if it's a file message with attachments
+                if (data.message_type === 'file' && data.attachments && data.attachments[0]) {
+                    var attachment = data.attachments[0];
+                    var isImage = attachment.file_type && attachment.file_type.startsWith('image/');
+                    var fileUrl = attachment.file_url;
+                    var imageUrl = isImage ? fileUrl : null;
+                    var fileSize = formatFileSize(attachment.file_size);
+                    var senderAvatar = isSentByMe
+                        ? (data.sender_avatar ? baseUrl + 'healthcareimg/uploads/' + data.sender_avatar : baseUrl + 'nurse/assets/imgs/nurse06.png')
+                        : baseUrl + 'nurse/assets/imgs/nurse06.png';
 
-                const messageHtml = `
-                    <div class="message ${isSentByMe ? 'sent' : 'received'}" data-message-id="${data.id}">
-                        ${!isSentByMe ? `<img src="${avatar}" class="message-avatar">` : ''}
-                        <div class="message-content">
-                            <p class="message-text">${data.message}</p>
+                    appendFileMessage(isSentByMe, attachment.file_name, fileSize, fileUrl, isImage, imageUrl, data.id, senderAvatar, data.sender_name);
+                } else {
+                    console.log('Avatar:', avatar);
+
+                    const messageHtml = `
+                        <div class="message ${isSentByMe ? 'sent' : 'received'}" data-message-id="${data.id}">
+                            ${!isSentByMe ? `<img src="${avatar}" class="message-avatar">` : ''}
+                            <div class="message-content">
+                                <p class="message-text">${data.message}</p>
+                            </div>
+                            ${isSentByMe ? `<img src="${avatar}" class="message-avatar">` : ''}
                         </div>
-                        ${isSentByMe ? `<img src="${avatar}" class="message-avatar">` : ''}
-                    </div>
-                `;
+                    `;
 
-                messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
 
                 // 🔔 Notification sound
                 if (!isSentByMe) {
@@ -465,6 +667,20 @@
                     audio.play().catch(() => {});
                 }
             });
+
+        // File upload event listeners
+        if (attachBtn && fileInput) {
+            attachBtn.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    uploadFile(this.files[0]);
+                    this.value = '';
+                }
+            });
+        }
 
         // ✅ Send message (ONLY ONE HANDLER)
         // Replace messageForm.addEventListener('submit', ...) with:

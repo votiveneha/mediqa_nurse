@@ -344,45 +344,90 @@ class SettingsController extends Controller
     $plan = DB::table('plan_management')->where('default_price_id', $price_id)->first();
 
     $session = \Stripe\Checkout\Session::create([
-        'mode' => 'subscription',
-        'customer' => $user->stripe_customer_id,
+    'mode' => 'subscription',
+    'customer' => $user->stripe_customer_id,
 
-        'line_items' => [[
-            'price' => $price_id,
-            'quantity' => 1,
-        ]],
+    'line_items' => [[
+        'price' => $price_id,
+        'quantity' => 1,
+    ]],
 
-        'payment_method_types' => ['card', 'au_becs_debit'],
+    'payment_method_types' => ['card', 'au_becs_debit'],
 
-        'success_url' => url('/healthcare-facilities/payment-success?session_id={CHECKOUT_SESSION_ID}'),
-        'cancel_url' => url('/payment-cancel'),
+    'success_url' => url('/healthcare-facilities/payment-success?session_id={CHECKOUT_SESSION_ID}'),
+    'cancel_url' => url('/payment-cancel'),
 
-        // Checkout session metadata
+    // ✅ Add this also
+    'metadata' => [
+        'user_id' => $user->id,
+        'user_type' => 'healthcare_facilities',
+        'plan_id' => $plan->id ?? null,
+        'plan_name' => $plan->name ?? null,
+    ],
+
+    // ✅ Keep this also
+    'subscription_data' => [
         'metadata' => [
-            'user_id'   => $user->id,
+            'user_id' => $user->id,
             'user_type' => 'healthcare_facilities',
-            'plan_id'   => $plan->id ?? '',
-            'plan_name' => $plan->plan_name ?? '',
+            'plan_id' => $plan->id ?? null,
+            'plan_name' => $plan->name ?? null,
         ],
-
-        // Subscription metadata
-        'subscription_data' => [
-            'metadata' => [
-                'user_id'   => $user->id,
-                'user_type' => 'healthcare_facilities',
-                'plan_id'   => $plan->id ?? '',
-                'plan_name' => $plan->plan_name ?? '',
-            ],
-        ],
-    ]);
+    ],
+]);
 
     return redirect($session->url);
 }
 
-    public function success(Request $request)
-    {
-        return view('payment-success');
+  public function success(Request $request)
+{
+    //dd($request->all());
+    \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+
+    $session_id = $request->session_id;
+
+    $payment = DB::table('payments')
+        ->where('stripe_checkout_session_id', $session_id)
+        ->latest()
+        ->first();
+
+    $invoice = null;
+
+    // If webhook has not inserted payment yet, fetch from Stripe directly
+    if (!$payment && $session_id) {
+        try {
+            $session = \Stripe\Checkout\Session::retrieve($session_id, [
+                'expand' => ['subscription', 'customer']
+            ]);
+
+            $payment = (object)[
+                'stripe_checkout_session_id' => $session->id ?? null,
+                'stripe_customer_id' => $session->customer->id ?? $session->customer ?? null,
+                'stripe_subscription_id' => $session->subscription->id ?? $session->subscription ?? null,
+                'amount' => isset($session->amount_total) ? ($session->amount_total / 100) : 0,
+                'currency' => strtoupper($session->currency ?? 'AUD'),
+                'status' => $session->payment_status ?? 'paid',
+                'product_name' => data_get($session, 'metadata.plan_name'),
+                'product_id' => data_get($session, 'metadata.plan_id'),
+                'user_id' => data_get($session, 'metadata.user_id'),
+            ];
+        } catch (\Exception $e) {
+            \Log::error('Success page Stripe fetch failed', [
+                'message' => $e->getMessage(),
+                'session_id' => $session_id,
+            ]);
+        }
     }
+
+    // If webhook inserted invoice already
+    if ($payment && !empty($payment->stripe_invoice_id)) {
+        $invoice = DB::table('invoices')
+            ->where('stripe_invoice_id', $payment->stripe_invoice_id)
+            ->first();
+    }
+
+    return view('healthcare.settings.payment-success', compact('payment', 'invoice'));
+}
 
     public function cancel()
     {
