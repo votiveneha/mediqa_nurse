@@ -387,6 +387,8 @@ Route::prefix('nurse/chat')->name('nurse.chat.')->middleware(['auth:nurse_middle
     Route::post('/delete-conversation', 'App\Http\Controllers\ChatController@deleteConversation')->name('delete_conversation');
     Route::post('/archive', 'App\Http\Controllers\ChatController@archiveConversation')->name('archive');
     Route::post('/mark-as-read', 'App\Http\Controllers\ChatController@markAsRead')->name('mark_as_read');
+    Route::post('/mark-as-delivered', 'App\Http\Controllers\ChatController@markAsDelivered')->name('mark_as_delivered');
+    Route::post('/message-read', 'App\Http\Controllers\ChatController@markMessageRead')->name('message_read');
     Route::post('/typing', 'App\Http\Controllers\ChatController@typingStatus')->name('typing');
     Route::post('/online-status', 'App\Http\Controllers\ChatController@updateOnlineStatus')->name('online_status');
     Route::get('/check-status/{userId}', 'App\Http\Controllers\ChatController@checkUserStatus')->name('check_status');
@@ -409,6 +411,8 @@ Route::prefix('healthcare-facilities/chat')->name('healthcare.chat.')->middlewar
     Route::post('/delete-conversation', 'App\Http\Controllers\ChatController@deleteConversation')->name('delete_conversation');
     Route::post('/archive', 'App\Http\Controllers\ChatController@archiveConversation')->name('archive');
     Route::post('/mark-as-read', 'App\Http\Controllers\ChatController@markAsRead')->name('mark_as_read');
+    Route::post('/mark-as-delivered', 'App\Http\Controllers\ChatController@markAsDelivered')->name('mark_as_delivered');
+    Route::post('/message-read', 'App\Http\Controllers\ChatController@markMessageRead')->name('message_read');
     Route::post('/typing', 'App\Http\Controllers\ChatController@typingStatus')->name('typing');
     Route::post('/online-status', 'App\Http\Controllers\ChatController@updateOnlineStatus')->name('online_status');
     Route::get('/check-status/{userId}', 'App\Http\Controllers\ChatController@checkUserStatus')->name('check_status');

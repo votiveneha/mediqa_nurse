@@ -171,12 +171,12 @@
 
         .message.sent .message-content {
             background: #f1f3f4;
-            color: #fff;
+            color: #635454;
         }
 
         .message.received .message-content {
             background: #f1f3f4;
-            color: #333;
+            color: #635454;
         }
 
         .message-avatar {
@@ -337,6 +337,35 @@
             width: 0%;
             transition: width 0.3s;
         }
+
+        /* Message Status Ticks */
+        .message-status {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-top: 4px;
+            font-size: 14px;
+        }
+
+        .message-status i {
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        /* Single tick - sent */
+        .message-status i.sent {
+            color: #999;
+        }
+
+        /* Double tick - delivered */
+        .message-status i.delivered {
+            color: #999;
+        }
+
+        /* Double blue tick - read */
+        .message-status i.read {
+            color: #53bdeb;
+        }
     </style>
 
     <div class="chat-wrapper">
@@ -344,7 +373,7 @@
         <div class="chat-sidebar">
             <div class="chat-sidebar-header">
                 <button class="btn-back" onclick="window.location.href='{{ route('nurse.chat.index') }}'">
-                    <i class="fas fa-arrow-left"></i> Back
+                    <i class="fi fi-rr-arrow-left"></i> Back
                 </button>
             </div>
 
@@ -407,7 +436,7 @@
                             @endif -->
                         </div>
                         <div class="chat-header-subtitle online-status" id="userStatusContainer" data-user-id="{{ $otherParticipant->id }}">
-                            <i class="fas fa-circle" id="status-icon" style="font-size: 8px; color: {{ $isOnline ? '#28a745' : '#888' }};"></i>
+                            <i class="fi fi-rr-circle" id="status-icon" style="font-size: 8px; color: {{ $isOnline ? '#28a745' : '#888' }};"></i>
                             <span id="status-text">{{ $isOnline ? 'Online' : 'Offline' }}</span>
                         </div>
                     </div>
@@ -420,8 +449,18 @@
                     @if(!$message->deleted_by_sender && !$message->deleted_by_receiver)
                         @php
                             $isSent = $message->sender_id == Auth::guard('nurse_middle')->id();
+                            $tickStatus = '';
+                            if ($isSent) {
+                                if ($message->is_read) {
+                                    $tickStatus = 'read';
+                                } elseif ($message->is_delivered) {
+                                    $tickStatus = 'delivered';
+                                } else {
+                                    $tickStatus = 'sent';
+                                }
+                            }
                         @endphp
-                        <div class="message {{ $isSent ? 'sent' : 'received' }}">
+                        <div class="message {{ $isSent ? 'sent' : 'received' }}" data-message-id="{{ $message->id }}">
                             @if(!$isSent)
                                 <img src="{{ $message->sender->profile_img
                                     ? asset('healthcareimg/uploads/' . $message->sender->profile_img)
@@ -429,6 +468,22 @@
                                     alt="{{ $message->sender->name }}" class="message-avatar">
                             @endif
                             <div class="message-content">
+                                <div class="message-header">
+                                    @if(!$isSent)
+                                        <span class="sender-name">{{ $message->sender->name }} {{ $message->sender->lastname ?? '' }}</span>
+                                    @endif
+                                    <span class="message-time">
+                                        @php
+                                            $messageDate = $message->created_at;
+                                            if ($messageDate->isToday())
+                                                echo $messageDate->format('h:i A');
+                                            elseif ($messageDate->isYesterday())
+                                                echo 'Yesterday';
+                                            else
+                                                echo $messageDate->format('d/m/Y');
+                                        @endphp
+                                    </span>
+                                </div>
                                 <p class="message-text">{{ nl2br(e($message->message)) }}</p>
                                 @if($message->message_type === 'file' && $message->attachments->count() > 0)
                                     @php
@@ -441,16 +496,27 @@
                                         </div>
                                     @else
                                         <div class="message-file">
-                                            <i class="file-icon {{ $attachment->file_icon ?? 'fas fa-file' }}"></i>
+                                            <i class="file-icon {{ $attachment->file_icon ?? 'fi fi-rr-file' }}"></i>
                                             <div class="file-info">
                                                 <div class="file-name">{{ $attachment->file_name }}</div>
                                                 <div class="file-size">{{ $attachment->formatted_file_size }}</div>
                                             </div>
                                             <a href="{{ asset($attachment->file_path) }}" download>
-                                                <i class="fas fa-download"></i>
+                                                <i class="fi fi-rr-download"></i>
                                             </a>
                                         </div>
                                     @endif
+                                @endif
+                                @if($isSent)
+                                    <div class="message-status" data-status="{{ $tickStatus }}">
+                                        @if($tickStatus === 'read')
+                                            <i class="fi fi-rr-check read"></i><i class="fi fi-rr-check read"></i>
+                                        @elseif($tickStatus === 'delivered')
+                                            <i class="fi fi-rr-check delivered"></i><i class="fi fi-rr-check delivered"></i>
+                                        @else
+                                            <i class="fi fi-rr-check sent"></i>
+                                        @endif
+                                    </div>
                                 @endif
                             </div>
                             @if($isSent)
@@ -463,7 +529,7 @@
 
                 <!-- Typing Indicator -->
                 <div class="typing-indicator" id="typingIndicator">
-                    <i class="fas fa-circle"></i> {{ $otherParticipant->name }} is typing...
+                    <i class="fi fi-rr-circle"></i> {{ $otherParticipant->name }} is typing...
                 </div>
             </div>
 
@@ -473,7 +539,7 @@
                     <input type="hidden" name="_token" value="{{ csrf_token() }}" autocomplete="off">
                     <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
                     <button type="button" id="attachBtn" class="btn-attach" title="Attach file">
-                        <i class="fas fa-paperclip"></i>
+                        <i class="fi fi-rr-clip"></i>
                     </button>
                     <input type="file" id="fileInput" style="display: none;" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv">
                     <input type="text" name="message" class="chat-input" placeholder="Type message" id="messageInput" autocomplete="off">
@@ -531,13 +597,13 @@
 
         // Get file icon class based on mime type
         function getFileIcon(mimeType) {
-            if (mimeType.startsWith('image/')) return 'fas fa-image';
-            if (mimeType === 'application/pdf') return 'fas fa-file-pdf';
-            if (mimeType.startsWith('text/')) return 'fas fa-file-alt';
-            if (mimeType.includes('word')) return 'fas fa-file-word';
-            if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return 'fas fa-file-excel';
-            if (mimeType.includes('powerpoint')) return 'fas fa-file-powerpoint';
-            return 'fas fa-file';
+            if (mimeType.startsWith('image/')) return 'fi fi-rr-image';
+            if (mimeType === 'application/pdf') return 'fi fi-rr-file-pdf';
+            if (mimeType.startsWith('text/')) return 'fi fi-rr-file-alt';
+            if (mimeType.includes('word')) return 'fi fi-rr-file-word';
+            if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return 'fi fi-rr-file-excel';
+            if (mimeType.includes('powerpoint')) return 'fi fi-rr-file-powerpoint';
+            return 'fi fi-rr-file';
         }
 
         // Format file size
@@ -572,6 +638,13 @@
             bubble.appendChild(p);
 
             if (isSent) {
+                // Add status ticks
+                var statusDiv = document.createElement('div');
+                statusDiv.className = 'message-status';
+                statusDiv.setAttribute('data-status', 'sent');
+                statusDiv.innerHTML = '<i class="fi fi-rr-check sent"></i>';
+                bubble.appendChild(statusDiv);
+
                 div.appendChild(bubble);
                 div.appendChild(img);
             } else {
@@ -615,7 +688,7 @@
                 fileDiv.className = 'message-file';
 
                 var icon = document.createElement('i');
-                icon.className = 'file-icon fas fa-file';
+                icon.className = 'file-icon fi fi-rr-file';
                 fileDiv.appendChild(icon);
 
                 var fileInfo = document.createElement('div');
@@ -636,13 +709,20 @@
                 var downloadLink = document.createElement('a');
                 downloadLink.href = fileUrl;
                 downloadLink.download = fileName;
-                downloadLink.innerHTML = '<i class="fas fa-download"></i>';
+                downloadLink.innerHTML = '<i class="fi fi-rr-download"></i>';
                 fileDiv.appendChild(downloadLink);
 
                 bubble.appendChild(fileDiv);
             }
 
             if (isSent) {
+                // Add status ticks
+                var statusDiv = document.createElement('div');
+                statusDiv.className = 'message-status';
+                statusDiv.setAttribute('data-status', 'sent');
+                statusDiv.innerHTML = '<i class="fi fi-rr-check sent"></i>';
+                bubble.appendChild(statusDiv);
+
                 div.appendChild(bubble);
                 div.appendChild(img);
             } else {
@@ -683,6 +763,8 @@
                 if (data.success && data.message) {
                     appendMessage(true, data.message.message, data.message.id, MY_AVATAR, data.message.sender.name);
                     messageInput.value = '';
+
+                    // Trigger message visible check if implemented
                 } else {
                     alert(data.error || 'Failed to send message');
                 }
@@ -806,6 +888,13 @@
                     } else {
                         appendMessage(false, data.message, data.id, avatar, data.sender_name);
                     }
+
+                    // Mark message as read when received in active conversation
+                    markMessageAsRead(data.id);
+                })
+                .listen('.message.status.updated', function(data) {
+                    console.log('Message status updated:', data);
+                    updateMessageStatus(data.message_ids, data.status);
                 });
 
             // Online status
@@ -816,6 +905,39 @@
                 })
                 .joining(function(user) { if (user.id == OTHER_USER_ID) setStatus(true);  })
                 .leaving(function(user)  { if (user.id == OTHER_USER_ID) setStatus(false); });
+        }
+
+        // Mark message as read
+        function markMessageAsRead(messageId) {
+            fetch('{{ route("nurse.chat.message_read") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ message_id: messageId })
+            }).catch(function(err) {
+                console.error('Failed to mark message as read:', err);
+            });
+        }
+
+        // Update message status in UI
+        function updateMessageStatus(messageIds, status) {
+            messageIds.forEach(function(id) {
+                var messageEl = document.querySelector('.message.sent[data-message-id="' + id + '"]');
+                if (messageEl) {
+                    var statusEl = messageEl.querySelector('.message-status');
+                    if (statusEl) {
+                        statusEl.setAttribute('data-status', status);
+                        if (status === 'read') {
+                            statusEl.innerHTML = '<i class="fi fi-rr-check read"></i><i class="fi fi-rr-check read"></i>';
+                        } else if (status === 'delivered') {
+                            statusEl.innerHTML = '<i class="fi fi-rr-check delivered"></i><i class="fi fi-rr-check delivered"></i>';
+                        }
+                    }
+                }
+            });
         }
 
         function setStatus(online) {

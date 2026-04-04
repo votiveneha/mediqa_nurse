@@ -171,12 +171,12 @@
 
         .message.sent .message-content {
             background: #f1f3f4;
-            color: #fff;
+            color: #635454;
         }
 
         .message.received .message-content {
             background: #f1f3f4;
-            color: #333;
+            color: #635454;
         }
 
         .message-avatar {
@@ -273,6 +273,35 @@
             left: 0;
             right: 0;
         }
+
+        /* Message Status Ticks */
+        .message-status {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-top: 4px;
+            font-size: 14px;
+        }
+
+        .message-status i {
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        /* Single tick - sent */
+        .message-status i.sent {
+            color: #999;
+        }
+
+        /* Double tick - delivered */
+        .message-status i.delivered {
+            color: #999;
+        }
+
+        /* Double blue tick - read */
+        .message-status i.read {
+            color: #53bdeb;
+        }
     </style>
 
     <div class="chat-wrapper">
@@ -281,7 +310,7 @@
             <div class="chat-sidebar-header">
                 <button class="btn-back"
                     onclick="window.location.href='{{ Auth::guard('healthcare_facilities')->user()->role === 2 ? route('healthcare.chat.index') : route('nurse.chat.index') }}'">
-                    <i class="fas fa-arrow-left"></i> Back
+                    <i class="fi fi-rr-arrow-left"></i> Back
                 </button>
             </div>
 
@@ -334,7 +363,7 @@
                         <div class="chat-header-title">{{ $otherParticipant->name }} {{ $otherParticipant->lastname ?? '' }}
                         </div>
                         <div class="chat-header-subtitle" id="userStatusContainer" data-user-id="{{ $otherParticipant->id }}">
-                            <i class="fas fa-circle" id="status-icon" style="font-size: 8px; color: {{ $isOnline ? '#28a745' : '#888' }};"></i>
+                            <i class="fi fi-rr-circle" id="status-icon" style="font-size: 8px; color: {{ $isOnline ? '#28a745' : '#888' }};"></i>
                             <span id="status-text">{{ $isOnline ? 'Online' : 'Offline' }}</span>
                         </div>
                     </div>
@@ -347,8 +376,18 @@
                     @if(!$message->deleted_by_sender && !$message->deleted_by_receiver)
                         @php
                             $isSent = $message->sender_id == Auth::id();
+                            $tickStatus = '';
+                            if ($isSent) {
+                                if ($message->is_read) {
+                                    $tickStatus = 'read';
+                                } elseif ($message->is_delivered) {
+                                    $tickStatus = 'delivered';
+                                } else {
+                                    $tickStatus = 'sent';
+                                }
+                            }
                         @endphp
-                        <div class="message {{ $isSent ? 'sent' : 'received' }}">
+                        <div class="message {{ $isSent ? 'sent' : 'received' }}" data-message-id="{{ $message->id }}">
 
                             @if(!$isSent)
                                 <img src="{{ $message->sender->profile_img
@@ -358,8 +397,24 @@
                             @endif
 
                             <div class="message-content">
+                                <div class="message-header">
+                                    @if(!$isSent)
+                                        <span class="sender-name">{{ $message->sender->name }} {{ $message->sender->lastname ?? '' }}</span>
+                                    @endif
+                                    <span class="message-time">
+                                        @php
+                                            $messageDate = $message->created_at;
+                                            if ($messageDate->isToday())
+                                                echo $messageDate->format('h:i A');
+                                            elseif ($messageDate->isYesterday())
+                                                echo 'Yesterday';
+                                            else
+                                                echo $messageDate->format('d/m/Y');
+                                        @endphp
+                                    </span>
+                                </div>
                                 <p class="message-text">{{ nl2br(e($message->message)) }}</p>
-                                
+
                                 @if($message->message_type === 'file' && $message->attachments->count() > 0)
                                     @php
                                         $attachment = $message->attachments->first();
@@ -371,16 +426,28 @@
                                         </div>
                                     @else
                                         <div class="message-file" style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(0, 0, 0, 0.05); border-radius: 8px; margin-top: 8px; max-width: 300px;">
-                                            <i class="file-icon {{ $attachment->file_icon ?? 'fas fa-file' }}" style="font-size: 24px; color: #007bff;"></i>
+                                            <i class="file-icon {{ $attachment->file_icon ?? 'fi fi-rr-file' }}" style="font-size: 24px; color: #007bff;"></i>
                                             <div class="file-info" style="flex: 1; overflow: hidden;">
                                                 <div class="file-name" style="font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $attachment->file_name }}</div>
                                                 <div class="file-size" style="font-size: 11px; color: #888;">{{ $attachment->formatted_file_size }}</div>
                                             </div>
                                             <a href="{{ asset($attachment->file_path) }}" download style="color: #007bff; text-decoration: none;">
-                                                <i class="fas fa-download"></i>
+                                                <i class="fi fi-rr-download"></i>
                                             </a>
                                         </div>
                                     @endif
+                                @endif
+
+                                @if($isSent)
+                                    <div class="message-status" data-status="{{ $tickStatus }}">
+                                        @if($tickStatus === 'read')
+                                            <i class="fi fi-rr-check read"></i><i class="fi fi-rr-check read"></i>
+                                        @elseif($tickStatus === 'delivered')
+                                            <i class="fi fi-rr-check delivered"></i><i class="fi fi-rr-check delivered"></i>
+                                        @else
+                                            <i class="fi fi-rr-check sent"></i>
+                                        @endif
+                                    </div>
                                 @endif
                             </div>
 
@@ -397,7 +464,7 @@
 
                 <!-- Typing Indicator -->
                 <div class="typing-indicator" id="typingIndicator">
-                    <i class="fas fa-circle"></i> {{ $otherParticipant->name }} is typing...
+                    <i class="fi fi-rr-circle"></i> {{ $otherParticipant->name }} is typing...
                 </div>
             </div>
 
@@ -407,7 +474,7 @@
                     @csrf
                     <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
                     <button type="button" id="attachBtn" class="btn-attach" title="Attach file" style="background: none; border: none; color: #666; cursor: pointer; font-size: 18px; padding: 8px; border-radius: 50%; margin-right: 10px;">
-                        <i class="fas fa-paperclip"></i>
+                        <i class="fi fi-rr-paperclip"></i>
                     </button>
                     <input type="file" id="fileInput" style="display: none;" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv">
                     <input type="text" name="message" class="chat-input" placeholder="Type message" id="messageInput"
@@ -518,15 +585,15 @@
             } else {
                 var fileDiv = document.createElement('div');
                 fileDiv.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(0, 0, 0, 0.05); border-radius: 8px; margin-top: 8px; max-width: 300px;';
-                
+
                 var icon = document.createElement('i');
-                icon.className = 'fas fa-file';
+                icon.className = 'fi fi-rr-file';
                 icon.style.cssText = 'font-size: 24px; color: #007bff;';
                 fileDiv.appendChild(icon);
 
                 var fileInfo = document.createElement('div');
                 fileInfo.style.cssText = 'flex: 1; overflow: hidden;';
-                
+
                 var fName = document.createElement('div');
                 fName.className = 'file-name';
                 fName.textContent = fileName;
@@ -544,7 +611,7 @@
                 var downloadLink = document.createElement('a');
                 downloadLink.href = fileUrl;
                 downloadLink.download = fileName;
-                downloadLink.innerHTML = '<i class="fas fa-download"></i>';
+                downloadLink.innerHTML = '<i class="fi fi-rr-download"></i>';
                 downloadLink.style.cssText = 'color: #007bff; text-decoration: none;';
                 fileDiv.appendChild(downloadLink);
 
@@ -552,6 +619,13 @@
             }
 
             if (isSent) {
+                // Add status ticks
+                var statusDiv = document.createElement('div');
+                statusDiv.className = 'message-status';
+                statusDiv.setAttribute('data-status', 'sent');
+                statusDiv.innerHTML = '<i class="fi fi-rr-check sent"></i>';
+                bubble.appendChild(statusDiv);
+
                 div.appendChild(bubble);
                 div.appendChild(img);
             } else {
@@ -639,7 +713,7 @@
                     var fileUrl = attachment.file_url;
                     var imageUrl = isImage ? fileUrl : null;
                     var fileSize = formatFileSize(attachment.file_size);
-                    var senderAvatar = isSentByMe 
+                    var senderAvatar = isSentByMe
                         ? (data.sender_avatar ? baseUrl + 'healthcareimg/uploads/' + data.sender_avatar : baseUrl + 'nurse/assets/imgs/nurse06.png')
                         : baseUrl + 'nurse/assets/imgs/nurse06.png';
 
@@ -652,6 +726,11 @@
                             ${!isSentByMe ? `<img src="${avatar}" class="message-avatar">` : ''}
                             <div class="message-content">
                                 <p class="message-text">${data.message}</p>
+                                ${isSentByMe ? `
+                                <div class="message-status" data-status="sent">
+                                    <i class="fi fi-rr-check sent"></i>
+                                </div>
+                                ` : ''}
                             </div>
                             ${isSentByMe ? `<img src="${avatar}" class="message-avatar">` : ''}
                         </div>
@@ -663,10 +742,50 @@
 
                 // 🔔 Notification sound
                 if (!isSentByMe) {
-                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQQAKZXZ8NOmdhoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBo=');
+                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQQAKZXZ8NOmdhoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBo=');
                     audio.play().catch(() => {});
+
+                    // Mark as read if received in active conversation
+                    markMessageAsRead(data.id);
+                }
+            })
+            .listen('.message.status.updated', function(data) {
+                console.log('Message status updated:', data);
+                updateMessageStatus(data.message_ids, data.status);
+            });
+
+        // Mark message as read
+        function markMessageAsRead(messageId) {
+            fetch('{{ route("healthcare.chat.message_read") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': window.Laravel.csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ message_id: messageId })
+            }).catch(function(err) {
+                console.error('Failed to mark message as read:', err);
+            });
+        }
+
+        // Update message status in UI
+        function updateMessageStatus(messageIds, status) {
+            messageIds.forEach(function(id) {
+                var messageEl = document.querySelector('.message.sent[data-message-id="' + id + '"]');
+                if (messageEl) {
+                    var statusEl = messageEl.querySelector('.message-status');
+                    if (statusEl) {
+                        statusEl.setAttribute('data-status', status);
+                        if (status === 'read') {
+                            statusEl.innerHTML = '<i class="fi fi-rr-check read"></i><i class="fi fi-rr-check read"></i>';
+                        } else if (status === 'delivered') {
+                            statusEl.innerHTML = '<i class="fi fi-rr-check delivered"></i><i class="fi fi-rr-check delivered"></i>';
+                        }
+                    }
                 }
             });
+        }
 
         // File upload event listeners
         if (attachBtn && fileInput) {
@@ -732,7 +851,7 @@
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
         // ========== ONLINE STATUS TRACKING ==========
-        
+
         // Listen to global online status channel (for broadcast events)
         Echo.channel('users.online.global')
             .listen('.user.status', function(data) {
@@ -786,11 +905,11 @@
         // Function to update online status UI
         function updateOnlineStatusUI(isOnline) {
             console.log('updateOnlineStatusUI called:', isOnline ? 'Online' : 'Offline');
-            
+
             const statusIcon = document.getElementById('status-icon');
             const statusText = document.getElementById('status-text');
             const statusContainer = document.getElementById('userStatusContainer');
-            
+
             console.log('Elements found:', {
                 statusIcon: !!statusIcon,
                 statusText: !!statusText,

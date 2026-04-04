@@ -525,6 +525,27 @@
     right: 10px;
 }
 
+/* Message Status Ticks */
+.message-status i {
+    color: #999;
+    transition: color 0.3s ease;
+}
+
+/* Single tick - sent */
+.message-status i.sent {
+    color: #999;
+}
+
+/* Double tick - delivered */
+.message-status i.delivered {
+    color: #999;
+}
+
+/* Double blue tick - read */
+.message-status i.read {
+    color: #53bdeb;
+}
+
 .edited-label {
     font-size: 0.7rem;
     color: #aaa;

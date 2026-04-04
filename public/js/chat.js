@@ -1,7 +1,7 @@
 /**
  * Chat System - Compiled Version for Production
  * MediQa Nurse-Healthcare Chat Application
- * 
+ *
  * Note: This is a simplified version without ES6 modules.
  * For development, use resources/js/chat.js with Vite/Laravel Mix.
  */
@@ -16,7 +16,7 @@
         this.conversationId = conversationId;
         this.typingTimeout = null;
         this.isTyping = false;
-        
+
         this.init();
     };
 
@@ -220,6 +220,7 @@
             var isSent = event.sender_id === window.Laravel.userId;
             var messageClass = isSent ? 'sent' : 'received';
             var time = new Date(event.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            console.log('Appending message TIME :', event);
 
             var messageContent = '';
             if (event.message_type === 'file') {
@@ -281,10 +282,10 @@
         replyToMessage: function(messageId) {
             var messageElement = document.querySelector('[data-message-id="' + messageId + '"]');
             var messageText = messageElement ? messageElement.querySelector('.message-text').textContent : '';
-            
+
             var replyPreview = document.getElementById('replyPreview');
             var replyToText = document.getElementById('replyToText');
-            
+
             if (replyPreview && replyToText) {
                 window.replyToMessageId = messageId;
                 replyToText.textContent = messageText.substring(0, 50) + (messageText.length > 50 ? '...' : '');

@@ -18,6 +18,8 @@ class Message extends Model
         'file_url',
         'file_name',
         'file_size',
+        'is_delivered',
+        'delivered_at',
         'is_read',
         'read_at',
         'deleted_by_sender',
@@ -27,11 +29,13 @@ class Message extends Model
     ];
 
     protected $casts = [
+        'is_delivered' => 'boolean',
+        'delivered_at' => 'datetime',
         'is_read' => 'boolean',
+        'read_at' => 'datetime',
         'deleted_by_sender' => 'boolean',
         'deleted_by_receiver' => 'boolean',
         'edited' => 'boolean',
-        'read_at' => 'datetime',
         'edited_at' => 'datetime',
     ];
 
@@ -60,6 +64,19 @@ class Message extends Model
     }
 
     /**
+     * Mark message as delivered
+     */
+    public function markAsDelivered()
+    {
+        if (!$this->is_delivered) {
+            $this->update([
+                'is_delivered' => 1,
+                'delivered_at' => now()
+            ]);
+        }
+    }
+
+    /**
      * Mark message as read
      */
     public function markAsRead()
@@ -71,11 +88,34 @@ class Message extends Model
     }
 
     /**
+     * Get read status for display
+     * Returns: 'sent', 'delivered', or 'read'
+     */
+    public function getReadStatusAttribute()
+    {
+        if ($this->is_read) {
+            return 'read';
+        }
+        if ($this->is_delivered) {
+            return 'delivered';
+        }
+        return 'sent';
+    }
+
+    /**
      * Scope for unread messages
      */
     public function scopeUnread($query)
     {
         return $query->where('is_read', 0);
+    }
+
+    /**
+     * Scope for undelivered messages
+     */
+    public function scopeUndelivered($query)
+    {
+        return $query->where('is_delivered', 0);
     }
 
     /**

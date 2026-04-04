@@ -267,13 +267,25 @@ class ChatController extends Controller
      */
     private function markMessagesAsRead($conversationId, $userId)
     {
-        Message::where('conversation_id', $conversationId)
+        $messagesQuery = Message::where('conversation_id', $conversationId)
             ->where('sender_id', '!=', $userId)
-            ->where('is_read', 0)
-            ->update([
+            ->where('is_read', 0);
+
+        $messageIds = $messagesQuery->pluck('id')->toArray();
+
+        if (!empty($messageIds)) {
+            $messagesQuery->update([
                 'is_read' => 1,
                 'read_at' => now()
             ]);
+
+            // Broadcast read status to sender
+            try {
+                broadcast(new \App\Events\MessageStatusUpdated($conversationId, $messageIds, 'read'))->toOthers();
+            } catch (\Exception $e) {
+                \Log::error('Broadcast read status failed: ' . $e->getMessage());
+            }
+        }
 
         ConversationParticipant::where('conversation_id', $conversationId)
             ->where('user_id', $userId)
@@ -546,6 +558,121 @@ class ChatController extends Controller
         $this->markMessagesAsRead($request->conversation_id, $user->id);
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Mark messages as delivered (when user opens chat)
+     */
+    public function markAsDelivered(Request $request)
+    {
+        $request->validate([
+            'conversation_id' => 'required|exists:conversations,id',
+        ]);
+
+        $user = $this->getAuthenticatedUser();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $conversation = Conversation::findOrFail($request->conversation_id);
+
+        // Check if user is participant
+        if (!$conversation->isParticipant($user->id)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Mark all messages from other user as delivered
+        $messages = Message::where('conversation_id', $conversation->id)
+            ->where('sender_id', '!=', $user->id)
+            ->where('is_delivered', 0)
+            ->get();
+
+        $updatedMessages = [];
+        foreach ($messages as $message) {
+            $message->markAsDelivered();
+            $updatedMessages[] = $message;
+        }
+
+        // Broadcast delivery status to sender
+        if (count($updatedMessages) > 0) {
+            broadcast(new \App\Events\MessageStatusUpdated($conversation->id, $updatedMessages->pluck('id')->toArray(), 'delivered'))->toOthers();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message_ids' => $messages->pluck('id')
+        ]);
+    }
+
+    /**
+     * Mark specific message as read (when it becomes visible)
+     */
+    public function markMessageRead(Request $request)
+    {
+        $request->validate([
+            'message_id' => 'required|exists:messages,id',
+        ]);
+
+        $user = $this->getAuthenticatedUser();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $message = Message::findOrFail($request->message_id);
+        $conversation = Conversation::find($message->conversation_id);
+
+        // Check if user is participant
+        if (!$conversation || !$conversation->isParticipant($user->id)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Only mark as read if not already read
+        if (!$message->is_read) {
+            $message->markAsRead();
+
+            // Also mark all previous messages as delivered and read
+            Message::where('conversation_id', $conversation->id)
+                ->where('sender_id', '!=', $user->id)
+                ->where('id', '<=', $message->id)
+                ->where('is_delivered', 0)
+                ->update([
+                    'is_delivered' => 1,
+                    'delivered_at' => now()
+                ]);
+
+            $updatedIds = Message::where('conversation_id', $conversation->id)
+                ->where('sender_id', '!=', $user->id)
+                ->where('id', '<=', $message->id)
+                ->where('is_read', 0)
+                ->pluck('id')
+                ->toArray();
+
+            if (!in_array($message->id, $updatedIds)) {
+                $updatedIds[] = $message->id;
+            }
+
+            Message::where('conversation_id', $conversation->id)
+                ->where('sender_id', '!=', $user->id)
+                ->where('id', '<=', $message->id)
+                ->where('is_read', 0)
+                ->update([
+                    'is_read' => 1,
+                    'read_at' => now(),
+                    'is_delivered' => 1,
+                    'delivered_at' => now()
+                ]);
+
+            // Broadcast read status to sender for all updated messages
+            broadcast(new \App\Events\MessageStatusUpdated($conversation->id, $updatedIds, 'read'))->toOthers();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message_id' => $message->id,
+            'status' => 'read'
+        ]);
     }
 
     /**
