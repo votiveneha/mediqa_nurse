@@ -331,21 +331,32 @@
                             $unread = $conv->unreadCount(Auth::guard('healthcare_facilities')->id());
                         @endphp
                         <div class="conversation-item-compact {{ $conv->id == $conversation->id ? 'active' : '' }}"
+                            data-conversation-id="{{ $conv->id }}"
                             onclick="window.location.href='{{ route('healthcare.chat.show', $conv->id) }}'">
-                            <img src="{{ asset($other->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}" alt="{{ $other->name }}"
+
+                            <img src="{{ $other->profile_img ? asset('healthcareimg/uploads/' . $other->profile_img) : 'nurse/assets/imgs/nurse06.png' }}" alt="{{ $other->name }}"
                                 class="conversation-avatar-compact">
                             <div class="conversation-info-compact">
                                 <div class="conversation-name-compact">{{ $other->name }} {{ $other->lastname ?? '' }}</div>
                                 @if($conv->latestMessage)
-                                    <div class="conversation-last-message-compact">
-                                        {{ Str::limit($conv->latestMessage->message, 30) }}
+                                    <div class="conversation-last-message-compact" id="last-message-{{ $conv->id }}">
+                                        @if($conv->latestMessage->sender_id == Auth::guard('healthcare_facilities')->id())
+                                            <span class="sidebar-tick" id="sidebar-tick-{{ $conv->id }}">
+                                                @if($conv->latestMessage->is_read)
+                                                    <i class="fi fi-rr-check read"></i><i class="fi fi-rr-check read"></i>
+                                                @elseif($conv->latestMessage->is_delivered)
+                                                    <i class="fi fi-rr-check delivered"></i><i class="fi fi-rr-check delivered"></i>
+                                                @else
+                                                    <i class="fi fi-rr-check sent"></i>
+                                                @endif
+                                            </span>
+                                        @endif
+                                        <span class="last-message-text">{{ Str::limit($conv->latestMessage->message, 30) }}</span>
                                     </div>
                                 @endif
                             </div>
-                            @if($unread > 0)
-                                <span
-                                    style="background: #007bff; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 10px;">{{ $unread }}</span>
-                            @endif
+                            <span class="sidebar-unread-count" id="unread-count-{{ $conv->id }}"
+                                style="background: #007bff; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 10px; {{ $unread > 0 ? '' : 'display: none;' }}">{{ $unread }}</span>
                         </div>
                     @endif
                 @endforeach
@@ -474,7 +485,7 @@
                     @csrf
                     <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
                     <button type="button" id="attachBtn" class="btn-attach" title="Attach file" style="background: none; border: none; color: #666; cursor: pointer; font-size: 18px; padding: 8px; border-radius: 50%; margin-right: 10px;">
-                        <i class="fi fi-rr-paperclip"></i>
+                        <i class="fi fi-rr-clip"></i>
                     </button>
                     <input type="file" id="fileInput" style="display: none;" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv">
                     <input type="text" name="message" class="chat-input" placeholder="Type message" id="messageInput"
@@ -752,6 +763,53 @@
             .listen('.message.status.updated', function(data) {
                 console.log('Message status updated:', data);
                 updateMessageStatus(data.message_ids, data.status);
+
+                // Also update sidebar ticks if applicable
+                data.message_ids.forEach(function(id) {
+                    const sidebarTick = document.getElementById('sidebar-tick-' + data.conversation_id);
+                    if (sidebarTick) {
+                        if (data.status === 'read') {
+                            sidebarTick.innerHTML = '<i class="fi fi-rr-check read"></i><i class="fi fi-rr-check read"></i>';
+                        } else if (data.status === 'delivered') {
+                            sidebarTick.innerHTML = '<i class="fi fi-rr-check delivered"></i><i class="fi fi-rr-check delivered"></i>';
+                        }
+                    }
+                });
+            });
+
+        // Listen for messages site-wide (for sidebar updates in other conversations)
+        Echo.private('user.' + window.Laravel.userId)
+            .listen('.message.sent', function(data) {
+                console.log('Site-wide message:', data);
+
+                // Update sidebar message preview and unread count
+                const lastMsgEl = document.getElementById('last-message-' + data.conversation_id);
+                const unreadEl = document.getElementById('unread-count-' + data.conversation_id);
+
+                if (lastMsgEl) {
+                    // Update preview text
+                    const textEl = lastMsgEl.querySelector('.last-message-text');
+                    if (textEl) textEl.textContent = data.message.substring(0, 30) + (data.message.length > 30 ? '...' : '');
+
+                    // Update tick (if sent by me)
+                    const tickEl = document.getElementById('sidebar-tick-' + data.conversation_id);
+                    if (data.sender_id == window.Laravel.userId) {
+                        if (!tickEl) {
+                            lastMsgEl.insertAdjacentHTML('afterbegin', '<span class="sidebar-tick" id="sidebar-tick-' + data.conversation_id + '"><i class="fi fi-rr-check sent"></i></span>');
+                        } else {
+                            tickEl.innerHTML = '<i class="fi fi-rr-check sent"></i>';
+                        }
+                    } else if (tickEl) {
+                        tickEl.remove(); // Not sent by me, remove tick
+                    }
+                }
+
+                // Update unread count if not the current conversation
+                if (data.conversation_id != window.Laravel.conversationId && unreadEl) {
+                    let count = parseInt(unreadEl.textContent) || 0;
+                    unreadEl.textContent = count + 1;
+                    unreadEl.style.display = 'inline-block';
+                }
             });
 
         // Mark message as read
