@@ -79,10 +79,22 @@ class ChatController extends Controller
         }
 
         // Mark messages as read
-        Message::where('conversation_id', $id)
+        $messagesQuery = Message::where('conversation_id', $id)
             ->where('sender_id', '!=', $user->id)
-            ->where('is_read', 0)
-            ->update(['is_read' => 1, 'read_at' => now()]);
+            ->where('is_read', 0);
+
+        $messageIds = $messagesQuery->pluck('id')->toArray();
+
+        if (!empty($messageIds)) {
+            $messagesQuery->update(['is_read' => 1, 'read_at' => now()]);
+
+            // Broadcast read status to sender
+            try {
+                broadcast(new \App\Events\MessageStatusUpdated($id, $messageIds, 'read'))->toOthers();
+            } catch (\Exception $e) {
+                \Log::error('Broadcast read status failed: ' . $e->getMessage());
+            }
+        }
 
         $otherParticipant = $conversation->healthcare;
         $isOnline = $this->checkUserOnline($otherParticipant->id);

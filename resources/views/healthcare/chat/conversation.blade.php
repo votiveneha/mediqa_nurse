@@ -171,12 +171,12 @@
 
         .message.sent .message-content {
             background: #f1f3f4;
-            color: #fff;
+            color: #635454;
         }
 
         .message.received .message-content {
             background: #f1f3f4;
-            color: #333;
+            color: #635454;
         }
 
         .message-avatar {
@@ -273,6 +273,35 @@
             left: 0;
             right: 0;
         }
+
+        /* Message Status Ticks */
+        .message-status {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-top: 4px;
+            font-size: 14px;
+        }
+
+        .message-status i {
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        /* Single tick - sent */
+        .message-status i.sent {
+            color: #999;
+        }
+
+        /* Double tick - delivered */
+        .message-status i.delivered {
+            color: #999;
+        }
+
+        /* Double blue tick - read */
+        .message-status i.read {
+            color: #53bdeb;
+        }
     </style>
 
     <div class="chat-wrapper">
@@ -281,7 +310,7 @@
             <div class="chat-sidebar-header">
                 <button class="btn-back"
                     onclick="window.location.href='{{ Auth::guard('healthcare_facilities')->user()->role === 2 ? route('healthcare.chat.index') : route('nurse.chat.index') }}'">
-                    <i class="fas fa-arrow-left"></i> Back
+                    <i class="fi fi-rr-arrow-left"></i> Back
                 </button>
             </div>
 
@@ -302,21 +331,32 @@
                             $unread = $conv->unreadCount(Auth::guard('healthcare_facilities')->id());
                         @endphp
                         <div class="conversation-item-compact {{ $conv->id == $conversation->id ? 'active' : '' }}"
+                            data-conversation-id="{{ $conv->id }}"
                             onclick="window.location.href='{{ route('healthcare.chat.show', $conv->id) }}'">
-                            <img src="{{ asset($other->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}" alt="{{ $other->name }}"
+
+                            <img src="{{ $other->profile_img ? asset('healthcareimg/uploads/' . $other->profile_img) : 'nurse/assets/imgs/nurse06.png' }}" alt="{{ $other->name }}"
                                 class="conversation-avatar-compact">
                             <div class="conversation-info-compact">
                                 <div class="conversation-name-compact">{{ $other->name }} {{ $other->lastname ?? '' }}</div>
                                 @if($conv->latestMessage)
-                                    <div class="conversation-last-message-compact">
-                                        {{ Str::limit($conv->latestMessage->message, 30) }}
+                                    <div class="conversation-last-message-compact" id="last-message-{{ $conv->id }}">
+                                        @if($conv->latestMessage->sender_id == Auth::guard('healthcare_facilities')->id())
+                                            <span class="sidebar-tick" id="sidebar-tick-{{ $conv->id }}">
+                                                @if($conv->latestMessage->is_read)
+                                                    <i class="fi fi-rr-check read"></i><i class="fi fi-rr-check read"></i>
+                                                @elseif($conv->latestMessage->is_delivered)
+                                                    <i class="fi fi-rr-check delivered"></i><i class="fi fi-rr-check delivered"></i>
+                                                @else
+                                                    <i class="fi fi-rr-check sent"></i>
+                                                @endif
+                                            </span>
+                                        @endif
+                                        <span class="last-message-text">{{ Str::limit($conv->latestMessage->message, 30) }}</span>
                                     </div>
                                 @endif
                             </div>
-                            @if($unread > 0)
-                                <span
-                                    style="background: #007bff; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 10px;">{{ $unread }}</span>
-                            @endif
+                            <span class="sidebar-unread-count" id="unread-count-{{ $conv->id }}"
+                                style="background: #007bff; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 10px; {{ $unread > 0 ? '' : 'display: none;' }}">{{ $unread }}</span>
                         </div>
                     @endif
                 @endforeach
@@ -334,7 +374,7 @@
                         <div class="chat-header-title">{{ $otherParticipant->name }} {{ $otherParticipant->lastname ?? '' }}
                         </div>
                         <div class="chat-header-subtitle" id="userStatusContainer" data-user-id="{{ $otherParticipant->id }}">
-                            <i class="fas fa-circle" id="status-icon" style="font-size: 8px; color: {{ $isOnline ? '#28a745' : '#888' }};"></i>
+                            <i class="fi fi-rr-circle" id="status-icon" style="font-size: 8px; color: {{ $isOnline ? '#28a745' : '#888' }};"></i>
                             <span id="status-text">{{ $isOnline ? 'Online' : 'Offline' }}</span>
                         </div>
                     </div>
@@ -347,8 +387,18 @@
                     @if(!$message->deleted_by_sender && !$message->deleted_by_receiver)
                         @php
                             $isSent = $message->sender_id == Auth::id();
+                            $tickStatus = '';
+                            if ($isSent) {
+                                if ($message->is_read) {
+                                    $tickStatus = 'read';
+                                } elseif ($message->is_delivered) {
+                                    $tickStatus = 'delivered';
+                                } else {
+                                    $tickStatus = 'sent';
+                                }
+                            }
                         @endphp
-                        <div class="message {{ $isSent ? 'sent' : 'received' }}">
+                        <div class="message {{ $isSent ? 'sent' : 'received' }}" data-message-id="{{ $message->id }}">
 
                             @if(!$isSent)
                                 <img src="{{ $message->sender->profile_img
@@ -358,6 +408,22 @@
                             @endif
 
                             <div class="message-content">
+                                <div class="message-header">
+                                    @if(!$isSent)
+                                        <span class="sender-name">{{ $message->sender->name }} {{ $message->sender->lastname ?? '' }}</span>
+                                    @endif
+                                    <span class="message-time">
+                                        @php
+                                            $messageDate = $message->created_at;
+                                            if ($messageDate->isToday())
+                                                echo $messageDate->format('h:i A');
+                                            elseif ($messageDate->isYesterday())
+                                                echo 'Yesterday';
+                                            else
+                                                echo $messageDate->format('d/m/Y');
+                                        @endphp
+                                    </span>
+                                </div>
                                 <p class="message-text">{{ nl2br(e($message->message)) }}</p>
 
                                 @if($message->message_type === 'file' && $message->attachments->count() > 0)
@@ -371,16 +437,28 @@
                                         </div>
                                     @else
                                         <div class="message-file" style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(0, 0, 0, 0.05); border-radius: 8px; margin-top: 8px; max-width: 300px;">
-                                            <i class="file-icon {{ $attachment->file_icon ?? 'fas fa-file' }}" style="font-size: 24px; color: #007bff;"></i>
+                                            <i class="file-icon {{ $attachment->file_icon ?? 'fi fi-rr-file' }}" style="font-size: 24px; color: #007bff;"></i>
                                             <div class="file-info" style="flex: 1; overflow: hidden;">
                                                 <div class="file-name" style="font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $attachment->file_name }}</div>
                                                 <div class="file-size" style="font-size: 11px; color: #888;">{{ $attachment->formatted_file_size }}</div>
                                             </div>
                                             <a href="{{ asset($attachment->file_path) }}" download style="color: #007bff; text-decoration: none;">
-                                                <i class="fas fa-download"></i>
+                                                <i class="fi fi-rr-download"></i>
                                             </a>
                                         </div>
                                     @endif
+                                @endif
+
+                                @if($isSent)
+                                    <div class="message-status" data-status="{{ $tickStatus }}">
+                                        @if($tickStatus === 'read')
+                                            <i class="fi fi-rr-check read"></i><i class="fi fi-rr-check read"></i>
+                                        @elseif($tickStatus === 'delivered')
+                                            <i class="fi fi-rr-check delivered"></i><i class="fi fi-rr-check delivered"></i>
+                                        @else
+                                            <i class="fi fi-rr-check sent"></i>
+                                        @endif
+                                    </div>
                                 @endif
                             </div>
 
@@ -397,7 +475,7 @@
 
                 <!-- Typing Indicator -->
                 <div class="typing-indicator" id="typingIndicator">
-                    <i class="fas fa-circle"></i> {{ $otherParticipant->name }} is typing...
+                    <i class="fi fi-rr-circle"></i> {{ $otherParticipant->name }} is typing...
                 </div>
             </div>
 
@@ -407,7 +485,7 @@
                     @csrf
                     <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
                     <button type="button" id="attachBtn" class="btn-attach" title="Attach file" style="background: none; border: none; color: #666; cursor: pointer; font-size: 18px; padding: 8px; border-radius: 50%; margin-right: 10px;">
-                        <i class="fas fa-paperclip"></i>
+                        <i class="fi fi-rr-clip"></i>
                     </button>
                     <input type="file" id="fileInput" style="display: none;" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv">
                     <input type="text" name="message" class="chat-input" placeholder="Type message" id="messageInput"
@@ -520,7 +598,7 @@
                 fileDiv.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(0, 0, 0, 0.05); border-radius: 8px; margin-top: 8px; max-width: 300px;';
 
                 var icon = document.createElement('i');
-                icon.className = 'fas fa-file';
+                icon.className = 'fi fi-rr-file';
                 icon.style.cssText = 'font-size: 24px; color: #007bff;';
                 fileDiv.appendChild(icon);
 
@@ -544,7 +622,7 @@
                 var downloadLink = document.createElement('a');
                 downloadLink.href = fileUrl;
                 downloadLink.download = fileName;
-                downloadLink.innerHTML = '<i class="fas fa-download"></i>';
+                downloadLink.innerHTML = '<i class="fi fi-rr-download"></i>';
                 downloadLink.style.cssText = 'color: #007bff; text-decoration: none;';
                 fileDiv.appendChild(downloadLink);
 
@@ -552,6 +630,13 @@
             }
 
             if (isSent) {
+                // Add status ticks
+                var statusDiv = document.createElement('div');
+                statusDiv.className = 'message-status';
+                statusDiv.setAttribute('data-status', 'sent');
+                statusDiv.innerHTML = '<i class="fi fi-rr-check sent"></i>';
+                bubble.appendChild(statusDiv);
+
                 div.appendChild(bubble);
                 div.appendChild(img);
             } else {
@@ -600,6 +685,7 @@
                         alert(data.error || 'Failed to upload file');
                     }
                 } catch (err) {
+                    console.error('Upload error:', err);
                     alert('Upload failed: ' + err.message);
                 }
             });
@@ -652,6 +738,11 @@
                             ${!isSentByMe ? `<img src="${avatar}" class="message-avatar">` : ''}
                             <div class="message-content">
                                 <p class="message-text">${data.message}</p>
+                                ${isSentByMe ? `
+                                <div class="message-status" data-status="sent">
+                                    <i class="fi fi-rr-check sent"></i>
+                                </div>
+                                ` : ''}
                             </div>
                             ${isSentByMe ? `<img src="${avatar}" class="message-avatar">` : ''}
                         </div>
@@ -663,10 +754,97 @@
 
                 // 🔔 Notification sound
                 if (!isSentByMe) {
-                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQQAKZXZ8NOmdhoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBo=');
+                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQQAKZXZ8NOmdhoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBoCLJ7a8NOndBo=');
                     audio.play().catch(() => {});
+
+                    // Mark as read if received in active conversation
+                    markMessageAsRead(data.id);
+                }
+            })
+            .listen('.message.status.updated', function(data) {
+                console.log('Message status updated:', data);
+                updateMessageStatus(data.message_ids, data.status);
+
+                // Also update sidebar ticks if applicable
+                data.message_ids.forEach(function(id) {
+                    const sidebarTick = document.getElementById('sidebar-tick-' + data.conversation_id);
+                    if (sidebarTick) {
+                        if (data.status === 'read') {
+                            sidebarTick.innerHTML = '<i class="fi fi-rr-check-double read"></i>';
+                        } else if (data.status === 'delivered') {
+                            sidebarTick.innerHTML = '<i class="fi fi-rr-check-double delivered"></i>';
+                        }
+                    }
+                });
+            });
+
+        // Listen for messages site-wide (for sidebar updates in other conversations)
+        Echo.private('user.' + window.Laravel.userId)
+            .listen('.message.sent', function(data) {
+                console.log('Site-wide message:', data);
+
+                // Update sidebar message preview and unread count
+                const lastMsgEl = document.getElementById('last-message-' + data.conversation_id);
+                const unreadEl = document.getElementById('unread-count-' + data.conversation_id);
+
+                if (lastMsgEl) {
+                    // Update preview text
+                    const textEl = lastMsgEl.querySelector('.last-message-text');
+                    if (textEl) textEl.textContent = data.message.substring(0, 30) + (data.message.length > 30 ? '...' : '');
+
+                    // Update tick (if sent by me)
+                    const tickEl = document.getElementById('sidebar-tick-' + data.conversation_id);
+                    if (data.sender_id == window.Laravel.userId) {
+                        if (!tickEl) {
+                            lastMsgEl.insertAdjacentHTML('afterbegin', '<span class="sidebar-tick" id="sidebar-tick-' + data.conversation_id + '"><i class="fi fi-rr-check sent"></i></span>');
+                        } else {
+                            tickEl.innerHTML = '<i class="fi fi-rr-check sent"></i>';
+                        }
+                    } else if (tickEl) {
+                        tickEl.remove(); // Not sent by me, remove tick
+                    }
+                }
+
+                // Update unread count if not the current conversation
+                if (data.conversation_id != window.Laravel.conversationId && unreadEl) {
+                    let count = parseInt(unreadEl.textContent) || 0;
+                    unreadEl.textContent = count + 1;
+                    unreadEl.style.display = 'inline-block';
                 }
             });
+
+        // Mark message as read
+        function markMessageAsRead(messageId) {
+            fetch('{{ route("healthcare.chat.message_read") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': window.Laravel.csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ message_id: messageId })
+            }).catch(function(err) {
+                console.error('Failed to mark message as read:', err);
+            });
+        }
+
+        // Update message status in UI
+        function updateMessageStatus(messageIds, status) {
+            messageIds.forEach(function(id) {
+                var messageEl = document.querySelector('.message.sent[data-message-id="' + id + '"]');
+                if (messageEl) {
+                    var statusEl = messageEl.querySelector('.message-status');
+                    if (statusEl) {
+                        statusEl.setAttribute('data-status', status);
+                        if (status === 'read') {
+                            statusEl.innerHTML = '<i class="fi fi-rr-check read"></i><i class="fi fi-rr-check read"></i>';
+                        } else if (status === 'delivered') {
+                            statusEl.innerHTML = '<i class="fi fi-rr-check delivered"></i><i class="fi fi-rr-check delivered"></i>';
+                        }
+                    }
+                }
+            });
+        }
 
         // File upload event listeners
         if (attachBtn && fileInput) {

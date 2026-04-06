@@ -73,10 +73,22 @@ class ChatApiController extends Controller
         }
 
         // Mark messages as read
-        Message::where('conversation_id', $id)
+        $messagesQuery = Message::where('conversation_id', $id)
             ->where('sender_id', '!=', $user->id)
-            ->where('is_read', 0)
-            ->update(['is_read' => 1, 'read_at' => now()]);
+            ->where('is_read', 0);
+
+        $messageIds = $messagesQuery->pluck('id')->toArray();
+
+        if (!empty($messageIds)) {
+            $messagesQuery->update(['is_read' => 1, 'read_at' => now()]);
+
+            // Broadcast read status to sender
+            try {
+                broadcast(new \App\Events\MessageStatusUpdated($id, $messageIds, 'read'))->toOthers();
+            } catch (\Exception $e) {
+                \Log::error('API Broadcast read status failed: ' . $e->getMessage());
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -148,13 +160,26 @@ class ChatApiController extends Controller
         ]);
 
         $user = Auth::user();
+        $id = $request->conversation_id;
 
-        Message::where('conversation_id', $request->conversation_id)
+        $messagesQuery = Message::where('conversation_id', $id)
             ->where('sender_id', '!=', $user->id)
-            ->where('is_read', 0)
-            ->update(['is_read' => 1, 'read_at' => now()]);
+            ->where('is_read', 0);
 
-        ConversationParticipant::where('conversation_id', $request->conversation_id)
+        $messageIds = $messagesQuery->pluck('id')->toArray();
+
+        if (!empty($messageIds)) {
+            $messagesQuery->update(['is_read' => 1, 'read_at' => now()]);
+
+            // Broadcast read status to sender
+            try {
+                broadcast(new \App\Events\MessageStatusUpdated($id, $messageIds, 'read'))->toOthers();
+            } catch (\Exception $e) {
+                \Log::error('API markAsRead Broadcast failed: ' . $e->getMessage());
+            }
+        }
+
+        ConversationParticipant::where('conversation_id', $id)
             ->where('user_id', $user->id)
             ->update(['unread_count' => 0]);
 
@@ -173,7 +198,7 @@ class ChatApiController extends Controller
         $message = Message::findOrFail($id);
 
         $conversation = Conversation::find($message->conversation_id);
-        
+
         if (!$conversation || !$conversation->isParticipant($user->id)) {
             return response()->json([
                 'success' => false,
@@ -356,8 +381,8 @@ class ChatApiController extends Controller
             ], 403);
         }
 
-        $blockedUserId = $user->id === $conversation->nurse_id 
-            ? $conversation->healthcare_id 
+        $blockedUserId = $user->id === $conversation->nurse_id
+            ? $conversation->healthcare_id
             : $conversation->nurse_id;
 
         BlockedUser::create([

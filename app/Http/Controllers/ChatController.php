@@ -169,35 +169,35 @@ class ChatController extends Controller
             }
         }
 
-        if ($user->role === 1) {
-            // Sender is nurse -> receiver is healthcare
-            $receiver = DB::table("users")->find($conversation->healthcare_id);
-        } else {
-            // Sender is healthcare -> receiver is nurse
-            $receiver = DB::table("users")->find($conversation->nurse_id);
-        }
+        // if ($user->role === 1) {
+        //     // Sender is nurse -> receiver is healthcare
+        //     $receiver = DB::table("users")->find($conversation->healthcare_id);
+        // } else {
+        //     // Sender is healthcare -> receiver is nurse
+        //     $receiver = DB::table("users")->find($conversation->nurse_id);
+        // }
 
-        //print_r($receiver);die;
+        // //print_r($receiver);die;
 
-        if ($receiver && $receiver->email_notification == 1) {
+        // if ($receiver && $receiver->email_notification == 1) {
 
-            $htmlBody = view('email.chat_message_notification', [
-                'sender' => $user,
-                'receiver' => $receiver,
-                'messageText' => strip_tags($request->message),
-                'conversation' => $conversation,
-            ])->render();
+        //     $htmlBody = view('email.chat_message_notification', [
+        //         'sender' => $user,
+        //         'receiver' => $receiver,
+        //         'messageText' => strip_tags($request->message),
+        //         'conversation' => $conversation,
+        //     ])->render();
 
-            \App\Helpers\ZeptoMailHelper::sendMail(
-                $receiver->email,
-                "New Message Received - Mediqa",
-                $htmlBody
-            );
-        }
+        //     \App\Helpers\ZeptoMailHelper::sendMail(
+        //         $receiver->email,
+        //         "New Message Received - Mediqa",
+        //         $htmlBody
+        //     );
+        // }
 
         return response()->json([
             'success' => true,
-            'message' => $message->load('sender')
+            'message' => $message->load(['sender', 'attachments'])
         ]);
     }
 
@@ -282,7 +282,7 @@ class ChatController extends Controller
             'user_id' => $recipient->id,
         ]);
 
-       
+
 
         return response()->json([
             'success' => true,
@@ -295,13 +295,25 @@ class ChatController extends Controller
      */
     private function markMessagesAsRead($conversationId, $userId)
     {
-        Message::where('conversation_id', $conversationId)
+        $messagesQuery = Message::where('conversation_id', $conversationId)
             ->where('sender_id', '!=', $userId)
-            ->where('is_read', 0)
-            ->update([
+            ->where('is_read', 0);
+
+        $messageIds = $messagesQuery->pluck('id')->toArray();
+
+        if (!empty($messageIds)) {
+            $messagesQuery->update([
                 'is_read' => 1,
                 'read_at' => now()
             ]);
+
+            // Broadcast read status to sender
+            try {
+                broadcast(new \App\Events\MessageStatusUpdated($conversationId, $messageIds, 'read'))->toOthers();
+            } catch (\Exception $e) {
+                \Log::error('Broadcast read status failed: ' . $e->getMessage());
+            }
+        }
 
         ConversationParticipant::where('conversation_id', $conversationId)
             ->where('user_id', $userId)
@@ -311,6 +323,75 @@ class ChatController extends Controller
     /**
      * Upload file attachment
      */
+    // public function uploadAttachment(Request $request)
+    // {
+    //     $request->validate([
+    //         'conversation_id' => 'required|exists:conversations,id',
+    //         'file' => 'required|file|max:10240', // 10MB max
+    //     ]);
+
+    //     $user = Auth::guard('nurse_middle')->user();
+    //     $conversation = Conversation::findOrFail($request->conversation_id);
+
+    //     // Check if user is participant
+    //     if (!$conversation->isParticipant($user->id)) {
+    //         return response()->json(['error' => 'Unauthorized'], 403);
+    //     }
+
+    //     $file = $request->file('file');
+
+    //     // Get file size before moving (temp file will be deleted after move)
+    //     $fileSize = $file->getSize();
+
+    //     // Create directory if it doesn't exist
+    //     $uploadPath = public_path('uploads/chat_file');
+    //     if (!file_exists($uploadPath)) {
+    //         mkdir($uploadPath, 0755, true);
+    //     }
+
+    //     // Generate unique filename
+    //     $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+    //     // Move file to public/uploads/chat_file (root public directory)
+    //     $file->move($uploadPath, $fileName);
+
+    //     // Store relative path from public folder
+    //     $filePath = 'uploads/chat_file/' . $fileName;
+
+    //     $message = Message::create([
+    //         'conversation_id' => $conversation->id,
+    //         'sender_id' => $user->id,
+    //         'sender_type' => $user->role === 1 ? 'nurse' : 'healthcare',
+    //         'message' => 'File: ' . $file->getClientOriginalName(),
+    //         'message_type' => 'file',
+    //         'file_url' => asset($filePath),
+    //         'file_name' => $file->getClientOriginalName(),
+    //         'file_size' => $fileSize,
+    //     ]);
+
+    //     // Create attachment record
+    //     $message->attachments()->create([
+    //         'file_name' => $file->getClientOriginalName(),
+    //         'file_path' => $filePath,
+    //         'file_type' => $file->getMimeType(),
+    //         'file_size' => $fileSize,
+    //     ]);
+
+    //     // Update conversation
+    //     $conversation->update([
+    //         'last_message_id' => $message->id,
+    //         'last_message_at' => now(),
+    //     ]);
+
+    //     // Broadcast event
+    //     broadcast(new MessageSent($message))->toOthers();
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => $message->load(['sender', 'attachments'])
+    //     ]);
+    // }
+
     public function uploadAttachment(Request $request)
     {
         $request->validate([
@@ -318,7 +399,15 @@ class ChatController extends Controller
             'file' => 'required|file|max:10240', // 10MB max
         ]);
 
-        $user = Auth::guard('nurse_middle')->user();
+        // Detect which guard is authenticated
+        $user = Auth::guard('nurse_middle')->check() ? Auth::guard('nurse_middle')->user() :
+                (Auth::guard('healthcare_facilities')->check() ? Auth::guard('healthcare_facilities')->user() :
+                (Auth::check() ? Auth::user() : null));
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
         $conversation = Conversation::findOrFail($request->conversation_id);
 
         // Check if user is participant
@@ -327,25 +416,76 @@ class ChatController extends Controller
         }
 
         $file = $request->file('file');
-        $path = $file->store('chat_attachments', 'public');
 
+        // ✅ IMPORTANT: Get all file details BEFORE moving the file
+        $fileSize = $file->getSize();
+        $fileType = $file->getMimeType();
+        $originalName = $file->getClientOriginalName();
+        $extension = $file->getClientOriginalExtension();
+
+        // Create directory if it doesn't exist
+        $uploadPath = public_path('uploads' . DIRECTORY_SEPARATOR . 'chat_file');
+
+        // Ensure the directory exists
+        if (!is_dir($uploadPath)) {
+            if (!@mkdir($uploadPath, 0755, true)) {
+                \Log::error('mkdir failed', ['path' => $uploadPath]);
+            }
+        }
+
+        // Double-check directory exists and is writable
+        if (!is_writable($uploadPath)) {
+            \Log::error('Upload directory is not writable', [
+                'path' => $uploadPath,
+                'exists' => file_exists($uploadPath),
+                'is_dir' => is_dir($uploadPath)
+            ]);
+            return response()->json([
+                'error' => 'Upload directory is not writable. Please check permissions.',
+                'debug_path' => $uploadPath
+            ], 500);
+        }
+
+        // Generate unique filename
+        $fileName = time() . '_' . uniqid() . '.' . $extension;
+        $fullPath = rtrim($uploadPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $fileName;
+
+        // Use PHP's native move_uploaded_file for better Windows compatibility
+        if (!move_uploaded_file($file->getPathname(), $fullPath)) {
+            \Log::error('move_uploaded_file failed', [
+                'from' => $file->getPathname(),
+                'to' => $fullPath,
+                'upload_path' => $uploadPath,
+                'is_writable' => is_writable($uploadPath),
+                'file_exists' => file_exists($uploadPath)
+            ]);
+            return response()->json([
+                'error' => 'Failed to upload file. Please check directory permissions.',
+                'debug_path' => $fullPath
+            ], 500);
+        }
+
+        // Store relative path (use forward slashes for URLs)
+        $filePath = 'uploads/chat_file/' . $fileName;
+
+        // Create message
         $message = Message::create([
             'conversation_id' => $conversation->id,
             'sender_id' => $user->id,
             'sender_type' => $user->role === 1 ? 'nurse' : 'healthcare',
-            'message' => 'File: ' . $file->getClientOriginalName(),
+            'message' => 'File: ' . $originalName,
             'message_type' => 'file',
-            'file_url' => Storage::url($path),
-            'file_name' => $file->getClientOriginalName(),
-            'file_size' => $file->getSize(),
+            'file_url' => asset($filePath),
+            'file_name' => $originalName,
+            'file_size' => $fileSize,
         ]);
 
         // Create attachment record
         $message->attachments()->create([
-            'file_name' => $file->getClientOriginalName(),
-            'file_path' => $path,
-            'file_type' => $file->getMimeType(),
-            'file_size' => $file->getSize(),
+            'file_name' => $originalName,
+            'file_path' => $filePath,
+            'file_type' => $fileType, // ✅ use stored mime type
+            'file_size' => $fileSize,
         ]);
 
         // Update conversation
@@ -476,6 +616,121 @@ class ChatController extends Controller
         $this->markMessagesAsRead($request->conversation_id, $user->id);
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Mark messages as delivered (when user opens chat)
+     */
+    public function markAsDelivered(Request $request)
+    {
+        $request->validate([
+            'conversation_id' => 'required|exists:conversations,id',
+        ]);
+
+        $user = $this->getAuthenticatedUser();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $conversation = Conversation::findOrFail($request->conversation_id);
+
+        // Check if user is participant
+        if (!$conversation->isParticipant($user->id)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Mark all messages from other user as delivered
+        $messages = Message::where('conversation_id', $conversation->id)
+            ->where('sender_id', '!=', $user->id)
+            ->where('is_delivered', 0)
+            ->get();
+
+        $updatedMessages = [];
+        foreach ($messages as $message) {
+            $message->markAsDelivered();
+            $updatedMessages[] = $message;
+        }
+
+        // Broadcast delivery status to sender
+        if (count($updatedMessages) > 0) {
+            broadcast(new \App\Events\MessageStatusUpdated($conversation->id, $updatedMessages->pluck('id')->toArray(), 'delivered'))->toOthers();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message_ids' => $messages->pluck('id')
+        ]);
+    }
+
+    /**
+     * Mark specific message as read (when it becomes visible)
+     */
+    public function markMessageRead(Request $request)
+    {
+        $request->validate([
+            'message_id' => 'required|exists:messages,id',
+        ]);
+
+        $user = $this->getAuthenticatedUser();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $message = Message::findOrFail($request->message_id);
+        $conversation = Conversation::find($message->conversation_id);
+
+        // Check if user is participant
+        if (!$conversation || !$conversation->isParticipant($user->id)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Only mark as read if not already read
+        if (!$message->is_read) {
+            $message->markAsRead();
+
+            // Also mark all previous messages as delivered and read
+            Message::where('conversation_id', $conversation->id)
+                ->where('sender_id', '!=', $user->id)
+                ->where('id', '<=', $message->id)
+                ->where('is_delivered', 0)
+                ->update([
+                    'is_delivered' => 1,
+                    'delivered_at' => now()
+                ]);
+
+            $updatedIds = Message::where('conversation_id', $conversation->id)
+                ->where('sender_id', '!=', $user->id)
+                ->where('id', '<=', $message->id)
+                ->where('is_read', 0)
+                ->pluck('id')
+                ->toArray();
+
+            if (!in_array($message->id, $updatedIds)) {
+                $updatedIds[] = $message->id;
+            }
+
+            Message::where('conversation_id', $conversation->id)
+                ->where('sender_id', '!=', $user->id)
+                ->where('id', '<=', $message->id)
+                ->where('is_read', 0)
+                ->update([
+                    'is_read' => 1,
+                    'read_at' => now(),
+                    'is_delivered' => 1,
+                    'delivered_at' => now()
+                ]);
+
+            // Broadcast read status to sender for all updated messages
+            broadcast(new \App\Events\MessageStatusUpdated($conversation->id, $updatedIds, 'read'))->toOthers();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message_id' => $message->id,
+            'status' => 'read'
+        ]);
     }
 
     /**

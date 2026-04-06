@@ -95,12 +95,15 @@ Route::prefix('/admin')->name('admin.')->namespace('App\Http\Controllers\admin')
     Route::get('/customer-list', 'NurseController@customerList')->name('customer-list');
     Route::get('/healthcare-list', 'HealthcareController@index')->name('healthcareList');
     Route::get('/healthcare-detail/{id}', 'HealthcareController@healthcare_details')->name('healthcare_details');
+    Route::get('/add_healthcare','HealthcareController@add_healthcare')->name('add_healthcare');
+    Route::post('/post_healthcare','HealthcareController@post_healthcare')->name('post_healthcare');
+    Route::get('/edit_healthcare/{id}','HealthcareController@edit_healthcare')->name('edit_healthcare');
     Route::get('/plan_management', 'HealthcareController@plan_list')->name('plan_list');
     Route::get('/add_plans', 'HealthcareController@add_plans')->name('add_plans');
     Route::post('/updatePlan', 'HealthcareController@update_plan')->name('updatePlan');
     Route::get('/update_plans/{id}', 'HealthcareController@update_plans')->name('update_plans');
-   
-    
+
+
     Route::get('/show_invoice', 'HealthcareController@show_invoice')->name('show_invoice');
     Route::get('/show_customers', 'HealthcareController@show_customers')->name('show_customers');
     Route::get('/recruiter-list', 'HealthcareController@recruiter_list')->name('recruiter_list');
@@ -395,6 +398,8 @@ Route::prefix('nurse/chat')->name('nurse.chat.')->middleware(['auth:nurse_middle
     Route::post('/delete-conversation', 'App\Http\Controllers\ChatController@deleteConversation')->name('delete_conversation');
     Route::post('/archive', 'App\Http\Controllers\ChatController@archiveConversation')->name('archive');
     Route::post('/mark-as-read', 'App\Http\Controllers\ChatController@markAsRead')->name('mark_as_read');
+    Route::post('/mark-as-delivered', 'App\Http\Controllers\ChatController@markAsDelivered')->name('mark_as_delivered');
+    Route::post('/message-read', 'App\Http\Controllers\ChatController@markMessageRead')->name('message_read');
     Route::post('/typing', 'App\Http\Controllers\ChatController@typingStatus')->name('typing');
     Route::post('/online-status', 'App\Http\Controllers\ChatController@updateOnlineStatus')->name('online_status');
     Route::get('/check-status/{userId}', 'App\Http\Controllers\ChatController@checkUserStatus')->name('check_status');
@@ -417,6 +422,8 @@ Route::prefix('healthcare-facilities/chat')->name('healthcare.chat.')->middlewar
     Route::post('/delete-conversation', 'App\Http\Controllers\ChatController@deleteConversation')->name('delete_conversation');
     Route::post('/archive', 'App\Http\Controllers\ChatController@archiveConversation')->name('archive');
     Route::post('/mark-as-read', 'App\Http\Controllers\ChatController@markAsRead')->name('mark_as_read');
+    Route::post('/mark-as-delivered', 'App\Http\Controllers\ChatController@markAsDelivered')->name('mark_as_delivered');
+    Route::post('/message-read', 'App\Http\Controllers\ChatController@markMessageRead')->name('message_read');
     Route::post('/typing', 'App\Http\Controllers\ChatController@typingStatus')->name('typing');
     Route::post('/online-status', 'App\Http\Controllers\ChatController@updateOnlineStatus')->name('online_status');
     Route::get('/check-status/{userId}', 'App\Http\Controllers\ChatController@checkUserStatus')->name('check_status');

@@ -46,7 +46,7 @@ class NurseRepository extends BaseRepository{
     }
     public function getIncomingNurseList(){
         try {
-            return $this->model->where(['type'=>'1','emailVerified'=>'1','user_stage' => '1'])->orderBy('id', 'desc')->get();
+            return $this->model->where(['type'=>'1','emailVerified'=>'1','user_stage' => '1','role' => '1'])->orderBy('id', 'desc')->get();
         } catch(\Exception $e){
             Log::error("Error in NurseRepository.getIncomingNurseList(): " . $e->getMessage());
             return response()->json(['status' => '0', 'message' => __('message.statusZero')]);
@@ -55,7 +55,7 @@ class NurseRepository extends BaseRepository{
     
     public function getUnverifiedNurseList(){
         try {
-            return $this->model->where(['type'=>'1','email_verify'=>'0','emailVerified'=>'0','user_stage' => '0'])->orderBy('id', 'desc')->get();
+            return $this->model->where(['type'=>'1','email_verify'=>'0','emailVerified'=>'0','user_stage' => '0','role' => '1'])->orderBy('id', 'desc')->get();
         } catch(\Exception $e){
             Log::error("Error in NurseRepository.getIncomingNurseList(): " . $e->getMessage());
             return response()->json(['status' => '0', 'message' => __('message.statusZero')]);
@@ -64,7 +64,7 @@ class NurseRepository extends BaseRepository{
     
     public function getcompleteprofileNurseList(){
         try {
-            return $this->model->where(['type'=>'1','emailVerified'=>'1','user_stage' => '4'])->orderBy('id', 'desc')->get();
+            return $this->model->where(['type'=>'1','emailVerified'=>'1','user_stage' => '4','role' => '1'])->orderBy('id', 'desc')->get();
         } catch(\Exception $e){
             Log::error("Error in NurseRepository.getcompleteprofileNurseList(): " . $e->getMessage());
             return response()->json(['status' => '0', 'message' => __('message.statusZero')]);
@@ -73,7 +73,7 @@ class NurseRepository extends BaseRepository{
 
     public function getInProgressprofileNurseList(){
         try {
-            return $this->model->where(['type'=>'1','emailVerified'=>'1','user_stage' => '5'])->orderBy('id', 'desc')->get();
+            return $this->model->where(['type'=>'1','emailVerified'=>'1','user_stage' => '5','role' => '1'])->orderBy('id', 'desc')->get();
         } catch(\Exception $e){
             Log::error("Error in NurseRepository.getInProgressprofileNurseList(): " . $e->getMessage());
             return response()->json(['status' => '0', 'message' => __('message.statusZero')]);

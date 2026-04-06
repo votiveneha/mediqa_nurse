@@ -576,7 +576,7 @@
 <main class="main find_job_div">
     <section class="section-box mt-30">
         <div class="container">
-     <div class="saved-searches-row" id="search-tabs">
+           <div class="saved-searches-row" id="search-tabs">
                 <div class="searchtabs">
                     <!-- Fixed left tab -->
                     <div class="saved-search-tab" data-id="browse_all">
@@ -608,6 +608,7 @@
                     </div>
                 </div>
             </div>
+              @include('healthcare.find_nurse.modal_saved_searches')
         <div>
             <div class="job_tabs">
                 <ul class="tab-nav">
@@ -796,9 +797,9 @@
                                 <tr>
                                     <th><input type="checkbox" class="ss-checkbox"></th>
                                     <th>Name</th>
-                                    <th>Search Type</th>
+                                    <!-- <th>Search Type</th> -->
                                     <th>Filters Summary</th>
-                                    <th>Matches</th>
+                                    <th>Matches Count</th>
                                     <!-- <th>Alert</th> -->
                                     <th>Created</th>
                                     <th>Last Run</th>
@@ -808,48 +809,19 @@
 
                             <tbody>
 
+                                @forelse($list_saved_searches as $search_list)
+                             
                                 <!-- Row -->
                                 <tr class="ss-row">
                                     <td><input type="checkbox" class="ss-checkbox"></td>
-                                    <td class="ss-name">My Preferences</td>
-                                    <td class="ss-type">Dynamic</td>
-                                    <td>-</td>
+                                    <td class="ss-name">{{ucfirst($search_list->name)}}</td>
+                                    <td class="ss-type">Read more</td>
                                     <td><span class="ss-match">0</span></td>
-                                    <!-- <td><span class="ss-alert">Realtime</span></td> -->
-                                    <td>Today</td>
-                                    <!-- <td><span class="ss-toggle"></span></td> -->
-                                    <td>
-                                        <div class="alert-toggle-wrapper">
-                                            <label class="alert-toggle">
-                                                <input type="checkbox" class="alert-toggle-input" checked>
-
-                                                <span class="alert-toggle-slider"></span>
-                                            </label>
-                                        </div>
-                                    </td>
-                                    <td class="ss-actions">
-                                        <button class="btn ss-run">
-                                            <!-- <i class="fi fi-rr-play mr-1"></i> -->
-                                            Run
-                                        </button>
-                                        <button class="btn ss-duplicate">
-                                            <!-- <i class="fi fi-rr-copy mr-1"></i>  -->
-                                            Duplicate
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- Row -->
-                                <tr class="ss-row">
-                                    <td><input type="checkbox" class="ss-checkbox"></td>
-                                    <td class="ss-name">Saved Search 2</td>
-                                    <td class="ss-type">Dynamic</td>
                                     <td>-</td>
-                                    <td><span class="ss-match">0</span></td>
                                     <!-- <td><span class="ss-alert">Realtime</span></td> -->
                                     <td>2026-04-01</td>
                                     <!-- <td><span class="ss-toggle"></span></td> -->
-                                    <td>
+                                    <!-- <td>
                                         <div class="alert-toggle-wrapper">
                                             <label class="alert-toggle">
                                                 <input type="checkbox" class="alert-toggle-input" checked>
@@ -857,7 +829,7 @@
                                                 <span class="alert-toggle-slider"></span>
                                             </label>
                                         </div>
-                                    </td>
+                                    </td> -->
                                     <td class="ss-actions">
                                         <button class="btn ss-run">
                                             <!-- <i class="fi fi-rr-play mr-1"></i> -->
@@ -877,48 +849,11 @@
                                         </button>
                                     </td>
                                 </tr>
-
-                                <!-- Row -->
-                                <tr class="ss-row">
-                                    <td><input type="checkbox" class="ss-checkbox"></td>
-                                    <td class="ss-name">Educational & Training</td>
-                                    <td class="ss-type">-</td>
-                                    <td>
-                                        -<br>
-                                        <a href="#" class="ss-read">Read More</a>
-                                    </td>
-                                    <td><span class="ss-match">0</span></td>
-                                    <!-- <td><span class="ss-alert">Realtime</span></td> -->
-                                    <td>2026-04-01</td>
-                                    <!-- <td><span class="ss-toggle"></span></td> -->
-                                    <td>
-                                        <div class="alert-toggle-wrapper">
-                                            <label class="alert-toggle">
-                                                <input type="checkbox" class="alert-toggle-input" checked>
-
-                                                <span class="alert-toggle-slider"></span>
-                                            </label>
-                                        </div>
-                                    </td>
-                                    <td class="ss-actions">
-                                        <button class="btn ss-run">
-                                            <!-- <i class="fi fi-rr-play mr-1"></i> -->
-                                            Run
-                                        </button>
-                                        <button class="btn ss-edit">
-                                            <!-- <i class="fi fi-rr-edit mr-1"></i> -->
-                                            Edit
-                                        </button>
-                                        <button class="btn ss-duplicate">
-                                            <!-- <i class="fi fi-rr-copy mr-1"></i>  -->
-                                            Duplicate
-                                        </button>
-                                        <button class="btn ss-delete">
-                                            <!-- <i class="fi fi-rr-trash"></i> -->
-                                            Delete
-                                        </button>
-                                    </td>
+                                @empty
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">No Record Found</td>
                                 </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>

@@ -920,7 +920,7 @@ $work_preferences_data = DB::table("work_shift_preferences")->get();
       if (typeof Echo !== 'undefined') {
         Echo.private('user.{{ Auth::guard("nurse_middle")->id() }}')
           .listen('.message.sent', (e) => {
-            updateNotificationCount();
+            updateNotificationCount(e);
             showBrowserNotification(e);
           });
       }
@@ -934,7 +934,7 @@ $work_preferences_data = DB::table("work_shift_preferences")->get();
       if (typeof Echo !== 'undefined') {
         Echo.private('user.{{ Auth::guard("healthcare_facilities")->id() }}')
           .listen('.message.sent', (e) => {
-            updateNotificationCount();
+            updateNotificationCount(e);
             showBrowserNotification(e);
           });
       }
@@ -943,10 +943,11 @@ $work_preferences_data = DB::table("work_shift_preferences")->get();
 @endauth
 
 <script>
-  function updateNotificationCount() {
+  function updateNotificationCount(e) {
     const badges = document.querySelectorAll('.notification-badge');
     const countTexts = document.querySelectorAll('.notification-count-text');
     const messageCountTexts = document.querySelectorAll('.message-count-text');
+    const realtimeContainer = document.getElementById('realtime-messages-container');
 
     let currentCount = 0;
     if (badges.length > 0) {
@@ -979,6 +980,31 @@ $work_preferences_data = DB::table("work_shift_preferences")->get();
     messageCountTexts.forEach(text => {
       text.textContent = newCount + ' messages';
     });
+
+    // Append new message to realtime container if e is provided
+    if (e && realtimeContainer) {
+      const baseUrl = '{{ url("/") }}/';
+      const conversationUrl = e.sender_role == 1
+        ? `${baseUrl}healthcare-facilities/chat/conversation/${e.conversation_id}`
+        : `${baseUrl}nurse/chat/conversation/${e.conversation_id}`;
+
+      const avatarPath = e.sender_role == 1
+        ? `${baseUrl}healthcareimg/uploads/${e.sender_avatar}`
+        : `${baseUrl}nurse/assets/imgs/nurse06.png`; // Fallback or logic for nurse avatar
+
+      const messageHtml = `
+        <li>
+          <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="${conversationUrl}" style="border-left: 3px solid #007bff; background: #f0f7ff;">
+            <img src="${e.sender_avatar ? (e.sender_role == 1 ? baseUrl + 'healthcareimg/uploads/' + e.sender_avatar : baseUrl + e.sender_avatar) : baseUrl + 'nurse/assets/imgs/nurse06.png'}" alt="${e.sender_name}" class="rounded-circle" style="width: 30px; height: 30px; object-fit: cover;">
+            <div style="flex: 1; overflow: hidden;">
+              <div style="font-weight: 600; font-size: 13px;">${e.sender_name}</div>
+              <div style="font-size: 11px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${e.message}</div>
+            </div>
+          </a>
+        </li>
+      `;
+      realtimeContainer.insertAdjacentHTML('afterbegin', messageHtml);
+    }
 
     // Update page title
     const originalTitle = document.title.replace(/^\(\d+\)\s/, '');

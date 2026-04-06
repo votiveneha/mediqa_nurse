@@ -115,7 +115,7 @@
                     </div>
                     <div class="filter-options">
                         @php
-                        $type_of_nurse = DB::table("practitioner_type")->where("parent","!=","0")->get();
+                        $type_of_nurse = DB::table("practitioner_type")->where("parent","=","0")->get();
                         @endphp
                         @foreach($type_of_nurse as $nurse_type)
                         <label class="sub-heading nurse-type-{{ $nurse_type->id }}" data-name="Nurse Type" data-filter="nurse_type" data-value="{{ $nurse_type->id }}">
@@ -147,7 +147,7 @@
                     </div>
                     <div class="filter-options">
                         @php
-                        $employeement_type_data = DB::table("employeement_type_preferences")->where("sub_prefer_id","!=","0")->get();
+                        $employeement_type_data = DB::table("employeement_type_preferences")->where("sub_prefer_id","=","0")->get();
                         @endphp
                         @foreach($employeement_type_data as $emp_data)
                         <label class="sub-heading emp-type-{{ $emp_data->emp_prefer_id }}" data-name="Employment Type" data-filter="employment_type" data-value="{{ $emp_data->emp_prefer_id }}">
@@ -168,7 +168,7 @@
                     </div>
                     <div class="filter-options">
                         @php
-                        $work_shift_data = DB::table("work_shift_preferences")->where("shift_id","!=","0")->get();
+                        $work_shift_data = DB::table("work_shift_preferences")->where("shift_id","=","0")->get();
                         @endphp
                         @foreach($work_shift_data as $work_shift)
                         <label class="sub-heading shift-type-{{ $work_shift->work_shift_id }}" data-filter="work_shift"
@@ -191,7 +191,7 @@
                     </div>
                     <div class="filter-options">
                         @php
-                        $work_environment_data = DB::table("work_enviornment_preferences")->where("sub_env_id","!=","0")->get();
+                        $work_environment_data = DB::table("work_enviornment_preferences")->where("sub_env_id","=","0")->get();
                         @endphp
                         @foreach($work_environment_data as $work_environment)
                         <label class="sub-heading work-environment-{{ $work_environment->prefer_id }}" 
@@ -215,7 +215,7 @@
                     </div>
                     <div class="filter-options">
                         @php
-                        $employee_positions = DB::table("employee_positions")->where("subposition_id","!=","0")->get();
+                        $employee_positions = DB::table("employee_positions")->where("subposition_id","=","0")->get();
                         @endphp
                         @foreach($employee_positions as $emp_pos)
                         <label class="sub-heading work-environment-{{ $emp_pos->position_id }}" 
@@ -240,7 +240,7 @@
                     </div>
                     <div class="filter-options">
                         @php
-                        $benefits_preferences = DB::table("benefits_preferences")->where("subbenefit_id","!=","0")->get();
+                        $benefits_preferences = DB::table("benefits_preferences")->where("subbenefit_id","=","0")->get();
                         @endphp
                         @foreach($benefits_preferences as $benprefer)
                         <label class="sub-heading benefits_preferences-{{ $benprefer->benefits_id }}" 
@@ -337,7 +337,7 @@
                     </div>
                     <div class="filter-options">
                         @php
-                        $speciality = DB::table("speciality")->where("parent","!=","0")->get();
+                        $speciality = DB::table("speciality")->where("parent","=","0")->get();
                         @endphp
                         @foreach($speciality as $spec)
                         <label class="sub-heading nurse-type-{{ $spec->id }}" data-name="Speciality" data-filter="speciality" data-value="{{ $spec->id }}">
@@ -377,8 +377,8 @@
                                 <input type="range" name="maxSalary1" id="maxSalary1" min="0" max="200000" step="1000"  value="{{ $filters['salary']['max'] ?? 0 }}">
                             </div>
                             <div class="salary-values">
-                                <span id="minSalaryValue1">₹30,000</span> - 
-                                <span id="maxSalaryValue1">₹1,20,000</span>
+                                <span id="minSalaryValue1">$30,000</span> - 
+                                <span id="maxSalaryValue1">$1,20,000</span>
                             </div>
                         </div>
 
@@ -747,6 +747,8 @@
         const isChecked = Array.isArray(savedValues) && savedValues.includes(sub.name)
             ? 'checked'
             : '';
+
+            console.log("isChecked",isChecked);
 
         subOptions += `
             <label class="sub-heading sub-heading-${filterType}-${sub.id}" 

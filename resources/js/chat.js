@@ -11,8 +11,8 @@ window.Pusher = Pusher;
 
 window.Echo = new Echo({
     broadcaster: 'pusher',
-    key: process.env.MIX_PUSHER_APP_KEY || 'your-pusher-key',
-    cluster: process.env.MIX_PUSHER_APP_CLUSTER || 'mt1',
+    key: process.env.PUSHER_APP_KEY || 'your-pusher-key',
+    cluster: process.env.PUSHER_APP_CLUSTER || 'mt1',
     forceTLS: true,
     encrypted: true,
     authEndpoint: '/broadcasting/auth',
@@ -45,9 +45,13 @@ class ChatManager {
         this.setupTypingDetection();
         this.setupFileUpload();
         this.setupEmojiPicker();
+        this.setupReadObserver();
         this.autoResizeTextarea();
         this.scrollToBottom();
         this.startHeartbeat();
+
+        // Mark all messages as delivered when chat opens
+        this.markConversationAsDelivered();
     }
 
     /**
@@ -76,7 +80,52 @@ class ChatManager {
                 this.scrollToBottom();
                 this.playNotificationSound();
                 this.updateTitleNotification();
+            })
+            .listen('.message.status.updated', (event) => {
+                console.log('Message status updated:', event);
+                this.updateMessageTicks(event.message_ids, event.status);
             });
+    }
+
+    /**
+     * Setup intersection observer to mark messages as read when visible
+     */
+    setupReadObserver() {
+        if (!this.chatMessages) return;
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const messageId = entry.target.dataset.messageId;
+                    if (messageId) {
+                        this.markMessageAsRead(messageId);
+                        observer.unobserve(entry.target);
+                    }
+                }
+            });
+        }, {
+            root: this.chatMessages,
+            threshold: 0.5
+        });
+
+        // Observe all received messages
+        const messageElements = this.chatMessages.querySelectorAll('.message.received');
+        messageElements.forEach(el => observer.observe(el));
+
+        // Re-observe when new messages are added
+        const mutationObserver = new MutationObserver((mutations) => {
+            mutations.forEach(mutation => {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === 1 && node.classList && node.classList.contains('message')) {
+                        if (node.classList.contains('received')) {
+                            observer.observe(node);
+                        }
+                    }
+                });
+            });
+        });
+
+        mutationObserver.observe(this.chatMessages, { childList: true });
     }
 
     /**
@@ -401,15 +450,43 @@ class ChatManager {
     }
 
     /**
+     * Format timestamp like WhatsApp
+     */
+    formatWhatsAppTime(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+        const hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = String(hours % 12 || 12).padStart(2, '0');
+        const time = `${formattedHours}:${minutes} ${ampm}`;
+
+        if (messageDate.getTime() === today.getTime()) {
+            return time;
+        } else if (messageDate.getTime() === yesterday.getTime()) {
+            return 'Yesterday';
+        } else {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+    }
+
+    /**
      * Append message to chat
      */
     appendMessage(event) {
         const isSent = event.sender_id === window.Laravel.userId;
         const messageClass = isSent ? 'sent' : 'received';
-        const time = new Date(event.created_at).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        const time = this.formatWhatsAppTime(event.created_at);
+
+        console.log('Message time:', time, 'from date:', event.created_at);
 
         let messageContent = '';
 
@@ -459,6 +536,19 @@ class ChatManager {
             messageContent = `<p class="message-text">${this.escapeHtml(event.message)}</p>`;
         }
 
+        // Determine tick status for sent messages
+        let tickStatus = '';
+        if (isSent) {
+            // Use is_read and is_delivered from the message data if available
+            if (event.is_read) {
+                tickStatus = 'read';
+            } else if (event.is_delivered) {
+                tickStatus = 'delivered';
+            } else {
+                tickStatus = 'sent';
+            }
+        }
+
         const messageHtml = `
             <div class="message ${messageClass}" data-message-id="${event.id}">
                 ${!isSent ? `
@@ -473,8 +563,8 @@ class ChatManager {
                     </div>
                     ${messageContent}
                     ${isSent ? `
-                    <div class="message-status">
-                        <i class="fas fa-check"></i>
+                    <div class="message-status" data-status="${tickStatus}">
+                        ${this.getTickIcon(tickStatus)}
                     </div>
                     ` : ''}
                     <div class="message-actions">
@@ -492,6 +582,108 @@ class ChatManager {
         `;
 
         this.chatMessages.insertAdjacentHTML('beforeend', messageHtml);
+    }
+
+    /**
+     * Get tick icon based on message status
+     */
+    getTickIcon(status) {
+        switch (status) {
+            case 'read':
+                return '<i class="fi fi-rr-check read"></i><i class="fi fi-rr-check read"></i>';
+            case 'delivered':
+                return '<i class="fi fi-rr-check delivered"></i><i class="fi fi-rr-check delivered"></i>';
+            case 'sent':
+            default:
+                return '<i class="fi fi-rr-check sent"></i>';
+        }
+    }
+
+    /**
+     * Mark all messages in conversation as delivered
+     */
+    async markConversationAsDelivered() {
+        try {
+            const response = await fetch(this.getMarkAsDeliveredUrl(), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify({
+                    conversation_id: this.conversationId,
+                    _token: window.Laravel.csrfToken,
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                console.log('Messages marked as delivered:', data.message_ids);
+                // Update ticks for all delivered messages
+                this.updateMessageTicks(data.message_ids, 'delivered');
+            }
+        } catch (error) {
+            console.error('Error marking messages as delivered:', error);
+        }
+    }
+
+    /**
+     * Mark specific message as read when visible
+     */
+    async markMessageAsRead(messageId) {
+        try {
+            const response = await fetch(this.getMessageReadUrl(), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify({
+                    message_id: messageId,
+                    _token: window.Laravel.csrfToken,
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                this.updateMessageTick(messageId, 'read');
+            }
+        } catch (error) {
+            console.error('Error marking message as read:', error);
+        }
+    }
+
+    /**
+     * Update message tick UI
+     */
+    updateMessageTick(messageId, status) {
+        const messageElement = this.chatMessages.querySelector(`[data-message-id="${messageId}"]`);
+        if (!messageElement) {
+            console.log(`Message element not found for ID: ${messageId}`);
+            return;
+        }
+
+        const statusElement = messageElement.querySelector('.message-status');
+        if (!statusElement) {
+            console.log(`Status element not found for message ID: ${messageId}`);
+            return;
+        }
+
+        console.log(`Updating message ${messageId} tick to: ${status}`);
+        statusElement.dataset.status = status;
+        statusElement.innerHTML = this.getTickIcon(status);
+    }
+
+    /**
+     * Update multiple message ticks
+     */
+    updateMessageTicks(messageIds, status) {
+        console.log(`Updating ${messageIds.length} messages to status: ${status}`, messageIds);
+        messageIds.forEach(messageId => {
+            this.updateMessageTick(messageId, status);
+        });
     }
 
     /**
@@ -713,6 +905,24 @@ class ChatManager {
         return window.Laravel.userRole === 1
             ? '/nurse/chat/mark-as-read'
             : '/healthcare-facilities/chat/mark-as-read';
+    }
+
+    /**
+     * Get mark as delivered URL
+     */
+    getMarkAsDeliveredUrl() {
+        return window.Laravel.userRole === 1
+            ? '/nurse/chat/mark-as-delivered'
+            : '/healthcare-facilities/chat/mark-as-delivered';
+    }
+
+    /**
+     * Get message read status update URL
+     */
+    getMessageReadUrl() {
+        return window.Laravel.userRole === 1
+            ? '/nurse/chat/message-read'
+            : '/healthcare-facilities/chat/message-read';
     }
 
     /**

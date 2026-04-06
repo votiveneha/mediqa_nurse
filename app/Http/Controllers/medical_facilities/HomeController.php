@@ -93,6 +93,7 @@ class HomeController extends Controller
         $post_code = $request->post_code;
         $address = $request->address;
         $password = $request->password;
+        $country = $request->country;
 
         $user_data = User::where("email",$emailaddress)->first();
 
@@ -101,6 +102,7 @@ class HomeController extends Controller
             $user->name = $hospital_name;
             $user->email = $emailaddress;
             $user->role = 2;
+            $user->country_iso = $country;
             $user->password = Hash::make($password);
             $run = $user->save();
             $r   = User::where('email', $emailaddress)->first();

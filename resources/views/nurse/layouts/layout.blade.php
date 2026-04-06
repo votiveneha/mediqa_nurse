@@ -26,7 +26,7 @@
         window.Echo = new Echo({
             broadcaster: 'pusher',
             key: '{{ config("broadcasting.connections.pusher.key") }}',
-            cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
+            cluster: '{{ config("broadcasting.connections.pusher.options.cluster", "mt1") }}',
             forceTLS: true,
             encrypted: true,
             authEndpoint: '{{ url("/broadcasting/auth") }}',
@@ -118,13 +118,13 @@
       $user = Auth::guard("healthcare_facilities")->user();
 
       $nurse_user = Auth::guard("nurse_middle")->user();
-      
+
     @endphp
     @if($user && $user->role == 2 && request()->routeIs('medical-facilities.notification'))
     <div class="floating-chat-wrapper">
       <a href="{{ route('healthcare.chat.index') }}" class="floating-chat-btn" id="openChatBtn">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M8 10H16M8 14H13M21 12C21 16.4183 16.9706 20 12 20C10.8562 20 9.76178 19.8078 8.75862 19.4552L4 20L4.72295 15.7824C4.26263 14.6475 4 13.3604 4 12C4 7.58172 8.02944 4 13 4C17.9706 4 21 7.58172 21 12Z" 
+              <path d="M8 10H16M8 14H13M21 12C21 16.4183 16.9706 20 12 20C10.8562 20 9.76178 19.8078 8.75862 19.4552L4 20L4.72295 15.7824C4.26263 14.6475 4 13.3604 4 12C4 7.58172 8.02944 4 13 4C17.9706 4 21 7.58172 21 12Z"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <span>Chat</span>
@@ -140,7 +140,7 @@
     <div class="floating-chat-wrapper">
       <a href="{{ route('nurse.chat.index')}}" class="floating-chat-btn" id="openChatBtn">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M8 10H16M8 14H13M21 12C21 16.4183 16.9706 20 12 20C10.8562 20 9.76178 19.8078 8.75862 19.4552L4 20L4.72295 15.7824C4.26263 14.6475 4 13.3604 4 12C4 7.58172 8.02944 4 13 4C17.9706 4 21 7.58172 21 12Z" 
+              <path d="M8 10H16M8 14H13M21 12C21 16.4183 16.9706 20 12 20C10.8562 20 9.76178 19.8078 8.75862 19.4552L4 20L4.72295 15.7824C4.26263 14.6475 4 13.3604 4 12C4 7.58172 8.02944 4 13 4C17.9706 4 21 7.58172 21 12Z"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <span>Chat</span>
@@ -163,75 +163,6 @@
             $('.selectpicker').selectpicker();
           });
         </script>
-
-        <!-- Site-wide Real-time Notifications -->
-        @if(Auth::guard('nurse_middle')->check() || Auth::guard('healthcare_facilities')->check() || Auth::check())
-        <script>
-            (function() {
-                // Echo already initialized in head, just use it
-                const userId = {{ Auth::guard('nurse_middle')->id() ?? Auth::guard('healthcare_facilities')->id() ?? Auth::id() }};
-
-                // Listen for new messages on user's private channel (for header notifications)
-                Echo.private('user.' + userId)
-                    .listen('.message.sent', function(e) {
-                        console.log('🔔 Site-wide notification:', e);
-                        updateNotificationCount(e);
-                        showBrowserNotification(e);
-                    });
-
-                // Update notification count in header
-                function updateNotificationCount(e) {
-                    const badges = document.querySelectorAll('.notification-badge');
-                    badges.forEach(badge => {
-                        let currentCount = parseInt(badge.textContent) || 0;
-                        let newCount = currentCount + 1;
-                        badge.textContent = newCount;
-                        badge.style.display = 'inline-block';
-                    });
-
-                    if (badges.length === 0) {
-                        const bells = document.querySelectorAll('#dropdownNotify');
-                        bells.forEach(bell => {
-                            const badge = document.createElement('span');
-                            badge.className = 'notify-badge badge rounded-pill bg-danger notification-badge';
-                            badge.textContent = '1';
-                            bell.appendChild(badge);
-                        });
-                    }
-
-                    const countTexts = document.querySelectorAll('.notification-count-text');
-                    countTexts.forEach(text => {
-                        let currentCount = parseInt(text.textContent) || 0;
-                        text.textContent = (currentCount + 1) + ' notifications';
-                    });
-
-                    const messageCountTexts = document.querySelectorAll('.message-count-text');
-                    messageCountTexts.forEach(text => {
-                        let currentCount = parseInt(text.textContent) || 0;
-                        text.textContent = (currentCount + 1) + ' messages';
-                    });
-
-                    const originalTitle = document.title.replace(/^\(\d+\)\s*/, '');
-                    document.title = '(' + (parseInt(badges[0]?.textContent || 0) + 1) + ') ' + originalTitle;
-                }
-
-                // Show browser notification
-                function showBrowserNotification(e) {
-                    if (!("Notification" in window)) return;
-                    if (Notification.permission === "granted") {
-                        new Notification("New Message from " + e.sender_name, {
-                            body: e.message,
-                            icon: e.sender_avatar || '{{ asset('nurse/assets/imgs/nurse06.png') }}'
-                        });
-                    } else if (Notification.permission !== "denied") {
-                        Notification.requestPermission();
-                    }
-                }
-
-                console.log('✅ Site-wide notifications active for user:', userId);
-            })();
-        </script>
-        @endif
 
         @yield('js')
       </body>

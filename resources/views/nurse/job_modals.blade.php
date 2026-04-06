@@ -11,6 +11,7 @@
           <div class="modal-content work_environment_modal" style="display:none">
             <div class="modal-header">
               <h2>Work Environment</h2>
+              <button class="btn-cross" onclick="closeModal()"><i class="fi fi-rr-cross"></i></button>
               <button class="edit-btns edit-btn-work_environment_modals" style="display:none;" onclick="editSector()"><i class="fa fa-pencil" aria-hidden="true"></i></button>
               </div>
               
@@ -71,6 +72,7 @@
           <div class="modal-content work_shift_modal" style="display:none">
             <div class="modal-header">
               <h2>Shift Type</h2>
+              <button class="btn-cross" onclick="closeModal()"><i class="fi fi-rr-cross"></i></button>
               <button class="edit-btns edit-btn-shift_modal" style="display:none;" onclick="editSector()"><i class="fa fa-pencil" aria-hidden="true"></i></button>
             </div>
               
@@ -146,6 +148,7 @@
           <div class="modal-content work_benefits_modal" style="display:none">
               <div class="modal-header">
                   <h2>Benefits</h2>
+                  <button class="btn-cross" onclick="closeModal()"><i class="fi fi-rr-cross"></i></button>
                   <button class="edit-btns edit-btn-benefits" style="display:none;" onclick="editSector()">
                       <i class="fa fa-pencil"></i>
                   </button>
@@ -249,7 +252,7 @@
                 <!-- Right Panel -->
                 <div class="panel right col-md-6">
                     <div class="modal-header nurse_modal_header"><span>Registered Nurses (RNs)</span>
-                      <button class="close-btn" onclick="closeModal()">×</button>
+                      <button class="btn-cross" onclick="closeModal()"><i class="fi fi-rr-cross"></i></button>
                     </div>
                     <div class="search-box">
                         <input type="text" placeholder="Search" id="sub_nurseSearch">
@@ -298,7 +301,7 @@
                 <div class="panel right col-md-6">
                     <div class="modal-header speciality_modal_header">
                       <span>Adults</span>
-                      <button class="close-btn" onclick="closeModal()">×</button>
+                      <button class="btn-cross" onclick="closeModal()"><i class="fi fi-rr-cross"></i></button>
                     </div>
                     <div class="search-box">
                         <input type="text" placeholder="Search" id="sub_specialitySearch">
@@ -343,6 +346,7 @@
           <div class="modal-content">
             <div class="modal-header">
               <h2>Select Sector</h2>
+              <button class="btn-cross" onclick="closeModal()"><i class="fi fi-rr-cross"></i></button>
               <button class="edit-btns edit-btn" onclick="editSector()"><i class="fa fa-pencil" aria-hidden="true"></i></button>
             </div>
             <div class="modal-body">
@@ -361,6 +365,7 @@
           <div class="modal-content">
             <div class="modal-header">
               <h2>Salary Range ($/hr)</h2>
+              <button class="btn-cross" onclick="closeModal()"><i class="fi fi-rr-cross"></i></button>
               <button class="edit-btns edit-btn-salary" style="display:none;" onclick="editSector()"><i class="fa fa-pencil" aria-hidden="true"></i></button>
             </div>
             <div class="modal-body">
@@ -380,6 +385,7 @@
           <div class="modal-content">
             <div class="modal-header">
               <h2>Years of Experience</h2>
+              <button class="btn-cross" onclick="closeModal()"><i class="fi fi-rr-cross"></i></button>
                <button class="edit-btns edit-btn-experience-modal" style="display: none;" onclick="editSector()"><i class="fa fa-pencil" aria-hidden="true"></i></button>
             </div>
             <div class="modal-body">
@@ -400,7 +406,7 @@
           <div class="modal-content">
             <div class="modal-header">
               <h2>Location Preferences</h2>
-              <button class="close-btn" onclick="closeModal()">×</button>
+              <button class="btn-cross" onclick="closeModal()"><i class="fi fi-rr-cross"></i></button>
             </div>
             <div class="modal-body">
               <!-- Quick Toggle -->
@@ -1074,6 +1080,7 @@ function applyNurse() {
         var emp_type = "emp_type";
         $(".modal-content-preferences").html('\<div class="modal-header">\
               <h2>'+filter_type+'</h2>\
+              <button class="btn-cross" onclick="closeModal()"><i class="fi fi-rr-cross"></i></button>\
               <button class="edit-btns edit-btn-emp-type" onclick="editSector()"><i class="fa fa-pencil" aria-hidden="true"></i></button>\
             </div>\
             <p class="modal-subtext">Your saved preferences are pre-filled. You can adjust below.</p>\

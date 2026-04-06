@@ -11,6 +11,7 @@ use App\Http\Requests\UserUpdateProfile;
 use App\Http\Requests\UserChangePasswordRequest;
 use App\Models\JobsModel;
 use App\Models\User;
+use App\Models\HealthcareSavedSearch;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Crypt;
@@ -30,18 +31,64 @@ class FindNurseController extends Controller
     {
         $user = Auth::guard('healthcare_facilities')->user();
 
-        $jobs = JobsModel::where('healthcare_id', $user->id)->get();
+        $jobs = JobsModel::where('healthcare_id', $user->id)->where('save_draft', 2)->get();
 
         // foreach ($jobs as $job) {
 
         //     $job->display_name = $job->job_title;
         // }
 
+       $list_saved_searches =  HealthcareSavedSearch::where('health_care_id',$user->id)->get();
         $nurse_list = User::where(['role' => '1','type' => '1', 'user_stage' => '2'])->orderBy('id', 'desc')->paginate(2);
         // echo "<pre>"; print_r($nurse_list);die;
-        return view('healthcare.find_nurse.job_find_nurse', compact('jobs','nurse_list'));
+        return view('healthcare.find_nurse.job_find_nurse', compact('jobs','nurse_list','list_saved_searches'));
     }
 
+    public function hFaddSavedSearches(Request $request)
+    {
+         $user_id = Auth::guard('healthcare_facilities')->user()->id;
+        $saved = HealthcareSavedSearch::create([
+            'health_care_id' => $user_id,
+            'name' => $request->search_name,
+          
+        ]);
+
+        return response()->json([
+            'status' => 1,
+            'id' => $saved->id
+        ]);
+    }
+
+    public function checkName(Request $request)
+    {
+        $user_id = Auth::guard('healthcare_facilities')->user()->id;
+        $searchName = trim($request->search_name);
+
+        $query = HealthcareSavedSearch::where('user_id', $user_id)
+            ->whereRaw('LOWER(name) = ?', [strtolower($searchName)]);
+
+        // Ignore same record (edit mode)
+        if (!empty($request->id)) {
+            $query->where('id', '!=', $request->id);
+        }
+
+        $exists = $query->exists();
+
+        return response()->json([
+            'exists' => $exists
+        ]);
+    }
+    public function checkNamerere(Request $request)
+    {
+       $user_id = Auth::guard('healthcare_facilities')->user()->id;
+        $exists = HealthcareSavedSearch::where('user_id', $user_id)
+            ->where('name', $request->search_name)
+            ->exists();
+
+        return response()->json([
+            'exists' => $exists
+        ]);
+    }
     public function getNurseSorting(Request $request)
     {
         $query = DB::table('users')

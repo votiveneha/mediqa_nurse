@@ -71,6 +71,54 @@ class HealthcareController extends Controller
         return view("admin.healthcare.add_plans")->with($data);
     }
 
+    public function add_healthcare()
+    {
+        
+        return view("admin.healthcare.add_healthcare");
+    }
+
+    public function edit_healthcare(Request $request)
+    {
+        $data['user_data'] = DB::table("users")->where("id",$request->id)->first(); 
+        return view("admin.healthcare.add_healthcare")->with($data);
+    }
+
+    public function post_healthcare(Request $request)
+    {
+        
+        if($request->user_id){
+            $user_post = User::find($request->user_id);
+        
+            $user_post->name = $request->hospital_name;
+            $user_post->email = $request->emailaddress;
+            $user_post->password = Hash::make($request->password);
+            $user_post->country_iso = $request->country;
+        
+            $run = $user_post->save();
+        }else{
+            $user_post = new User;
+        
+            $user_post->name = $request->hospital_name;
+            $user_post->role = 2;
+            $user_post->email = $request->emailaddress;
+            $user_post->password = Hash::make($request->password);
+            $user_post->country_iso = $request->country;
+        
+            $run = $user_post->save();
+        }
+        
+
+        if ($run) {
+            $json['status'] = 1;
+            
+            
+        } else {
+            $json['status'] = 0;
+        }
+
+        echo json_encode($json);
+    }
+
     public function update_plans(Request $request)
     {
         $product_id = base64_decode($request->id);

@@ -1150,6 +1150,11 @@ use Carbon\Carbon;
   /* .jobTitle_filter{
     width: auto !important;
   } */
+
+   .btn-cross{
+      border: none;
+      background: none;
+   }
 </style>
 @endsection
 @section('content')
