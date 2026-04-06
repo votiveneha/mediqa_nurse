@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(mkdir *)",
+      "Bash(icacls *)",
+      "Bash(type *)",
+      "Bash(powershell *)"
     ]
   },
   "$version": 3

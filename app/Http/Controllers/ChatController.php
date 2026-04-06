@@ -396,18 +396,48 @@ class ChatController extends Controller
         $extension = $file->getClientOriginalExtension();
 
         // Create directory if it doesn't exist
-        $uploadPath = public_path('uploads/chat_file');
-        if (!file_exists($uploadPath)) {
-            mkdir($uploadPath, 0755, true);
+        $uploadPath = public_path('uploads' . DIRECTORY_SEPARATOR . 'chat_file');
+        
+        // Ensure the directory exists
+        if (!is_dir($uploadPath)) {
+            if (!@mkdir($uploadPath, 0755, true)) {
+                \Log::error('mkdir failed', ['path' => $uploadPath]);
+            }
+        }
+        
+        // Double-check directory exists and is writable
+        if (!is_writable($uploadPath)) {
+            \Log::error('Upload directory is not writable', [
+                'path' => $uploadPath,
+                'exists' => file_exists($uploadPath),
+                'is_dir' => is_dir($uploadPath)
+            ]);
+            return response()->json([
+                'error' => 'Upload directory is not writable. Please check permissions.',
+                'debug_path' => $uploadPath
+            ], 500);
         }
 
         // Generate unique filename
         $fileName = time() . '_' . uniqid() . '.' . $extension;
+        $fullPath = rtrim($uploadPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $fileName;
 
-        // ✅ Move file AFTER extracting info
-        $file->move($uploadPath, $fileName);
+        // Use PHP's native move_uploaded_file for better Windows compatibility
+        if (!move_uploaded_file($file->getPathname(), $fullPath)) {
+            \Log::error('move_uploaded_file failed', [
+                'from' => $file->getPathname(),
+                'to' => $fullPath,
+                'upload_path' => $uploadPath,
+                'is_writable' => is_writable($uploadPath),
+                'file_exists' => file_exists($uploadPath)
+            ]);
+            return response()->json([
+                'error' => 'Failed to upload file. Please check directory permissions.',
+                'debug_path' => $fullPath
+            ], 500);
+        }
 
-        // Store relative path
+        // Store relative path (use forward slashes for URLs)
         $filePath = 'uploads/chat_file/' . $fileName;
 
         // Create message

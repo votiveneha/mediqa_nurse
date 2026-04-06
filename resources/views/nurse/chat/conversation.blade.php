@@ -827,12 +827,14 @@
                         var fileUrl = msg.file_url || (msg.attachments && msg.attachments[0] ? BASE_URL + msg.attachments[0].file_path : '');
                         var imageUrl = isImage ? fileUrl : null;
                         var fileSize = formatFileSize(file.size);
+                        var senderName = msg.sender ? (msg.sender.name || window.Laravel.userName) : window.Laravel.userName;
 
-                        appendFileMessage(true, msg.file_name || file.name, fileSize, fileUrl, isImage, imageUrl, msg.id, MY_AVATAR, msg.sender.name);
+                        appendFileMessage(true, msg.file_name || file.name, fileSize, fileUrl, isImage, imageUrl, msg.id, MY_AVATAR, senderName);
                     } else {
                         alert(data.error || 'Failed to upload file');
                     }
                 } catch (err) {
+                    console.error('Upload error:', err);
                     alert('Upload failed: ' + err.message);
                 }
             });
@@ -914,9 +916,9 @@
                         const sidebarTick = document.getElementById('sidebar-tick-' + data.conversation_id);
                         if (sidebarTick) {
                             if (data.status === 'read') {
-                                sidebarTick.innerHTML = '<i class="fi fi-rr-check read"></i><i class="fi fi-rr-check read"></i>';
+                                sidebarTick.innerHTML = '<i class="fi fi-rr-check-double read"></i>';
                             } else if (data.status === 'delivered') {
-                                sidebarTick.innerHTML = '<i class="fi fi-rr-check delivered"></i><i class="fi fi-rr-check delivered"></i>';
+                                sidebarTick.innerHTML = '<i class="fi fi-rr-check-double delivered"></i>';
                             }
                         }
                     });
