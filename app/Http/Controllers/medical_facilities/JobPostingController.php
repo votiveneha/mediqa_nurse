@@ -17,6 +17,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\NurseApplication;
+use App\Events\JobPublished;
+use App\Notifications\JobPublishedNotification;
 
 use Illuminate\Support\Facades\Log;
 use App\Services\User\AuthServices;
@@ -768,6 +770,16 @@ class JobPostingController extends Controller
 
         if($request->save == 2){
             session()->forget('jobId');
+            
+            // Send database notifications to all nurses with app notifications enabled
+            $nurses = User::whereHasAppNotifications()->get();
+            foreach ($nurses as $nurse) {
+                $nurse->notify(new JobPublishedNotification($job_post));
+            }
+            
+            // Also dispatch real-time broadcast event
+            JobPublished::dispatch($job_post);
+            
             return response()->json(['status'=>3]); // published
         }
 

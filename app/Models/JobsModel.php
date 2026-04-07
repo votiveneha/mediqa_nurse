@@ -71,4 +71,12 @@ class JobsModel extends Model
             ->value('name');
     }
 
+    /**
+     * Get the healthcare facility that posted the job
+     */
+    public function postedBy()
+    {
+        return $this->belongsTo(User::class, 'healthcare_id');
+    }
+
 }

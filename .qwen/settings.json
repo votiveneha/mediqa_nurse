@@ -5,7 +5,8 @@
       "Bash(mkdir *)",
       "Bash(icacls *)",
       "Bash(type *)",
-      "Bash(powershell *)"
+      "Bash(powershell *)",
+      "Bash(php *)"
     ]
   },
   "$version": 3

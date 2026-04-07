@@ -13,5 +13,10 @@
     "file": "assets/chat-f1b4e466.js",
     "isEntry": true,
     "src": "resources/js/chat.js"
+  },
+  "resources/js/job-notifications.js": {
+    "file": "assets/job-notifications-ca17ddac.js",
+    "isEntry": true,
+    "src": "resources/js/job-notifications.js"
   }
 }
