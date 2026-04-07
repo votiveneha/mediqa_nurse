@@ -302,6 +302,27 @@
         .message-status i.read {
             color: #53bdeb;
         }
+
+        .message-video {
+            max-width: 350px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .message-video video {
+            width: 100%;
+            display: block;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .online-status.online {
+            background-color: #28a745;
+        }
+        .online-status.offline {
+            background-color: #888;
+        }
     </style>
 
     <div class="chat-wrapper">
@@ -374,7 +395,10 @@
                         <div class="chat-header-title">{{ $otherParticipant->name }} {{ $otherParticipant->lastname ?? '' }}
                         </div>
                         <div class="chat-header-subtitle" id="userStatusContainer" data-user-id="{{ $otherParticipant->id }}">
-                            <i class="fi fi-rr-circle" id="status-icon" style="font-size: 8px; color: {{ $isOnline ? '#28a745' : '#888' }};"></i>
+                            <span class="online-status {{ cache()->get('user_'.$otherParticipant->id.'_online', false) ? 'online' : 'offline' }}"
+                              data-user-id="{{ $otherParticipant->id }}"
+                              style="position: absolute; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff;">
+                            </span>
                             <span id="status-text">{{ $isOnline ? 'Online' : 'Offline' }}</span>
                         </div>
                     </div>
@@ -430,10 +454,32 @@
                                     @php
                                         $attachment = $message->attachments->first();
                                         $isImage = $attachment->file_type && str_starts_with($attachment->file_type, 'image/');
+                                        $isVideo = $attachment->file_type && str_starts_with($attachment->file_type, 'video/');
                                     @endphp
                                     @if($isImage)
                                         <div class="message-image">
                                             <img src="{{ asset($attachment->file_path) }}" alt="{{ $attachment->file_name }}" onclick="window.open(this.src)" style="max-width: 300px; border-radius: 8px; cursor: pointer;">
+                                        </div>
+                                    @elseif($isVideo)
+                                        <div class="message-video" style="position: relative; background: #000; border-radius: 12px; overflow: hidden; max-width: 350px;">
+                                            <video
+                                                id="video-{{ $attachment->id }}"
+                                                controls
+                                                preload="metadata"
+                                                style="width: 100%; display: block; border-radius: 12px;"
+                                                onclick="event.stopPropagation();"
+                                            >
+                                                <source src="{{ asset($attachment->file_path) }}" type="{{ $attachment->file_type }}">
+                                            </video>
+                                            <div style="padding: 8px 12px; background: rgba(0,0,0,0.05); display: flex; align-items: center; gap: 8px;">
+                                                <i class="fi fi-rr-video" style="color: #28a745; font-size: 16px;"></i>
+                                                <span style="font-size: 12px; color: #666; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                    {{ $attachment->file_name }}
+                                                </span>
+                                                <a href="{{ asset($attachment->file_path) }}" download style="color: #007bff; font-size: 14px; text-decoration: none;">
+                                                    <i class="fi fi-rr-download"></i>
+                                                </a>
+                                            </div>
                                         </div>
                                     @else
                                         <div class="message-file" style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(0, 0, 0, 0.05); border-radius: 8px; margin-top: 8px; max-width: 300px;">
@@ -487,7 +533,13 @@
                     <button type="button" id="attachBtn" class="btn-attach" title="Attach file" style="background: none; border: none; color: #666; cursor: pointer; font-size: 18px; padding: 8px; border-radius: 50%; margin-right: 10px;">
                         <i class="fi fi-rr-clip"></i>
                     </button>
-                    <input type="file" id="fileInput" style="display: none;" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv">
+                    <input type="file" id="fileInput" style="display: none;" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv">
+
+                    <!-- Video button -->
+                    <!-- <button type="button" id="videoBtn" class="btn-attach btn-video" title="Send video">
+                        <i class="fi fi-rr-video"></i>
+                    </button>
+                    <input type="file" id="videoInput" style="display: none;" accept="video/*"> -->
                     <input type="text" name="message" class="chat-input" placeholder="Type message" id="messageInput"
                         autocomplete="off">
                     <button type="button" class="chat-btn" id="sendBtn">Send</button>
@@ -564,7 +616,7 @@
         }
 
         // Append file message to chat
-        function appendFileMessage(isSent, fileName, fileSize, fileUrl, isImage, imageUrl, id, avatar, name) {
+        function appendFileMessage(isSent, fileName, fileSize, fileUrl, isImage, imageUrl, id, avatar, name, isVideo, videoUrl) {
             var div = document.createElement('div');
             div.className = 'message ' + (isSent ? 'sent' : 'received');
             if (id) div.setAttribute('data-message-id', id);
@@ -579,7 +631,7 @@
 
             var p = document.createElement('p');
             p.className = 'message-text';
-            p.textContent = isImage ? 'Image' : 'File: ' + fileName;
+            p.textContent = isImage ? 'Image' : (isVideo ? 'Video' : 'File: ' + fileName);
             bubble.appendChild(p);
 
             if (isImage) {
@@ -593,6 +645,46 @@
                 innerImg.onclick = function() { window.open(this.src); };
                 imgDiv.appendChild(innerImg);
                 bubble.appendChild(imgDiv);
+            } else if (isVideo) {
+                var videoDiv = document.createElement('div');
+                videoDiv.className = 'message-video';
+                videoDiv.style.cssText = 'max-width: 350px; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);';
+
+                var video = document.createElement('video');
+                video.controls = true;
+                video.preload = 'metadata';
+                video.style.cssText = 'width: 100%; display: block; border-radius: 12px 12px 0 0;';
+                video.onclick = function(e) { e.stopPropagation(); };
+
+                var source = document.createElement('source');
+                source.src = videoUrl;
+                source.type = 'video/mp4';
+                video.appendChild(source);
+
+                videoDiv.appendChild(video);
+
+                var infoBar = document.createElement('div');
+                infoBar.style.cssText = 'padding: 8px 12px; background: rgba(0,0,0,0.05); display: flex; align-items: center; gap: 8px;';
+
+                var videoIcon = document.createElement('i');
+                videoIcon.className = 'fi fi-rr-video';
+                videoIcon.style.cssText = 'color: #28a745; font-size: 16px;';
+                infoBar.appendChild(videoIcon);
+
+                var nameSpan = document.createElement('span');
+                nameSpan.style.cssText = 'font-size: 12px; color: #666; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+                nameSpan.textContent = fileName;
+                infoBar.appendChild(nameSpan);
+
+                var downloadLink = document.createElement('a');
+                downloadLink.href = fileUrl;
+                downloadLink.download = fileName;
+                downloadLink.style.cssText = 'color: #007bff; font-size: 14px; text-decoration: none;';
+                downloadLink.innerHTML = '<i class="fi fi-rr-download"></i>';
+                infoBar.appendChild(downloadLink);
+
+                videoDiv.appendChild(infoBar);
+                bubble.appendChild(videoDiv);
             } else {
                 var fileDiv = document.createElement('div');
                 fileDiv.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(0, 0, 0, 0.05); border-radius: 8px; margin-top: 8px; max-width: 300px;';
@@ -630,7 +722,6 @@
             }
 
             if (isSent) {
-                // Add status ticks
                 var statusDiv = document.createElement('div');
                 statusDiv.className = 'message-status';
                 statusDiv.setAttribute('data-status', 'sent');
@@ -722,14 +813,26 @@
                 if (data.message_type === 'file' && data.attachments && data.attachments[0]) {
                     var attachment = data.attachments[0];
                     var isImage = attachment.file_type && attachment.file_type.startsWith('image/');
+                    var isVideo = attachment.file_type && attachment.file_type.startsWith('video/');
                     var fileUrl = attachment.file_url;
                     var imageUrl = isImage ? fileUrl : null;
+                    var videoUrl = isVideo ? fileUrl : null;
                     var fileSize = formatFileSize(attachment.file_size);
                     var senderAvatar = isSentByMe
                         ? (data.sender_avatar ? baseUrl + 'healthcareimg/uploads/' + data.sender_avatar : baseUrl + 'nurse/assets/imgs/nurse06.png')
                         : baseUrl + 'nurse/assets/imgs/nurse06.png';
 
-                    appendFileMessage(isSentByMe, attachment.file_name, fileSize, fileUrl, isImage, imageUrl, data.id, senderAvatar, data.sender_name);
+                    appendFileMessage(isSentByMe, attachment.file_name, fileSize, fileUrl, isImage, imageUrl, data.id, senderAvatar, data.sender_name, isVideo, videoUrl);
+                } else if (data.message_type === 'video') {
+                    var isVideo = true;
+                    var fileUrl = data.file_url || (baseUrl + data.file_path);
+                    var videoUrl = fileUrl;
+                    var fileSize = formatFileSize(data.file_size || 0);
+                    var senderAvatar = isSentByMe
+                        ? (data.sender_avatar ? baseUrl + 'healthcareimg/uploads/' + data.sender_avatar : baseUrl + 'nurse/assets/imgs/nurse06.png')
+                        : baseUrl + 'nurse/assets/imgs/nurse06.png';
+
+                    appendFileMessage(isSentByMe, data.file_name || 'Video', fileSize, fileUrl, false, null, data.id, senderAvatar, data.sender_name, isVideo, videoUrl);
                 } else {
                     console.log('Avatar:', avatar);
 
@@ -853,6 +956,23 @@
             });
 
             fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    uploadFile(this.files[0]);
+                    this.value = '';
+                }
+            });
+        }
+
+        // Video upload event listeners
+        var videoBtn = document.getElementById('videoBtn');
+        var videoInput = document.getElementById('videoInput');
+
+        if (videoBtn && videoInput) {
+            videoBtn.addEventListener('click', function() {
+                videoInput.click();
+            });
+
+            videoInput.addEventListener('change', function() {
                 if (this.files && this.files[0]) {
                     uploadFile(this.files[0]);
                     this.value = '';

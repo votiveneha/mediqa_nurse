@@ -202,6 +202,12 @@
     font-size: 13px;
     padding: 10px 12px;
 }
+.online-status.online {
+    background-color: #28a745;
+}
+.online-status.offline {
+    background-color: #888;
+}
 </style>
 
 <div class="chat-wrapper">
@@ -221,6 +227,10 @@
                      onclick="window.location.href='{{ route('healthcare.chat.show', $conv->id) }}'">
                     <img src="{{ asset($otherParticipant->profile_img ?? 'nurse/assets/imgs/nurse06.png') }}"
                          alt="{{ $otherParticipant->name }}" class="conversation-avatar">
+                    <span class="online-status {{ cache()->get('user_'.$otherParticipant->id.'_online', false) ? 'online' : 'offline' }}"
+                        data-user-id="{{ $otherParticipant->id }}"
+                        style="position: absolute; bottom: 0; right: 15px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff;">
+                    </span>
                     <div class="conversation-info">
                         <div class="conversation-name">{{ $otherParticipant->name }} {{ $otherParticipant->lastname ?? '' }}</div>
                         @if($conv->latestMessage)
