@@ -38,15 +38,23 @@
             <p><i class="fa fa-check text-success"></i> Availability: Within 48h (Lat
                 Minute)</p>
         </div>
+       @if(!empty($list->match_percentage) && $list->match_percentage > 0)
         <div class="col-md-2">
             <!-- PROGRESS -->
-            <div class="progress-circle">
-                <div class="progress-text">
-                    <h5>95%</h5>
-                    <span>Match</span>
+             <div class="match-circle progress-circle" data-value="{{ $list->match_percentage }}">
+                <div class="match-inner progress-text">
+                    <div class="percent">{{ round($list->match_percentage) }}%</div>
+                    <div class="label">Match</div>
                 </div>
             </div>
+            <script>
+            document.querySelectorAll('.match-circle').forEach(el => {
+                const val = el.getAttribute('data-value') || 0;
+                el.style.setProperty('--percent', val);
+            });
+            </script>
         </div>
+         @endif
     </div>
     <hr>
     <!-- BUTTONS -->

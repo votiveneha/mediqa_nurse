@@ -8,6 +8,43 @@
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
 <style>
+      /* match circle  */
+  .match-circle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 85px;
+    height: 85px;
+    border-radius: 50%;
+    background: conic-gradient(#16A34A calc(var(--percent) * 1%),
+        #9CA3AF 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* position: relative; */
+  }
+
+  .match-inner {
+    width: 70px;
+    height: 70px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .match-inner .percent {
+    font-size: 20px;
+    font-weight: bold;
+    color: #16A34A;
+  }
+
+  .match-inner .label {
+    font-size: 12px;
+    color: #16A34A;
+  }
 .pagination-wrapper .page-item.active .page-link {
     background-color: #000000ff;
     border-color: #000000ff;
@@ -576,10 +613,10 @@
 <main class="main find_job_div">
     <section class="section-box mt-30">
         <div class="container">
-           <div class="saved-searches-row" id="search-tabs">
+            <div class="saved-searches-row" id="search-tabs">
                 <div class="searchtabs">
                     <!-- Fixed left tab -->
-                    <div class="saved-search-tab" data-id="browse_all">
+                    <div class="saved-search-tab" id="browse_all">
                         Browse All Nurse
                     </div>
                     @if(count($jobs) <= 0) 
@@ -608,7 +645,7 @@
                     </div>
                 </div>
             </div>
-              @include('healthcare.find_nurse.modal_saved_searches')
+         @include('healthcare.find_nurse.modal_saved_searches')
         <div>
             <div class="job_tabs">
                 <ul class="tab-nav">
@@ -737,15 +774,23 @@
                                         48h (Last
                                         Minute)</p>
                                 </div>
+                                 @if(!empty($list->match_percentage) && $list->match_percentage > 0)
                                 <div class="col-md-2">
-                                    <!-- PROGRESS -->
-                                    <div class="progress-circle">
-                                        <div class="progress-text">
-                                            <h5>95%</h5>
-                                            <span>Match</span>
+                                    <!-- PROGRESS -->                            
+                                    <div class="match-circle progress-circle" data-value="{{ $list->match_percentage }}">
+                                        <div class="match-inner progress-text">
+                                            <div class="percent">{{ round($list->match_percentage) }}%</div>
+                                            <div class="label">Match</div>
                                         </div>
                                     </div>
+                                    <script>
+                                    document.querySelectorAll('.match-circle').forEach(el => {
+                                        const val = el.getAttribute('data-value') || 0;
+                                        el.style.setProperty('--percent', val);
+                                    });
+                                    </script>
                                 </div>
+                                @endif
                             </div>
                             <!-- <hr> -->
                             <!-- BUTTONS -->
@@ -912,6 +957,9 @@ $(document).ready(function() {
       }
     });
 
+    $(document).on('click', '#browse_all', function() {
+        window.location.reload();
+    });
     let filters = {
         nurse_registration: '',
         role_speciality: '',

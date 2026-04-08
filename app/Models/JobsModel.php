@@ -40,7 +40,7 @@ class JobsModel extends Model
 
         return EmpTypeModel::where('emp_prefer_id', $this->emplyeement_type)
             ->value('emp_type');
-    } 
+    }
 
     public function getHealthCareNameAttribute()
     {
@@ -69,6 +69,14 @@ class JobsModel extends Model
 
         return StateModel::where('id', $this->location_state)
             ->value('name');
+    }
+
+    /**
+     * Get the healthcare facility that posted the job
+     */
+    public function postedBy()
+    {
+        return $this->belongsTo(User::class, 'healthcare_id');
     }
 
 }

@@ -10,6 +10,7 @@ use App\Services\User\AuthServices;
 use App\Http\Requests\UserUpdateProfile;
 use App\Http\Requests\UserChangePasswordRequest;
 use App\Models\JobsModel;
+use App\Models\Profession;
 use App\Models\User;
 use App\Models\HealthcareSavedSearch;
 use Illuminate\Support\Facades\Hash;
@@ -24,6 +25,8 @@ use URL;
 use Session;
 use Helpers;
 use App\Repository\Eloquent\SpecialityRepository;
+use App\Services\User\NurseJobMatchService;
+
 
 class FindNurseController extends Controller
 {
@@ -32,6 +35,7 @@ class FindNurseController extends Controller
         $user = Auth::guard('healthcare_facilities')->user();
 
         $jobs = JobsModel::where('healthcare_id', $user->id)->where('save_draft', 2)->get();
+        // $jobs = JobsModel::where('healthcare_id', $user->id)->get();
 
         // foreach ($jobs as $job) {
 
@@ -39,7 +43,7 @@ class FindNurseController extends Controller
         // }
 
        $list_saved_searches =  HealthcareSavedSearch::where('health_care_id',$user->id)->get();
-        $nurse_list = User::where(['role' => '1','type' => '1', 'user_stage' => '2'])->orderBy('id', 'desc')->paginate(2);
+        $nurse_list = User::where(['role' => '1','type' => '1'])->whereIn('user_stage', ['2', '4'])->orderBy('id', 'desc')->paginate(2);
         // echo "<pre>"; print_r($nurse_list);die;
         return view('healthcare.find_nurse.job_find_nurse', compact('jobs','nurse_list','list_saved_searches'));
     }
@@ -89,7 +93,8 @@ class FindNurseController extends Controller
             'exists' => $exists
         ]);
     }
-    public function getNurseSorting(Request $request)
+
+    public function getNurseSorting_main(Request $request)
     {
         $query = DB::table('users')
             ->select(
@@ -143,7 +148,57 @@ class FindNurseController extends Controller
                 ->where('job_box_id', $request->search_id)
                 ->first();
 
-            // print_r($saved); die;
+         //Match Percentage  
+        // $user = User::where('id', $user_id)->first();
+        $nurseData = Profession::where('user_id', $users.id)->get();
+        $nurseTypes = $nurseData->pluck('nurse_data')->toArray();
+        $nurseSpecialties = $nurseData->pluck('specialties')->toArray();
+        $experience_data = $nurseData->pluck('assistent_level');
+
+        //vaccination 5%
+        $nurseVaccines = DB::table('vaccination_front')
+            ->where('user_id', $users.id)
+            ->pluck('vaccination_id')
+            ->toArray();
+
+        //Checks and Clearance 5%
+        $eligibility = DB::table('eligibility_to_work')
+            ->where('user_id', $users.id)
+            ->first();
+
+        $policeCheck = DB::table('police_check')
+            ->where('user_id', $users.id)
+            ->exists();
+
+        $workingChildren = DB::table('working_children_check')
+            ->where('user_id', $users.id)
+            ->exists();
+
+        $ndisCheck = DB::table('ndis_screening_check')
+            ->where('user_id', $users.id)
+            ->exists();
+
+        $preferences = DB::table('work_preferences')
+            ->where('user_id', $users.id)
+            ->first();
+
+        foreach ($query  as $nurse) {
+            $nurse->match_percentage = $matchService->calculateMatch(
+                $user,
+                $nurseTypes,
+                $nurseSpecialties,
+                $experience_data,
+                $nurseVaccines,
+                $eligibility,
+                $policeCheck,
+                $workingChildren,
+                $ndisCheck,
+                $preferences,
+                $job
+            );
+        }
+
+        //   echo "<pre>";  print_r($saved); die;
             if ($saved) {
 
                 //Sector
@@ -232,6 +287,7 @@ class FindNurseController extends Controller
         }
         $query->where(['users.role' => '1','users.type' => '1','users.user_stage' => '2']);
 
+
         // Get results
         $nurse_list = $query->get();
 
@@ -240,6 +296,146 @@ class FindNurseController extends Controller
         $nurse_list = new \Illuminate\Pagination\LengthAwarePaginator(
             $nurse_list->forPage($request->page ?? 1, 2),
             $nurse_list->count(),
+            2,
+            $request->page ?? 1
+        );
+
+        if ($nurse_list->count() == 0) {
+            return response()->json([
+                'status' => false,
+                'html' => ''
+            ]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'html' => view('healthcare.find_nurse.partial_find_nurse', compact('nurse_list'))->render()
+        ]);
+    }
+    
+        public function getNurseSorting(Request $request, NurseJobMatchService $matchService)
+    {
+        $query = DB::table('users')
+            ->select(
+                'users.*',
+                DB::raw('MAX(profession_data.assistent_level) as experience_level')
+            )
+            ->leftJoin('work_preferences', 'work_preferences.user_id', '=', 'users.id')
+            ->leftJoin('user_licenses_details', 'user_licenses_details.user_id', '=', 'users.id')
+            ->leftJoin('profession_data', 'profession_data.user_id', '=', 'users.id')
+            ->leftJoin('speciality', 'speciality.id', '=', 'profession_data.specialties')
+            ->leftJoin('practitioner_type', 'practitioner_type.id', '=', 'profession_data.nurse_data')
+            ->groupBy('users.id');
+
+        // 🔍 Search
+        if ($request->nurse_registration) {
+            $query->where(function ($q) use ($request) {
+                $q->where('users.name', 'LIKE', '%' . $request->nurse_registration . '%')
+                ->orWhere('users.lastname', 'LIKE', '%' . $request->nurse_registration . '%')
+                ->orWhere(DB::raw("CONCAT(users.name, ' ', users.lastname)"), 'LIKE', '%' . $request->nurse_registration . '%')
+                ->orWhere('user_licenses_details.aphra_registration_no', 'LIKE', '%' . $request->nurse_registration . '%');
+            });
+        }
+
+        // 🔍 Speciality / Role
+        if ($request->role_speciality) {
+            $query->where(function ($q) use ($request) {
+                $q->where('speciality.name', 'LIKE', '%' . $request->role_speciality . '%')
+                ->orWhere('practitioner_type.name', 'LIKE', '%' . $request->role_speciality . '%');
+            });
+        }
+
+        if ($request->available_to_start) {
+            $query->where('users.start_job_dropdown', $request->available_to_start);
+        }
+
+        // ✅ Fixed Conditions
+        $query->where([
+            'users.role' => '1',
+            'users.type' => '1',
+        ])->whereIn('users.user_stage',['2','4']);
+
+        // =====================================================
+        // ✅ GET NURSES FIRST
+        // =====================================================
+        $nurse_list = $query->get();
+        $matchedData = [];
+
+        // 👉 ONLY if job selected
+
+        if (!empty($request->search_id ))  {
+            $job = DB::table('job_boxes')->where('job_box_id', $request->search_id)->first();
+
+            if ($job) {
+                foreach ($nurse_list as $nurse) {
+                    $userId = $nurse->id;
+
+                    // Profession Data
+                    $nurseData = DB::table('profession_data')
+                        ->where('user_id', $userId)
+                        ->get();
+
+                    $nurseTypes       = $nurseData->pluck('nurse_data')->toArray();
+                    $nurseSpecialties = $nurseData->pluck('specialties')->toArray();
+                    $experience_data  = $nurseData->pluck('assistent_level');
+
+                    // Vaccination
+                    $nurseVaccines = DB::table('vaccination_front')
+                        ->where('user_id', $userId)
+                        ->pluck('vaccination_id')
+                        ->toArray();
+
+                    // Checks
+                    $eligibility     = DB::table('eligibility_to_work')->where('user_id', $userId)->first();
+                    $policeCheck     = DB::table('police_check')->where('user_id', $userId)->exists();
+                    $workingChildren = DB::table('working_children_check')->where('user_id', $userId)->exists();
+                    $ndisCheck       = DB::table('ndis_screening_check')->where('user_id', $userId)->exists();
+
+                    // Preferences
+                    $preferences = DB::table('work_preferences')->where('user_id', $userId)->first();
+
+                    // ✅ FIX: pass full nurse object, not just ID
+                    $nurse->match_percentage = $matchService->calculateMatch(
+                        $nurse,            // full object
+                        $nurseTypes,
+                        $nurseSpecialties,
+                        $experience_data,
+                        $nurseVaccines,
+                        $eligibility,
+                        $policeCheck,
+                        $workingChildren,
+                        $ndisCheck,
+                        $preferences,
+                        $job
+                    );
+
+                    $matchedData[] = $nurse;
+                }
+
+                // ✅ Sort by match %
+                if ($request->sort_by == "top_matches") {
+                    $matchedData = collect($matchedData)
+                        ->sortByDesc('match_percentage')
+                        ->values()
+                        ->toArray();
+                }
+            }
+        } else {
+            // 🚫 No Job → No %
+            foreach ($nurse_list as $nurse) {
+                $nurse->match_percentage = null;
+                $matchedData[] = $nurse;   // ✅ FIX: append to array, not overwrite
+            }
+        }
+
+        // =====================================================
+        // 📄 PAGINATION
+        // =====================================================
+        $collection = collect($matchedData);
+
+        $nurse_list = new \Illuminate\Pagination\LengthAwarePaginator(
+            $collection->forPage($request->page ?? 1, 2),
+            $collection->count(),
             2,
             $request->page ?? 1
         );

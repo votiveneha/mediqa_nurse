@@ -38,7 +38,6 @@ Route::post('/getSubSpecialties', 'App\Http\Controllers\HomeController@getSubSpe
 Route::post('/getNursepractitionorSpecialities', 'App\Http\Controllers\HomeController@getNurseSpecialties')->name('getNursepractitionorSpecialities');
 Route::post('/getsurgicalSpeciality', 'App\Http\Controllers\HomeController@getsurgicalSpeciality')->name('getsurgicalSpeciality');
 Route::post('/getsurgicalSubSpeciality', 'App\Http\Controllers\HomeController@getsurgicalSubSpeciality')->name('getsurgicalSubSpeciality');
-Route::get('/chat', 'App\Http\Controllers\nurse\HomeController@nurseChat')->name('nurse_chat');
 
 Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('App\Http\Controllers\medical_facilities')->group(function () {
   Route::get('/', 'HomeController@index_main')->name('medical_facilities_home_main');

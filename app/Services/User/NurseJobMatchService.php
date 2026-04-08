@@ -5,7 +5,7 @@ namespace App\Services\User;
 class NurseJobMatchService
 {
 
-    public function calculateMatch($user,$nurseTypes, $nurseSpecialties, $experience_data, $nurseVaccines, $eligibility, $policeCheck, $workingChildren, $ndisCheck, $preferences, $job)
+    public function calculateMatch($user,$nurseTypes, $nurseSpecialties, $experience_data, $nurseVaccines, $eligibility, $policeCheck, $workingChildren, $ndisCheck, $preferences = '', $job)
     {
         $score = 0;
 
@@ -62,7 +62,8 @@ class NurseJobMatchService
 
         // Get user rank
         $userDegree = $user->degree;
-        $userRank = DB::table('degree')->where('id', $userDegree)->value('rank');
+        $userDegreeId = is_object($user->degree) ? $user->degree->id : $user->degree;
+        $userRank = DB::table('degree')->where('id', $userDegreeId)->value('rank');
 
         if (!$userRank || !isset($rankMap[$userRank])) {
             return 0;
@@ -79,12 +80,12 @@ class NurseJobMatchService
 
         return 0;
     }
-    private function trainingScore($user, $job)
+        private function trainingScore($user, $job)
     {
         $weight = 5;
 
-        $jobTrainings = $this->toArray($job->mandatory_training_req);
-        $userTrainings = $this->toArray($user->degree);
+        $jobTrainings = $this->toArray($job->mandatory_training_req) ?? [];
+        $userTrainings = $this->toArray($user->trainings ?? []) ?? [];
 
         if (empty($jobTrainings)) {
             return $weight;
@@ -93,25 +94,29 @@ class NurseJobMatchService
         $jobFlat = $this->flattenArray($jobTrainings);
         $userKeys = array_keys($userTrainings);
 
-        $matched = array_intersect($jobFlat, $userKeys);
-
         if (count($jobFlat) == 0) return $weight;
 
-        return (count($matched) / count($jobFlat)) * $weight;
+        return (count(array_intersect($jobFlat, $userKeys)) / count($jobFlat)) * $weight;
     }
+
     private function languageScore($user, $job)
     {
         $weight = 5;
 
-        $jobLang = $this->toArray($job->sub_languages_req);
-        $userLang = $this->toArray($user->langprof_level);
+        // If $user is not an object, bail out safely
+        if (!is_object($user) || !property_exists($user, 'langprof_level')) {
+            return 0; // or $weight if you want to give full score by default
+        }
+
+        $jobLang  = $this->toArray($job->sub_languages_req) ?? [];
+        $userLang = $this->toArray($user->langprof_level) ?? [];
 
         if (empty($jobLang)) {
             return $weight;
         }
 
-        $jobKeys = array_keys($jobLang);
-        $userKeys = array_keys($userLang);
+        $jobKeys  = array_keys((array) $jobLang);
+        $userKeys = array_keys((array) $userLang);
 
         $matched = array_intersect($jobKeys, $userKeys);
 
@@ -119,6 +124,7 @@ class NurseJobMatchService
 
         return (count($matched) / count($jobKeys)) * $weight;
     }
+
 
     private function workPreferenceScore($preferences, $job)
     {
@@ -175,7 +181,7 @@ class NurseJobMatchService
         $weight = 5;
 
         // Handle user data
-        $user = $preferences->work_shift_preferences;
+        $user = $preferences->work_shift_preferences ?? null;
         if (is_string($user)) {
             $user = json_decode($user, true);
         }
@@ -199,7 +205,7 @@ class NurseJobMatchService
         $weight = 5;
 
         // Handle user data
-        $user = $preferences->emptype_preferences;
+        $user = $preferences->emptype_preferences ?? null;
         if (is_string($user)) {
             $user = json_decode($user, true);
         }
@@ -225,7 +231,13 @@ class NurseJobMatchService
     {
         $weight = 5;
 
-        $user = json_decode($preferences->benefits_preferences, true);
+        // $user = json_decode($preferences->benefits_preferences, true) ?? null;
+        $user = null;
+        if (!empty($preferences->benefits_preferences)) {
+            $decoded = json_decode($preferences->benefits_preferences, true);
+            $user = is_array($decoded) ? $decoded : null;
+        }
+
         $jobBenefits = json_decode($job->benefits, true);
 
         if (!$user || !$jobBenefits) {

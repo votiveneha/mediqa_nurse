@@ -160,6 +160,7 @@
     var address = $("#address").val();
     var password = $("#password").val();
     var confirm_password = $("#confirm_password").val();
+    var countryI = $("#countryI").val();
 
     var isValid = true;
     if(hospital_name == ""){
@@ -199,6 +200,11 @@
 
     if(password != confirm_password){
       $("#reqconfirm_password").text("The password and confirm password do not match.");
+      isValid = false;
+    }
+
+    if(countryI == ""){
+      $("#reqcountry").text("Please select the operating country");
       isValid = false;
     }
 
