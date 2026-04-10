@@ -3,7 +3,9 @@
 @php
 use Carbon\Carbon;
 @endphp
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3/dist/style.min.css" />
 <style>
+  
   .agency_filter_show .select2-container {
   width: 100% !important;
   }
@@ -1150,14 +1152,24 @@ use Carbon\Carbon;
   /* .jobTitle_filter{
     width: auto !important;
   } */
-
    .btn-cross{
       border: none;
       background: none;
    }
+
+   .drawer-header-edit{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+   }
+
+   table.dataTable thead .sorting_desc:after {
+    display: none !important;
+}
 </style>
 @endsection
 @section('content')
+
 <main class="main find_job_div">
   <section class="section-box mt-30">
     <div class="container">
@@ -1835,169 +1847,179 @@ use Carbon\Carbon;
             <h6>Manage Saved Searches</h6>
             <button id="deleteSelected" style="margin-top:10px;">Delete Selected</button>
           </div>
-          <table id="savedSearchTable" class="table">
-            <thead>
-              <tr>
-                <th><input type="checkbox" id="selectAll"></th>
-                <th>Name</th>
-                <th>Search Type</th>
-                <th>Filters summary</th>
-                <th>Matches Today</th>
-                <th>Alert</th>
-                <th>Delivery</th>
-                <th>Created</th>
-                <th>Last run</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if($saved_searches_data->isNotEmpty())
-              @php
-              $i = 1;
-              @endphp
-              @foreach($saved_searches_data as $saved_searches)
-              <tr data-id="{{ $i }}" data-value="{{ $saved_searches->searches_id }}"
-                data-filters='{{ $saved_searches->filters }}' data-name='{{ $saved_searches->delivery }}'>
-                <td>
-                  @if($saved_searches->status_my_preference != 1 && $i != 0)
-                  <input type="checkbox" class="select-item">
-                  @endif
-                </td>
-                {{-- <td>Saved search {{ $i }}</td> --}}
-                <td>
-                  {{-- My Preferences --}}
-                  @if($saved_searches->status_my_preference == 1)
-                  My Preferences
+          <div class="table-responsive">
+            <table id="savedSearchTable" class="table">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="selectAll"></th>
+                  <th>Name</th>
+                  <th>Search Type</th>
+                  <th>Filters summary</th>
+                  <th>Matches Today</th>
+                  <th>Alert</th>
+                  <th>Delivery</th>
+                  <th>Created</th>
+                  <th>Last run</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if($saved_searches_data->isNotEmpty())
+                @php
+                $i = 1;
+                @endphp
+                @foreach($saved_searches_data as $saved_searches)
+                 @php
+                      $filters = json_decode($saved_searches->filters, true);
 
-                  {{-- Named saved search --}}
-                  @elseif(!empty($saved_searches->name))
-                  {{ $saved_searches->name }}
+                      @endphp
+                      @php
+                          $nurse_type_ids = json_decode($saved_searches->filter_nurse_type, true) ?? [];
+                          $specilaity_ids = json_decode($saved_searches->filter_speciality, true) ?? [];
+                          $filter_employment_type = json_decode($saved_searches->filter_employment_type, true) ?? [];
+                          $filter_sector = $saved_searches->filter_sector;
+                          $filter_work_environment = json_decode($saved_searches->filter_work_environment, true) ?? [];
+                          $filter_benefits_preferences = json_decode($saved_searches->filter_benefits_preferences, true) ?? [];
+                          //$filter_benefits_preferences = json_decode($saved_searches->filter_benefits_preferences, true) ?? [];
 
-                  {{-- Auto numbered --}}
-                  @else
-                  Saved search {{ $i }}
-                  @endif
-                </td>
-                <td>{{ $saved_searches->type }}</td>
-                <td>
-                  <div class="filter-summary">
+                          
+                          $nurse_type_names = [];
+                          $specilaity_names = [];
 
-                    @php
-                    $filters = json_decode($saved_searches->filters, true);
+                          if (!empty($nurse_type_ids) && is_array($nurse_type_ids)) {
+                              $nurse_type_names = \DB::table('practitioner_type')
+                                  ->whereIn('id', $nurse_type_ids)
+                                  ->pluck('name')
+                                  ->toArray();
+                          }
 
-                    @endphp
-                    @if(!empty($filters))
-                    @php
-                    $firstFilterValue = collect($filters)
-                    ->filter(fn($v) => !empty($v))
-                    ->first();
-                    @endphp
+                          
 
-                    @if(is_array($firstFilterValue))
-                    <span class="chip-new">{{ implode(', ', $firstFilterValue) }}</span>
-                    @elseif($firstFilterValue)
-                    <span class="chip-new">{{ $firstFilterValue }}</span>
-                    @endif
-                    <a href="#" class="btn-readmore" data-id="{{ $saved_searches->searches_id }}"
-                      data-filters='{{ $saved_searches->filters }}'>Read More</a>
-                    @endif
-                  </div>
-                </td>
-                <td>
-                  <span class="match-count badge bg-info text-dark">
-                    {{ $search->matches_today ?? 0 }}
-                  </span>
-                </td>
-                <td><span class="alert-pill alert-on">{{ $saved_searches->alert }}</span></td>
-                <td>
-                  @if($saved_searches->delivery === 'Email')
-                  <i class="fa-solid fa-envelope"></i>
-                  @elseif($saved_searches->delivery === 'In-app')
-                  <i class="fa-solid fa-laptop"></i>
-                  @elseif($saved_searches->delivery === 'SMS')
-                  <i class="fa-solid fa-comment-sms"></i>
-                  @endif
-                  <!-- {{ $saved_searches->delivery }} -->
-                </td>
-                <td>
-                  @php
-                  $dateOnly = date('Y-m-d', strtotime($saved_searches->created_at));
-                  $today = date('Y-m-d');
-                  @endphp
-
-                  @if($dateOnly === $today)
-                  Today
-                  @else
-                  {{ $dateOnly }}
-                  @endif
-                </td>
-                <td class="last_run_at-{{ $saved_searches->searches_id }}">
-                  {{ $saved_searches->last_run_at }}
-                </td>
-                <td class="actions">
-                  <div class="alert_box d-flex align-items-center gap-1">
-                    <div class="alert-toggle-wrapper">
-                      <label class="alert-toggle">
-                        <input type="checkbox" class="alert-toggle-input" @if($saved_searches->alert != "Off") checked
-                        @endif data-id="{{ $saved_searches->searches_id }}">
-                        <span class="alert-toggle-slider"></span>
-                      </label>
-                    </div>
-
-                    <button class="btn-run" data-id="{{ $saved_searches->searches_id }}">Run</button>
-                    <button class="btn-edit {{ ($saved_searches->status_my_preference == 1 && $i != 0) ? 'edit-search-btn' : '' }}"  data-id="{{ $saved_searches->searches_id }}"> Edit </button>                    
-                   <button class="btn-duplicate">Duplicate</button>
+                          
+                      @endphp 
+                <tr data-id="{{ $i }}" data-value="{{ $saved_searches->searches_id }}"
+                  data-filters='{{ $saved_searches->filters }}' 
+                  data-nurse-type='@json($nurse_type_ids)'
+                  data-speciality-type='@json($specilaity_ids)'
+                  data-employeement-type='@json($filter_employment_type)'
+                  data-sector-type='@json($filter_sector)'
+                  data-environment-type='@json($filter_work_environment)'
+                  data-benefits-type='@json($filter_benefits_preferences)'
+                  >
+                  <td>
                     @if($saved_searches->status_my_preference != 1 && $i != 0)
-                    <button class="btn-delete" data-name="single-delete">Delete</button>
+                    <input type="checkbox" class="select-item">
                     @endif
+                  </td>
+                  {{-- <td>Saved search {{ $i }}</td> --}}
+                  <td>
+                    {{-- My Preferences --}}
+                    @if($saved_searches->status_my_preference == 1)
+                    My Preferences
 
-                  </div>
-                </td>
-              </tr>
+                    {{-- Named saved search --}}
+                    @elseif(!empty($saved_searches->name))
+                    {{ $saved_searches->name }}
+
+                    {{-- Auto numbered --}}
+                    @else
+                    Saved search {{ $i }}
+                    @endif
+                  </td>
+                  <td>{{ $saved_searches->type }}</td>
+                  <td>
+                    <div class="filter-summary">
+                       @php 
+                          $filter_data = (array)json_decode($saved_searches->filters);
+                          //print_r($filter_data);
 
 
-              <!-- @if($filters)
-                  <tr class="filter-summary-row">
-                    <td></td>
-                    <td colspan="5">
-                      <div class="filter-summary">
-                        @foreach($filters as $key => $value)
-                          @if(is_array($value) && isset($value['min']) && isset($value['max']))
-                            {{-- Salary Range --}}
-                            <div class="filter-line">
-                              <strong>{{ ucwords(str_replace('_', ' ', $key)) }}:</strong>
-                              <span class="chip">${{ number_format($value['min']) }} – ${{ number_format($value['max']) }}</span>
-                            </div>
+                          
 
-                          @elseif(is_array($value) && !empty($value))
-                            {{-- Array fields (like multiple selections) --}}
-                            <div class="filter-line">
-                              <strong>{{ ucwords(str_replace('_', ' ', $key)) }}:</strong>
-                              @foreach($value as $item)
-                                <span class="chip">{{ $item }}</span>
-                              @endforeach
-                            </div>
+                          $filter_summury = filterSummuryData($filter_data);
 
-                          @elseif(!is_array($value) && !empty($value))
-                            {{-- Simple key-value pairs --}}
-                            <div class="filter-line">
-                              <strong>{{ ucwords(str_replace('_', ' ', $key)) }}:</strong>
-                              <span class="chip">{{ $value }}</span>
-                            </div>
-                          @endif
-                        @endforeach
+                          //($filter_summury);
+                       
+                       @endphp
 
+                      @if(!empty($nurse_type_names))
+                          <span class="chip-new">{{ $nurse_type_names[0] }}</span>
+                          <a href="#" class="btn-readmore" data-id="{{ $saved_searches->searches_id }}"
+                        data-filters='{{ $filter_summury }}' 
+                        data-nurse-type='@json($nurse_type_names)'
+                        data-speciality-type='@json($specilaity_names)'
+                        data-employeement-type='@json($filter_employment_type)'
+                        data-sector-type='@json($filter_sector)'
+                        data-environment-type='@json($filter_work_environment)'
+                        data-benefits-type='@json($filter_benefits_preferences)' style="color:black;text-decoration:underline"
+                        >Read More</a>
+                      @endif
+
+                      
+                      
+                    </div>
+                  </td>
+                  <td>
+                    <span class="match-count badge bg-info text-dark">
+                      {{ $search->matches_today ?? 0 }}
+                    </span>
+                  </td>
+                  <td><span class="alert-pill alert-on">{{ $saved_searches->alert }}</span></td>
+                  <td>
+                    @if($saved_searches->delivery === 'Email')
+                    <i class="fa fa-envelope"></i>
+                    @elseif($saved_searches->delivery === 'In-app')
+                    <i class="fa fa-laptop"></i>
+                    @elseif($saved_searches->delivery === 'SMS')
+                    <i class="fa fa-comment"></i>
+                    @endif
+                    <!-- {{ $saved_searches->delivery }} -->
+                  </td>
+                  <td>
+                    @php
+                    $dateOnly = date('Y-m-d', strtotime($saved_searches->created_at));
+                    $today = date('Y-m-d');
+                    @endphp
+
+                    @if($dateOnly === $today)
+                    Today
+                    @else
+                    
+                    {{ $dateOnly ? \Carbon\Carbon::parse($dateOnly)->format('d/m/Y') : '' }}
+                    @endif
+                  </td>
+                  <td class="last_run_at-{{ $saved_searches->searches_id }}">
+                    {{ $saved_searches->last_run_at ? \Carbon\Carbon::parse($saved_searches->last_run_at)->format('d/m/Y') : '' }}
+                  </td>
+                  <td class="actions">
+                    <div class="alert_box d-flex align-items-center gap-1">
+                      <div class="alert-toggle-wrapper">
+                        <label class="alert-toggle">
+                          <input type="checkbox" class="alert-toggle-input" @if($saved_searches->alert != "Off") checked
+                          @endif data-id="{{ $saved_searches->searches_id }}">
+                          <span class="alert-toggle-slider"></span>
+                        </label>
                       </div>
-                    </td>
-                  </tr>
-                  @endif -->
-              @php
-              $i++;
-              @endphp
-              @endforeach
-              @endif
-            </tbody>
-          </table>
+
+                      <button class="btn-run" data-id="{{ $saved_searches->searches_id }}">Run</button>
+                      <button class="btn-edit {{ ($saved_searches->status_my_preference == 1 && $i != 0) ? 'edit-search-btn' : '' }}"  data-id="{{ $saved_searches->searches_id }}"> Edit </button>                    
+                    <button class="btn-duplicate">Duplicate</button>
+                      @if($saved_searches->status_my_preference != 1 && $i != 0)
+                      <button class="btn-delete" data-name="single-delete">Delete</button>
+                      @endif
+
+                    </div>
+                  </td>
+                </tr>
+
+                @php
+                $i++;
+                @endphp
+                @endforeach
+                @endif
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -2009,7 +2031,9 @@ use Carbon\Carbon;
   <div class="toast" id="toast"></div>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js"></script>
+
 <script>
+   
       $('.addAll_removeAll_btn').on('select2:open', function() {
         var $dropdown = $(this);
         var searchBoxHtml = `
@@ -2356,7 +2380,7 @@ use Carbon\Carbon;
         cache: false,
         success: function(data){
           var data1 = JSON.parse(data);
-          console.log("alert",data1.filters);
+          console.log("alert",data1);
           if(data1){
             
             $('#filter-location').val(data1.location);
@@ -2370,16 +2394,36 @@ use Carbon\Carbon;
             $('#edit-alert-delivery').val(data1.delivery);
             $('#edit-search-name').val(data1.name);
             $('#search_id').val(data1.searches_id);
-            var data_parse = JSON.parse(data1.filters);
+            var data_parse = data1.filters;
             $(`input[name="edit_sector"][value="${data_parse.sector}"]`).prop("checked", true);
             $(`input[name="edit_location"][value="${data_parse.sector}"]`).prop("checked", true);
-            $(`#year_experience`).val(data1.experience);
-            $(`#minSalary1`).val(data1.salary_min);
-            $(`#maxSalary1`).val(data1.salary_max);
-            $(`#minSalaryValue1`).text(data1.salary_min);
-            $(`#maxSalaryValue1`).text(data1.salary_max);
-            console.log("v",data_parse.years_of_experience);
-            // Loop through and apply dynamically
+            $(`#year_experience`).val(data_parse.experience_years);
+            $(`#minSalary1`).val(data_parse.salary.min);
+            $(`#maxSalary1`).val(data_parse.salary.max);
+            $(`#minSalaryValue1`).text(data_parse.salary.min);
+            $(`#maxSalaryValue1`).text(data_parse.salary.max);
+            console.log("v",data_parse);
+            $(".saved_filters").val(JSON.stringify(data_parse));
+            let savedValues = JSON.parse(data1.filter_nurse_type);
+            let sector = data1.filter_sector;
+            let filter_employment_type = JSON.parse(data1.filter_employment_type);
+            let shift_type = JSON.parse(data1.filter_work_shift);
+            console.log("shift_type",shift_type);
+            savedValues.forEach(function(value) {
+                $(".nurse_type[value='" + value + "']").prop("checked", true);
+            })
+            filter_employment_type.forEach(function(value) {
+                $(".employment_types[value='" + value + "']").prop("checked", true);
+            });
+      
+
+            if (Array.isArray(shift_type) && shift_type.length > 0) {
+                shift_type.forEach(function(value) {
+                    $(".shift_types[value='" + value + "']").prop("checked", true);
+                });
+            }
+             
+            $(".edit_sector_radio").prop("checked", true);
             // $.each(data_parse, function (key, values) {
             //   if (Array.isArray(values)) {
                 
@@ -2387,19 +2431,18 @@ use Carbon\Carbon;
             //       console.log("key",key);
             //       console.log("values",v);
             //       $(`input[name="${key}[]"][value="${v}"]`).prop("checked", true);
+                 
             //     });
+                
             //   }
             // });
-            data_parse.forEach(function(value) {
-                // Check checkboxes or radio buttons with matching value
-                $(".edit_side_drawer input[type='checkbox'][value='" + value + "'], .edit_side_drawer input[type='radio'][value='" + value + "']")
-                    .prop("checked", true)
-                    .trigger("change"); // optional, if you have any dependent UI logic
-            });
+            
+            
           }
         }
       });  
     });
+   
 
     $('#drawer-save').click(function(){
       const name = $('#search-name').val() || 'New Search';
@@ -2434,11 +2477,21 @@ $(document).on('click', '.btn-duplicate', function() {
   const filterSummary = row.find('td:nth-child(4)').html();
   const alertFreq = row.find('td:nth-child(6)').text().trim();
   
-  console.log("alertFreq",alertFreq);
-  
+  console.log("filterSummary",filterSummary);
+
   // Get the full JSON filter from the row’s data attribute
   const filterJson = row.data('filters');
   const delivery = row.data('name');
+  
+  // Get the full JSON filter from the row’s data attribute
+  const filter_nurse_type = row.data('nurse-type');
+  const speciality_type = row.data('speciality-type');
+  const benefits_type = row.data('benefits-type');
+  const employeement_type = row.data('employeement-type');
+  const sector_type = row.data('sector-type');
+  const environment_type = row.data('environment-type');
+ 
+  
 
   const totalSearches = $('#savedSearchTable tbody tr').length;
       
@@ -2458,7 +2511,13 @@ $(document).on('click', '.btn-duplicate', function() {
     id,
     name: originalName,
     filterSummary,
-    filterJson, // ✅ store JSON
+    filterJson,
+    filter_nurse_type,
+    speciality_type,
+    benefits_type,
+    employeement_type,
+    sector_type,
+    environment_type,
     alert: alertFreq,
     delivery
   };
@@ -2489,7 +2548,13 @@ $('#renameSave1').off('click').on('click', function() {
         _token: "{{ csrf_token() }}",
         searches_id: duplicateData.id,
         name: newName,
-        filter_json: JSON.stringify(duplicateData.filterJson), // ✅ send full filters
+        filters: duplicateData.filterJson, // ✅ send full filters
+        filter_nurse_type: JSON.stringify(duplicateData.filter_nurse_type), // ✅ send full filters
+        speciality_type: JSON.stringify(duplicateData.speciality_type), // ✅ send full filters
+        benefits_type: JSON.stringify(duplicateData.benefits_type), // ✅ send full filters
+        employeement_type: JSON.stringify(duplicateData.employeement_type), // ✅ send full filters
+        sector_type: JSON.stringify(duplicateData.sector_type), // ✅ send full filters
+        environment_type: JSON.stringify(duplicateData.environment_type), // ✅ send full filters
         alert: duplicateData.alert,
         delivery: duplicateData.delivery
       },
@@ -2499,6 +2564,7 @@ $('#renameSave1').off('click').on('click', function() {
             response.new_id,
             newName,
             duplicateData.filterSummary,
+           
             duplicateData.alert,
             duplicateData.delivery
           );

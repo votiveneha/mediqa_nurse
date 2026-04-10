@@ -70,6 +70,11 @@
                             </th>
                             <th>
 
+                                <h6 class="fs-4 fw-semibold mb-0">Applied Nurse</h6>
+
+                            </th>
+                            <th>
+
                                 <h6 class="fs-4 fw-semibold mb-0">Job Status</h6>
 
                             </th>
@@ -134,6 +139,13 @@
                                         <div class="">
 
                                             <span class="mb-0 fw-normal fs-3">{{ $item->position_open }}</span>
+
+                                        </div>
+
+                                    </td>
+                                    <td>
+                                        <div class="">
+                                         <a href="{{ route('admin.applied_nurse_list',['id'=>$item->id]) }}"> <button class="btn btn-primary w-100" "="">View </button></a>
 
                                         </div>
 

@@ -91,7 +91,11 @@
 <div class="edit_side_drawer">
     
     <div class="drawer" id="drawer">
-        <h3 id="drawer-title">Edit Search</h3>
+        <div class="drawer-header-edit">
+            <h3 id="drawer-title">Edit Search</h3>
+            <button class="btn-cross" id="drawer-cancel"><i class="fi fi-rr-cross"></i></button>
+        </div>
+        
         <div class="tabs">
             <ul class="tab-nav-edit">
                 <li class="active" data-tab="tab3">Filters</li>
@@ -104,10 +108,7 @@
             @csrf
             <input type="hidden" name="search_id" id="search_id">
             <div class="tab-content-edit active" id="tab3">
-                @php
-                    $filters = json_decode($saved_searches->filters, true);
-                    
-                @endphp
+                <input type="hidden" name="saved_filters" class="saved_filters">
                 <div class="filter-section">
                     <div class="filter-title">
                         <span>Type of nurse</span>
@@ -119,13 +120,38 @@
                         @endphp
                         @foreach($type_of_nurse as $nurse_type)
                         <label class="sub-heading nurse-type-{{ $nurse_type->id }}" data-name="Nurse Type" data-filter="nurse_type" data-value="{{ $nurse_type->id }}">
-                            <input type="checkbox" name="nurse_type[]" value="{{ $nurse_type->id }}" {{ in_array($nurse_type->id, $filters['nurse_type'] ?? []) ? 'checked' : '' }}> {{ $nurse_type->name }}</label>
+                            <input type="checkbox" name="nurse_type[]" class="nurse_type" value="{{ $nurse_type->id }}"> {{ $nurse_type->name }}</label>
                         
                         @endforeach
                         
                     </div>
                     <div class="subpagedata-nurse_type">
-                        
+                        @foreach($type_of_nurse as $nurse_type)
+                            @php
+                                $subtype_of_nurse = DB::table("practitioner_type")
+                                    ->where("parent", "=", $nurse_type->id)
+                                    ->get();
+                            @endphp
+
+                            <div class="subpage subpage-nurse_type-{{ $nurse_type->id }}">
+                                <div class="subpage-header">
+                                    <span class="back-btn">‹</span>
+                                    <h4>{{ $nurse_type->name }}</h4>
+                                </div>
+
+                                <div class="subpage-content">
+                                    @foreach($subtype_of_nurse as $sub_nurse)
+                                        <label class="sub-heading sub-heading-nurse_type-{{ $sub_nurse->id }}"
+                                            data-name="{{ $sub_nurse->name }}"
+                                            data-filter="nurse_type"
+                                            data-value="{{ $sub_nurse->id }}">
+                                            <input type="checkbox" class="nurse_type" value="{{ $sub_nurse->id }}" name="nurse_type[]">
+                                            {{ $sub_nurse->name }}
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                     
                 </div>
@@ -151,14 +177,37 @@
                         @endphp
                         @foreach($employeement_type_data as $emp_data)
                         <label class="sub-heading emp-type-{{ $emp_data->emp_prefer_id }}" data-name="Employment Type" data-filter="employment_type" data-value="{{ $emp_data->emp_prefer_id }}">
-                        <input type="checkbox" name="employment_type[]"  value="{{ $emp_data->emp_prefer_id }}"
+                        <input type="checkbox" class="employment_types" name="employment_type[]"  value="{{ $emp_data->emp_prefer_id }}"
                             {{ in_array($emp_data->emp_prefer_id, $filters['employment_type'] ?? []) ? 'checked' : '' }}> {{ $emp_data->emp_type }}</label>
                         
                         @endforeach
                         
                     </div>
                     <div class="subpagedata-employment_type">
-                        
+                        @foreach($employeement_type_data as $emp_data)
+                            @php
+                                $subemployeement_type_data = DB::table("employeement_type_preferences")->where("sub_prefer_id","=",$emp_data->emp_prefer_id)->get();
+                            @endphp
+
+                            <div class="subpage subpage-employment_type-{{ $emp_data->emp_prefer_id }}">
+                                <div class="subpage-header">
+                                    <span class="back-btn">‹</span>
+                                    <h4>{{ $emp_data->emp_type }}</h4>
+                                </div>
+
+                                <div class="subpage-content">
+                                    @foreach($subemployeement_type_data as $subemployeement_type)
+                                        <label class="sub-heading sub-heading-employment_type-{{ $subemployeement_type->emp_prefer_id }}"
+                                            data-name="{{ $subemployeement_type->emp_type }}"
+                                            data-filter="employment_type"
+                                            data-value="{{ $subemployeement_type->emp_prefer_id }}">
+                                            <input type="checkbox" class="employment_types" value="{{ $subemployeement_type->emp_prefer_id }}" name="employment_type[]">
+                                            {{ $subemployeement_type->emp_type }}
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
                 <div class="filter-section">
@@ -174,14 +223,36 @@
                         <label class="sub-heading shift-type-{{ $work_shift->work_shift_id }}" data-filter="work_shift"
                             data-value="{{ $work_shift->work_shift_id }}"
                             data-name="Shift Type">
-                            <input type="checkbox" name="work_shift[]" value="{{ $work_shift->work_shift_id }}"
-                                {{ in_array($work_shift->work_shift_id, $filters['work_shift'] ?? []) ? 'checked' : '' }}> {{ $work_shift->shift_name }}</label>
+                            <input type="checkbox" name="work_shift[]" class="work_shift_types" value="{{ $work_shift->work_shift_id }}"> {{ $work_shift->shift_name }}</label>
                         
                         @endforeach
                         
                     </div>
                     <div class="subpagedata-work_shift">
-                        
+                         @foreach($work_shift_data as $work_shift)
+                            @php
+                                $work_shift_subdata = DB::table("work_shift_preferences")->where("shift_id","=",$work_shift->work_shift_id)->get();
+                            @endphp
+
+                            <div class="subpage subpage-work_shift-{{ $work_shift->work_shift_id }}">
+                                <div class="subpage-header">
+                                    <span class="back-btn">‹</span>
+                                    <h4>{{ $work_shift->shift_name }}</h4>
+                                </div>
+
+                                <div class="subpage-content">
+                                    @foreach($work_shift_subdata as $work_shift_sub)
+                                        <label class="sub-heading sub-heading-shift_type-{{ $work_shift_sub->work_shift_id }}"
+                                            data-name="{{ $work_shift_sub->shift_name }}"
+                                            data-filter="work_shift"
+                                            data-value="{{ $work_shift_sub->work_shift_id }}">
+                                            <input type="checkbox" class="shift_types" value="{{ $work_shift_sub->work_shift_id }}" name="work_shift[]">
+                                            {{ $work_shift_sub->shift_name }}
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
                 <div class="filter-section">
@@ -198,41 +269,40 @@
                             data-name="Work Environment" 
                             data-filter="work_environment" 
                             data-value="{{ $work_environment->prefer_id }}">
-                            <input type="checkbox" name="work_environment[]" value="{{ $work_environment->prefer_id }}" {{ in_array($work_environment->prefer_id, $filters['work_environment'] ?? []) ? 'checked' : '' }}> {{ $work_environment->env_name }}
+                            <input type="checkbox" name="work_environment[]" value="{{ $work_environment->prefer_id }}"> {{ $work_environment->env_name }}
                         </label>
                         @endforeach
 
                         
                     </div>
                     <div class="subpagedata-work_environment">
-                        
-                    </div>
-                </div>
-                <div class="filter-section">
-                    <div class="filter-title">
-                        <span>Position</span>
-                        <span class="icon">&#8250;</span>
-                    </div>
-                    <div class="filter-options">
-                        @php
-                        $employee_positions = DB::table("employee_positions")->where("subposition_id","=","0")->get();
-                        @endphp
-                        @foreach($employee_positions as $emp_pos)
-                        <label class="sub-heading work-environment-{{ $emp_pos->position_id }}" 
-                            data-name="Employee Positions" 
-                            data-filter="employee_positions" 
-                            data-value="{{ $emp_pos->position_id }}">
-                            <input type="checkbox" name="employee_positions[]" value="{{ $emp_pos->position_id }}"> {{ $emp_pos->position_name }}
-                        </label>
-                        @endforeach
+                        @foreach($work_environment_data as $work_environment)
+                            @php
+                                $work_environment_data = DB::table("work_enviornment_preferences")->where("sub_env_id","=",$work_environment->prefer_id)->get();
+                            @endphp
 
-                        
+                            <div class="subpage subpage-work_environment-{{ $work_environment->prefer_id }}">
+                                <div class="subpage-header">
+                                    <span class="back-btn">‹</span>
+                                    <h4>{{ $work_environment->env_name }}</h4>
+                                </div>
+
+                                <div class="subpage-content">
+                                    @foreach($work_environment_data as $work_environment_sub)
+                                        <label class="sub-heading sub-heading-work_environment-{{ $work_environment_sub->prefer_id }}"
+                                            data-name="{{ $work_environment_sub->env_name }}"
+                                            data-filter="work_environment"
+                                            data-value="{{ $work_environment_sub->prefer_id }}">
+                                            <input type="checkbox" class="shift_types" value="{{ $work_environment_sub->prefer_id }}" name="work_environment[]">
+                                            {{ $work_environment_sub->env_name }}
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
-                    <div class="subpagedata-employee_positions">
-                        
-                    </div>
-                    
                 </div>
+                
                 <div class="filter-section">
                     <div class="filter-title">
                         <span>Benefits</span>
@@ -254,7 +324,30 @@
                         
                     </div>
                     <div class="subpagedata-benefits_preferences">
-                        
+                        @foreach($benefits_preferences as $benprefer)
+                            @php
+                                $benefits_preferences = DB::table("benefits_preferences")->where("subbenefit_id","=",$benprefer->benefits_id)->get();
+                            @endphp
+
+                            <div class="subpage subpage-benefits_preferences-{{ $benprefer->benefits_id }}">
+                                <div class="subpage-header">
+                                    <span class="back-btn">‹</span>
+                                    <h4>{{ $benprefer->benefits_name }}</h4>
+                                </div>
+
+                                <div class="subpage-content">
+                                    @foreach($benefits_preferences as $benefits_prefer)
+                                        <label class="sub-heading sub-heading-benefits_preferences-{{ $benefits_prefer->benefits_id }}"
+                                            data-name="{{ $benefits_prefer->benefits_name }}"
+                                            data-filter="benefits_preferences"
+                                            data-value="{{ $benefits_prefer->benefits_id }}">
+                                            <input type="checkbox" class="benefits_preferences" value="{{ $benefits_prefer->benefits_id }}" name="benefits_preferences[]">
+                                            {{ $benefits_prefer->benefits_name }}
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
                 <div class="filter-section">
@@ -347,7 +440,30 @@
                         
                     </div>
                     <div class="subpagedata-speciality">
-                        
+                        @foreach($speciality as $spec)
+                            @php
+                                $speciality = DB::table("speciality")->where("parent","=",$spec->id)->get();
+                            @endphp
+
+                            <div class="subpage subpage-benefits_preferences-{{ $spec->id }}">
+                                <div class="subpage-header">
+                                    <span class="back-btn">‹</span>
+                                    <h4>{{ $benprefer->benefits_name }}</h4>
+                                </div>
+
+                                <div class="subpage-content">
+                                    @foreach($benefits_preferences as $benefits_prefer)
+                                        <label class="sub-heading sub-heading-benefits_preferences-{{ $benefits_prefer->benefits_id }}"
+                                            data-name="{{ $benefits_prefer->benefits_name }}"
+                                            data-filter="benefits_preferences"
+                                            data-value="{{ $benefits_prefer->benefits_id }}">
+                                            <input type="checkbox" class="benefits_preferences" value="{{ $benefits_prefer->benefits_id }}" name="benefits_preferences[]">
+                                            {{ $benefits_prefer->benefits_name }}
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
                 <div class="filter-section">
@@ -377,8 +493,8 @@
                                 <input type="range" name="maxSalary1" id="maxSalary1" min="0" max="200000" step="1000"  value="{{ $filters['salary']['max'] ?? 0 }}">
                             </div>
                             <div class="salary-values">
-                                <span id="minSalaryValue1">$30,000</span> - 
-                                <span id="maxSalaryValue1">$1,20,000</span>
+                                <span id="minSalaryValue1">₹30,000</span> - 
+                                <span id="maxSalaryValue1">₹1,20,000</span>
                             </div>
                         </div>
 
@@ -444,6 +560,7 @@
     <div id="modalContent"></div>
   </div>
 </div>
+
 <script>
     // Pass PHP filters JSON safely to JavaScript
     window.savedFilters = @json($filters ?? []);
@@ -569,44 +686,42 @@
         $('.select-item').prop('checked', isChecked);
     });
 
-    // $(document).on('click', '.btn-run', function(e) {
-    //     e.preventDefault();
-    //     const id = $(this).data('id');
-    //     const baseUrl = `{{ url('/nurse/run-saved-search') }}`;
-    //     $.ajax({
-    //         url: `${baseUrl}/${id}`,
-    //         type: 'POST',
-    //         data: {
-    //             _token: "{{ csrf_token() }}"
-    //         },
-    //         beforeSend: function() {
-    //             console.log("Running saved search...");
-    //         },
-    //         success: function(res) {
-    //             const now = new Date();
+    $(document).on('click', '.btn-run', function(e) {
+        //alert("hello");
+        e.preventDefault();
+        const id = $(this).data('id');
+        const baseUrl = `{{ url('/nurse/run-saved-search') }}`;
+        $.ajax({
+            url: `${baseUrl}/${id}`,
+            type: 'POST',
+            data: {
+                _token: "{{ csrf_token() }}"
+            },
+            beforeSend: function() {
+                console.log("Running saved search...");
+            },
+            success: function(res) {
+                const now = new Date();
 
-    //             const formattedDateTime =
-    //             now.getFullYear() + '-' +
-    //             String(now.getMonth() + 1).padStart(2, '0') + '-' +
-    //             String(now.getDate()).padStart(2, '0') + ' ' +
-    //             String(now.getHours()).padStart(2, '0') + ':' +
-    //             String(now.getMinutes()).padStart(2, '0') + ':' +
-    //             String(now.getSeconds()).padStart(2, '0');
+                const formattedDateTime =
+                now.getFullYear() + '/' +
+                String(now.getMonth() + 1).padStart(2, '0') + '/' +
+                String(now.getDate()).padStart(2, '0');
 
-    //             console.log(formattedDateTime);
-    //             $(".last_run_at-"+id).text(formattedDateTime);
-    //             if (res.success) {
-    //                 // Example: display job cards dynamically
-    //                 renderJobResults(res.jobs);
-    //             } else {
-    //                 alert("No jobs found.");
-    //             }
-    //         },
-    //         error: function(xhr) {
-    //             console.error("Error:", xhr.responseText);
-    //         }
-    //     });
-    // });
+                console.log(formattedDateTime);
+                $(".last_run_at-"+id).text(formattedDateTime);
+                if (res.success) {
+                    // Example: display job cards dynamically
+                    renderJobResults(res.jobs);
+                } else {
+                    alert("No jobs found.");
+                }
+            },
+            error: function(xhr) {
+                console.error("Error:", xhr.responseText);
+            }
+        });
+    });
 
     // function renderJobResults(jobs) {
     //     let html = '';
@@ -653,7 +768,7 @@
     //     });
     // });
 
-    $('.filter-options input[type="checkbox"]:checked').prop('disabled', true);
+    //$('.filter-options input[type="checkbox"]:checked').prop('disabled', true);
     // Toggle filter sections
     $('.filter-title').click(function () {
         const $current = $(this);
@@ -673,6 +788,7 @@
 
     // Handle first-level filter click
     $(document).on("click", ".sub-heading[data-value]", function (e) {
+        
         const $this = $(this);
         const id = $this.data("value");
         const filterType = $this.data("filter");
@@ -689,7 +805,7 @@
             fetchAndBuildSubPage(filterName, filterType, id);
         
 
-
+        
         //const uniqueKey = `${filterType}-${id}`;
         //fetchAndBuildSubPage(filterName, filterType, id);
     });
@@ -697,7 +813,7 @@
 
     function fetchAndBuildSubPage(filterName, filterType, id) {
         const uniqueKey = `${filterType}-${id}`; // 👈 unique per filterType + id
-
+        //alert(uniqueKey);
         $.ajax({
             type: "GET",
             url: "{{ url('/nurse/getEmpDataSearch') }}",
@@ -709,6 +825,11 @@
             cache: false,
             success: function (data) {
                 if (!data.main || !data.subtypes || data.subtypes.length === 0) {
+                    const savedValues = savedFilters && savedFilters[filterType]
+                        ? savedFilters[filterType]
+                        : [];
+
+                    console.log("savedValues",savedFilters);    
                     showToast("No data found for this filter.");
                     return;
                 }
@@ -721,83 +842,91 @@
     }
 
     function buildSubPage(filterData, filterType, uniqueKey) {
-    const mainId = filterData.main.id;
-    const mainName = filterData.main.name;
+        console.log("filterData",filterData);
+        const mainId = filterData.main.id;
+        const mainName = filterData.main.name;
 
-    const savedValues = savedFilters && savedFilters[filterType]
-        ? savedFilters[filterType]
-        : [];
+        
 
-    // Hide current active page (if any)
-    const $activePage = $(".subpage.active");
-    if ($activePage.length) {
-        subpageStack.push($activePage);
-        $activePage.removeClass("active");
-    }
+        const savedValues = savedFilters && savedFilters[filterType]
+            ? savedFilters[filterType]
+            : [];
 
-    // Avoid duplicates
-    if ($(".subpage-" + uniqueKey).length) {
-        $(".subpage-" + uniqueKey).addClass("active");
-        return;
-    }
+        console.log("savedValues",savedValues);    
 
-    // Build sub-options with pre-checked state
-    let subOptions = '';
-    filterData.subtypes.forEach(function (sub) {
-        const isChecked = Array.isArray(savedValues) && savedValues.includes(sub.name)
-            ? 'checked'
-            : '';
-
-            console.log("isChecked",isChecked);
-
-        subOptions += `
-            <label class="sub-heading sub-heading-${filterType}-${sub.id}" 
-                data-name="${sub.name}" 
-                data-filter="${filterType}" 
-                data-value="${sub.id}">
-                <input type="checkbox" value="${sub.id}" name="${filterType}[]" ${isChecked}> 
-                ${sub.name}
-            </label>`;
-    });
-
-    // Create new subpage (with uniqueKey)
-    const subpageHTML = `
-        <div class="subpage subpage-${uniqueKey}">
-            <div class="subpage-header">
-                <span class="back-btn">&#8249;</span>
-                <h4>${mainName}</h4>
-            </div>
-            <div class="subpage-content">
-                ${subOptions}
-            </div>
-        </div>`;
-
-    $(".subpagedata-" + filterType).append(subpageHTML);
-    const $newPage = $(".subpage-" + uniqueKey);
-    $newPage.addClass("active");
-
-    // Back button handler
-    $newPage.find(".back-btn").on("click", function () {
-        $newPage.removeClass("active");
-
-        if (subpageStack.length > 0) {
-            const $prevPage = subpageStack.pop();
-            $prevPage.addClass("active");
+        // Hide current active page (if any)
+        const $activePage = $(".subpage.active");
+        if ($activePage.length) {
+            subpageStack.push($activePage);
+            $activePage.removeClass("active");
         }
-    });
 
-    // Nested checkbox subtypes
-    $newPage.find(".sub-heading input[type='checkbox']").off('change').on('change', function () {
-        const $label = $(this).closest('.sub-heading');
-        const subId = $label.data("value");
-        const subName = $label.data("name");
-        const subFilterType = $label.data("filter");
-
-        if (this.checked) {
-            fetchAndBuildSubPage(subName, subFilterType, subId);
+        // Avoid duplicates
+        if ($(".subpage-" + uniqueKey).length) {
+            $(".subpage-" + uniqueKey).addClass("active");
+            return;
         }
-    });
-}
+
+        
+
+        // Build sub-options with pre-checked state
+        let subOptions = '';
+        filterData.subtypes.forEach(function (sub) {
+            console.log("sub.id",savedValues);    
+            const isChecked = Array.isArray(savedValues) && savedValues.includes(sub.id)
+                ? 'checked'
+                : '';
+
+            subOptions += `
+                <label class="sub-heading sub-heading-${filterType}-${sub.id}" 
+                    data-name="${sub.name}" 
+                    data-filter="${filterType}" 
+                    data-value="${sub.id}">
+                    <input type="checkbox" value="${sub.id}" name="${filterType}[]" ${isChecked}> 
+                    ${sub.name}
+                </label>`;
+        });
+
+        // Create new subpage (with uniqueKey)
+        const subpageHTML = `
+            <div class="subpage subpage-${uniqueKey}">
+                <div class="subpage-header">
+                    <span class="back-btn">&#8249;</span>
+                    <h4>${mainName}</h4>
+                </div>
+                <div class="subpage-content">
+                    ${subOptions}
+                </div>
+            </div>`;
+
+        //$(".subpagedata-" + filterType).append(subpageHTML);
+        const $newPage = $(".subpage-" + uniqueKey);
+        $newPage.addClass("active");
+
+        
+
+        // Back button handler
+        $newPage.find(".back-btn").on("click", function () {
+            $newPage.removeClass("active");
+
+            if (subpageStack.length > 0) {
+                const $prevPage = subpageStack.pop();
+                $prevPage.addClass("active");
+            }
+        });
+
+        // Nested checkbox subtypes
+        $newPage.find(".sub-heading input[type='checkbox']").off('change').on('change', function () {
+            const $label = $(this).closest('.sub-heading');
+            const subId = $label.data("value");
+            const subName = $label.data("name");
+            const subFilterType = $label.data("filter");
+
+            if (this.checked) {
+                fetchAndBuildSubPage(subName, subFilterType, subId);
+            }
+        });
+    }
 
 
 
@@ -811,7 +940,7 @@
         const maxLimit = parseInt($max.attr('max'));
 
         function formatCurrency(value) {
-        return '₹' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            return '₹' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
         function updateValues() {
@@ -850,10 +979,10 @@
             
         });
         $(".subpage .back-btn").on("click", function () {
-            $(this).closest(".subpage").removeClass("active").remove();
+            $(this).closest(".subpage").removeClass("active");
         });
 
-        $(document).on('click', '.btn-readmore', function(e) {
+ $(document).on('click', '.btn-readmore', function(e) {
             e.preventDefault();
             var modal_id = $(this).data('id');
             //alert(modal_id);

@@ -7,8 +7,9 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\DatabaseMessage;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class JobPublishedNotification extends Notification
+class JobPublishedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -30,12 +31,12 @@ class JobPublishedNotification extends Notification
     public function via(object $notifiable): array
     {
         $channels = ['database'];
-        
+
         // Only broadcast if user has app notifications enabled
         if ($notifiable->hasAppNotification()) {
             $channels[] = 'broadcast';
         }
-        
+
         return $channels;
     }
 
@@ -47,7 +48,8 @@ class JobPublishedNotification extends Notification
         return new BroadcastMessage([
             'job_id' => $this->job->id,
             'title' => $this->job->title ?? 'New Job Opportunity',
-            'facility_name' => $this->job->postedBy->name ?? 'Healthcare Facility',
+            // 'facility_name' => $this->job->postedBy->name ?? 'Healthcare Facility',
+            'facility_name' => optional($this->job->postedBy)->name ?? 'Healthcare Facility',
             'location' => $this->job->location ?? 'Location TBD',
             'specialty' => $this->job->specialty ?? 'General',
             'message' => 'A new job matching your preferences has been posted',
@@ -66,7 +68,8 @@ class JobPublishedNotification extends Notification
         return [
             'job_id' => $this->job->id,
             'title' => $this->job->title ?? 'New Job Opportunity',
-            'facility_name' => $this->job->postedBy->name ?? 'Healthcare Facility',
+            // 'facility_name' => $this->job->postedBy->name ?? 'Healthcare Facility',
+            'facility_name' => optional($this->job->postedBy)->name ?? 'Healthcare Facility',
             'location' => $this->job->location ?? 'Location TBD',
             'specialty' => $this->job->specialty ?? 'General',
             'message' => 'A new job matching your preferences has been posted',

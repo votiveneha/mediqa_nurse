@@ -414,7 +414,7 @@ class JobsController extends Controller{
     {
         // echo "<pre>";print_r($request->all());die;
         $query = DB::table('job_boxes');
-        // APPLY SAVED SEARCH (if exists)  
+        // APPLY SAVED SEARCH (if exists)
         if ($request->has('filters_data')) {
 
             $filters = $request->filters_data;
@@ -478,7 +478,7 @@ class JobsController extends Controller{
                 });
             }
 
-            // year of experience 
+            // year of experience
             if (!empty($filters['experience'])) {
                 $query->where('experience_level', $filters['experience']);
             }
@@ -639,7 +639,7 @@ class JobsController extends Controller{
         $jobs = $query->where("save_draft", 2)->get();
         // $jobs = $query->get();
         // print_r($jobs);die;
-        //calculate Match percentage 
+        //calculate Match percentage
         $user_id = Auth::guard('nurse_middle')->user()->id;
 
         $user = User::where('id', $user_id)->first();
@@ -1323,7 +1323,7 @@ class JobsController extends Controller{
         $job = DB::table('job_boxes')->where('id', $job_id)->first();
 
         $healthcare = User::find($job->healthcare_id);
-        $healthcare_notification = DB::table("notifications")->where("user_id",$job->healthcare_id)->first();
+        $healthcare_notification = DB::table("users")->where("id",$job->healthcare_id)->first();
 
         // Send email if healthcare has email notifications ON
         if ($healthcare && $healthcare_notification->email_notification == 1) {
@@ -1628,7 +1628,7 @@ class JobsController extends Controller{
         echo $delete_search_data;
     }
 
-    public function duplicateSearch(Request $request)
+   public function duplicateSearch(Request $request)
     {
 
         $oldSearch = SavedSearches::where('searches_id', $request->searches_id)->first();
@@ -1641,9 +1641,15 @@ class JobsController extends Controller{
         $duplicate = new SavedSearches();
         $duplicate->user_id = $user_id;
         $duplicate->name = $request->name;
-        $duplicate->filters = $request->filter_json;
+        $duplicate->filters = $request->filters;
+        $duplicate->filter_nurse_type = $request->filter_nurse_type;
+        $duplicate->filter_speciality = $request->speciality_type;
+        $duplicate->filter_benefits_preferences = $request->benefits_type;
+        $duplicate->filter_employment_type = $request->employeement_type;
+        $duplicate->filter_sector = $request->sector_type;
+        $duplicate->filter_work_environment = $request->environment_type;
         $duplicate->alert = $request->alert;
-        $duplicate->delivery = $request->delivery;
+        //$duplicate->delivery = $request->delivery;
         $duplicate->created_at = now();
         $duplicate->save();
 

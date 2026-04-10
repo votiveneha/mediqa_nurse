@@ -157,12 +157,12 @@
                             Visible to Agencies
                           </label>
                         </div>
-                        <div class="form-check mt-3">
+                        <!-- <div class="form-check mt-3">
                           <input class="form-check-input" type="checkbox" value="1" {{ Auth::guard('nurse_middle')->user()->individuals =='Yes'? 'checked' : '' }} id="visibleToIndividuals" name="individuals">
                           <label class="form-check-label" for="visibleToAgencies">
                             Visible to Individuals (Nurse care at home)
                           </label>
-                        </div>
+                        </div> -->
                         <label class="form-check-label  mt-3" for="availableNow">
                           <h6> Profile Status: </h6>
                         </label>

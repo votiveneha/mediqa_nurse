@@ -233,10 +233,9 @@
                 <div class="conversation-item {{ request()->route('id') == $conv->id ? 'active' : '' }}"
                      onclick="window.location.href='{{ route('nurse.chat.show', $conv->id) }}'">
                     <div style="position: relative;">
-                        <img src="{{ $otherParticipant->profile_img
-                            ? asset('healthcareimg/uploads/' . $otherParticipant->profile_img)
-                            : 'nurse/assets/imgs/nurse06.png' }}"
+                        <img src="{{ ($otherParticipant->profile_img && $otherParticipant->profile_img !== 'nurse/assets/imgs/nurse06.png') ? asset('healthcareimg/uploads/' . $otherParticipant->profile_img) : asset('/nurse/assets/imgs/nurse06.png') }}"
                              alt="{{ $otherParticipant->name }}" class="conversation-avatar">
+
                         <span class="online-status {{ cache()->get('user_'.$otherParticipant->id.'_online', false) ? 'online' : 'offline' }}"
                               data-user-id="{{ $otherParticipant->id }}"
                               style="position: absolute; bottom: 0; right: 15px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff;"></span>

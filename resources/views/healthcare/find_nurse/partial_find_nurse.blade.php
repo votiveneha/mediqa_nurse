@@ -58,6 +58,13 @@
     </div>
     <hr>
     <!-- BUTTONS -->
+     @if(!empty($list->application_status) )
+    <div class="d-flex gap-4 justify-content-end">
+        <button class="btn btn-custom mr-2" disabled>
+            <i class="fa fa-user"></i> Already Applied
+        </button>
+    </div>
+    @else
     <div class="d-flex gap-4 justify-content-end">
         <button class="btn btn-custom mr-2">
             <i class="fa fa-user"></i> Invite to Apply
@@ -66,6 +73,7 @@
             <i class="fa fa-comments"></i> Invite to Interview
         </button>
     </div>
+    @endif
 </div>
 @endforeach
 <div class="pagination-wrapper" id="rohit">

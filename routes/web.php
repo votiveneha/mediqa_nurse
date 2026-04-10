@@ -371,6 +371,8 @@ Route::prefix('/admin')->name('admin.')->namespace('App\Http\Controllers\admin')
     Route::get('/jobList', 'JobsController@jobList')->name('jobList');
     Route::get('/edit_jobs/{id}','JobsController@edit_jobs')->name('edit_jobs');
     Route::get('/view_jobs/{id}','JobsController@job_details')->name('view_jobs');
+    Route::get('/applied-nurse-list/{id}','JobsController@applied_nurse_list')->name('applied_nurse_list');
+
 
   });
 

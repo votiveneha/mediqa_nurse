@@ -70,6 +70,13 @@ Route::prefix('healthcare-facilities')->name('medical-facilities.')->namespace('
     Route::get('/find-nurse', 'FindNurseController@index')->name('job.find_nurse');
     Route::post('/getNurseSorting', 'FindNurseController@getNurseSorting')->name('job.getNurseSorting');
 
+        
+    Route::post('/hFaddSavedSearches', 'FindNurseController@hFaddSavedSearches')->name('hFaddSavedSearches');
+    Route::post('/check-search-name', 'FindNurseController@checkName')->name('checkName');
+    Route::post('/duplicateSearch', 'FindNurseController@duplicateSearch')->name('duplicateSearch');
+    Route::post('/deleteSearchJobsData', 'FindNurseController@deleteSearchJobsData')->name('deleteSearchJobsData');
+    Route::post('/deleteMultipleSearches', 'FindNurseController@deleteMultipleSearches')->name('deleteMultipleSearches');
+
     Route::post('/stripe/webhook', [StripeController::class, 'webhook']);
     Route::post('/inviteUser', 'SettingsController@inviteUser')->name('inviteUser');
     Route::get('/compliance_security', 'SettingsController@compliance_security')->name('compliance_security');

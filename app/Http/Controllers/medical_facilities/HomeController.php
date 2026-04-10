@@ -464,6 +464,9 @@ class HomeController extends Controller
     public function manage_profile(){
         $user_id = Auth::guard('healthcare_facilities')->user()->id;
         $data['user_data'] = User::where("id",$user_id)->first();
+
+        $get_matching_percent = sendJobAlertEmails();
+        // die;
         return view('healthcare.settings.profile')->with($data);
     }
 

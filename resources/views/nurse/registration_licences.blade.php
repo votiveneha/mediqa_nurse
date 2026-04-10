@@ -337,7 +337,7 @@ input:checked + .slider:before {
                                   {{ ucwords(str_replace('_',' ',$registration_country->status)) }}
                               </span>
                           </h5>
-                          <p>Switch country to manage another registration.Move the tab just above My profile and Setting. </p>
+                          <p>Switch country to manage another registration. </p>
                           @if (in_array($registration_country->status, [1, 2, null], true))
                             <div class="form-group">
                                 <label>Status</label>

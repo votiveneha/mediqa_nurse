@@ -28,6 +28,7 @@ use App\Services\Admins\SpecialityServices;
 use Illuminate\Support\Facades\Storage;
 
 use App\Models\JobsModel;
+use App\Models\NurseApplication;
 
 class JobsController extends Controller
 {
@@ -52,6 +53,14 @@ class JobsController extends Controller
         return view("admin.job_list")->with($data);
     }
 
+        public function applied_nurse_list($id = null)
+    {
+        // $id = 51;
+        $nurse_application = NurseApplication::with('nurse')->where('job_id', $id)->get();
+        $job_information = JobsModel::select('job_title','job_box_id')->where('id',$id)->first();
+        // echo "<pre>"; print_r($job_information);die;
+        return view('admin.applied_nurse_list', compact('nurse_application','job_information'));
+    }
     public function addJobs(Request $request)
     {
         $nurse_type_name = DB::table('practitioner_type')->where('id', $request->nurse_type)->pluck('name');

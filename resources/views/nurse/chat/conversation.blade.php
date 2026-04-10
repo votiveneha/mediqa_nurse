@@ -396,8 +396,7 @@
                         <div class="conversation-item-compact {{ $conv->id == $conversation->id ? 'active' : '' }}"
                             data-conversation-id="{{ $conv->id }}"
                             onclick="window.location.href='{{ route('nurse.chat.show', $conv->id) }}'">
-                            <img src="{{ $other->profile_img ? asset('healthcareimg/uploads/' . $other->profile_img)
-                            : asset('nurse/assets/imgs/nurse06.png') }}" alt="{{ $other->name }}"
+                            <img src="{{ ($other->profile_img && $other->profile_img !== 'nurse/assets/imgs/nurse06.png') ? asset('healthcareimg/uploads/' . $other->profile_img) : asset('/nurse/assets/imgs/nurse06.png') }}" alt="{{ $other->name }}"
                                 class="conversation-avatar-compact">
 
                             <div class="conversation-info-compact">

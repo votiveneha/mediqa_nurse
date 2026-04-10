@@ -33,14 +33,7 @@ class FindNurseController extends Controller
     public function index()
     {
         $user = Auth::guard('healthcare_facilities')->user();
-
         $jobs = JobsModel::where('healthcare_id', $user->id)->where('save_draft', 2)->get();
-        // $jobs = JobsModel::where('healthcare_id', $user->id)->get();
-
-        // foreach ($jobs as $job) {
-
-        //     $job->display_name = $job->job_title;
-        // }
 
        $list_saved_searches =  HealthcareSavedSearch::where('health_care_id',$user->id)->get();
         $nurse_list = User::where(['role' => '1','type' => '1'])->whereIn('user_stage', ['2', '4'])->orderBy('id', 'desc')->paginate(2);
@@ -53,8 +46,7 @@ class FindNurseController extends Controller
          $user_id = Auth::guard('healthcare_facilities')->user()->id;
         $saved = HealthcareSavedSearch::create([
             'health_care_id' => $user_id,
-            'name' => $request->search_name,
-          
+            'name' => $request->search_name,      
         ]);
 
         return response()->json([
@@ -63,6 +55,32 @@ class FindNurseController extends Controller
         ]);
     }
 
+    public function duplicateSearch(Request $request){
+        $user_id = Auth::guard('healthcare_facilities')->user()->id;
+        $saved = HealthcareSavedSearch::create([
+            'health_care_id' => $user_id,
+            'name' => $request->name,      
+        ]);
+
+        return response()->json([
+            'success'=> true,
+            'status' => 1,
+            'id' => $saved->id
+        ]);
+    }
+
+    public function deleteSearchJobsData(Request $request){
+        print_r($request->all());die;
+    }
+    
+    public function deleteMultipleSearches(Request $request){
+         if (!$request->has('ids')) {
+            return response()->json(['status' => 'error', 'message' => 'No IDs provided']);
+        }
+        HealthcareSavedSearch::whereIn('id', $request->ids)->delete();
+
+        return response()->json(['status' => 'success']);
+    }
     public function checkName(Request $request)
     {
         $user_id = Auth::guard('healthcare_facilities')->user()->id;
@@ -313,10 +331,11 @@ class FindNurseController extends Controller
         ]);
     }
     
-        public function getNurseSorting(Request $request, NurseJobMatchService $matchService)
+     public function getNurseSorting(Request $request, NurseJobMatchService $matchService)
     {
         $query = DB::table('users')
             ->select(
+                'nurse_applications.status as application_status',
                 'users.*',
                 DB::raw('MAX(profession_data.assistent_level) as experience_level')
             )
@@ -325,6 +344,7 @@ class FindNurseController extends Controller
             ->leftJoin('profession_data', 'profession_data.user_id', '=', 'users.id')
             ->leftJoin('speciality', 'speciality.id', '=', 'profession_data.specialties')
             ->leftJoin('practitioner_type', 'practitioner_type.id', '=', 'profession_data.nurse_data')
+            ->leftJoin('nurse_applications', 'nurse_applications.nurse_id', '=', 'users.id')
             ->groupBy('users.id');
 
         // 🔍 Search
@@ -359,11 +379,20 @@ class FindNurseController extends Controller
         // ✅ GET NURSES FIRST
         // =====================================================
         $nurse_list = $query->get();
+        // echo "<pre>"; print_r($nurse_list);die;
+          if (!empty($request->search_id ) && is_numeric($request->search_id))  {
+              $manage_save_search =  HealthcareSavedSearch::where('id', $request->search_id)->first();
+            //   print_r($manage_save_search);die;
+            foreach ($nurse_list as $nurse) {
+                $matchedData[] = $nurse;   
+            }
+              
+          }
         $matchedData = [];
 
         // 👉 ONLY if job selected
 
-        if (!empty($request->search_id ))  {
+        if (!empty($request->search_id && !is_numeric($request->search_id)))  {
             $job = DB::table('job_boxes')->where('job_box_id', $request->search_id)->first();
 
             if ($job) {
@@ -424,13 +453,10 @@ class FindNurseController extends Controller
             // 🚫 No Job → No %
             foreach ($nurse_list as $nurse) {
                 $nurse->match_percentage = null;
-                $matchedData[] = $nurse;   // ✅ FIX: append to array, not overwrite
+                $matchedData[] = $nurse;   
             }
         }
 
-        // =====================================================
-        // 📄 PAGINATION
-        // =====================================================
         $collection = collect($matchedData);
 
         $nurse_list = new \Illuminate\Pagination\LengthAwarePaginator(
@@ -452,6 +478,5 @@ class FindNurseController extends Controller
             'html' => view('healthcare.find_nurse.partial_find_nurse', compact('nurse_list'))->render()
         ]);
     }
-
 
 }

@@ -8,6 +8,93 @@
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
 <style>
+    .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    justify-content: center; /* centers horizontally */
+    align-items: center;     /* centers vertically */
+    z-index: 9999;
+}
+.modal-content {
+    background: #fff;
+    padding: 20px 30px;
+    border-radius: 6px;
+    width: 400px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    font-weight: bold;
+    color: #000;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.modal-alert {
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    padding: 10px;
+    margin: 15px 0;
+    font-size: 14px;
+    color: #000;
+}
+
+.alert-icon {
+    font-weight: bold;
+    margin-right: 8px;
+    color: #1976d2;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-weight: bold;
+    color: #000;
+}
+
+.form-tip {
+    font-size: 12px;
+    color: #888;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-cancel {
+    background: #fff;
+    border: 1px solid #000;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.btn-save {
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+}
       /* match circle  */
   .match-circle {
     position: absolute;
@@ -620,7 +707,7 @@
                         Browse All Nurse
                     </div>
                     @if(count($jobs) <= 0) 
-                    <div id="no-job-post-hf" data-bs-toggle="tooltip"
+                    <div id="no-job-post-hf" class="saved-search-tab" data-bs-toggle="tooltip"
                         data-bs-placement="top" title="You don’t have active job postings yet.">
                         Post a Job
                     </div>
@@ -633,11 +720,12 @@
                         </div> 
                         @empty   
                         @endforelse
-                        {{-- @foreach ($jobs as $job)
-                        <div class="saved-search-tab" value="{{ $job->job_box_id }}">
-                            {{ $job->display_name }}
-                        </div>
-                        @endforeach --}}              
+                        @forelse ($list_saved_searches as $manage_list)
+                        <div class="saved-search-tab" data-id="{{ $manage_list->id }}">
+                            {{ $manage_list->name }}
+                        </div> 
+                        @empty   
+                        @endforelse           
                     </div>          
                     <!-- Fixed right button -->
                     <div class="add-new">
@@ -685,8 +773,8 @@
                     <div class="form-group top_filter location_filter">
                         <label for="sort_by">Sort By</label>
                         <select id="sort_by" name="sort_by" class="form-control">
-                            <option value="top_matches">Top Matches</option>
                             <option value="highest_experience">Highest Experience</option>
+                            <option value="top_matches">Top Matches</option>
                             <option value="available_soonest">Available Soonest</option>
                         </select>
                     </div>
@@ -700,19 +788,19 @@
                             <div class="filter-header">Filters</div>
                             <ul class="filter-list">
                                 <li class="filter-item">
-                                    <span>Experience Level</span>
+                                    <span>Type of Nurse</span>
                                     <span class="arrow">›</span>
                                 </li>
                                 <li class="filter-item">
-                                    <span>Speciality</span>
+                                    <span>Specialty</span>
                                     <span class="arrow">›</span>
                                 </li>
                                 <li class="filter-item">
-                                    <span>Certifications</span>
+                                    <span>Work Environment</span>
                                     <span class="arrow">›</span>
                                 </li>
                                 <li class="filter-item">
-                                    <span>Language spoken</span>
+                                    <span>Years of Experience</span>
                                     <span class="arrow">›</span>
                                 </li>
                                 <li class="filter-item">
@@ -720,7 +808,47 @@
                                     <span class="arrow">›</span>
                                 </li>
                                 <li class="filter-item">
-                                    <span>Availability</span>
+                                    <span>Employment Type</span>
+                                    <span class="arrow">›</span>
+                                </li>
+                                <li class="filter-item">
+                                    <span>Shift Type</span>
+                                    <span class="arrow">›</span>
+                                </li>
+                                <li class="filter-item">
+                                    <span>Salary Expectations </span>
+                                    <span class="arrow">›</span>
+                                </li>
+                                <li class="filter-item">
+                                    <span>Education </span>
+                                    <span class="arrow">›</span>
+                                </li>
+                                <li class="filter-item">
+                                    <span>Registration & Licences </span>
+                                    <span class="arrow">›</span>
+                                </li>
+                                <li class="filter-item">
+                                    <span>Checks & Clearances  </span>
+                                    <span class="arrow">›</span>
+                                </li>
+                                 <li class="filter-item">
+                                    <span>Certifications </span>
+                                    <span class="arrow">›</span>
+                                </li>
+                                 <li class="filter-item">
+                                    <span>Language   </span>
+                                    <span class="arrow">›</span>
+                                </li>
+                                 <li class="filter-item">
+                                    <span>Location Preferences  </span>
+                                    <span class="arrow">›</span>
+                                </li>
+                                 <li class="filter-item">
+                                    <span>Residency/work Status </span>
+                                    <span class="arrow">›</span>
+                                </li>
+                                 <li class="filter-item">
+                                    <span>International hiring </span>
                                     <span class="arrow">›</span>
                                 </li>
                             </ul>
@@ -795,11 +923,11 @@
                             <!-- <hr> -->
                             <!-- BUTTONS -->
                             <div class="d-flex gap-4 justify-content-end border-top">
-                                <button class="btn btn-custom mr-2">
+                                <button class="btn btn-custom mr-2" >
                                     <i class="fa fa-user"></i> Invite to Apply
                                 </button>
-                                <button class="btn btn-custom">
-                                    <i class="fa fa-comments"></i> Invite to Interview
+                                <button class="btn btn-custom" >
+                                    <i class="fa fa-comments" ></i> Invite to Interview
                                 </button>
                             </div>
                         </div>
@@ -829,7 +957,7 @@
                         <!-- <a href='#'>
                             <i class="fa fa-trash" aria-hidden="true"></i>
                         </a> -->
-                        <button class="btn ss-delete bg-delete-selected">
+                        <button class="btn ss-delete bg-delete-selected" id="deleteSelected">
                             <!-- <i class="fi fi-rr-trash mr-1"></i> -->
                             Delete Selected
                         </button>
@@ -837,10 +965,10 @@
 
                     <!-- Table -->
                     <div class="table-responsive">
-                        <table class="ss-table border">
+                        <table  id="savedSearchTable" class="ss-table border">
                             <thead>
                                 <tr>
-                                    <th><input type="checkbox" class="ss-checkbox"></th>
+                                    <th><input type="checkbox" id="selectAll" class="ss-checkbox"></th>
                                     <th>Name</th>
                                     <!-- <th>Search Type</th> -->
                                     <th>Filters Summary</th>
@@ -851,45 +979,36 @@
                                     <th>Actions</th>
                                 </tr>
                             </thead>
-
+                                @php
+                                 $i = 1;
+                                @endphp
                             <tbody>
 
                                 @forelse($list_saved_searches as $search_list)
                              
                                 <!-- Row -->
-                                <tr class="ss-row">
-                                    <td><input type="checkbox" class="ss-checkbox"></td>
+                                <tr data-id="{{ $i }}" data-name="{{ $search_list->id }}" class="ss-row">
+                                    <td><input type="checkbox" class="ss-checkbox select-item"></td>
                                     <td class="ss-name">{{ucfirst($search_list->name)}}</td>
                                     <td class="ss-type">Read more</td>
                                     <td><span class="ss-match">0</span></td>
-                                    <td>-</td>
+                                    @php
+                                      $dateOnly = date('Y-m-d', strtotime($search_list->created_at));
+                                    @endphp
+                                    <td>{{$dateOnly}}</td>
                                     <!-- <td><span class="ss-alert">Realtime</span></td> -->
-                                    <td>2026-04-01</td>
-                                    <!-- <td><span class="ss-toggle"></span></td> -->
-                                    <!-- <td>
-                                        <div class="alert-toggle-wrapper">
-                                            <label class="alert-toggle">
-                                                <input type="checkbox" class="alert-toggle-input" checked>
-
-                                                <span class="alert-toggle-slider"></span>
-                                            </label>
-                                        </div>
-                                    </td> -->
+                                    <td>-</td>
                                     <td class="ss-actions">
                                         <button class="btn ss-run">
-                                            <!-- <i class="fi fi-rr-play mr-1"></i> -->
                                             Run
                                         </button>
                                         <button class="btn ss-edit">
-                                            <!-- <i class="fi fi-rr-edit mr-1"></i> -->
                                             Edit
                                         </button>
-                                        <button class="btn ss-duplicate">
-                                            <!-- <i class="fi fi-rr-copy mr-1"></i>  -->
+                                        <button class="btn ss-duplicate btn-duplicate">
                                             Duplicate
                                         </button>
-                                        <button class="btn ss-delete">
-                                            <!-- <i class="fi fi-rr-trash"></i> -->
+                                        <button  class="btn ss-delete btn-delete" data-name="single-delete">
                                             Delete
                                         </button>
                                     </td>

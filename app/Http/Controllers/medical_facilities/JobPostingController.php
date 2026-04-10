@@ -818,7 +818,7 @@ class JobPostingController extends Controller
 
         if($request->save == 2){
             session()->forget('jobId');
-
+            sendJobAlertEmails();
             // Send database notifications to all nurses with app notifications enabled
             $nurses = User::whereHasAppNotifications()->get();
             foreach ($nurses as $nurse) {
