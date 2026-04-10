@@ -157,12 +157,12 @@
                             Visible to Agencies
                           </label>
                         </div>
-                        <div class="form-check mt-3">
+                        <!-- <div class="form-check mt-3">
                           <input class="form-check-input" type="checkbox" value="1" {{ Auth::guard('nurse_middle')->user()->individuals =='Yes'? 'checked' : '' }} id="visibleToIndividuals" name="individuals">
                           <label class="form-check-label" for="visibleToAgencies">
                             Visible to Individuals (Nurse care at home)
                           </label>
-                        </div>
+                        </div> -->
                         <label class="form-check-label  mt-3" for="availableNow">
                           <h6> Profile Status: </h6>
                         </label>
@@ -190,12 +190,30 @@
                             ?>
                             <select class="form-control" name="start_job_dropdown" id="start_job_dropdown">
                                 <option value="">Select</option>
-                                <option value="Immediately" @if(!empty($user) && $user->start_job_dropdown == "Immediately") selected @endif>Immediately</option>
-                                <option value="Within 2 weeks" @if(!empty($user) && $user->start_job_dropdown == "Within 2 weeks") selected @endif>Within 2 weeks</option>
-                                <option value="Within 1 month" @if(!empty($user) && $user->start_job_dropdown == "Within 1 month") selected @endif>Within 1 month</option>
-                                <option value="More than 1 month" @if(!empty($user) && $user->start_job_dropdown == "More than 1 month") selected @endif>More than 1 month</option>
+
+                                <option value="1" @if(empty($user) || $user->start_job_dropdown == "1") selected @endif>
+                                    Flexible (default)
+                                </option>
+                                <option value="2" @if(!empty($user) && $user->start_job_dropdown == "2") selected @endif>
+                                    Same-day (Instant Connect)
+                                </option>
+                                <option value="3" @if(!empty($user) && $user->start_job_dropdown == "3") selected @endif>
+                                    Within 48h (Last Minute)
+                                </option>
+                                <option value="4" @if(!empty($user) && $user->start_job_dropdown == "4") selected @endif>
+                                    Within 7 Days (Immediate Start)
+                                </option>
+                                <option value="5" @if(!empty($user) && $user->start_job_dropdown == "5") selected @endif>
+                                    Within 2 Weeks
+                                </option>
+                                <option value="6" @if(!empty($user) && $user->start_job_dropdown == "6") selected @endif>
+                                    Within 5 Weeks
+                                </option>
+                                <option value="7" @if(!empty($user) && $user->start_job_dropdown == "7") selected @endif>
+                                    Within 7 Weeks
+                                </option>
                             </select>    
-                        </div>        
+                        </div>
                         <div class="form-group drp--clr">
                             <label class="form-label" for="input-1">Do you need help with any of the following? </label>
                             

@@ -1,3 +1,23 @@
+@php
+use Carbon\Carbon;
+@endphp
+<style>
+.urgent-tag {
+    background: #000000ff;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 12px;
+    height: fit-content;
+    position: absolute;
+    margin-top: -68px;
+    width: 8%;
+    margin-left: -67px;
+    display: flex;
+    justify-content: space-around;
+    }
+</style>
 @foreach ($jobs as $job)
 <div class="job-card " >
         <!-- Top Row: Company Logo & Position -->
@@ -122,7 +142,16 @@
                     </div>
                     <div>
                         <div class="heart-toggle" data-active="0">
-                            <i data-lucide="heart"></i>
+                            @php
+                            $user_id = Auth::guard("nurse_middle")->user()->id;
+                            $liked = DB::table('nurse_job_likes')
+                            ->where('nurse_id', $user_id)
+                            ->where('job_id', $job->id)
+                            ->exists();
+                            @endphp
+                            <a href="javascript:void(0)" class="job-like-btn" data-job="{{$job->id}}">
+                                <i class="{{ $liked ? 'fas fa-heart text-danger' : 'far fa-heart' }}"></i>
+                            </a>
                         </div>
                         @if($job->urgent_hire == 1)
                         <div class="urgent-tag">Urgent Hiring</div>
@@ -259,12 +288,25 @@
                     == 1 ? 'st' : ($job->experience_level == 2 ? 'nd' : ($job->experience_level == 3 ? 'rd' : 'th'))
                     }} Year</div>
                 <div>
-                    <span class="salary"><strong>Salary:</strong> ${{ $job->per_salary_min }}/hr </span>
+                    @php
+                        if ($job->main_emp_type == 1) {
+                        $min = $job->per_salary_min;
+                        $max = $job->per_salary_max;
+                        $per = $job->salary_permanent;
+                        } elseif ($job->main_emp_type == 2) {
+                        $min = $job->fixed_term_salary_min;
+                        $max = $job->fixed_term_salary_max;
+                        $per = $job->salary_range_fix_term;
+                        } elseif ($job->main_emp_type == 3) {
+                        $min = $job->temporary_salary_min;
+                        $max = $job->temporary_salary_max;
+                        $per = $job->salary_range_temporary;
+                        }
+                    @endphp
+                    <span class="salary"><strong>Salary:</strong> ${{ $min }} - {{ $max }} {{ $per }} </span>
                 </div>
-                <div class="last-date"><strong> Last Date:</strong>
-                    <?php
-                                        echo $formattedDate = date("d M Y", strtotime($job->application_deadline));
-                                      ?>
+                <div class="last-date"><strong>Last Date :</strong>
+                 {{ \Carbon\Carbon::parse($job->custom_expiry_date)->format('d M Y') ?? "N/A"}}
                 </div>
             </div>
     

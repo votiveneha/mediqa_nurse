@@ -1022,8 +1022,8 @@ p.highlight-text {
                           </td>  
                           <td>
                             <div class="d-flex gap-2">
-                            <a href="{{ url('/nurse/my-profile') }}?page=profession&&btn=edit&&profession_id={{ $exp_data->profession_id }}" class="btn btn-dark px-3 py-2"><i class="fa fa-pencil"></i></a>
-                            <a style="cursor:pointer" data-item="{{ $exp_data->profession_id }}" data-key="{{ $exp_data->experience_id }}" data-id="{{ $exp_data->specialties }}" data-count="{{ $i }}" class="btn btn-danger px-4 py-2 @if($exp_data->row_status == 'complete') delete-specialty-btn @else delete-draft-btn @endif"><i class="fa fa-trash"></i></a>
+                            <a href="{{ url('/nurse/my-profile') }}?page=profession&&btn=edit&&profession_id={{ $exp_data->profession_id }}" class="btn btn-dark px-3 py-2"><i class="fas fa-pencil-alt"></i></a>
+                            <a style="cursor:pointer" data-item="{{ $exp_data->profession_id }}" data-key="{{ $exp_data->experience_id }}" data-id="{{ $exp_data->specialties }}" data-count="{{ $i }}" class="btn btn-danger px-4 py-2 @if($exp_data->row_status == 'complete') delete-specialty-btn @else delete-draft-btn @endif"><i class="fas fa-trash"></i></a>
                             </div>
                           </td>
                         </tr>       
@@ -11263,7 +11263,7 @@ $.each(specialityTree, function (parentKey, children) {
     //   });
     // },
     // hiddenInput: "full_number",
-    initialCountry: "{{ Auth::guard('nurse_middle')->user()->country_iso }}",
+    initialCountry: "{{ Auth::guard('nurse_middle')->user()->country }}",
     // // localizedCountries: { 'de': 'Deutschland' },
     nationalMode: false,
     // // onlyCountries: ['us', 'gb', 'ch', 'ca', 'do'],

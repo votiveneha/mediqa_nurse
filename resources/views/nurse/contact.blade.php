@@ -55,7 +55,7 @@
         <div class="col-lg-12 mb-40">
           <div class="user_btns">
             <a href="#" class="btn btn-default btn-shadow hover-up">Nurses & Midwives</a>
-            <a href="{{ route('nurse.chat.index')}}" class="btn btn-default btn-shadow hover-up">Healthcare Facilities</a>
+            <a href="#" class="btn btn-default btn-shadow hover-up">Healthcare Facilities</a>
             <a href="#" class="btn btn-default btn-shadow hover-up">Agencies</a>
             <a href="#" class="btn btn-default btn-shadow hover-up">CPD/CE Providers</a>
           </div>

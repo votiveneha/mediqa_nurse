@@ -81,7 +81,7 @@ class ChatApiController extends Controller
 
         if (!empty($messageIds)) {
             $messagesQuery->update(['is_read' => 1, 'read_at' => now()]);
-            
+
             // Broadcast read status to sender
             try {
                 broadcast(new \App\Events\MessageStatusUpdated($id, $messageIds, 'read'))->toOthers();
@@ -198,7 +198,7 @@ class ChatApiController extends Controller
         $message = Message::findOrFail($id);
 
         $conversation = Conversation::find($message->conversation_id);
-        
+
         if (!$conversation || !$conversation->isParticipant($user->id)) {
             return response()->json([
                 'success' => false,
@@ -381,8 +381,8 @@ class ChatApiController extends Controller
             ], 403);
         }
 
-        $blockedUserId = $user->id === $conversation->nurse_id 
-            ? $conversation->healthcare_id 
+        $blockedUserId = $user->id === $conversation->nurse_id
+            ? $conversation->healthcare_id
             : $conversation->nurse_id;
 
         BlockedUser::create([

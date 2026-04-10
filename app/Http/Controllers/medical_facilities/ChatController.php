@@ -85,7 +85,7 @@ class ChatController extends Controller
     public function nursesList()
     {
         $user = Auth::guard('healthcare_facilities')->user();
-        
+
         $nurses = User::where('role', 1)
             ->where('status', 1)
             ->where('user_stage', '4') // Complete profile
@@ -121,7 +121,7 @@ class ChatController extends Controller
     public function jobConversations($jobId)
     {
         $user = Auth::guard('healthcare_facilities')->user();
-        
+
         $conversations = Conversation::with(['nurse', 'latestMessage'])
             ->where('healthcare_id', $user->id)
             ->where('job_id', $jobId)
@@ -145,7 +145,7 @@ class ChatController extends Controller
     public function applicationsWithChat()
     {
         $user = Auth::guard('healthcare_facilities')->user();
-        
+
         $applications = DB::table('nurse_applications')
             ->join('users', 'nurse_applications.nurse_id', '=', 'users.id')
             ->leftJoin('conversations', function($join) use ($user) {

@@ -146,14 +146,17 @@
                 <div class="job-header">
 
                     <div class="job-detail-left">
-
+                        @if($healthcare_data->profile_img != "nurse/assets/imgs/nurse06.png")    
                         <img alt="{{ $healthcare_data->name }}" src="{{ asset('healthcareimg/uploads') }}/{{ $healthcare_data->profile_img }}">
-
+                        @else
+                        <img alt="" src="{{ asset('nurse/assets/imgs/nurse06.png') }}">
+                        @endif
                         <div class="title-wrap">
                             <h1 class="job-title">{{ $healthcare_data->name }}</h1>
 
                             <div class="job-submeta">
                                 @php
+                                    $sector = '';
                                     if($healthcare_data->sector == 1){
                                         $sector = 'Public & Government';
                                     }
@@ -186,7 +189,7 @@
                                     $commaSeparated_work = implode(',', $work_name_arr);
                                 @endphp
                                 <div>Sector: {{ $sector }}</div>
-                                <div>Operating Country: {{ $country->name }}</div>
+                                <div>Operating Country: @if(!empty($country)){{ $country->name }}@endif</div>
                                 <div>Facility Services & Care Areas: {{ $commaSeparated_work  }}</div>
                             </div>
                                     
@@ -225,13 +228,15 @@
                             @endif
                         </div>
                         @endif
+                        @if(!empty($healthcare_data->accreditations_certifications))
                         <div class="card">
+                            
                             <h2>Accreditations & Certifications:</h2>
                             @php
                             $get_accreditation = (!empty($healthcare_data->accreditations_certifications))?json_decode($healthcare_data->accreditations_certifications):[];  
                             //print_r($get_accreditation);
                             @endphp
-                            
+                            @if(!empty($get_accreditation))
                             @foreach($get_accreditation as $accreditation)
                                 @foreach($accreditation as $index=>$accred)
                                     @php
@@ -248,7 +253,10 @@
                                     </ul>
                                 @endforeach
                             @endforeach
+                            @endif
                         </div>
+                        @endif
+                        @if(!empty($healthcare_data->work_environment_size))
                         <div class="card">
                             <h2>Work Environment Details</h2>
                             <h4>Size</h4>
@@ -270,45 +278,70 @@
                               $staff_data = DB::table("healthcare_profile_dropdowns")->where("id",$healthcare_data->staff_wellbeing_programs)->first(); 
                             @endphp
                             <h4>Staff wellbeing programs</h4>
-                            <p>{{ $staff_data->name }}</p>
+                            <p>@if(!empty($staff_data)){{ $staff_data->name }}@endif</p>
                         </div>
+                        @endif
+                        
                         <div class="card">
+                            @if(!empty($healthcare_data) && !empty($healthcare_data->technology_emr_system))
                             <h2>Technology & Equipment</h2>
                             <h4>EMR/EHR System</h4>
                             <ul>
+                                
                                 @foreach (json_decode($healthcare_data->technology_emr_system) as $technology_emr_system)
                                     @php
                                         $emr_data = DB::table("healthcare_profile_dropdowns")->where("id",$technology_emr_system)->first(); 
                                     @endphp
                                     <li>{{ $emr_data->name }}</li>
                                 @endforeach
+                                
                             </ul>
-                            <h4>Equipment & Facilities</h4>
+                            @endif
+                            
                             @php
                                 $equipment_data = DB::table("healthcare_profile_dropdowns")->where("id",$healthcare_data->equipment_facilities)->first(); 
                             @endphp
+                            @if(!empty($staff_data))
+                            <h4>Equipment & Facilities</h4>
                             <p>{{ $equipment_data->name }}</p>
-                            <h4>Digital Health Integration</h4>
-                            <ul>
-                                @foreach (json_decode($healthcare_data->digital_health_integration) as $digital_health_integration)
-                                    @php
-                                        $digital_health_data = DB::table("healthcare_profile_dropdowns")->where("id",$digital_health_integration)->first(); 
-                                    @endphp
-                                    <li>{{ $digital_health_data->name }}</li>
-                                @endforeach
-                            </ul>
+                            @endif
+                           @php
+                                $digital_health_integrations = json_decode($healthcare_data->digital_health_integration ?? '[]', true) ?? [];
+                            @endphp
+
+                            @if(!empty($healthcare_data) && !empty($digital_health_integrations))
+                                <h4>Digital Health Integration</h4>
+                                <ul>
+                                    @foreach($digital_health_integrations as $digital_health_integration)
+                                        @php
+                                            $digital_health_data = DB::table('healthcare_profile_dropdowns')
+                                                ->where('id', $digital_health_integration)
+                                                ->first();
+                                        @endphp
+
+                                        @if($digital_health_data)
+                                            <li>{{ $digital_health_data->name }}</li>
+                                        @endif
+                                    @endforeach
+                                </ul>
+                            @endif
                         </div>
                         
                     </div>
                     <div class="right-col">
                         <div class="card">
-                            <h2>Professional Development</h2>
+                            
                             @php
                                 $professional_data = DB::table("healthcare_profile_dropdowns")->where("id",$healthcare_data->professional_development)->first(); 
                             @endphp
-                            <p>{{ $professional_data->name }}</p>
+                            @if(!empty($staff_data))
+                            <h2>Professional Development</h2>
+                            <p>@if(!empty($professional_data)){{ $professional_data->name }}@endif</p>
+                            @endif
                         </div>
+                        @if(!empty($healthcare_data->profile_visiblity))
                         <div class="card">
+                            
                             <h2>Facility Profile Visibility</h2>
                             @php
                                 $visiblity = "";
@@ -323,15 +356,19 @@
                                 $role_position_data = DB::table("role_position")->where("id",$healthcare_data->role_position)->first(); 
                             @endphp
                             <p><span class="badge public">{{ $visiblity }}</span></p>
+
                         </div>
+                        @endif
+                        @if(!empty($healthcare_data->contact_person_name))
                         <div class="card">
                             <h2>Contact Person</h2>
                             <p><b>Name:</b> {{ $healthcare_data->contact_person_name }}</p>
-                            <p><b>Role:</b> {{ $role_position_data->name }}</p>
+                            <p><b>Role:</b> @if(!empty($role_position_data)){{ $role_position_data->name }}@endif</p>
                             <p><b>Email:</b> {{ $healthcare_data->email }}</p>
                             <p><b>Phone:</b> {{ $healthcare_data->phone }}</p>
                             <h4>Preferred Communication Method</h4>
                             <ul>
+                                @if(!empty($healthcare_data) && !empty($healthcare_data->communication_method))
                                 @foreach (json_decode($healthcare_data->communication_method) as $communication_method)
                                     @if($communication_method == 1)
                                     <li>Email</li>
@@ -343,9 +380,11 @@
                                     <li>In App</li>
                                     @endif
                                 @endforeach
+                                @endif
                             </ul>
                             
                         </div>
+                        @endif
                     </div>
                 </div>
             </div>

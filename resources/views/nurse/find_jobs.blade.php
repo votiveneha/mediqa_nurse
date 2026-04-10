@@ -1,7 +1,19 @@
 @extends('nurse.layouts.layout')
 @section('css')
-
+@php
+use Carbon\Carbon;
+@endphp
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3/dist/style.min.css" />
 <style>
+  
+  .agency_filter_show .select2-container {
+  width: 100% !important;
+  }
+  
+  .agency_filter_show .select2-selection--multiple {
+  min-height: 42px;
+  border-radius: 6px;
+  }
   /* Search bar */
   .search-bar {
     display: flex;
@@ -731,7 +743,7 @@
     color: #666666;
   }
 
-  .top_filter.agency_filter select#agency {
+  .top_filter.agency_filter_show select#agency {
     background: #fff;
     height: 43px;
     color: #666666;
@@ -760,11 +772,30 @@
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
-    padding-right: 8px;
+    /* padding-right: 8px; */
     margin-left: -10px;
     justify-content: space-between;
+    width: 100% !important;
   }
-
+  /* 23/03  */
+  .top_filter{
+    width: 100% !important;
+  }
+  .top_filter.keywords_filter input#keywords{
+    width: 100% !important;
+  }
+  .form-group .top_filter .location_filter{
+    width: 100% !important;
+  }
+  .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #000;
+    border: 1px solid #000;
+    color: #fff;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: #fff !important;
+}
+/* ==================== */
   .job-card.item {
     margin-top: 0px;
   }
@@ -1114,9 +1145,31 @@
     opacity: 1;
     visibility: visible;
   }
+  .facility_dropdown .select2-container{
+  padding:0 !important;
+  border:0 !important;
+  }
+  /* .jobTitle_filter{
+    width: auto !important;
+  } */
+   .btn-cross{
+      border: none;
+      background: none;
+   }
+
+   .drawer-header-edit{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+   }
+
+   table.dataTable thead .sorting_desc:after {
+    display: none !important;
+}
 </style>
 @endsection
 @section('content')
+
 <main class="main find_job_div">
   <section class="section-box mt-30">
     <div class="container">
@@ -1196,30 +1249,44 @@
         </div>
         <!-- Horizontal Search Bar with Labels -->
         <div class="search-bar">
-          <div class="top_filter keywords_filter">
-            <label for="keywords">Keywords</label>
-            <input type="text" id="keywords" placeholder="e.g. ICU, aged care, night shift">
+          <div class="top_filter keywords_filter jobTitle_filter">
+            <label for="keywords">Job Title</label>
+            <input type="text" id="keywords" placeholder="Search by role or specialty">
           </div>
 
           <div class="form-group top_filter location_filter">
-            <label for="agency">Location</label>
-            <div class="custom-multiselect">
-              <div class="select-box">Select Location</div>
-              <div class="checkbox-options">
-                @if(!empty($registered_countries))
-                @foreach ($registered_countries as $code)
-                <label>
-                  <input type="checkbox" class="location-checkbox" value="{{ $code }}">{{ country_name($code) }}
-                </label>
-
-                @endforeach
-                @endif
-              </div>
-            </div>
+            <label for="job_start">Job Start</label>
+              <select id="job_start" >
+                <option value="any">Any</option>
+                <option value="instant">Instant Connect</option>
+                <option value="last_minute">Last Minute</option>
+                <option value="immediate">Immediate Start</option>
+              </select>
           </div>
           <!-- Hidden input to store selected values -->
           <input type="hidden" id="selectedLocations" name="locations">
-          <div class="top_filter agency_filter">
+
+          <div class="top_filter agency_filter_show facility_dropdown">
+            <label for="agency">Facility / Agency</label>
+            <ul id="agency_filter" style="display:none;">
+                             
+              @if(!empty($agencies_list))
+              @foreach ($agencies_list as $agency)
+              <li data-value="{{ $agency->healthcare_id }}">{{ $agency->health_care_name }}</li>
+              @endforeach
+              @endif
+            </ul>
+            <select class="js-example-basic-multiple addAll_removeAll_btn" data-list-id="agency_filter" name="agency_ids[]" multiple></select>
+            <!-- <select class="js-example-basic-multiple addAll_removeAll_btn" id="agency" name="agency_ids[]" multiple="multiple"
+              style="width:100%">
+              @foreach ($agencies_list as $agency)
+              <option value="{{ $agency->healthcare_id }}">
+                {{ $agency->health_care_name }}
+              </option>
+              @endforeach
+            </select> -->
+          </div>
+          {{-- <div class="top_filter agency_filter">
             <label for="agency">Facility/Agency</label>
             <select id="agency">
               <option value="">Select Agency</option>
@@ -1227,10 +1294,10 @@
                 <option value="{{ $agency->healthcare_id }}">{{ $agency->health_care_name }}</option>
                 @endforeach
             </select>
-          </div>
+          </div> --}}
           <?php 
-                   $find_job_sort =  DB::table('find_job_sort')->where('status',1)->get();
-                ?>
+              $find_job_sort =  DB::table('find_job_sort')->where('status',1)->get();
+          ?>
           <div class="top_filter sort_by_filter">
             <label for="sort">Sort By</label>
             <select onchange="sortBy(this.value)">
@@ -1248,9 +1315,9 @@
                 <li class="filter-item">
                   <label for="toggleRegisteredPreferences" class="toggle-label">
                     Use My Registered Preferences
-                    <div class="auto_fill_message">Filters are Auto-filled from your preferences</div>
+                    {{-- <div class="auto_fill_message">Filters are Auto-filled from your preferences</div>
                     <div class="auto_empty_message">Filters are empty/default and not Auto-filled<br> from your
-                      preferences</div>
+                      preferences</div> --}}
                   </label>
                   &nbsp;
                   <label class="switch">
@@ -1259,7 +1326,7 @@
                   </label>
                 </li>
                 <li class="filter-item">
-                  <label for="toggleRegisteredPreferences" class="toggle-label">
+                  <label for="toggleUpdatePreferences" class="toggle-label">
                     Update My Preferences
                     <!-- <div class="tooltip_preferences" id="tooltipPref">
                                   Temporary filtering, your current filter choices are not saved
@@ -1610,12 +1677,26 @@
                         == 1 ? 'st' : ($job->experience_level == 2 ? 'nd' : ($job->experience_level == 3 ? 'rd' : 'th'))
                         }} Year</div>
                       <div>
-                        <span class="salary"><strong>Salary:</strong> ${{ $job->per_salary_min }}/hr </span>
+                        @php
+                        if ($job->main_emp_type == 1) {
+                        $min = $job->per_salary_min;
+                        $max = $job->per_salary_max;
+                        $per = $job->salary_permanent;
+                        } elseif ($job->main_emp_type == 2) {
+                        $min = $job->fixed_term_salary_min;
+                        $max = $job->fixed_term_salary_max;
+                        $per = $job->salary_range_fix_term;
+                        } elseif ($job->main_emp_type == 3) {
+                        $min = $job->temporary_salary_min;
+                        $max = $job->temporary_salary_max;
+                        $per = $job->salary_range_temporary;
+                        }
+                        @endphp
+                        <span class="salary"><strong>Salary:</strong> ${{ $min }} - {{ $max }} {{ $per }} </span>
                       </div>
-                      <div class="last-date"><strong> Last Date:</strong>
-                        <?php
-                                    echo $formattedDate = date("d M Y", strtotime($job->application_deadline));
-                                  ?>
+
+                      <div class="last-date"><strong>Last Date :</strong>
+                       {{ \Carbon\Carbon::parse($job->custom_expiry_date)->format('d M Y') ?? "N/A"}}
                       </div>
                     </div>
 
@@ -1766,171 +1847,179 @@
             <h6>Manage Saved Searches</h6>
             <button id="deleteSelected" style="margin-top:10px;">Delete Selected</button>
           </div>
-          <table id="savedSearchTable" class="table">
-            <thead>
-              <tr>
-                <th><input type="checkbox" id="selectAll"></th>
-                <th>Name</th>
-                <th>Search Type</th>
-                <th>Filters summary</th>
-                <th>Matches Today</th>
-                <th>Alert</th>
-                <th>Delivery</th>
-                <th>Created</th>
-                <th>Last run</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if($saved_searches_data->isNotEmpty())
-              @php
-              $i = 1;
-              @endphp
-              @foreach($saved_searches_data as $saved_searches)
-              <tr data-id="{{ $i }}" data-value="{{ $saved_searches->searches_id }}"
-                data-filters='{{ $saved_searches->filters }}' data-name='{{ $saved_searches->delivery }}'>
-                <td>
-                  @if($saved_searches->status_my_preference != 1 && $i != 0)
-                  <input type="checkbox" class="select-item">
-                  @endif
-                </td>
-                {{-- <td>Saved search {{ $i }}</td> --}}
-                <td>
-                  {{-- My Preferences --}}
-                  @if($saved_searches->status_my_preference == 1)
-                  My Preferences
+          <div class="table-responsive">
+            <table id="savedSearchTable" class="table">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="selectAll"></th>
+                  <th>Name</th>
+                  <th>Search Type</th>
+                  <th>Filters summary</th>
+                  <th>Matches Today</th>
+                  <th>Alert</th>
+                  <th>Delivery</th>
+                  <th>Created</th>
+                  <th>Last run</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if($saved_searches_data->isNotEmpty())
+                @php
+                $i = 1;
+                @endphp
+                @foreach($saved_searches_data as $saved_searches)
+                 @php
+                      $filters = json_decode($saved_searches->filters, true);
 
-                  {{-- Named saved search --}}
-                  @elseif(!empty($saved_searches->name))
-                  {{ $saved_searches->name }}
+                      @endphp
+                      @php
+                          $nurse_type_ids = json_decode($saved_searches->filter_nurse_type, true) ?? [];
+                          $specilaity_ids = json_decode($saved_searches->filter_speciality, true) ?? [];
+                          $filter_employment_type = json_decode($saved_searches->filter_employment_type, true) ?? [];
+                          $filter_sector = $saved_searches->filter_sector;
+                          $filter_work_environment = json_decode($saved_searches->filter_work_environment, true) ?? [];
+                          $filter_benefits_preferences = json_decode($saved_searches->filter_benefits_preferences, true) ?? [];
+                          //$filter_benefits_preferences = json_decode($saved_searches->filter_benefits_preferences, true) ?? [];
 
-                  {{-- Auto numbered --}}
-                  @else
-                  Saved search {{ $i }}
-                  @endif
-                </td>
-                <td>{{ $saved_searches->type }}</td>
-                <td>
-                  <div class="filter-summary">
+                          
+                          $nurse_type_names = [];
+                          $specilaity_names = [];
 
-                    @php
-                    $filters = json_decode($saved_searches->filters, true);
+                          if (!empty($nurse_type_ids) && is_array($nurse_type_ids)) {
+                              $nurse_type_names = \DB::table('practitioner_type')
+                                  ->whereIn('id', $nurse_type_ids)
+                                  ->pluck('name')
+                                  ->toArray();
+                          }
 
-                    @endphp
-                    @if(!empty($filters))
-                    @php
-                    $firstFilterValue = collect($filters)
-                    ->filter(fn($v) => !empty($v))
-                    ->first();
-                    @endphp
+                          
 
-                    @if(is_array($firstFilterValue))
-                    <span class="chip-new">{{ implode(', ', $firstFilterValue) }}</span>
-                    @elseif($firstFilterValue)
-                    <span class="chip-new">{{ $firstFilterValue }}</span>
-                    @endif
-                    <a href="#" class="btn-readmore" data-id="{{ $saved_searches->searches_id }}"
-                      data-filters='{{ $saved_searches->filters }}'>Read More</a>
-                    @endif
-
-
-                  </div>
-                </td>
-                <td>
-                  <span class="match-count badge bg-info text-dark">
-                    {{ $search->matches_today ?? 0 }}
-                  </span>
-                </td>
-                <td><span class="alert-pill alert-on">{{ $saved_searches->alert }}</span></td>
-                <td>
-                  @if($saved_searches->delivery === 'Email')
-                  <i class="fa-solid fa-envelope"></i>
-                  @elseif($saved_searches->delivery === 'In-app')
-                  <i class="fa-solid fa-laptop"></i>
-                  @elseif($saved_searches->delivery === 'SMS')
-                  <i class="fa-solid fa-comment-sms"></i>
-                  @endif
-                  <!-- {{ $saved_searches->delivery }} -->
-                </td>
-                <td>
-                  @php
-                  $dateOnly = date('Y-m-d', strtotime($saved_searches->created_at));
-                  $today = date('Y-m-d');
-                  @endphp
-
-                  @if($dateOnly === $today)
-                  Today
-                  @else
-                  {{ $dateOnly }}
-                  @endif
-                </td>
-                <td class="last_run_at-{{ $saved_searches->searches_id }}">
-                  {{ $saved_searches->last_run_at }}
-                </td>
-                <td class="actions">
-                  <div class="alert_box d-flex align-items-center gap-1">
-                    <div class="alert-toggle-wrapper">
-                      <label class="alert-toggle">
-                        <input type="checkbox" class="alert-toggle-input" @if($saved_searches->alert != "Off") checked
-                        @endif data-id="{{ $saved_searches->searches_id }}">
-                        <span class="alert-toggle-slider"></span>
-                      </label>
-                    </div>
-
-                    <button class="btn-run" data-id="{{ $saved_searches->searches_id }}">Run</button>
-                    <button class="btn-edit" data-id="{{ $saved_searches->searches_id }}">Edit</button>
-                    <button class="btn-duplicate">Duplicate</button>
+                          
+                      @endphp 
+                <tr data-id="{{ $i }}" data-value="{{ $saved_searches->searches_id }}"
+                  data-filters='{{ $saved_searches->filters }}' 
+                  data-nurse-type='@json($nurse_type_ids)'
+                  data-speciality-type='@json($specilaity_ids)'
+                  data-employeement-type='@json($filter_employment_type)'
+                  data-sector-type='@json($filter_sector)'
+                  data-environment-type='@json($filter_work_environment)'
+                  data-benefits-type='@json($filter_benefits_preferences)'
+                  >
+                  <td>
                     @if($saved_searches->status_my_preference != 1 && $i != 0)
-                    <button class="btn-delete" data-name="single-delete">Delete</button>
+                    <input type="checkbox" class="select-item">
                     @endif
+                  </td>
+                  {{-- <td>Saved search {{ $i }}</td> --}}
+                  <td>
+                    {{-- My Preferences --}}
+                    @if($saved_searches->status_my_preference == 1)
+                    My Preferences
 
-                  </div>
-                </td>
-              </tr>
+                    {{-- Named saved search --}}
+                    @elseif(!empty($saved_searches->name))
+                    {{ $saved_searches->name }}
+
+                    {{-- Auto numbered --}}
+                    @else
+                    Saved search {{ $i }}
+                    @endif
+                  </td>
+                  <td>{{ $saved_searches->type }}</td>
+                  <td>
+                    <div class="filter-summary">
+                       @php 
+                          $filter_data = (array)json_decode($saved_searches->filters);
+                          //print_r($filter_data);
 
 
-              <!-- @if($filters)
-                  <tr class="filter-summary-row">
-                    <td></td>
-                    <td colspan="5">
-                      <div class="filter-summary">
-                        @foreach($filters as $key => $value)
-                          @if(is_array($value) && isset($value['min']) && isset($value['max']))
-                            {{-- Salary Range --}}
-                            <div class="filter-line">
-                              <strong>{{ ucwords(str_replace('_', ' ', $key)) }}:</strong>
-                              <span class="chip">${{ number_format($value['min']) }} – ${{ number_format($value['max']) }}</span>
-                            </div>
+                          
 
-                          @elseif(is_array($value) && !empty($value))
-                            {{-- Array fields (like multiple selections) --}}
-                            <div class="filter-line">
-                              <strong>{{ ucwords(str_replace('_', ' ', $key)) }}:</strong>
-                              @foreach($value as $item)
-                                <span class="chip">{{ $item }}</span>
-                              @endforeach
-                            </div>
+                          $filter_summury = filterSummuryData($filter_data);
 
-                          @elseif(!is_array($value) && !empty($value))
-                            {{-- Simple key-value pairs --}}
-                            <div class="filter-line">
-                              <strong>{{ ucwords(str_replace('_', ' ', $key)) }}:</strong>
-                              <span class="chip">{{ $value }}</span>
-                            </div>
-                          @endif
-                        @endforeach
+                          //($filter_summury);
+                       
+                       @endphp
 
+                      @if(!empty($nurse_type_names))
+                          <span class="chip-new">{{ $nurse_type_names[0] }}</span>
+                          <a href="#" class="btn-readmore btn btn-default" data-id="{{ $saved_searches->searches_id }}"
+                        data-filters='{{ $filter_summury }}' 
+                        data-nurse-type='@json($nurse_type_names)'
+                        data-speciality-type='@json($specilaity_names)'
+                        data-employeement-type='@json($filter_employment_type)'
+                        data-sector-type='@json($filter_sector)'
+                        data-environment-type='@json($filter_work_environment)'
+                        data-benefits-type='@json($filter_benefits_preferences)'
+                        >Read More</a>
+                      @endif
+
+                      
+                      
+                    </div>
+                  </td>
+                  <td>
+                    <span class="match-count badge bg-info text-dark">
+                      {{ $search->matches_today ?? 0 }}
+                    </span>
+                  </td>
+                  <td><span class="alert-pill alert-on">{{ $saved_searches->alert }}</span></td>
+                  <td>
+                    @if($saved_searches->delivery === 'Email')
+                    <i class="fa fa-envelope"></i>
+                    @elseif($saved_searches->delivery === 'In-app')
+                    <i class="fa fa-laptop"></i>
+                    @elseif($saved_searches->delivery === 'SMS')
+                    <i class="fa fa-comment"></i>
+                    @endif
+                    <!-- {{ $saved_searches->delivery }} -->
+                  </td>
+                  <td>
+                    @php
+                    $dateOnly = date('Y-m-d', strtotime($saved_searches->created_at));
+                    $today = date('Y-m-d');
+                    @endphp
+
+                    @if($dateOnly === $today)
+                    Today
+                    @else
+                    
+                    {{ $dateOnly ? \Carbon\Carbon::parse($dateOnly)->format('d/m/Y') : '' }}
+                    @endif
+                  </td>
+                  <td class="last_run_at-{{ $saved_searches->searches_id }}">
+                    {{ $saved_searches->last_run_at ? \Carbon\Carbon::parse($saved_searches->last_run_at)->format('d/m/Y') : '' }}
+                  </td>
+                  <td class="actions">
+                    <div class="alert_box d-flex align-items-center gap-1">
+                      <div class="alert-toggle-wrapper">
+                        <label class="alert-toggle">
+                          <input type="checkbox" class="alert-toggle-input" @if($saved_searches->alert != "Off") checked
+                          @endif data-id="{{ $saved_searches->searches_id }}">
+                          <span class="alert-toggle-slider"></span>
+                        </label>
                       </div>
-                    </td>
-                  </tr>
-                  @endif -->
-              @php
-              $i++;
-              @endphp
-              @endforeach
-              @endif
-            </tbody>
-          </table>
+
+                      <button class="btn-run" data-id="{{ $saved_searches->searches_id }}">Run</button>
+                      <button class="btn-edit {{ ($saved_searches->status_my_preference == 1 && $i != 0) ? 'edit-search-btn' : '' }}"  data-id="{{ $saved_searches->searches_id }}"> Edit </button>                    
+                    <button class="btn-duplicate">Duplicate</button>
+                      @if($saved_searches->status_my_preference != 1 && $i != 0)
+                      <button class="btn-delete" data-name="single-delete">Delete</button>
+                      @endif
+
+                    </div>
+                  </td>
+                </tr>
+
+                @php
+                $i++;
+                @endphp
+                @endforeach
+                @endif
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -1941,6 +2030,123 @@
   <!-- Save Search Modal -->
   <div class="toast" id="toast"></div>
 </main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js"></script>
+
+<script>
+   
+      $('.addAll_removeAll_btn').on('select2:open', function() {
+        var $dropdown = $(this);
+        var searchBoxHtml = `
+            
+            <div class="extra-buttons">
+                <button class="select-all-button" type="button">Select All</button>
+                <button class="remove-all-button" type="button">Remove All</button>
+            </div>`;
+
+        // Remove any existing extra buttons before adding new ones
+        $('.select2-results .extra-search-container').remove();
+        $('.select2-results .extra-buttons').remove();
+
+        // Append the new extra buttons and search box
+        $('.select2-results').prepend(searchBoxHtml);
+
+        // Handle Select All button for the current dropdown
+        $('.select-all-button').on('click', function() {
+            
+            var $currentDropdown = $dropdown;
+            
+            var allValues = $currentDropdown.find('option').map(function() {
+                return $(this).val();
+            }).get();
+            console.log("dropdown",$currentDropdown);
+            $currentDropdown.val(allValues).trigger('change');
+        });
+
+        // Handle Remove All button for the current dropdown
+        $('.remove-all-button').on('click', function() {
+            var $currentDropdown = $dropdown;
+            $currentDropdown.val(null).trigger('change');
+        });
+    });
+    $('.js-example-basic-multiple').on('select2:open', function() {
+        var searchBoxHtml = `
+            <div class="extra-search-container">
+                <input type="text" class="extra-search-box" placeholder="Search...">
+                <button class="clear-button" type="button">&times;</button>
+            </div>`;
+        
+        if ($('.select2-results').find('.extra-search-container').length === 0) {
+            $('.select2-results').prepend(searchBoxHtml);
+        }
+
+        var $searchBox = $('.extra-search-box');
+        var $clearButton = $('.clear-button');
+
+        $searchBox.on('input', function() {
+
+            var searchTerm = $(this).val().toLowerCase();
+            $('.select2-results__option').each(function() {
+                var text = $(this).text().toLowerCase();
+                if (text.includes(searchTerm)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+
+            $clearButton.toggle($searchBox.val().length > 0);
+        });
+
+        $clearButton.on('click', function() {
+            $searchBox.val('');
+            $searchBox.trigger('input');
+        });
+    });
+
+    $('.js-example-basic-multiple').select2();
+
+    // Dynamically add the clear button
+    const clearButton = $('<span class="clear-btn">✖</span>');
+    $('.select2-container').append(clearButton);
+
+    // Handle the visibility of the clear button
+    function toggleClearButton() {
+
+        const selectedOptions = $('.js-example-basic-multiple').val();
+        if (selectedOptions && selectedOptions.length > 0) {
+            clearButton.show();
+        } else {
+            clearButton.hide();
+        }
+    }
+
+    // Attach change event to select2
+    $('.js-example-basic-multiple').on('change', toggleClearButton);
+
+    // Clear button click event
+    clearButton.click(function() {
+
+        $('.js-example-basic-multiple').val(null).trigger('change');
+        toggleClearButton();
+    });
+
+    // Initial check
+    toggleClearButton();
+    $('.js-example-basic-multiple').each(function() {
+        let listId = $(this).data('list-id');
+
+        let items = [];
+        console.log("listId",listId);
+        $('#' + listId + ' li').each(function() {
+            console.log("value",$(this).data('value'));
+            items.push({ id: $(this).data('value'), text: $(this).text() });
+        });
+        console.log("items",items);
+        $(this).select2({
+            data: items
+        });
+    });
+</script>
 <script>
   $(document).on('click','.job-like-btn',function(){
 
@@ -2174,7 +2380,7 @@
         cache: false,
         success: function(data){
           var data1 = JSON.parse(data);
-          console.log("alert",data1.filters);
+          console.log("alert",data1);
           if(data1){
             
             $('#filter-location').val(data1.location);
@@ -2188,16 +2394,36 @@
             $('#edit-alert-delivery').val(data1.delivery);
             $('#edit-search-name').val(data1.name);
             $('#search_id').val(data1.searches_id);
-            var data_parse = JSON.parse(data1.filters);
+            var data_parse = data1.filters;
             $(`input[name="edit_sector"][value="${data_parse.sector}"]`).prop("checked", true);
             $(`input[name="edit_location"][value="${data_parse.sector}"]`).prop("checked", true);
-            $(`#year_experience`).val(data1.experience);
-            $(`#minSalary1`).val(data1.salary_min);
-            $(`#maxSalary1`).val(data1.salary_max);
-            $(`#minSalaryValue1`).text(data1.salary_min);
-            $(`#maxSalaryValue1`).text(data1.salary_max);
-            console.log("v",data_parse.years_of_experience);
-            // Loop through and apply dynamically
+            $(`#year_experience`).val(data_parse.experience_years);
+            $(`#minSalary1`).val(data_parse.salary.min);
+            $(`#maxSalary1`).val(data_parse.salary.max);
+            $(`#minSalaryValue1`).text(data_parse.salary.min);
+            $(`#maxSalaryValue1`).text(data_parse.salary.max);
+            console.log("v",data_parse);
+            $(".saved_filters").val(JSON.stringify(data_parse));
+            let savedValues = JSON.parse(data1.filter_nurse_type);
+            let sector = data1.filter_sector;
+            let filter_employment_type = JSON.parse(data1.filter_employment_type);
+            let shift_type = JSON.parse(data1.filter_work_shift);
+            console.log("shift_type",shift_type);
+            savedValues.forEach(function(value) {
+                $(".nurse_type[value='" + value + "']").prop("checked", true);
+            })
+            filter_employment_type.forEach(function(value) {
+                $(".employment_types[value='" + value + "']").prop("checked", true);
+            });
+      
+
+            if (Array.isArray(shift_type) && shift_type.length > 0) {
+                shift_type.forEach(function(value) {
+                    $(".shift_types[value='" + value + "']").prop("checked", true);
+                });
+            }
+             
+            $(".edit_sector_radio").prop("checked", true);
             // $.each(data_parse, function (key, values) {
             //   if (Array.isArray(values)) {
                 
@@ -2205,19 +2431,18 @@
             //       console.log("key",key);
             //       console.log("values",v);
             //       $(`input[name="${key}[]"][value="${v}"]`).prop("checked", true);
+                 
             //     });
+                
             //   }
             // });
-            data_parse.forEach(function(value) {
-                // Check checkboxes or radio buttons with matching value
-                $(".edit_side_drawer input[type='checkbox'][value='" + value + "'], .edit_side_drawer input[type='radio'][value='" + value + "']")
-                    .prop("checked", true)
-                    .trigger("change"); // optional, if you have any dependent UI logic
-            });
+            
+            
           }
         }
       });  
     });
+   
 
     $('#drawer-save').click(function(){
       const name = $('#search-name').val() || 'New Search';
@@ -2252,11 +2477,21 @@ $(document).on('click', '.btn-duplicate', function() {
   const filterSummary = row.find('td:nth-child(4)').html();
   const alertFreq = row.find('td:nth-child(6)').text().trim();
   
-  console.log("alertFreq",alertFreq);
-  
+  console.log("filterSummary",filterSummary);
+
   // Get the full JSON filter from the row’s data attribute
   const filterJson = row.data('filters');
   const delivery = row.data('name');
+  
+  // Get the full JSON filter from the row’s data attribute
+  const filter_nurse_type = row.data('nurse-type');
+  const speciality_type = row.data('speciality-type');
+  const benefits_type = row.data('benefits-type');
+  const employeement_type = row.data('employeement-type');
+  const sector_type = row.data('sector-type');
+  const environment_type = row.data('environment-type');
+ 
+  
 
   const totalSearches = $('#savedSearchTable tbody tr').length;
       
@@ -2276,7 +2511,13 @@ $(document).on('click', '.btn-duplicate', function() {
     id,
     name: originalName,
     filterSummary,
-    filterJson, // ✅ store JSON
+    filterJson,
+    filter_nurse_type,
+    speciality_type,
+    benefits_type,
+    employeement_type,
+    sector_type,
+    environment_type,
     alert: alertFreq,
     delivery
   };
@@ -2307,7 +2548,13 @@ $('#renameSave1').off('click').on('click', function() {
         _token: "{{ csrf_token() }}",
         searches_id: duplicateData.id,
         name: newName,
-        filter_json: JSON.stringify(duplicateData.filterJson), // ✅ send full filters
+        filters: duplicateData.filterJson, // ✅ send full filters
+        filter_nurse_type: JSON.stringify(duplicateData.filter_nurse_type), // ✅ send full filters
+        speciality_type: JSON.stringify(duplicateData.speciality_type), // ✅ send full filters
+        benefits_type: JSON.stringify(duplicateData.benefits_type), // ✅ send full filters
+        employeement_type: JSON.stringify(duplicateData.employeement_type), // ✅ send full filters
+        sector_type: JSON.stringify(duplicateData.sector_type), // ✅ send full filters
+        environment_type: JSON.stringify(duplicateData.environment_type), // ✅ send full filters
         alert: duplicateData.alert,
         delivery: duplicateData.delivery
       },
@@ -2317,6 +2564,7 @@ $('#renameSave1').off('click').on('click', function() {
             response.new_id,
             newName,
             duplicateData.filterSummary,
+           
             duplicateData.alert,
             duplicateData.delivery
           );
@@ -2609,8 +2857,8 @@ $('#renameCancel').click(function() {
 
       let filters = {
           keywords: '',
-          locations: [],
-          agency: '',
+          job_start: '',
+          agency: [],
           sort_by: '',
           searchId:''
       };
@@ -2633,7 +2881,7 @@ $('#renameCancel').click(function() {
             data: {
                 keywords: filters.keywords,
                 filters_data: filtersData,
-                locations: filters.locations,
+                job_start: filters.job_start,
                 agency: filters.agency,
                 sort_name: filters.sort_by,
                 search_id: filters.searchId,
@@ -2658,17 +2906,18 @@ $('#renameCancel').click(function() {
         filters.keywords = $(this).val();
         fetchJobs(1);
     });
-    $(document).on("change", ".location-checkbox", function () {
-        filters.locations = [];
 
-        $(".location-checkbox:checked").each(function () {
-            filters.locations.push($(this).val());
-        });
-
+    // $("#agency").on("change", function () {
+    //   filters.agency = $(this).val();
+    //   fetchJobs(1);
+    // });
+    $(document).on("change", '[data-list-id="agency_filter"]', function () {
+        filters.agency = $(this).val() || [];
         fetchJobs(1);
     });
-    $("#agency").on("change", function () {
-        filters.agency = $(this).val();
+   
+    $("#job_start").on("change", function () {
+        filters.job_start = $(this).val();
         fetchJobs(1);
     });
 
@@ -2926,17 +3175,25 @@ $('#renameCancel').click(function() {
   //  console.log(selected); 
    
    
-   $("#toggleRegisteredPreferences").click(function(){
-     if ($("#toggleRegisteredPreferences").is(":checked")) {
-       
-       $(".auto_fill_message").show();
-       $(".auto_empty_message").hide();
-     } else {
-       
-       $(".auto_fill_message").hide();
-       $(".auto_empty_message").show();
-     }
-   }); 
+   $(document).on('change','#toggleUpdatePreferences',function(){
+
+    if($(this).is(':checked')){
+        // Toggle ON → show edit
+        $('.edit-search-btn').show();
+    }
+    else{
+        // Toggle OFF → hide edit
+        $('.edit-search-btn').hide();
+    }
+
+  });
+    $(document).ready(function(){
+
+      if(!$('#toggleUpdatePreferences').is(':checked')){
+          $('.edit-search-btn').hide();
+      }
+
+  });
    
    
    $('#toggleUpdatePreferences').on('change', function() {
@@ -2961,6 +3218,72 @@ $('#renameCancel').click(function() {
    $('.dropdown-toggle').on('click', function() {
    $(this).next('.dropdown-menu').toggle();
    });
+
+     $(document).on('change', '#toggleRegisteredPreferences', function () {
+
+      let toggle = $(this);
+      let isChecked = toggle.is(':checked');
+      let message = isChecked 
+          ? "Filters will be auto-filled from your registered preferences."
+          : "Filters will be cleared and not linked to your saved preferences.";
+      Swal.fire({
+          title: 'Confirm Change',
+          text: message,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, continue',
+          cancelButtonText: 'Cancel'
+      }).then((result) => {
+          if (result.isConfirmed) {
+              if (isChecked) {
+                  $('.auto_fill_message').show();
+                  $('.auto_empty_message').hide();
+                  fetchFilters('prefill'); // common ajax
+              } else {
+                  $('.auto_fill_message').hide();
+                  $('.auto_empty_message').show();
+                  fetchFilters('clear'); // common ajax
+              }
+          } else {
+              toggle.prop('checked', !isChecked);
+          }
+      });
+  });
+
+  function fetchFilters(mode)
+  {
+      $.ajax({
+          url: "{{ url('/nurse/fetch-job-filters') }}",
+          type: "POST",
+          data: {
+              mode: mode,
+              _token: $('meta[name="csrf-token"]').attr('content')
+          },
+          success: function(res){
+
+              if(res.status === 'success')
+              {
+    
+                  Swal.fire({
+                      icon: 'success',
+                      title: 'Success',
+                      text: res.message,
+                      timer: 2000,
+                      showConfirmButton: false
+                  });
+              }
+              else
+              {
+                  Swal.fire({
+                      icon: 'warning',
+                      title: 'Notice',
+                      text: res.message
+                  });
+              }
+
+          }
+      });
+  }
    
    // Close dropdown if clicked outside
    $(document).on('click', function(e) {

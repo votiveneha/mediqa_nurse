@@ -12,7 +12,7 @@
                     <h4><i class="fas fa-comments"></i> Messages</h4>
                     <span class="badge badge-primary unread-badge" id="totalUnreadCount">0</span>
                 </div>
-                
+
                 <div class="conversation-search">
                     <div class="input-group">
                         <input type="text" class="form-control" placeholder="Search conversations..." id="searchConversations">
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Search conversations
 $('#searchConversations').on('input', function() {
     const query = $(this).val();
-    
+
     if (query.length < 2) {
         $('#conversationList').load(window.location.href + ' #conversationList > *');
         return;
@@ -136,7 +136,7 @@ $('#searchConversations').on('input', function() {
             response.conversations.forEach(conv => {
                 const otherParticipant = conv.nurse_id === {{ Auth::guard('healthcare_facilities')->id() }} ? conv.healthcare : conv.nurse;
                 html += `
-                    <div class="conversation-item" data-conversation-id="${conv.id}" 
+                    <div class="conversation-item" data-conversation-id="${conv.id}"
                          onclick="window.location.href='/healthcare-facilities/chat/conversation/${conv.id}'">
                         <div class="conversation-avatar">
                             <img src="${otherParticipant.profile_img}" alt="${otherParticipant.name}">

@@ -64,7 +64,7 @@ class MessageAttachment extends Model
         if (!$this->file_type) {
             return 'fas fa-file';
         }
-        
+
         if ($this->is_image) {
             return 'fas fa-image';
         }

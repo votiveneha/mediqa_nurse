@@ -59,15 +59,64 @@ class HealthcareController extends Controller
     {
         //$data['plan_list'] = DB::table("plan_management")->orderBy('created_at','desc')->get();
         \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
-        $data['plan_list'] = \Stripe\Product::all([
-                    'active' => true
-                ]);
+        $data['plan_list'] = DB::table("plan_management")->get();
         return view("admin.healthcare.plan_list")->with($data);
     }
 
     public function add_plans()
     {
-        return view("admin.healthcare.add_plans");
+        $data['product'] = "";
+
+        $data['prices'] = "";
+        return view("admin.healthcare.add_plans")->with($data);
+    }
+
+    public function add_healthcare()
+    {
+        
+        return view("admin.healthcare.add_healthcare");
+    }
+
+    public function edit_healthcare(Request $request)
+    {
+        $data['user_data'] = DB::table("users")->where("id",$request->id)->first(); 
+        return view("admin.healthcare.add_healthcare")->with($data);
+    }
+
+    public function post_healthcare(Request $request)
+    {
+        
+        if($request->user_id){
+            $user_post = User::find($request->user_id);
+        
+            $user_post->name = $request->hospital_name;
+            $user_post->email = $request->emailaddress;
+            $user_post->password = Hash::make($request->password);
+            $user_post->country_iso = $request->country;
+        
+            $run = $user_post->save();
+        }else{
+            $user_post = new User;
+        
+            $user_post->name = $request->hospital_name;
+            $user_post->role = 2;
+            $user_post->email = $request->emailaddress;
+            $user_post->password = Hash::make($request->password);
+            $user_post->country_iso = $request->country;
+        
+            $run = $user_post->save();
+        }
+        
+
+        if ($run) {
+            $json['status'] = 1;
+            
+            
+        } else {
+            $json['status'] = 0;
+        }
+
+        echo json_encode($json);
     }
 
     public function update_plans(Request $request)
@@ -76,10 +125,11 @@ class HealthcareController extends Controller
 
         \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
 
-        $data['product'] = \Stripe\Product::retrieve($product_id);
-
+        $data['product'] = DB::table("plan_management")->where("plan_id",$request->id)->first();
+        //print_r($data['product']->product_id);die;
+        //print_r($data);die;
         $data['prices'] = \Stripe\Price::all([
-                                        'product' => $product_id
+                                        'product' => $data['product']->stripe_product_id
                                     ]);
 
         return view("admin.healthcare.add_plans")->with($data);
@@ -88,7 +138,8 @@ class HealthcareController extends Controller
     public function update_plan(Request $request)
     {
         $plan_name = $request->plan_name;
-        
+        $product_id = $request->product_id;
+        $price_id = $request->price_id;
         $slug = $request->slug;
         $key_features = $request->key_features;
         $description = $request->description;
@@ -108,62 +159,210 @@ class HealthcareController extends Controller
         $employer_types_data = DB::table("employer_type")->whereIn("id",$employer_types)->get();
 
         $emp_type_arr = [];
-
+        
         foreach($employer_types_data as $emp_type){
             $emp_type_arr[] = $emp_type->name;
         }
 
         $emp_str = implode(",",$emp_type_arr);
 
-        // Create Product
-        $product = \Stripe\Product::create([
+        if($product_id){
+                
+            $plan_data = DB::table('plan_management')->where("plan_id",$request->plan_id)->first();
+
+            if($status == 1){
+                $status1 = true;
+            }else{
+                $status1 = false;
+            }
+
+            $product = \Stripe\Product::update($product_id,[
+                'name' => $plan_name,
+                'description' => $description,
+                //'marketing_features' => $key_features,
+                "metadata"=>[
+                    "slug" => $slug,
+                    "trial_days" => $trial_days,
+                    "employer_types" => $emp_str,
+                    "job_limit" => $job_limit,
+                    "key_features" => $key_features,
+                    "unlimited_jobs" => $unlimited_jobs,
+                    "recruiter_limit" => $recruiter_limit,
+                    "unlimited_recruiters" => $unlimited_recruiters
+                ],
+                "active" => $status1
+            ]);
+
+            $price = \Stripe\Price::create([
+                'unit_amount' => $plan_monthly_price*100, // $150
+                'currency' => 'usd',
+                'recurring' => ['interval' => $billing_cycle_enabled], // or 'year'
+                'product' => $product->id,
+            ]);
+
+            // ===== Deactivate Old Prices =====
+            if (!empty($plan_data->price_id)) {
+                \Stripe\Price::update($plan_data->price_id, [
+                    'active' => false
+                ]);
+            }
+            
+            $run = DB::table('plan_management')->where("plan_id",$request->plan_id)->update([
+                'stripe_product_id' => $product->id,
+                'default_price_id' => $price->id,
+                'name' => $plan_name,
+                'features' => $key_features,
+                'slug' => $slug,
+                'description' => $description,
+                
+                'trial_days' => $trial_days,
+                'employer_types' => json_encode($employer_types),
+                'job_limits' => $job_limit,
+                'unlimited_jobs' => $unlimited_jobs,
+                'recruiter_limits' => $recruiter_limit,
+                'unlimited_recruiter' => $unlimited_recruiters,
+                'active' => $status,
+                
+                'updated_at' => now()
+            ]);
+            DB::table('stripe_prices')->insert([
+                'stripe_product_id' => $product->id,
+                'stripe_price_id' => $price->id,
+                'active' => $status,
+                'currency' => 'aud',
+                'type' => 'recurring',
+                'interval_count' => '1',
+                'unit_amount' => $plan_monthly_price*100,
+                'interval' => $billing_cycle_enabled,
+                'created_at' => now()
+            ]);
+        }else{
+            
+
+           if($status == 1){
+                $status1 = true;
+            }else{
+                $status1 = false;
+            }
+
+            // Create Product
+            $product = \Stripe\Product::create([
+                'name' => $plan_name,
+                'description' => $description,
+                //'marketing_features' => $key_features,
+                "metadata"=>[
+                    "slug" => $slug,
+                    "trial_days" => $trial_days,
+                    "employer_types" => $emp_str,
+                    "job_limit" => $job_limit,
+                    "key_features" => $key_features,
+                    "unlimited_jobs" => $unlimited_jobs,
+                    "recruiter_limit" => $recruiter_limit,
+                    "unlimited_recruiters" => $unlimited_recruiters
+                ],
+                "active" => $status1
+            ]);
+
+            // if($plan_monthly_price != ""){
+            //     $price = $plan_yearly_price;
+            // }
+
+            // Create Price (monthly/yearly)
+            $price = \Stripe\Price::create([
+                'unit_amount' => $plan_monthly_price*100, // $150
+                'currency' => 'usd',
+                'recurring' => ['interval' => $billing_cycle_enabled], // or 'year'
+                'product' => $product->id,
+            ]);
+
+            $run = DB::table('plan_management')->insert([
+            'stripe_product_id' => $product->id,
+            'default_price_id' => $price->id,
             'name' => $plan_name,
-            'description' => $description,
-            //'marketing_features' => $key_features,
-            "metadata"=>[
-                "slug" => $slug,
-                "trial_days" => $trial_days,
-                "employer_types" => $emp_str,
-                "job_limit" => $job_limit,
-                "key_features" => $key_features,
-                "unlimited_jobs" => $unlimited_jobs,
-                "recruiter_limit" => $recruiter_limit,
-                "unlimited_recruiters" => $unlimited_recruiters
-            ],
-            "active" => $status
-        ]);
-
-        // if($plan_monthly_price != ""){
-        //     $price = $plan_yearly_price;
-        // }
-
-        // Create Price (monthly/yearly)
-        $price = \Stripe\Price::create([
-            'unit_amount' => $plan_monthly_price*100, // $150
-            'currency' => 'usd',
-            'recurring' => ['interval' => $billing_cycle_enabled], // or 'year'
-            'product' => $product->id,
-        ]);
-
-        $run = DB::table('plan_management')->insert([
-            'plan_name' => $plan_name,
             'features' => $key_features,
             'slug' => $slug,
             'description' => $description,
-            'monthly_price' => $plan_monthly_price,
-            'yearly_price' => $plan_yearly_price,
+            
             'trial_days' => $trial_days,
             'employer_types' => json_encode($employer_types),
             'job_limits' => $job_limit,
             'unlimited_jobs' => $unlimited_jobs,
             'recruiter_limits' => $recruiter_limit,
             'unlimited_recruiter' => $unlimited_recruiters,
-            'status' => $status,
-            'billing_cycle' => $billing_cycle_enabled,
+            'active' => $status,
+            
             'created_at' => now()
         ]);
+
+        DB::table('stripe_prices')->insert([
+            'stripe_product_id' => $product->id,
+            'stripe_price_id' => $price->id,
+            'active' => $status,
+            'currency' => 'aud',
+            'type' => 'recurring',
+            'interval_count' => '1',
+            'unit_amount' => $plan_monthly_price*100,
+            'interval' => $billing_cycle_enabled,
+            'created_at' => now()
+        ]);
+        }
+
+        
         
         if ($product) {
+            $json['status'] = 1;
+            $json['product_id'] = $product_id;
+            
+        } else {
+            $json['status'] = 0;
+        }
+
+        echo json_encode($json);
+    }
+
+    public function show_customers()
+    {
+        
+
+        $invoices = DB::table('invoices')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return view('admin.healthcare.show_customers', compact('invoices'));
+    }
+
+    public function show_invoice()
+    {
+        
+
+        $invoices = DB::table('invoices')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return view('admin.healthcare.show_invoice', compact('invoices'));
+    }
+
+
+    public function add_compliance_security()
+    {
+        $data['content'] = DB::table("compliance_security")->first();
+        return view('admin.healthcare.add_compliance_security')->with($data);
+    }
+
+    public function update_compliance_security(Request $request)
+    {
+        $compliance_content = $request->compliance_content;
+
+        $content = DB::table("compliance_security")->first();
+
+        if(!empty($content)){
+            $run = DB::table("compliance_security")->update(["compliance_content"=>$compliance_content]);
+        }else{
+            $run = DB::table("compliance_security")->insert(["compliance_content"=>$compliance_content]);
+        }
+        
+
+        if ($run) {
             $json['status'] = 1;
             
             

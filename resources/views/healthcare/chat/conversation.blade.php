@@ -355,7 +355,7 @@
                             data-conversation-id="{{ $conv->id }}"
                             onclick="window.location.href='{{ route('healthcare.chat.show', $conv->id) }}'">
 
-                            <img src="{{ $other->profile_img ? asset('healthcareimg/uploads/' . $other->profile_img) : 'nurse/assets/imgs/nurse06.png' }}" alt="{{ $other->name }}"
+                            <img src="{{ ($other->profile_img && $other->profile_img !== 'nurse/assets/imgs/nurse06.png') ? asset('healthcareimg/uploads/' . $other->profile_img) : asset('/nurse/assets/imgs/nurse06.png') }}" alt="{{ $other->name }}"
                                 class="conversation-avatar-compact">
                             <div class="conversation-info-compact">
                                 <div class="conversation-name-compact">{{ $other->name }} {{ $other->lastname ?? '' }}</div>
@@ -722,6 +722,7 @@
             }
 
             if (isSent) {
+                // Add status ticks
                 var statusDiv = document.createElement('div');
                 statusDiv.className = 'message-status';
                 statusDiv.setAttribute('data-status', 'sent');

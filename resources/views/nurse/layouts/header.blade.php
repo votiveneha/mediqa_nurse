@@ -96,19 +96,6 @@ $work_preferences_data = DB::table("work_shift_preferences")->get();
 
   .nurse-notification .btn-notify {
     width: auto !important;
-    padding: 8px 12px !important;
-    background: transparent !important;
-    border: none !important;
-    cursor: pointer !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    position: relative !important;
-  }
-
-  .nurse-notification .btn-notify i {
-    font-size: 20px !important;
-    color: #333 !important;
   }
 </style>
 
@@ -170,8 +157,8 @@ $work_preferences_data = DB::table("work_shift_preferences")->get();
             <ul class="main-menu">
 
               <!--  <li class="">
-                    <a class='menu-link hover-up' href='{{ route("nurse.home") }}'>Home</a>
-                  </li> -->
+                      <a class='menu-link hover-up' href='{{ route("nurse.home") }}'>Home</a>
+                    </li> -->
 
               <li class="has-children mega-dropdown">
 
@@ -241,36 +228,36 @@ $work_preferences_data = DB::table("work_shift_preferences")->get();
               </li>
               <!-- <li class="has-children mega-dropdown">
 
-                  <a class='{{ request()->is('nurseCareHome') ?"active":"" }} hover-up' href='#'>Individuals</a>
-                  <div class="mega-dropdown-content">
-                    <div class="mega-column">
-                      <ul>
-                        <li><a href="#">Hire a Nurse at Home</a></li>
-                        <li><a href="#">Services Offered</a></li>
-                        <li><a href="{{ route('individuals.login') }}">Sign in Individuals </a></li>
-                      </ul>
+                    <a class='{{ request()->is('nurseCareHome') ?"active":"" }} hover-up' href='#'>Individuals</a>
+                    <div class="mega-dropdown-content">
+                      <div class="mega-column">
+                        <ul>
+                          <li><a href="#">Hire a Nurse at Home</a></li>
+                          <li><a href="#">Services Offered</a></li>
+                          <li><a href="{{ route('individuals.login') }}">Sign in Individuals </a></li>
+                        </ul>
+                      </div>
                     </div>
-                  </div>
-                </li> -->
-              <li class="has-children mega-dropdown">
+                  </li> -->
+              <!-- <li class="has-children mega-dropdown">
 
-                <a class='{{ request()->is('contact') ? "active" : "" }} hover-up' href='#'>CPD/CE Providers</a>
-                <div class="mega-dropdown-content">
-                  <div class="mega-column">
-                    <ul>
-                      <li><a href="#">Post a Course</a></li>
-                      <li><a href="#">Pricing & Plans</a></li>
-                      <li><a href="#">Benefits</a></li>
-                      <li><a href="{{ route('cpd_providers.login') }}">Sign in CPD/CE Providers</a></li>
-                    </ul>
-                  </div>
-                </div>
-              </li>
+                    <a class='{{ request()->is('contact') ?"active":"" }} hover-up' href='#'>CPD/CE Providers</a>
+                    <div class="mega-dropdown-content">
+                      <div class="mega-column">
+                        <ul>
+                          <li><a href="#">Post a Course</a></li>
+                          <li><a href="#">Pricing & Plans</a></li>
+                          <li><a href="#">Benefits</a></li>
+                          <li><a href="{{ route('cpd_providers.login') }}">Sign in CPD/CE Providers</a></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </li> -->
             </ul>
           </nav>
           <!-- <div class="burger-icon burger-icon-white" id="openDrawer">
-              <span class="burger-icon-top"></span><span class="burger-icon-mid"></span><span class="burger-icon-bottom"></span>
-            </div> -->
+                <span class="burger-icon-top"></span><span class="burger-icon-mid"></span><span class="burger-icon-bottom"></span>
+              </div> -->
           <div id="openDrawer">
             <span></span>
             <span></span>
@@ -284,10 +271,10 @@ $work_preferences_data = DB::table("work_shift_preferences")->get();
             <a class='btn btn-default btn-shadow hover-up' href='{{ route("nurse.login") }}'>Log in</a>
             <a class='btn btn-default btn-shadow hover-up' href='{{ route("nurse.nurse-register") }}'>Sign up</a>
             <!-- @if(request()->is('') || request()->is('/'))
-              <a class='btn btn-default btn-shadow hover-up' href='{{ route("nurse.home") }}'>Sign in</a>
-              @elseif(request()->is('nurse'))
-              <a class='btn btn-default btn-shadow hover-up' href='{{ route("nurse.login") }}'>Sign in</a>
-              @endif -->
+                <a class='btn btn-default btn-shadow hover-up' href='{{ route("nurse.home") }}'>Sign in</a>
+                @elseif(request()->is('nurse'))
+                <a class='btn btn-default btn-shadow hover-up' href='{{ route("nurse.login") }}'>Sign in</a>
+                @endif -->
 
           </div>
         </div>
@@ -545,7 +532,8 @@ $work_preferences_data = DB::table("work_shift_preferences")->get();
                 </li>
                 @if($user_data->role != 5)
                   <li>
-                    <a class="hover-up" href="#">Find Nurse</a>
+                    <a class="{{ request()->is('healthcare-facilities/find-nurse') ? 'active' : '' }} hover-up "
+                      href="{{ route('medical-facilities.job.find_nurse') }}">Find Nurse</a>
                   </li>
                   <li>
                     <a class="hover-up " href='#'>Saved Candidates</a>
@@ -563,19 +551,17 @@ $work_preferences_data = DB::table("work_shift_preferences")->get();
                 <div class="dropdown d-inline-block nurse-notification">
                   <a class="btn btn-notify" id="dropdownNotify" type="button" data-bs-toggle="dropdown"
                     aria-expanded="false" data-bs-display="static">
-                    <i class="fa-regular fa-bell"></i>
+                    <i class="fi fi-rr-bell"></i>
                     @if($unreadMessagesCount > 0)
                       <span
                         class="notify-badge badge rounded-pill bg-danger notification-badge">{{ $unreadMessagesCount }}</span>
                     @endif
                   </a>
-                  <ul class="dropdown-menu dropdown-menu-light dropdown-menu-end notification-dropdown-list" aria-labelledby="dropdownNotify">
-                    <li class="dropdown-header">Notifications</li>
-                    <li><a class="dropdown-item active notification-count-text" href="#">{{ $unreadMessagesCount }} notifications</a></li>
+                  <ul class="dropdown-menu dropdown-menu-light dropdown-menu-end" aria-labelledby="dropdownNotify">
+                    <li><a class="dropdown-item active notification-count-text" href="#">{{ $unreadMessagesCount }}
+                        notifications</a></li>
                     <li><a class="dropdown-item message-count-text" href="#">{{ $unreadMessagesCount }} messages</a></li>
-                    <div id="realtime-messages-container"></div>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-center" href="{{ route('nurse.chat.index') }}">View All Messages</a></li>
+                    <li><a class="dropdown-item" href="#">0 replies</a></li>
                   </ul>
                 </div>
 
@@ -691,14 +677,14 @@ $work_preferences_data = DB::table("work_shift_preferences")->get();
 
                   </li>
                   <!-- <li class="">
-                      <a class='hover-up' href='{{ route("nurse.dashboard") }}'>My Jobs / MyApplications</a>
-                    </li>
-                    <li class="">
-                        <a class='' href='{{ route("nurse.interview", ["page" => "interview_references"]) }}'>Interviews</a>
-                    </li>
-                    <li class="">
-                        <a class='' href='{{ route("nurse.dashboard") }}'>Testimonial and Reviews</a>
-                    </li> -->
+                            <a class='hover-up' href='{{ route("nurse.dashboard") }}'>My Jobs / MyApplications</a>
+                          </li>
+                          <li class="">
+                              <a class='' href='{{ route("nurse.interview", ["page" => "interview_references"]) }}'>Interviews</a>
+                          </li>
+                          <li class="">
+                              <a class='' href='{{ route("nurse.dashboard") }}'>Testimonial and Reviews</a>
+                          </li> -->
                   <li class="@if(count($all_tabs) < 15) tooltip-link @endif" @if(count($all_tabs) < 15)
                   data-tooltip="Please complete the profile first" @endif>
                     <a class='@if(count($all_tabs) < 15) disabled-link @endif hover-up'
@@ -706,13 +692,13 @@ $work_preferences_data = DB::table("work_shift_preferences")->get();
                   </li>
 
                   <!-- <li>
-                      <a class="{{ request()->is('nurse/match_percentage') ?'active':'' }} hover-up" href="{{ route("nurse.match_percentage") }}">Match Percentage</a>
-                    </li> -->
+                            <a class="{{ request()->is('nurse/match_percentage') ?'active':'' }} hover-up" href="{{ route("nurse.match_percentage") }}">Match Percentage</a>
+                          </li> -->
                 </ul>
               </nav>
               <!-- <div class="burger-icon burger-icon-white">
-                  <span class="burger-icon-top"></span><span class="burger-icon-mid"></span><span class="burger-icon-bottom"></span>
-                </div> -->
+                        <span class="burger-icon-top"></span><span class="burger-icon-mid"></span><span class="burger-icon-bottom"></span>
+                      </div> -->
               <div id="openDrawer">
                 <span></span>
                 <span></span>
@@ -725,19 +711,17 @@ $work_preferences_data = DB::table("work_shift_preferences")->get();
                 <div class="dropdown d-inline-block">
                   <a class="btn btn-notify" id="dropdownNotify" type="button" data-bs-toggle="dropdown" aria-expanded="false"
                     data-bs-display="static">
-                    <i class="fa-regular fa-bell"></i>
+                    <i class="fi fi-rr-bell"></i>
                     @if($unreadMessagesCount > 0)
                       <span
                         class="notify-badge badge rounded-pill bg-danger notification-badge">{{ $unreadMessagesCount }}</span>
                     @endif
                   </a>
-                  <ul class="dropdown-menu dropdown-menu-light dropdown-menu-end notification-dropdown-list" aria-labelledby="dropdownNotify">
-                    <li class="dropdown-header">Notifications</li>
-                    <li><a class="dropdown-item active notification-count-text" href="#">{{ $unreadMessagesCount }} notifications</a></li>
+                  <ul class="dropdown-menu dropdown-menu-light dropdown-menu-end" aria-labelledby="dropdownNotify">
+                    <li><a class="dropdown-item active notification-count-text" href="#">{{ $unreadMessagesCount }}
+                        notifications</a></li>
                     <li><a class="dropdown-item message-count-text" href="#">{{ $unreadMessagesCount }} messages</a></li>
-                    <div id="realtime-messages-container"></div>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-center" href="{{ route('nurse.chat.index') }}">View All Messages</a></li>
+                    <li><a class="dropdown-item" href="#">0 replies</a></li>
                   </ul>
                 </div>
 
@@ -1000,12 +984,12 @@ $work_preferences_data = DB::table("work_shift_preferences")->get();
     // Append new message to realtime container if e is provided
     if (e && realtimeContainer) {
       const baseUrl = '{{ url("/") }}/';
-      const conversationUrl = e.sender_role == 1 
+      const conversationUrl = e.sender_role == 1
         ? `${baseUrl}healthcare-facilities/chat/conversation/${e.conversation_id}`
         : `${baseUrl}nurse/chat/conversation/${e.conversation_id}`;
-      
-      const avatarPath = e.sender_role == 1 
-        ? `${baseUrl}healthcareimg/uploads/${e.sender_avatar}` 
+
+      const avatarPath = e.sender_role == 1
+        ? `${baseUrl}healthcareimg/uploads/${e.sender_avatar}`
         : `${baseUrl}nurse/assets/imgs/nurse06.png`; // Fallback or logic for nurse avatar
 
       const messageHtml = `

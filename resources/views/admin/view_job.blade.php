@@ -166,7 +166,7 @@
 
                     <div class="job-detail-left">
 
-                        <img alt="{{ $healthcare_data->name }}" src="{{ asset($healthcare_data->profile_img) }}">
+                        <img alt="{{ $healthcare_data->name }}" src="{{ asset('healthcareimg/uploads') }}/{{ $healthcare_data->profile_img }}">
 
                         <div class="title-wrap">
                             <h1 class="job-title">{{ $jobs->job_title }}</h1>
@@ -241,7 +241,7 @@
                     </div>
 
 
-                    <div class="job-detail-right job-right">
+                    <!-- <div class="job-detail-right job-right">
 
                         <div class="match-ring match-ring-bg">
                             <span>87%</span>
@@ -249,16 +249,16 @@
                         </div>
                         <button class="save-btn job-detail-save">❤️ Save</button>
 
-                        <!-- <div class="priority-tags">
+                        <div class="priority-tags">
                                     <span class="tag new">New</span>
                                     <span class="tag urgent">Urgent</span>
                                     <span class="tag immediate">Immediate Start</span>
                                     <span class="tag more">+2 more</span>
-                                </div> -->
+                                </div>
 
-                        <!-- <button class="apply-btn">Apply Now</button> -->
+                        <button class="apply-btn">Apply Now</button>
 
-                    </div>
+                    </div> -->
                 </div>
                 <div class="main-grid">
                     <div class="left-col">
@@ -459,10 +459,11 @@
                                 @php
                                     $decoments_required = json_decode($jobs->documents_required);
                                 @endphp
+                                @if(!empty($decoments_required))
                                 @foreach($decoments_required as $req_doc)
                                 <li>{{ $req_doc }}</li>
                                 @endforeach
-                                
+                                @endif
                             </ul>
                         </div>
 

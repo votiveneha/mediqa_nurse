@@ -175,7 +175,7 @@ input.form-control.numbers.js_mobile_input {
 
     --------------------------------------------
 
-    State Dropdown Change Event 
+    State Dropdown Change Event
 
     --------------------------------------------
 
@@ -670,7 +670,7 @@ input.form-control.numbers.js_mobile_input {
   //     // Clear previous errors
   //     $('#EditProfile').find('.text-danger').text('');
 
-  
+
   //       $('.registration-card').each(function () {
 
   //         const $card = $(this);
@@ -816,7 +816,7 @@ input.form-control.numbers.js_mobile_input {
         isValid = false;
       }
 
-      
+
 
     });
 
@@ -857,43 +857,43 @@ input.form-control.numbers.js_mobile_input {
           if ($('.employee_status-'+val_spec+"-"+val_subspec_status).val() == '') {
             document.getElementById("reqemployee_status"+val_spec+"-"+val_subspec_status).innerHTML = "* Please select the Current Employment Status";
             isValid = false;
-          }  
+          }
 
           if ($('.professional_permanent-'+val_spec+"-"+val_subspec_status).is(':hidden') == false) {
             //alert('.js-example-basic-multipleper'+val_spec+"-"+val_subspec_status);
             if ($('.js-example-basic-multipleper'+val_spec+"-"+val_subspec_status).val() == 'select') {
-              
+
               document.getElementById("reqemployeep_status"+val_spec+"-"+val_subspec_status).innerHTML = "* Please select the Permanent Employment Status";
               isValid = false;
-            }  
+            }
           }
 
           if ($('.professional_temporary-'+val_spec+"-"+val_subspec_status).is(':hidden') == false) {
             if ($('.js-example-basic-multiple'+val_spec+"-"+val_subspec_status).val() == 'select') {
               document.getElementById("reqemployeet_status"+val_spec+"-"+val_subspec_status).innerHTML = "* Please select the Temporary Employment Status";
               isValid = false;
-            }  
+            }
           }
 
           if ($('.professional_unemplyeed-'+val_spec+"-"+val_subspec_status).is(':hidden') == false) {
             if ($('.unemployeement_reason-'+val_spec+"-"+val_subspec_status).val() == '') {
               document.getElementById("requnempreason-"+val_spec+"-"+val_subspec_status).innerHTML = "* Please select the Reason for Unemployment";
               isValid = false;
-            }  
+            }
           }
 
           if ($('.long_unemplyeed-'+val_spec+"-"+val_subspec_status).is(':hidden') == false) {
             if ($('.long_unemployeed-'+val_spec+"-"+val_subspec_status).val() == '') {
               document.getElementById("reqlong_unemp"+val_spec+"-"+val_subspec_status).innerHTML = "* Please select the Reason for Unemployment Period";
               isValid = false;
-            }  
+            }
           }
 
           if ($('.specify_reason_div-'+val_spec+"-"+val_subspec_status).is(':hidden') == false) {
             if ($('.specify_reason_div-'+val_spec+"-"+val_subspec_status+' input').val() == '') {
               document.getElementById("otherspecify_reason"+val_spec+"-"+val_subspec_status).innerHTML = "* Please enter the Other (Please specify)";
               isValid = false;
-            }  
+            }
           }
         });
 
@@ -1033,7 +1033,7 @@ input.form-control.numbers.js_mobile_input {
     // $(".acls_upload_certification").each(function(){
 
     //   console.log("acls_upload_certification",$(".acls_licence_img-"+k).length);
-    //   if($(".acls_licence_img-"+k).length == 0){ 
+    //   if($(".acls_licence_img-"+k).length == 0){
     //     if ($(".acls_upload_certification-"+k).length > 0) {
     //       if ($(".acls_upload_certification-"+k).val() == '') {
     //         document.getElementById("reqaclsuploadvalid-"+k).innerHTML = "* Please add the license image";
@@ -2845,13 +2845,13 @@ input.form-control.numbers.js_mobile_input {
       var r = 1;
       $(".show_positionsr-"+c+" .subpos_list").each(function() {
         var subpos = $(this).val();
-        
+
         var label_text = $(".show_positionsr-"+c+" .pos_label-"+ c+subpos).text();
         console.log("subpos",c+subpos);
         if ($(".position_validr-" + c+subpos).length > 0) {
-          
+
           if ($(".position_validr-" + c+subpos).val() == '') {
-            
+
             document.getElementById("reqsubpositionheldr-" + c+subpos).innerHTML = "* Please select the "+label_text;
             isValid = false;
           }
@@ -2889,7 +2889,7 @@ input.form-control.numbers.js_mobile_input {
         a++;
     });
 
-      
+
     var n = 1;
     $(".worked_together").each(function() {
       if ($(".worked_together-" + n).length > 0) {
@@ -2904,13 +2904,13 @@ input.form-control.numbers.js_mobile_input {
     });
     const isChecked = $('.declare').prop('checked');
     if (!isChecked) {
-      
+
       // If not checked, show an error message
       document.getElementById("reqreference").innerHTML = "* Please check this checkbox";
       //$('.declaration_bottom').find('#reqreference').text('You must declare that the information is true and correct.');
       isValid = false;
     }
-    
+
     if (isValid == true) {
       $('#reference_form').find('.text-danger').hide();
       $.ajax({

@@ -137,12 +137,7 @@
                         <tbody>
 
                             @foreach($plan_list as $plan_data)
-                            @php
-                                $prices = \Stripe\Price::all([
-                                        'product' => $plan_data->id
-                                    ]);
-                                 
-                            @endphp
+                            
                             <!-- User Row -->
                             <tr>
                                 <td>{{ $loop->index+1 }}</td>
@@ -150,25 +145,42 @@
                                 <td>{{ $plan_data->name }}</td>
 
                                 <td>
-                                    @foreach($prices->data as $price)
-                                        ${{ $price->unit_amount / 100 }}
-                                    @endforeach
+                                    @php
+                                        $price_data = DB::table("stripe_prices")->where("stripe_price_id",$plan_data->default_price_id)->first();
+                                    @endphp
+                                    ${{ $price_data->unit_amount/100 }}
+                                    
+                                    
                                 </td>
 
                                 <td>
-                                    {{ $plan_data->metadata->employer_types }}
+                                    @php
+                                    $employer_types = json_decode($plan_data->employer_types);
+
+                                    $emp_name_arr = [];
+                                    if(!empty($employer_types)){
+                                        foreach($employer_types as $emp_type){
+                                            $emp_name = DB::table("employer_type")->where("id",$emp_type)->first();
+                                            $emp_name_arr[] = $emp_name->name;
+                                        }
+                                        echo implode(",",$emp_name_arr);
+                                    }    
+                                    @endphp
+                                    
                                 </td>
 
                                 <td>
-                                    @if($plan_data->active == true)
+                                    @if($plan_data->active == 1)
                                         Active
+                                    @else
+                                        Deactive    
                                     @endif
                                     </td>
 
                                 <td class="text-end">
 
                                     @php
-                                        $product_id = base64_encode($plan_data->id);
+                                        $product_id = $plan_data->plan_id;
                                     @endphp
                                     
                                     <a href="{{ route('admin.update_plans',['id'=>$product_id]) }}" class="btn btn-primary">

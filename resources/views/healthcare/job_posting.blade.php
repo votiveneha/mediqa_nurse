@@ -153,12 +153,12 @@ form#job_posting_form ul.select2-selection__rendered {
                         <div class="form-group drp--clr">
                           <label class="form-label" for="input-1">Type of Nurse?</label>
                           @php
-                            $profession_nurse_id = (!empty($job_data))?(array)json_decode($job_data->nurse_type_id):[];
+                            $profession_nurse_id = (!empty($job_data))?(array)json_decode((string)$job_data->nurse_type_id):[];
                             $practitioner_data = DB::table("practitioner_type")->where("id",isset($profession_nurse_id[0])?$profession_nurse_id[0]:0)->first();
                             $mainnurse_json = (!empty($practitioner_data))?json_encode($practitioner_data->parent):'';
                             $subnurse_json = (!empty($job_data))?$job_data->nurse_type_id:'';
 
-                            $profession_speciality_id = (!empty($job_data))?(array)json_decode($job_data->typeofspeciality):[];
+                            $profession_speciality_id = (!empty($job_data))?(array)json_decode((string)$job_data->typeofspeciality):[];
                             $speciality_data = DB::table("speciality")->where("id",isset($profession_speciality_id[0])?$profession_speciality_id[0]:0)->first();
                             $mainspeciality_json = (!empty($speciality_data))?json_encode((string)$speciality_data->parent):'';
                             

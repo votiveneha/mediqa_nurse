@@ -100,9 +100,9 @@
 
       <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs {{ request()->routeIs('medical-facilities.users') ? 'active' : '' }}" href="{{ route('medical-facilities.users') }}" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-user"></i> Users</a></li>
       <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs {{ request()->routeIs('medical-facilities.billing') ? 'active' : '' }}" href="{{ route('medical-facilities.billing') }}" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-credit-card"></i> Billing</a></li>
-      <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="#" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-bell"></i> Notifications</a></li>
-      <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="#" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-shield-check"></i> Compliance & Security</a></li>
-      <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="{{ route('healthcare.chat.index') }}" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-headset"></i> Support</a></li>
+      <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs {{ request()->routeIs('medical-facilities.notification') ? 'active' : '' }}" href="{{ route('medical-facilities.notification') }}" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-bell"></i> Notifications</a></li>
+      <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs {{ request()->routeIs('medical-facilities.compliance_security') ? 'active' : '' }}" href="{{ route('medical-facilities.compliance_security') }}" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-shield-check"></i> Compliance & Security</a></li>
+      <li><a class="btn btn-border aboutus-icon mb-20 profile_tabs" href="{{ route('medical-facilities.support') }}" aria-controls="tab-my-profile" aria-selected="true"><i class="fi fi-rr-headset"></i> Support</a></li>
       <div class="mt-0 mb-20 logout-line">
         <a class="link-red font-md" href="{{ route('nurse.logout') }}"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Log Out</a>
       </div>

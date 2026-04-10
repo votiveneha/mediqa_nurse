@@ -45,6 +45,11 @@ class NurseApplication extends Model
     {
         return $this->belongsTo(User::class, 'employer_id', 'id');
     }
+
+    public function nurse()
+    {
+        return $this->belongsTo(User::class, 'nurse_id', 'id');
+    }
     public function interview()
     {
         return $this->hasOne(InterviewsNurse::class, 'application_id', 'id');

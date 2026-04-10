@@ -101,7 +101,21 @@
                   </div>
                 </div>
                 </div>
-                
+                <div class="col-md-12">
+                  <div class="form-group level-drp">
+                      <label class="form-label" for="input-1">Operating Country
+                      </label>
+                      <select class="form-control form-select country_dropdown" name="country" id="countryI" onchange="getStates(this.value,1)">
+                        <option value="">Select Country</option>
+                        @php $country_data=country_name_from_db();@endphp
+                        @foreach ($country_data as $data)
+                        <option value="{{$data->iso2}}"> {{$data->name}} </option>
+                        @endforeach
+                      </select>
+                      <span id='reqcountry' class='reqError text-danger valley'></span>
+                      
+                    </div>
+                </div>
                
                  <div class="d-flex align-items-center justify-content-between">
                 
@@ -146,6 +160,7 @@
     var address = $("#address").val();
     var password = $("#password").val();
     var confirm_password = $("#confirm_password").val();
+    var countryI = $("#countryI").val();
 
     var isValid = true;
     if(hospital_name == ""){
@@ -185,6 +200,11 @@
 
     if(password != confirm_password){
       $("#reqconfirm_password").text("The password and confirm password do not match.");
+      isValid = false;
+    }
+
+    if(countryI == ""){
+      $("#reqcountry").text("Please select the operating country");
       isValid = false;
     }
 

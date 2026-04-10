@@ -234,13 +234,13 @@ input:checked + .slider_remote:before {
                                   $country_data = DB::table("country")->where("iso2",Auth::guard('healthcare_facilities')->user()->country_iso)->first();
                                 @endphp
                                 <input class="country_code" type="hidden" name="country_code" id="country_code" value="{{ Auth::guard('healthcare_facilities')->user()->country_iso }}">
-                                <input class="form-control job_country" type="text" name="job_country" id="job_country" readonly value="{{ $country_data->name }}">
+                                <input class="form-control job_country" type="text" name="job_country" id="job_country" readonly value="@if(!empty($country_data)){{ $country_data->name }}@endif">
                                 <span id='reqhoursweek' class='reqError text-danger valley'></span>
                             </div>      
                             <div class="form-group level-drp">
                                 <label class="form-label" for="input-1">State / Region
                                 </label>
-                                <select class="form-control form-select" name="job_state" id="job_state">
+                                <select class="form-control form-select" name="job_state" id="job_state" onchange="changeState(this.value)">
 
                                 </select>
                                 <span id='reqjob_state' class='reqError text-danger valley'></span>
@@ -248,8 +248,12 @@ input:checked + .slider_remote:before {
                             <div class="form-group level-drp">
                                 <label class="form-label" for="input-1">City / Suburb
                                 </label>
-                                
-                                <input class="form-control city_suburb" type="text" name="city_suburb" id="city_suburb" value="@if(!empty($job_data)){{ $job_data->location_city }}@endif">
+                                <input type="hidden" name="city_lat" class="city_lat" value="@if(!empty($job_data)){{ $job_data->city_lat }}@endif">
+                                <input type="hidden" name="city_long" class="city_long" value="@if(!empty($job_data)){{ $job_data->city_long }}@endif">
+                                <select class="form-control form-select city_suburb" name="city_suburb" id="city_suburb" onchange="changeCity(this.value)">
+
+                                </select>
+                                <!-- <input class="form-control city_suburb" type="text" name="city_suburb" id="city_suburb" value="@if(!empty($job_data)){{ $job_data->location_city }}@endif"> -->
                                 <span id='reqcity_suburb' class='reqError text-danger valley'></span>
                             </div>   
                             <div class="form-group level-drp">
@@ -556,6 +560,33 @@ input:checked + .slider_remote:before {
             }
         });  
 
+        var job_city_state = "<?php echo (!empty($job_data))?$job_data->location_state:0; ?>";
+        $.ajax({
+          type: "get",
+          url: "{{ route('medical-facilities.getCities') }}",
+          
+          data: {state_code_value:job_city_state},
+          success: function(data) {
+              if(data != ""){
+                  var city_data = JSON.parse(data);
+                  var job_city = '';
+                  var job_selected_city = "<?php echo (!empty($job_data))?$job_data->location_city:0; ?>";
+                  console.log("job_selected_city",job_selected_city);
+                  for(var i = 0;i<city_data.length;i++){
+                      if(city_data[i].city_id == job_selected_city){
+                        var selected_text = 'selected';
+                      }else{
+                        var selected_text = '';
+                      }
+                      job_city += '<option value='+city_data[i].city_id+' '+selected_text+'>'+city_data[i].city_name+'</option>';
+                      
+                  }
+                  $("#city_suburb").html('<option value="">Select</option>'+job_city);
+                  //console.log("state_name",data.name);
+              }
+          }
+      }); 
+
         $("#site_rotation").change(function () {
             
             if ($("#site_rotation").is(":checked")) {
@@ -586,8 +617,54 @@ input:checked + .slider_remote:before {
         
     });
     
-    
+    function changeState(value){
+    //alert(value);
+      $.ajax({
+          type: "get",
+          url: "{{ route('medical-facilities.getCities') }}",
+          
+          data: {state_code_value:value},
+          success: function(data) {
+              if(data != ""){
+                  var city_data = JSON.parse(data);
+                  var job_city = '';
+                  var job_selected_city = "<?php echo (!empty($job_data))?$job_data->location_city:0; ?>";
+                  console.log("job_selected_city",job_selected_city);
+                  for(var i = 0;i<city_data.length;i++){
+                      if(city_data[i].id == job_selected_city){
+                        var selected_text = 'selected';
+                      }else{
+                        var selected_text = '';
+                      }
+                      job_city += '<option value='+city_data[i].city_id+' '+selected_text+'>'+city_data[i].city_name+'</option>';
+                      
+                  }
+                  $("#city_suburb").html('<option value="">Select</option>'+job_city);
+                  //console.log("state_name",data.name);
+              }
+          }
+      }); 
 
+    }
+
+    function changeCity(value){
+      $.ajax({
+          type: "get",
+          url: "{{ route('medical-facilities.getCitiesLat') }}",
+          
+          data: {city_code_value:value},
+          success: function(data) {
+              if(data != ""){
+                  var city_data = JSON.parse(data);
+                  
+                  console.log("city_data",city_data.latitude);
+                  $(".city_lat").val(city_data.latitude);
+                  $(".city_long").val(city_data.longitude);
+                  //console.log("state_name",data.name);
+              }
+          }
+      });
+    }
 
     function location_model_form() {
       var isValid = true;

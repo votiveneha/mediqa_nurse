@@ -106,6 +106,16 @@
                 </div>
             </div>
         </div>
+        <div class="card-header pb-0 p-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h5 class="card-title fw-semibold mb-0">Healthcare User List</h5>
+                </div>
+                <div>
+                    <a href="{{ route('admin.add_healthcare') }}" class="btn btn-primary text-nowrap">Add Healthcare</a>
+                </div>
+            </div>
+        </div>
         <div class="card w-100  overflow-hidden ">
             <div class="card-body p-3 px-md-4">
 
@@ -126,7 +136,9 @@
                                 <th>
                                     <h6 class="fs-4 fw-semibold mb-0">Operating Country</h6>
                                 </th>
-                                
+                                <th>
+                                    <h6 class="fs-4 fw-semibold mb-0">Date</h6>
+                                </th>
                                 <th>
                                     <h6 class="fs-4 fw-semibold mb-0 text-end">Action</h6>
                                 </th>
@@ -164,7 +176,11 @@
                                                 </span>
                                             </div>
                                         </td>
-                                        
+                                        <td>
+                                            <div class="">
+                                                <span class="mb-0 fw-normal fs-3">{{ \Carbon\Carbon::parse($item->created_at)->format('d-m-Y') }}</span>
+                                            </div>
+                                        </td>
                                         <td>
                                             <div class="d-flex align-items-center gap-1">
                                             <a href="{{ route('admin.healthcare_details',['id' => $item->id]) }}"
@@ -172,7 +188,7 @@
                                                      data-bs-toggle="tooltip" data-bs-trigger="hover" title="View">
                                                      View
                                             </a>
-                                            <a href="{{ route('admin.view-profile',['id' => $item->id]) }}"
+                                            <a href="{{ route('admin.edit_healthcare',['id' => $item->id]) }}"
                                                 class="btn btn-primary"
                                                      data-bs-toggle="tooltip" data-bs-trigger="hover" title="View">
                                                      Edit

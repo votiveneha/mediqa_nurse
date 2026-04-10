@@ -49,11 +49,11 @@ class HomeController extends Controller
             $title = "Login";
             return view('nurse.home', compact( 'message'));
         } else {
-            
+
 
             return redirect()->route('nurse.dashboard');
         }
-        
+
     }
     public function index_main($message = '')
     {
@@ -67,7 +67,7 @@ class HomeController extends Controller
         } else {
             return redirect()->route('nurse.dashboard');
         }
-        
+
     }
     public function registraion($message = '')
     {
@@ -81,26 +81,28 @@ class HomeController extends Controller
         } else {
             return redirect()->route('nurse.dashboard');
         }
-        
+
     }
 
     public function healthcareRegistration(Request $request)
     {
-        
+
         $hospital_name = $request->hospital_name;
         $emailaddress = $request->emailaddress;
         $mobile_no = $request->mobile_no;
         $post_code = $request->post_code;
         $address = $request->address;
         $password = $request->password;
-        
-        $user_data = User::where("email",$emailaddress)->first(); 
+        $country = $request->country;
+
+        $user_data = User::where("email",$emailaddress)->first();
 
         if(empty($user_data)){
             $user = new User();
             $user->name = $hospital_name;
             $user->email = $emailaddress;
             $user->role = 2;
+            $user->country_iso = $country;
             $user->password = Hash::make($password);
             $run = $user->save();
             $r   = User::where('email', $emailaddress)->first();
@@ -373,7 +375,7 @@ class HomeController extends Controller
                     return redirect('/healthcare-facilities/location_work_modal')
                     ->with('success', 'You are Logged in successfully.');
                 }
-                
+
 
             } else {
 
@@ -387,15 +389,23 @@ class HomeController extends Controller
         }
     }
 
-     public function logout(Request $request)
+    //  public function logout(Request $request)
+    // {
+    //     Auth::guard('healthcare_facilities')->logout();
+    //     $request->session()->invalidate();
+    //     $request->session()->regenerateToken();
+    //     return redirect('healthcare-facilities');
+    // }
+
+    public function logout(Request $request)
     {
         // Get user before logout
         $user = Auth::guard('healthcare_facilities')->user();
-        
+
         if ($user) {
             // Clear online status from cache
             cache()->forget("user_{$user->id}_online");
-            
+
             // Broadcast offline status BEFORE logging out
             try {
                 // Use broadcast() without toOthers() to ensure it's sent
@@ -405,12 +415,11 @@ class HomeController extends Controller
                 \Log::error('Failed to broadcast offline status on healthcare logout: ' . $e->getMessage());
             }
         }
-        
+
         // Now logout and destroy session
         Auth::guard('healthcare_facilities')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        
         return redirect('healthcare-facilities');
     }
 
@@ -421,10 +430,10 @@ class HomeController extends Controller
 
     public function emailVerificationPending()
     {
-        
+
         if (Auth::guard('healthcare_facilities')->user()) {
-            
-            
+
+
             if (Auth::guard('healthcare_facilities')->user()->emailVerified == 1 &&  Auth::guard('healthcare_facilities')->user()->user_stage == 1 && Auth::guard('healthcare_facilities')->user()->type == 1) {
 
                 return redirect()->route('medical-facilities.profile-under-reviewed');
@@ -455,6 +464,8 @@ class HomeController extends Controller
     public function manage_profile(){
         $user_id = Auth::guard('healthcare_facilities')->user()->id;
         $data['user_data'] = User::where("id",$user_id)->first();
+
+        $get_matching_percent = sendJobAlertEmails();
         return view('healthcare.settings.profile')->with($data);
     }
 
@@ -481,7 +492,7 @@ class HomeController extends Controller
         $email = $request->email;
         $phone = $request->phone;
         $communication_text = json_encode($request->communication_text);
-        
+
         $subaccreditation_data = json_encode($request->subaccreditation_data);
 
         //print_r($subaccreditation_data);die;
@@ -501,13 +512,13 @@ class HomeController extends Controller
 
             $image->move(public_path('healthcareimg/uploads'), $imageName);
 
-            
+
         }else{
             $imageName = $user_data->profile_img;
         }
 
         //print_r($site_data);
-        
+
         $user_data->name = $facility_name;
         $user_data->sector = $sector_preferences;
         $user_data->profile_img = $imageName;
@@ -534,8 +545,8 @@ class HomeController extends Controller
 
         if ($run) {
             $json['status'] = 1;
-            
-            
+
+
         } else {
             $json['status'] = 0;
         }
@@ -543,7 +554,7 @@ class HomeController extends Controller
         echo json_encode($json);
     }
 
-    
+
 
     public function getAccreditationsData(Request $request){
         $id = $request->id;
@@ -552,9 +563,9 @@ class HomeController extends Controller
         $data["accreditation_id"] = $id;
         $data["accreditation_name"] = $accreditation_name->name;
         echo json_encode($data);
-        
+
     }
 
-   
-    
+
+
 }

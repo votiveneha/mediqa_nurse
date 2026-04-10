@@ -157,8 +157,8 @@
                                     
                                     @if($recruit_data->role == 5)
                                     
-                                    <button class="btn btn-sm btn-outline-secondary" onclick="deleteUser({{ $recruit_data->id }})">
-                                        <i class="fa fa-trash"></i>
+                                    <button class="btn btn-danger" onclick="deleteUser({{ $recruit_data->id }})">
+                                        Delete
                                     </button>
                                     @endif
                                 </td>

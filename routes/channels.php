@@ -61,7 +61,7 @@ Broadcast::channel('user.{userId}', function ($user, $userId) {
 // User online status channel
 Broadcast::channel('user.{userId}.online', function ($user, $userId) {
     $authenticatedUser = $user ?: getBroadcastUser();
-    
+
     if (!$authenticatedUser) {
         return false;
     }

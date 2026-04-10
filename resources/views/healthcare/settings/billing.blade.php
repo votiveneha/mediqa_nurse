@@ -91,6 +91,11 @@
         background:#2563eb;
         color:#fff;
     }
+
+    .active-plan {
+    border: 2px solid #000;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.10);
+}
 </style>
 @endsection
 
@@ -112,15 +117,32 @@
 
                             <!-- Starter Plan -->
                             @foreach($plan_data as $plandata)
-                            <div class="plan-card">
-                                <h3 class="plan-name">{{ $plandata->plan_name }}</h3>
+                            @php
+                                $user_id = Auth::guard("healthcare_facilities")->user()->id;
+                                $invoice_data = DB::table("invoices")->where("user_id",$user_id)->where("product_id",$plandata->stripe_product_id)->first();
+                                $price_data = DB::table("stripe_prices")->where("stripe_price_id",$plandata->default_price_id)->first();    
 
-                                <div class="plan-price">
-                                    ${{ $plandata->monthly_price }} <span>/month</span>
-                                </div>
+                                
+                            @endphp
+                            <div class="plan-card @if(!empty($invoice_data)) active-plan @endif">
+                                <h3 class="plan-name">{{ $plandata->name }}</h3>
+                                
+                                    
+                                    <div class="plan-price">
+                                    ${{ $price_data->unit_amount/100 }} <span>/{{ $price_data->interval }}</span>
+                                    </div>
 
                                 <p class="plan-desc">
-                                    Small clinics, aged-care homes, local agencies
+                                    @php
+                                        $employer_types = json_decode($plandata->employer_types);
+
+                                        $emp_name_arr = [];
+                                        foreach($employer_types as $emp_type){
+                                            $emp_name = DB::table("employer_type")->where("id",$emp_type)->first();
+                                            $emp_name_arr[] = $emp_name->name;
+                                        }
+                                        echo implode(",",$emp_name_arr);
+                                    @endphp
                                 </p>
 
                                 <!-- <ul class="plan-features">
@@ -136,8 +158,13 @@
                                     {!! $plandata->features !!}
                                 </div>
                                 
-
-                                <button class="btn-plan">Choose Plan</button>
+                                @if(empty($invoice_data))
+                                <!-- <a href="{{ route('medical-facilities.payment_page',['product_id'=>$plandata->stripe_product_id]) }}" class="btn-plan">Choose Plan</a> -->
+                                 <a href="{{ route('medical-facilities.subscribe', $plandata->default_price_id) }}" class="btn btn-dark">
+    Choose Plan
+</a>
+                               
+                                @endif
                             </div>
                             @endforeach
 
@@ -168,11 +195,58 @@
                             </div> -->
 
                         </div>
+                        <hr style="margin:50px 0;">
 
+                            <h2 class="title">Invoices</h2>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered" style="background:#fff;">
+                                    <thead style="background:#f1f1f1;">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Invoice</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        @forelse($invoices as $invoice)
+                                            <tr>
+                                                <td>{{ date('d M Y', strtotime($invoice->created_at)) }}</td>
+
+                                                <td>
+                                                    ${{ number_format($invoice->total_amount / 100, 2) }}
+                                                </td>
+
+                                                <td>
+                                                    @if($invoice->status == 'paid')
+                                                        <span style="color:green; font-weight:bold;">Paid</span>
+                                                    @else
+                                                        <span style="color:red; font-weight:bold;">Pending</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <a href="{{ route('medical-facilities.invoice.download', $invoice->id) }}" target="_blank" 
+                            style="background:#2563eb;color:#fff;padding:6px 12px;border-radius:5px;text-decoration:none;">
+                            PDF
+                            </a>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center">No invoices found</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>    
                     </div>
+                    
                 </div>
             </div>
         </div>
+        
     </section>
 </main>
 @endsection

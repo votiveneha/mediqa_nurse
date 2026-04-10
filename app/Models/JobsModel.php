@@ -40,7 +40,7 @@ class JobsModel extends Model
 
         return EmpTypeModel::where('emp_prefer_id', $this->emplyeement_type)
             ->value('emp_type');
-    } 
+    }
 
     public function getHealthCareNameAttribute()
     {

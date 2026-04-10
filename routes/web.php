@@ -6,14 +6,14 @@ use App\Http\Controllers\nurse\HomeController;
 use App\Http\Controllers\admin\NurseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
-
+use App\Http\Controllers\admin\StripeWebhookController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 |
 | Here is where you can register web routes for your application. These
-| are loaded by the RouteServiceProvider and all of them will
+| routes are loaded by the RouteServiceProvider and all of them will
 | be assigned to the "web" middleware group. Make something great!
 |
 */
@@ -39,6 +39,8 @@ Route::post('/broadcasting/auth', function (Request $request) {
 // ===========
 // Admin Route
 // ===========
+ Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('handleWebhook');
+Route::get('/sync-stripe-products', [StripeWebhookController::class, 'syncStripeProducts']);
 Route::get('/ahepra_lookup', 'App\Http\Controllers\nurse\LicencesContoller@myFunction')->name('myFunction');
 Route::prefix('/admin')->name('admin.')->namespace('App\Http\Controllers\admin')->group(function () {
   Route::match(['get', 'post'], '/', 'AuthController@login')->name('login');
@@ -93,11 +95,20 @@ Route::prefix('/admin')->name('admin.')->namespace('App\Http\Controllers\admin')
     Route::get('/customer-list', 'NurseController@customerList')->name('customer-list');
     Route::get('/healthcare-list', 'HealthcareController@index')->name('healthcareList');
     Route::get('/healthcare-detail/{id}', 'HealthcareController@healthcare_details')->name('healthcare_details');
+    Route::get('/add_healthcare','HealthcareController@add_healthcare')->name('add_healthcare');
+    Route::post('/post_healthcare','HealthcareController@post_healthcare')->name('post_healthcare');
+    Route::get('/edit_healthcare/{id}','HealthcareController@edit_healthcare')->name('edit_healthcare');
     Route::get('/plan_management', 'HealthcareController@plan_list')->name('plan_list');
     Route::get('/add_plans', 'HealthcareController@add_plans')->name('add_plans');
     Route::post('/updatePlan', 'HealthcareController@update_plan')->name('updatePlan');
     Route::get('/update_plans/{id}', 'HealthcareController@update_plans')->name('update_plans');
+
+
+    Route::get('/show_invoice', 'HealthcareController@show_invoice')->name('show_invoice');
+    Route::get('/show_customers', 'HealthcareController@show_customers')->name('show_customers');
     Route::get('/recruiter-list', 'HealthcareController@recruiter_list')->name('recruiter_list');
+    Route::get('/add_compliance_security', 'HealthcareController@add_compliance_security')->name('add_compliance_security');
+    Route::post('/update_compliance_security', 'HealthcareController@update_compliance_security')->name('update_compliance_security');
     Route::get('/incoming-nurse-list', 'NurseController@incommingNurseList')->name('incoming-nurse-list');
     Route::get('/unverified-nurse-list', 'NurseController@unverified_nurse_list')->name('unverified-nurse-list');
     Route::post('/send_remainder', 'NurseController@send_remainder')->name('send_remainder');
@@ -360,6 +371,8 @@ Route::prefix('/admin')->name('admin.')->namespace('App\Http\Controllers\admin')
     Route::get('/jobList', 'JobsController@jobList')->name('jobList');
     Route::get('/edit_jobs/{id}','JobsController@edit_jobs')->name('edit_jobs');
     Route::get('/view_jobs/{id}','JobsController@job_details')->name('view_jobs');
+    Route::get('/applied-nurse-list/{id}','JobsController@applied_nurse_list')->name('applied_nurse_list');
+
 
   });
 

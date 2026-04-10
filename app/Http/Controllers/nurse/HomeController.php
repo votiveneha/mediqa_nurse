@@ -70,9 +70,13 @@ class HomeController extends Controller
         $this->specialityServices = $specialityServices;
         $this->specialityRepository = $specialityRepository;
         $this->authServices = $authServices;
-        
-    }
 
+    }
+    public function nurseChat(Request $request)
+    {
+        $hello = "Hello, this is the nurse chat!";
+        return view('nurse.chat', compact('hello'));
+    }
 
     public function like_Jobs(Request $request)
     {
@@ -288,7 +292,7 @@ class HomeController extends Controller
                 //     $jobs_list->where('experience_level', '>=', $saved->filter_experience_years);
                 // }
             }
-                        
+
         }elseif ($filter_data == 'instant'){
             $jobs_list = $jobs_list->whereDate('updated_at',$today)->where('main_emp_type',3);
         }elseif ($filter_data == 'last_minute'){
@@ -383,11 +387,44 @@ class HomeController extends Controller
     {
         if (!Auth::guard('nurse_middle')->check()) {
             $title = "Login";
-            $practitioner_data = SpecialityModel::where("status",'1')->get();
+
+            $jobs = [];
+
+            // Permanent
+            $jobs['permanent'] = JobsModel::where('save_draft', 2)
+                ->where('main_emp_type', 1)
+                ->orderBy('id', 'desc')
+                ->first();
+
+            // Fixed
+            $jobs['fixed'] = JobsModel::where('save_draft', 2)
+                ->where('main_emp_type', 2)
+                ->orderBy('id', 'desc')
+                ->first();
+
+            // Temporary
+            $jobs['temporary'] = JobsModel::where('save_draft', 2)
+                ->where('main_emp_type', 3)
+                ->orderBy('id', 'desc')
+                ->first();
+
+
+            // If any job type is missing
+            foreach ($jobs as $key => $job) {
+
+                if (!$job) {
+
+                    $jobs[$key] = JobsModel::where('save_draft', 2)
+                        ->orderBy('id', 'desc')
+                        ->first();
+                }
+            }
+
+            $practitioner_data = SpecialityModel::where("status", '1')->get();
             //print_r($practitioner_data);die;
-            $speciality_data = PractitionerTypeModel::where("status",'1')->get();
+            $speciality_data = PractitionerTypeModel::where("status", '1')->get();
             $work_preferences_data = WorkPreferModel::get();
-            return view('nurse.home', compact('message','practitioner_data','speciality_data','work_preferences_data'));
+            return view('nurse.home', compact('jobs', 'message', 'practitioner_data', 'speciality_data', 'work_preferences_data'));
         } else {
 
 
@@ -399,7 +436,7 @@ class HomeController extends Controller
         $practitioner_data = SpecialityModel::where("status",'1')->get();
         //print_r($practitioner_data);die;
         $speciality_data = PractitionerTypeModel::where("status",'1')->get();
-        $work_preferences_data = WorkPreferModel::get();    
+        $work_preferences_data = WorkPreferModel::get();
         $phoneCode = CountryModel::orderBy('id', 'DESC')->get();
         return view('nurse.contact', compact('message', 'phoneCode','practitioner_data','speciality_data','work_preferences_data'));
     }
@@ -459,9 +496,9 @@ class HomeController extends Controller
     }
     public function manage_profile($message = '')
     {
-        
+
         $employeement_type_preferences = DB::table("employeement_type_preferences")->where("sub_prefer_id","0")->get();
-        $user_id = Auth::guard('nurse_middle')->user()->id;    
+        $user_id = Auth::guard('nurse_middle')->user()->id;
         $user_data = User::where("id",$user_id)->first();
         $nurse_data = [];
         $specialities_data = [];
@@ -469,7 +506,7 @@ class HomeController extends Controller
         if($user_data->nurse_data != NULL){
             foreach (json_decode($user_data->nurse_data) as $key => $values) {
                 if ($key !== 'type_0') {
-                    
+
                     //$nurse_data = array_merge($nurse_data, $values);
                 }
             }
@@ -477,12 +514,12 @@ class HomeController extends Controller
         if($user_data->specialties != NULL){
             // foreach (json_decode($user_data->specialties) as $key => $values) {
             //     if ($key !== 'type_0' && $key !== 'speciality_status') {
-                    
+
             //         $specialities_data = array_merge($specialities_data, $values);
             //     }
             // }
         }
-        
+
         $specialities_type = (array)json_decode($user_data->specialties);
 
         //registration profile
@@ -490,18 +527,18 @@ class HomeController extends Controller
 
         $profession_id = isset($_GET['profession_id'])?$_GET['profession_id']:0;
         $profession_data = Profession::where("user_id",$user_id)->get();
-        
+
         $profession_single_data = Profession::where("profession_id",$profession_id)->first();
         //print_r($profession_single_data);die;
         //print_r($specialities_data);
         $experience_data = DB::table("user_experience")->where("user_id",$user_id)->get();
-        
+
         $emp_prefer_data = DB::table("employeement_type_preferences")->where("sub_prefer_id",1)->get();
         $emp_preferfixterm_data = DB::table("employeement_type_preferences")->where("sub_prefer_id",2)->get();
         $emp_prefertemp_data = DB::table("employeement_type_preferences")->where("sub_prefer_id",3)->get();
         $speciality_status_data = DB::table("speciality_status")->where("status",1)->get();
 
-        //Auto status update when date is expired 
+        //Auto status update when date is expired
         RegisteredProfile::whereNotNull('expiry_date')
             ->whereDate('expiry_date', '<', Carbon::today())
             ->where('status', '!=', 'expired')
@@ -617,16 +654,16 @@ class HomeController extends Controller
                     $specialities_data = $specialities[$lastKey];
                     //print_r($specialities[$lastKey]);
                     foreach($specialities_data as $spec){
-                        
-                            
+
+
                                 $post = new Profession;
                                 $post->user_id = $r->id;
                                 $post->nurse_data = $ntype;
                                 $post->specialties = $spec;
                                 $post->assistent_level = $request->assistent_level;
                                 $run = $post->save();
-                            
-                        
+
+
                     }
                 }
             }
@@ -1110,15 +1147,23 @@ class HomeController extends Controller
         }
     }
 
+    // public function logout(Request $request)
+    // {
+    //     Auth::guard('nurse_middle')->logout();
+    //     $request->session()->invalidate();
+    //     $request->session()->regenerateToken();
+    //     return redirect('nurse');
+    // }
+
     public function logout(Request $request)
     {
         // Get user before logout
         $user = Auth::guard('nurse_middle')->user();
-        
+
         if ($user) {
             // Clear online status from cache
             cache()->forget("user_{$user->id}_online");
-            
+
             // Broadcast offline status BEFORE logging out
             try {
                 // Use broadcast() without toOthers() to ensure it's sent
@@ -1128,12 +1173,12 @@ class HomeController extends Controller
                 \Log::error('Failed to broadcast offline status on nurse logout: ' . $e->getMessage());
             }
         }
-        
+
         // Now logout and destroy session
         Auth::guard('nurse_middle')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        
+
         return redirect('nurse');
     }
 
@@ -1246,9 +1291,9 @@ class HomeController extends Controller
                         <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4; padding:30px 0;">
                             <tr>
                                 <td align="center">
-                                    <table width="100%" max-width="600" cellpadding="0" cellspacing="0" 
+                                    <table width="100%" max-width="600" cellpadding="0" cellspacing="0"
                                         style="max-width:600px; background:#ffffff; border-radius:8px; overflow:hidden;">
-                                        
+
                                         <!-- Header -->
                                         <tr>
                                             <td style="background:#000; padding:20px; text-align:center;">
@@ -1266,8 +1311,8 @@ class HomeController extends Controller
                                                 </p>
 
                                                 <p style="margin:0 0 15px;">
-                                                    We received a request to reset the password for your 
-                                                    <strong>' . e(env("APP_NAME")) . '</strong> account 
+                                                    We received a request to reset the password for your
+                                                    <strong>' . e(env("APP_NAME")) . '</strong> account
                                                     (' . e($user->email) . ').
                                                 </p>
 
@@ -1386,16 +1431,16 @@ public function ResetPassword(Request $request)
         $updatePassword = DB::table('password_reset_tokens')
             ->where('token', $request->token)
             ->first();
-        
+
         if (!$updatePassword) {
             return $this->expiredRedirect();
         }
-        
+
         // Check if token is older than 15 minutes
         if (Carbon::parse($updatePassword->created_at)->addMinutes(15)->isPast()) {
-        
+
             DB::table('password_reset_tokens')->where('email', $updatePassword->email)->delete();
-        
+
             return $this->expiredRedirect();
         }
 
@@ -1701,7 +1746,7 @@ public function ResetPassword(Request $request)
                 ]
             );
         }
-        
+
         return response()->json([
             'status' => true,
             'message' => 'Registration country removed successfully'
@@ -1967,7 +2012,7 @@ public function ResetPassword(Request $request)
     //     $assistent_level = $request->assistent_level;
     //     $declare_information = $request->declare_information;
     //     $bio = $request->bio;
-        
+
     //     $employee_status = $request->employee_status;
     //     $permanent_status = $request->permanent_status;
     //     $temporary_status = $request->temporary_status;
@@ -2015,7 +2060,7 @@ public function ResetPassword(Request $request)
     //     $post->assistent_level = $assistent_level;
     //     $post->declaration_status = $declare_information;
     //     $post->bio = $bio;
-        
+
     //     $post->current_employee_status = $employee_status;
     //     $post->permanent_status = $permanent_status1;
     //     $post->temporary_status = $temporary_status1;
@@ -2067,7 +2112,7 @@ public function ResetPassword(Request $request)
         $assistent_level = $request->assistent_level;
         $declare_information = $request->declare_information;
         $bio = $request->bio;
-        
+
         $employee_status = $request->employee_status;
         $permanent_status = $request->permanent_status;
         $temporary_status = $request->temporary_status;
@@ -2090,23 +2135,23 @@ public function ResetPassword(Request $request)
             $temporary_status1 = "";
         }
 
-        
+
 
         $professionData = Profession::where("user_id",$user_id)->get();
 
         if($btn_name != 'edit'){
 
             //$user_stage = update_user_stage($request->user_id,"Profession");
-            
-            
+
+
 
             //print_r($levelKeys);die;
 
-            
+
 
             //print_r($nurse_type_arr);
             foreach($nurse_type_arr as $key1=>$nurse_type){
-                
+
                     if(str_contains($key1, 'type') && $key1 !== 'type_0'){
                     // contains 'word'
                     //print_r($nurse_type);
@@ -2130,11 +2175,11 @@ public function ResetPassword(Request $request)
                             //print_r($lastLevelValues);die;
                             //print_r($levelKeys);die;
                             //print_r($specialities);
-                            
+
                             foreach($lastLevelValues as $spe){
                                 $spec_arr_id = "type_".$spe;
                                 $post = new Profession;
-                                
+
                                 $post->user_id = $user_id;
                                 $post->nurse_data = $ntype;
                                 $post->specialties = $spe;
@@ -2154,18 +2199,18 @@ public function ResetPassword(Request $request)
                                 $post->profession_banner_status = 0;
                                 $run = $post->save();
                             }
-                               
-                            
+
+
                         }
                     }
             }
 
-           
+
         }else{
             //print_r($nurse_type_arr);
             $post = Profession::find($request->profession_id);
             foreach($nurse_type_arr as $key1=>$nurse_type){
-                
+
                     if(str_contains($key1, 'type') && $key1 !== 'type_0'){
                     // contains 'word'
                     //print_r($nurse_type);
@@ -2189,11 +2234,11 @@ public function ResetPassword(Request $request)
                             //print_r($lastLevelValues);die;
                             //print_r($levelKeys);die;
                             //print_r($specialities);
-                            
+
                             foreach($lastLevelValues as $spe){
                                 $spec_arr_id = "type_".$spe;
-                                
-                                
+
+
                                 $post->user_id = $user_id;
                                 $post->nurse_data = $ntype;
                                 $post->specialties = $spe;
@@ -2214,12 +2259,12 @@ public function ResetPassword(Request $request)
                                 $post->profession_banner_status = 0;
                                 $run = $post->save();
                             }
-                               
-                            
+
+
                         }
                     }
             }
-            
+
         }
 
         if ($run) {
@@ -2293,7 +2338,7 @@ public function ResetPassword(Request $request)
         $institution = $request->institution;
 
         $user_id = $request->user_id;
-        
+
         $graduation_start_date = $request->graduation_start_date;
 
         $professional_certification = json_encode($request->professional_certification);
@@ -2312,7 +2357,7 @@ public function ResetPassword(Request $request)
         //echo count($additional_license_number);die;
         $getedudata = DB::table("user_education_cerification")->where("user_id", $user_id)->first();
 
-        
+
 
         $training_certificate = $request->training_certificate;
         $certificate_license_number = $request->certificate_license_number;
@@ -2326,7 +2371,7 @@ public function ResetPassword(Request $request)
             for ($i = 0; $i < count($training_certificate); $i++) {
                 $new_certificate_array[] = array("certificate_id" => $i + 1, "training_certificate" => $training_certificate[$i], "certificate_license_number" => $certificate_license_number[$i], "certificate_expiry" => $certificate_expiry[$i], "regulating_body" => $regulating_body[$i], "certificate_upload_certification" => $certificate_upload_certification[$i+1]);
 
-                
+
             }
 
             $new_certificate_json = json_encode($new_certificate_array);
@@ -3058,17 +3103,17 @@ public function ResetPassword(Request $request)
 
     public function uploadAnotherImgs_cert(Request $request)
     {
-        
+
         $other_certificate = $request->other_certificate;
         $user_id = $request->user_id;
         $certificate_id = $request->certificate_id;
 
         $getedufieldsdata = DB::table("user_education_cerification")->where("user_id", $user_id)->first();
 
-        
+
 
         $exists = false;
-        
+
         if(!empty($getedufieldsdata) && $getedufieldsdata->additional_certification != NULL){
             $additional_certification = json_decode($getedufieldsdata->additional_certification);
             foreach ($additional_certification as $certificate) {
@@ -3078,10 +3123,10 @@ public function ResetPassword(Request $request)
                 }
             }
         }
-        
-        
+
+
         //print_r($additional_certification);die;
-        
+
         if(!empty($getedufieldsdata) && $getedufieldsdata->additional_certification != NULL && $exists==true){
             $additional_certification = json_decode($getedufieldsdata->additional_certification);
             $cert_img = '';
@@ -3093,14 +3138,14 @@ public function ResetPassword(Request $request)
                 }
             }
 
-           DB::table("user_education_cerification")->where("user_id", $user_id)->update(["additional_certification"=>json_encode($additional_certification)]); 
+           DB::table("user_education_cerification")->where("user_id", $user_id)->update(["additional_certification"=>json_encode($additional_certification)]);
         }else{
-            
+
             $cert_img = Helpers::multipleFileUpload($other_certificate[$certificate_id], '');
         }
 
         //print_r($cert_img);
-        
+
         //print_r($cert_img);
 
         // $additional_certification = json_decode($getedufieldsdata->additional_certification);
@@ -3108,16 +3153,16 @@ public function ResetPassword(Request $request)
         // foreach($additional_certification as $acert){
         //     $a
         // }
-        
+
         return $cert_img;
         //print_r($additional_certification);
     }
 
     public function getEmployeePositions(Request $request)
     {
-        
+
         $postion_id = $request->postion_id;
-        
+
         $data['employee_positions'] = DB::table("employee_positions")->where("subposition_id",$postion_id)->orderBy('position_name', 'ASC')->get();
         $position_name = DB::table("employee_positions")->where("position_id",$postion_id)->first();
         //print_r(json_encode($data));
@@ -3128,9 +3173,9 @@ public function ResetPassword(Request $request)
 
     public function getWorkplaceData(Request $request)
     {
-        
+
         $place_id = $request->place_id;
-        
+
         $data['work_data'] = DB::table("work_enviornment_preferences")->where("sub_env_id",$place_id)->where("sub_envp_id",0)->orderBy('env_name', 'ASC')->get();
         $environment_name = DB::table("work_enviornment_preferences")->where("prefer_id",$place_id)->first();
         //print_r(json_encode($data));
@@ -3141,7 +3186,7 @@ public function ResetPassword(Request $request)
 
     public function getSubWorkplaceData(Request $request)
     {
-        
+
         $place_id = $request->place_id;
         $subplace_id = $request->subplace_id;
         $data['work_data'] = DB::table("work_enviornment_preferences")->where("sub_env_id",$place_id)->where("sub_envp_id",$subplace_id)->orderBy('env_name', 'ASC')->get();
@@ -3154,12 +3199,12 @@ public function ResetPassword(Request $request)
     }
 
 
-   
+
 
     // public function updateExperience(Request $request)
     // {
     //     $userId = $request->user_id;
-        
+
     //     $facility_workplace_name = $request->facility_workplace_name;
     //     $nurseTypes = $request->input('nurseType', []);
     //     //print_r($nurseTypes);
@@ -3185,9 +3230,9 @@ public function ResetPassword(Request $request)
     //     //$positions_held = $request->input('subpositions_held');
 
     //     $subwork = $request->input('subwork');
-        
+
     //     $subpwork = $request->input('subworkthlevel');
-        
+
     //     $start_date =  $request->input('start_date');
     //     $end_date = $request->input('end_date');
     //     $present_box = $request->input('present_box', []);
@@ -3210,7 +3255,7 @@ public function ResetPassword(Request $request)
     //     $oldfile = $request->input('old_file');
     //     // print_r($oldfile);
     //     // die;
-        
+
     //     $loopCount = 0;
     //     // Loop through nurse types and process them
     //     foreach ($nurseTypes as $key => $nurseType) {
@@ -3228,17 +3273,17 @@ public function ResetPassword(Request $request)
     //             $p_box = 0;
     //         }
     //         $facility_workplace_name1 = $facility_workplace_name[$key] ?? null;
-            
+
     //         $subpwork1 = json_encode($subpwork[$key]) ?? null;
-            
+
     //         $job_responeblities1 = $job_responeblities[$key] ?? null;
     //         $achievements1 = $achievements[$key] ?? null;
-            
+
     //         $skills_compantancies1 = $skills_compantancies[$key] ?? null;
     //         $type_of_evidence1 = $type_of_evidence[$key] ?? null;
     //         $level_of_exp1 = $level_of_exp[$key] ?? null;
     //         $emptypelevel1 = $emptypelevel[$key] ?? null;
-            
+
     //         $sub_skills_compantancies1_1 = $sub_skills_compantancies1[$key] ?? null;
     //         $sub_skills_compantancies2_1 = $sub_skills_compantancies2[$key] ?? null;
     //         $sub_skills_compantancies3_1 = $sub_skills_compantancies3[$key] ?? null;
@@ -3253,7 +3298,7 @@ public function ResetPassword(Request $request)
 
     //             $profession_experience_id = $request->profession_experience_id;
     //             $post = Profession::find($profession_experience_id[$key]);
-                
+
     //             foreach($nurseType as $key1=>$nurse_type){
     //                 if(str_contains($key1, 'type') && $key1 !== 'type_0'){
     //                     foreach($nurse_type as $ntype){
@@ -3276,9 +3321,9 @@ public function ResetPassword(Request $request)
     //                         //print_r($lastLevelValues);die;
     //                         //print_r($levelKeys);die;
     //                         //print_r($specialities);
-                            
-                            
-                            
+
+
+
     //                         foreach($lastLevelValues as $spe){
     //                             $spec_arr_id = "type_".$spe;
     //                             if(isset($specialities['speciality_status'][$spec_arr_id]['present_status'])){
@@ -3286,14 +3331,14 @@ public function ResetPassword(Request $request)
     //                             }else{
     //                                 $present_status = 0;
     //                             }
-                               
+
     //                             $post->user_id = $userId;
     //                             $post->experience_id = $exp_id_1;
     //                             $post->nurse_data = $ntype;
     //                             $post->specialties = $spe;
     //                             $post->speciality_status = $specialities['speciality_status'][$spec_arr_id]['status'];
     //                             $post->assistent_level = $specialities['speciality_status'][$spec_arr_id]['assistent_level'];
-                                
+
     //                             $post->current_employee_status = $specialities['speciality_status'][$spec_arr_id]['employee_status'];
     //                             $post->permanent_status = $specialities['speciality_status'][$spec_arr_id]['permanent_status'];
     //                             $post->temporary_status = $specialities['speciality_status'][$spec_arr_id]['temporary_status'];
@@ -3307,8 +3352,8 @@ public function ResetPassword(Request $request)
     //                             $post->row_status = "complete";
     //                             $run = $post->save();
     //                         }
-                               
-                            
+
+
     //                     }
     //                 }
     //             }
@@ -3316,17 +3361,17 @@ public function ResetPassword(Request $request)
     //             $run = ExperienceModel::where('experience_id', $exp_id_1)->update([
     //                 'facility_workplace_name' => $facility_workplace_name1,
     //                 'nurseType' => json_encode($nurseType),
-                    
+
     //                 'responsiblities' => $job_responeblities1,
     //                 'achievements' => $achievements1,
-                    
+
     //                 'skills_compantancies' => json_encode($skills_compantancies1),
     //                 'evidence_type' => json_encode($type_of_evidence1),
-                    
+
     //                 'upload_evidence' => $evi1,
     //                 'sub_skills_compantancies' => json_encode($sub_skills_compantancies1),
-                    
-                    
+
+
     //                 'inter_and_em_skill' => json_encode($sub_skills_compantancies1_1),
     //                 'lead_and_ment_skill' => json_encode($sub_skills_compantancies3_1),
     //                 'org_and_any_skill' => json_encode($sub_skills_compantancies2_1),
@@ -3338,17 +3383,17 @@ public function ResetPassword(Request $request)
     //             //echo "hello";
     //             // $newExperience = new ExperienceModel();
     //             // $newExperience->user_id = $userId;
-                
+
     //             // $newExperience->facility_workplace_name = $facility_workplace_name1;
-                
+
     //             // $newExperience->facility_workplace_type = $subpwork1;
-                
+
     //             // $newExperience->responsiblities = $job_responeblities1;
     //             // $newExperience->achievements = $achievements1;
-                
+
     //             // $newExperience->skills_compantancies = json_encode($skills_compantancies1);
     //             // $newExperience->evidence_type =  json_encode($type_of_evidence1);
-               
+
     //             // $newExperience->upload_evidence  = $evi1;
     //             // $newExperience->sub_skills_compantancies = json_encode($sub_skills_compantancies1);
     //             // $newExperience->assistent_level = $level_of_exp1;
@@ -3361,7 +3406,7 @@ public function ResetPassword(Request $request)
     //             // $newExperience->declaration_status = $dec_status;
 
     //             // $run = $newExperience->save();
-                
+
     //             // $experi_id = $newExperience->id;
     //             // die;
     //             // $user_stage = update_user_stage($userId,"Experience");
@@ -3369,9 +3414,9 @@ public function ResetPassword(Request $request)
     //             // $level_name = $request->level_name;
 
     //             // if($level_name[$key] == 'add'){
-                    
+
     //             //     foreach($nurseType as $key1=>$nurse_type){
-                
+
     //             //             if(str_contains($key1, 'type') && $key1 !== 'type_0'){
     //             //             // contains 'word'
     //             //             //print_r($nurse_type);
@@ -3395,7 +3440,7 @@ public function ResetPassword(Request $request)
     //             //                     //print_r($lastLevelValues);die;
     //             //                     //print_r($levelKeys);die;
     //             //                     //print_r($specialities);
-                                    
+
     //             //                     foreach($lastLevelValues as $spe){
     //             //                         $spec_arr_id = "type_".$spe;
     //             //                         if(isset($specialities['speciality_status'][$spec_arr_id]['present_status'])){
@@ -3404,7 +3449,7 @@ public function ResetPassword(Request $request)
     //             //                             $present_status = 0;
     //             //                         }
     //             //                         $post = new Profession;
-                                        
+
     //             //                         $post->user_id = $userId;
     //             //                         $post->experience_id = $experi_id;
     //             //                         $post->nurse_data = $ntype;
@@ -3426,17 +3471,17 @@ public function ResetPassword(Request $request)
     //             //                         $post->row_status = "complete";
     //             //                         $run = $post->save();
     //             //                     }
-                                    
-                                    
+
+
     //             //                 }
     //             //             }
     //             //     }
     //             // }else{
 
-                
+
     //             //     $post = Profession::find($profession_experience_id[$key]);
 
-                    
+
     //             //     //print_r();
     //             //     foreach($nurseType as $key1=>$nurse_type){
     //             //         if(str_contains($key1, 'type') && $key1 !== 'type_0'){
@@ -3460,8 +3505,8 @@ public function ResetPassword(Request $request)
     //             //                 //print_r($lastLevelValues);die;
     //             //                 //print_r($levelKeys);die;
     //             //                 //print_r($specialities);
-                                
-                                
+
+
     //             //                 foreach($lastLevelValues as $spe){
     //             //                     $spec_arr_id = "type_".$spe;
     //             //                     if(isset($specialities['speciality_status'][$spec_arr_id]['present_status'])){
@@ -3469,14 +3514,14 @@ public function ResetPassword(Request $request)
     //             //                     }else{
     //             //                         $present_status = 0;
     //             //                     }
-                                
+
     //             //                     $post->user_id = $userId;
     //             //                     $post->experience_id = $experi_id;
     //             //                     $post->nurse_data = $ntype;
     //             //                     $post->specialties = $spe;
     //             //                     $post->speciality_status = $specialities['speciality_status'][$spec_arr_id]['status'];
     //             //                     $post->assistent_level = $specialities['speciality_status'][$spec_arr_id]['assistent_level'];
-                                    
+
     //             //                     $post->current_employee_status = $specialities['speciality_status'][$spec_arr_id]['employee_status'];
     //             //                     $post->permanent_status = $specialities['speciality_status'][$spec_arr_id]['permanent_status'];
     //             //                     $post->temporary_status = $specialities['speciality_status'][$spec_arr_id]['temporary_status'];
@@ -3490,24 +3535,24 @@ public function ResetPassword(Request $request)
     //             //                     $post->row_status = "complete";
     //             //                     $run = $post->save();
     //             //                 }
-                                
-                                
+
+
     //             //             }
     //             //         }
     //             //     }
     //             // }
-                
+
     //         }
     //     }
     //     echo $loopCount;
     //     die;
 
-        
+
     //     // echo $experi_id;die;
     //     if ($run) {
     //         $json['status'] = 1;
     //         $json['experience_id'] = $experi_id;
-            
+
     //     } else {
     //         $json['status'] = 0;
     //     }
@@ -3517,7 +3562,7 @@ public function ResetPassword(Request $request)
     public function updateExperience(Request $request)
     {
         $userId = $request->user_id;
-        
+
         $facility_workplace_name = $request->facility_workplace_name;
         $nurseTypes = $request->input('nurseType', []);
         //print_r($nurseTypes);
@@ -3543,9 +3588,9 @@ public function ResetPassword(Request $request)
         //$positions_held = $request->input('subpositions_held');
 
         $subwork = $request->input('subwork');
-        
+
         $subpwork = $request->input('subworkthlevel');
-        
+
         $start_date =  $request->input('start_date');
         $end_date = $request->input('end_date');
         $present_box = $request->input('present_box', []);
@@ -3628,7 +3673,7 @@ public function ResetPassword(Request $request)
                 $oldfile2 = json_decode($oldfile1, true);
 
                 // if(!empty($evi1)){
-                    
+
                 //     $expimgs = Helpers::multipleFileUpload($evi1, $oldfile2);
                 // }else{
                 //     $expimgs = Helpers::multipleFileUpload('', $oldfile2);
@@ -3662,9 +3707,9 @@ public function ResetPassword(Request $request)
                             //print_r($lastLevelValues);die;
                             //print_r($levelKeys);die;
                             //print_r($specialities);
-                            
-                            
-                            
+
+
+
                             foreach($lastLevelValues as $spe){
                                 $spec_arr_id = "type_".$spe;
                                 if(isset($specialities['speciality_status'][$spec_arr_id]['present_status'])){
@@ -3672,13 +3717,13 @@ public function ResetPassword(Request $request)
                                 }else{
                                     $present_status = 0;
                                 }
-                               
+
                                 $post->user_id = $userId;
                                 $post->nurse_data = $ntype;
                                 $post->specialties = $spe;
                                 $post->speciality_status = $specialities['speciality_status'][$spec_arr_id]['status'];
                                 $post->assistent_level = $specialities['speciality_status'][$spec_arr_id]['assistent_level'];
-                                
+
                                 $post->current_employee_status = $specialities['speciality_status'][$spec_arr_id]['employee_status'];
                                 $post->permanent_status = $specialities['speciality_status'][$spec_arr_id]['permanent_status'];
                                 $post->temporary_status = $specialities['speciality_status'][$spec_arr_id]['temporary_status'];
@@ -3692,8 +3737,8 @@ public function ResetPassword(Request $request)
                                 $post->row_status = "complete";
                                 $run = $post->save();
                             }
-                               
-                            
+
+
                         }
                     }
                 }
@@ -3701,17 +3746,17 @@ public function ResetPassword(Request $request)
                 $run = ExperienceModel::where('experience_id', $exp_id_1)->update([
                     'facility_workplace_name' => $facility_workplace_name1,
                     'nurseType' => json_encode($nurseType),
-                    
+
                     'responsiblities' => $job_responeblities1,
                     'achievements' => $achievements1,
-                    
+
                     'skills_compantancies' => json_encode($skills_compantancies1),
                     'evidence_type' => json_encode($type_of_evidence1),
-                    
+
                     'upload_evidence' => $evi1,
                     'sub_skills_compantancies' => json_encode($sub_skills_compantancies1),
-                    
-                    
+
+
                     'inter_and_em_skill' => json_encode($sub_skills_compantancies1_1),
                     'lead_and_ment_skill' => json_encode($sub_skills_compantancies3_1),
                     'org_and_any_skill' => json_encode($sub_skills_compantancies2_1),
@@ -3723,17 +3768,17 @@ public function ResetPassword(Request $request)
 
                 $newExperience = new ExperienceModel();
                 $newExperience->user_id = $userId;
-                
+
                 $newExperience->facility_workplace_name = $facility_workplace_name1;
-                
+
                 $newExperience->facility_workplace_type = $subpwork1;
-                
+
                 $newExperience->responsiblities = $job_responeblities1;
                 $newExperience->achievements = $achievements1;
-                
+
                 $newExperience->skills_compantancies = json_encode($skills_compantancies1);
                 $newExperience->evidence_type =  json_encode($type_of_evidence1);
-               
+
                 $newExperience->upload_evidence  = $evi1;
                 $newExperience->sub_skills_compantancies = json_encode($sub_skills_compantancies1);
                 $newExperience->assistent_level = $level_of_exp1;
@@ -3746,7 +3791,7 @@ public function ResetPassword(Request $request)
                 $newExperience->declaration_status = $dec_status;
 
                 $run = $newExperience->save();
-                
+
                 $experi_id = $newExperience->id;
 
                 $user_stage = update_user_stage($userId,"Experience");
@@ -3755,7 +3800,7 @@ public function ResetPassword(Request $request)
 
                 if($level_name[$key] == 'add'){
                     foreach($nurseType as $key1=>$nurse_type){
-                
+
                             if(str_contains($key1, 'type') && $key1 !== 'type_0'){
                             // contains 'word'
                             //print_r($nurse_type);
@@ -3779,7 +3824,7 @@ public function ResetPassword(Request $request)
                                     //print_r($lastLevelValues);die;
                                     //print_r($levelKeys);die;
                                     //print_r($specialities);
-                                    
+
                                     foreach($lastLevelValues as $spe){
                                         $spec_arr_id = "type_".$spe;
                                         if(isset($specialities['speciality_status'][$spec_arr_id]['present_status'])){
@@ -3787,9 +3832,9 @@ public function ResetPassword(Request $request)
                                         }else{
                                             $present_status = 0;
                                         }
-                                        
+
                                         $post = new Profession;
-                                        
+
                                         $post->user_id = $userId;
                                         $post->experience_id = $experi_id;
                                         $post->nurse_data = $ntype;
@@ -3811,17 +3856,17 @@ public function ResetPassword(Request $request)
                                         $post->row_status = "complete";
                                         $run = $post->save();
                                     }
-                                    
-                                    
+
+
                                 }
                             }
                     }
                 }else{
 
-                
+
                     $post = Profession::find($profession_experience_id[$key]);
 
-                    
+
                     //print_r($nurseType);
                     foreach($nurseType as $key1=>$nurse_type){
                         if(str_contains($key1, 'type') && $key1 !== 'type_0'){
@@ -3845,8 +3890,8 @@ public function ResetPassword(Request $request)
                                 //print_r($lastLevelValues);die;
                                 //print_r($levelKeys);die;
                                 //print_r($specialities);
-                                
-                                
+
+
                                 foreach($lastLevelValues as $spe){
                                     $spec_arr_id = "type_".$spe;
                                     if(isset($specialities['speciality_status'][$spec_arr_id]['present_status'])){
@@ -3854,14 +3899,14 @@ public function ResetPassword(Request $request)
                                     }else{
                                         $present_status = 0;
                                     }
-                                
+
                                     $post->user_id = $userId;
                                     $post->experience_id = $experi_id;
                                     $post->nurse_data = $ntype;
                                     $post->specialties = $spe;
                                     $post->speciality_status = $specialities['speciality_status'][$spec_arr_id]['status'];
                                     $post->assistent_level = $specialities['speciality_status'][$spec_arr_id]['assistent_level'];
-                                    
+
                                     $post->current_employee_status = $specialities['speciality_status'][$spec_arr_id]['employee_status'];
                                     $post->permanent_status = $specialities['speciality_status'][$spec_arr_id]['permanent_status'];
                                     $post->temporary_status = $specialities['speciality_status'][$spec_arr_id]['temporary_status'];
@@ -3875,22 +3920,22 @@ public function ResetPassword(Request $request)
                                     $post->row_status = "complete";
                                     $run = $post->save();
                                 }
-                                
-                                
+
+
                             }
                         }
                     }
                 }
-                
+
             }
         }
 
-        
+
         // echo $experi_id;die;
         if ($run) {
             $json['status'] = 1;
             $json['experience_id'] = $experi_id;
-            
+
         } else {
             $json['status'] = 0;
         }
@@ -3921,7 +3966,7 @@ public function ResetPassword(Request $request)
     //     $getrefereedata = DB::table("referee")->where("user_id", $user_id)->get();
 
     //     $referee_no_array = array();
-        
+
     //     foreach ($getrefereedata as $r_data) {
     //         $referee_no_array[] = $r_data->referee_no;
     //     }
@@ -3934,9 +3979,9 @@ public function ResetPassword(Request $request)
     //             // } else {
     //             //     $working = 0;
     //             // }
-                
-    //             $run = AddReferee::where('user_id', $user_id)->where('referee_no', $referee_no[$i])->update(['first_name' => $first_name[$i], 'last_name' => $last_name[$i], 'email' => $email[$i], 
-    //                 // 'phone_no' => $phone_no[$i], 
+
+    //             $run = AddReferee::where('user_id', $user_id)->where('referee_no', $referee_no[$i])->update(['first_name' => $first_name[$i], 'last_name' => $last_name[$i], 'email' => $email[$i],
+    //                 // 'phone_no' => $phone_no[$i],
     //                 'relationship' => $reference_relationship[$i], 'worked_together' => $worked_together[$i], 'position_with_referee' => json_encode($position_with_referee[$i+1]), 'start_date' => $start_date[$i], 'end_date' => $end_date[$i], 'still_working' => $still_working[$i], 'experience_id' => $experience_id[$i], 'is_declare' => 1]);
     //         } else {
     //             $user_stage = update_user_stage($user_id,"References");
@@ -3988,11 +4033,11 @@ public function ResetPassword(Request $request)
             $end_date = $request->end_date;
             $still_working = $request->still_working1;
             $reference_no = $request->reference_no;
-            
+
             $getrefereedata = DB::table("referee")->where("user_id", $user_id)->get();
 
             $referee_no_array = array();
-            
+
             foreach ($getrefereedata as $r_data) {
                 $referee_no_array[] = $r_data->referee_no;
             }
@@ -4311,14 +4356,14 @@ public function ResetPassword(Request $request)
         $user_id = $request->user_id;
         $img = $request->img;
         $certificate_id = $request->certificate_id;
-       
+
         $getEducationData = DB::table("user_education_cerification")->where("user_id", $user_id)->first();
 
         if(!empty($getEducationData) && $getEducationData->additional_certification != NULL){
             $additional_certification = json_decode($getEducationData->additional_certification);
             //print_r($additional_certification);
             foreach($additional_certification as $index=>$acert){
-                
+
                 if (isset($acert->certificate_id) && $acert->certificate_id == $certificate_id) {
                     //print_r($acert->certificate_upload_certification);die;
                     $certificate_upload_certification = json_decode($acert->certificate_upload_certification);
@@ -4330,16 +4375,16 @@ public function ResetPassword(Request $request)
             }
 
             //print_r($additional_certification);die;
-            $run = DB::table("user_education_cerification")->where("user_id", $user_id)->update(["additional_certification"=>json_encode($additional_certification)]); 
+            $run = DB::table("user_education_cerification")->where("user_id", $user_id)->update(["additional_certification"=>json_encode($additional_certification)]);
         }
 
-        
+
             return 1;
-        
 
 
 
-       
+
+
     }
 
     public function deleteAnoImg1(Request $request)
@@ -4394,7 +4439,7 @@ public function ResetPassword(Request $request)
     {
         //This function is for add /update the vaccination record for user
         $user_id = Auth::guard('nurse_middle')->user()->id;
-        
+
         /**[Other Vaccine Start]**/
         $other_ids              = $request->input('other_id', []);
         $vaccination_names      = $request->input('vaccination_name', []);
@@ -4413,17 +4458,17 @@ public function ResetPassword(Request $request)
                     $vaccine->save();
                     $other_id = $other_ids[$i];
 
-                   
+
                     if (isset($evidence_files[$i]) && is_array($evidence_files[$i])) {
-                       
+
                         foreach ($evidence_files[$i] as $file) {
-                            
+
                             if ($file->isValid()) {
                                 $filename = 'evidence_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                                 $originalName = $file->getClientOriginalName();
                                 $destinationPath = public_path('/uploads/evidence');
                                 $file->move($destinationPath, $filename);
-                                
+
                                 $others                  = new OtherEvidance();
                                 $others->other_vcc_id     = $other_id;
                                 $others->original_name    = $originalName;
@@ -4435,14 +4480,14 @@ public function ResetPassword(Request $request)
                     }
                 }
             } else {
-                
+
                 $vaccine = new OtherVaccineModel();
                 $vaccine->user_id = $user_id;
                 $vaccine->vaccination_name = $vaccination_names[$i];
                 $vaccine->immunization_status = $immunization_statuses[$i];
                 $vaccine->evidence_type = $evidence_types[$i];
                 $vaccine->is_declare = $request->is_declare=='on'?1:0;
-                
+
                 $vaccine->save();
                 $other_id = $vaccine->id;
 
@@ -4455,14 +4500,14 @@ public function ResetPassword(Request $request)
                 // }
 
                 if (isset($evidence_files[$i]) && is_array($evidence_files[$i])) {
-                        
+
                     foreach ($evidence_files[$i] as $file) {
                         if ($file->isValid()) {
                             $filename = 'evidence_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                             $originalName = $file->getClientOriginalName();
                             $destinationPath = public_path('/uploads/evidence');
                             $file->move($destinationPath, $filename);
-                            
+
 
                             $other                   = new OtherEvidance();
                             $other->other_vcc_id     = $other_id;
@@ -4473,7 +4518,7 @@ public function ResetPassword(Request $request)
                         }
                     }
                 }
-                
+
             }
         }
         /**[Other Vaccine End]**/
@@ -4488,7 +4533,7 @@ public function ResetPassword(Request $request)
 
 
         if (!empty($vaccination_record)) {
-            //Now delete the vaccination record which is not for update or add 
+            //Now delete the vaccination record which is not for update or add
             $selectedVaccinationIds = $request->input('vaccination_id', []);
             $selectedVaccinationIds = array_map('intval', $selectedVaccinationIds);
 
@@ -4517,7 +4562,7 @@ public function ResetPassword(Request $request)
                     }
                 }
 
-                //Now remove the vaccination record     
+                //Now remove the vaccination record
                 DB::table('vaccination_front')
                     ->where('user_id', $user_id)
                     ->whereNotIn('vaccination_id', $selectedVaccinationIds)
@@ -4535,7 +4580,7 @@ public function ResetPassword(Request $request)
                                 'evidance_type' => $evidence_required[$vaccination][0] ?? null,
                                 'covid_dose' => $covid_dose[$vaccination] ?? null,
                                 'is_declare'=> $request->is_declare=='on'?1:0
-                                
+
 
                             ]);
 
@@ -4569,7 +4614,7 @@ public function ResetPassword(Request $request)
                         $fvcc->save();
 
                         $user_stage = update_user_stage($user_id,"Vaccinations");
-                        
+
                         $vcc_id = $fvcc->id;
 
                         if ($request->hasFile('evidancefile' . $vaccination)) {
@@ -4594,7 +4639,7 @@ public function ResetPassword(Request $request)
         else{
             DB::table('vaccination_front')
             ->where('user_id', $user_id)
-            ->delete();   
+            ->delete();
         }
         /**********[Vaccination Record End]*************/
 
@@ -4911,7 +4956,7 @@ public function ResetPassword(Request $request)
     public function updateTraining(Request $request)
     {
         $user_id = $request->user_id;
-        
+
         $start_date = $request->start_date;
         $end_date = $request->end_date;
         $institution = $request->institution;
@@ -5019,7 +5064,7 @@ public function ResetPassword(Request $request)
             // }else{
             //     $acls_img = Helpers::multipleFileUpload('',$aclsimg);
             // }
-            //echo $acls_img;        
+            //echo $acls_img;
             $tech_innvo_array[] = array("tech_tra_id" => $techinnvonamearr[$i], "tech_institution" => $tech_institution[$i], "tech_start_date" => $tech_start_date[$i], "tech_end_date" => $tech_end_date[$i], "tech_expiry" => $tech_expiry[$i]);
         }
 
@@ -5056,7 +5101,7 @@ public function ResetPassword(Request $request)
             // }else{
             //     $acls_img = Helpers::multipleFileUpload('',$aclsimg);
             // }
-            //echo $acls_img;        
+            //echo $acls_img;
             $lead_pro_array[] = array("lead_pro_tra_id" => $leaderpronamearr[$i], "lead_pro_institution" => $lead_pro_institution[$i], "lead_start_date" => $lead_pro_start_date[$i], "lead_end_date" => $lead_pro_end_date[$i], "lead_expiry" => $leader_pro_expiry[$i]);
         }
 
@@ -5067,7 +5112,7 @@ public function ResetPassword(Request $request)
         }
 
 
-        // fourth        
+        // fourth
         $mid_spec_tra_data = $request->mid_spec_tra_data;
         if ($mid_spec_tra_data) {
             $mid_spec_count = count($mid_spec_tra_data);
@@ -5097,7 +5142,7 @@ public function ResetPassword(Request $request)
             // }else{
             //     $acls_img = Helpers::multipleFileUpload('',$aclsimg);
             // }
-            //echo $acls_img;        
+            //echo $acls_img;
             $mid_spec_array[] = array("mid_spec_tra_id" => $midspecnamearr[$i], "mid_spec_institution" => $mid_spec_institution[$i], "mid_spec_start_date" => $mid_spec_tra_start_date[$i], "mid_spec_end_date" => $mid_spec_tra_start_date[$i], "mis_spec_expiry" => $mid_spec_expiry[$i]);
         }
         if (!empty($mid_spec_array)) {
@@ -5409,16 +5454,16 @@ public function ResetPassword(Request $request)
 
         echo json_encode($json);
     }
-    
-    
-    
-    
+
+
+
+
     public function term_and_condition($message = '')
     {
         $practitioner_data = SpecialityModel::where("status",'1')->get();
         //print_r($practitioner_data);die;
         $speciality_data = PractitionerTypeModel::where("status",'1')->get();
-        $work_preferences_data = WorkPreferModel::get();    
+        $work_preferences_data = WorkPreferModel::get();
         return view('nurse.term-&-condition', compact('message','practitioner_data','speciality_data','work_preferences_data'));
     }
     public function about($message = '')
@@ -5426,7 +5471,7 @@ public function ResetPassword(Request $request)
         $practitioner_data = SpecialityModel::where("status",'1')->get();
         //print_r($practitioner_data);die;
         $speciality_data = PractitionerTypeModel::where("status",'1')->get();
-        $work_preferences_data = WorkPreferModel::get();    
+        $work_preferences_data = WorkPreferModel::get();
         return view('nurse.about-us', compact('message','practitioner_data','speciality_data','work_preferences_data'));
     }
 
@@ -5435,7 +5480,7 @@ public function ResetPassword(Request $request)
         $practitioner_data = SpecialityModel::where("status",'1')->get();
         //print_r($practitioner_data);die;
         $speciality_data = PractitionerTypeModel::where("status",'1')->get();
-        $work_preferences_data = WorkPreferModel::get();    
+        $work_preferences_data = WorkPreferModel::get();
         return view('nurse.privacy', compact('message','practitioner_data','speciality_data','work_preferences_data'));
     }
     public function addnewsletters(AddnewsletterRequest $request)
@@ -5454,7 +5499,7 @@ public function ResetPassword(Request $request)
         $user_id = $request->user_id;
         $cat_name = $request->cat_name;
         $field_name = $request->field_name;
-        // dd($field_name);die;  
+        // dd($field_name);die;
         $getedufieldsdata = DB::table("edu_fields")->where("user_id", $user_id)->first();
 
         if (empty($getedufieldsdata)) {
@@ -5489,7 +5534,7 @@ public function ResetPassword(Request $request)
         $user_id = $request->user_id;
         $cat_name = $request->cat_name;
         $field_name = $request->field_name;
-        // dd($field_name);die;  
+        // dd($field_name);die;
         $getedufieldsdata = DB::table("edu_fields")->where("user_id", $user_id)->first();
 
         if (empty($getedufieldsdata)) {
@@ -5656,23 +5701,23 @@ public function ResetPassword(Request $request)
         $files = $request->file('exp_evidence');
         $exp_id = $request->exp_id;
         $user_id = $request->user_id;
-        
+
         $getMembdata = DB::table("user_experience")->where("experience_id", $exp_id)->where("user_id", $user_id)->first();
-        
+
         if ($getMembdata && $getMembdata->upload_evidence) {
             $membimg = (array)json_decode($getMembdata->upload_evidence);
-            
-            
+
+
             $membimgs = Helpers::multipleFileUpload($files, $membimg);
 
-            
+
         } else {
             $membimgs = Helpers::multipleFileUpload($files, '');
-            
+
         }
- 
+
         //print_r(json_decode($membimgs));die;
-        
+
         $run = ExperienceModel::where("experience_id", $exp_id)->where('user_id', $user_id)->update(['upload_evidence' => $membimgs]);
 
         return $membimgs;
@@ -5711,7 +5756,7 @@ public function ResetPassword(Request $request)
                 File::delete($destinationPath);
             }
 
-            
+
 
         }else{
             $deleteData = 1;
@@ -5756,11 +5801,11 @@ public function ResetPassword(Request $request)
         $sub_prefer_id = $request->sub_prefer_id;
         $circle_value = $request->circle_value;
         $employeement_type_name = DB::table("employeement_type_preferences")->where("emp_prefer_id",$sub_prefer_id)->first();
-        
-        
+
+
         $data['employeement_type_preferences'] = DB::table("employeement_type_preferences")->where("sub_prefer_id",$sub_prefer_id)->get();
-        
-        
+
+
         //print_r($employeement_type_preferences);die;
         $data['employeement_type_name'] = $employeement_type_name->emp_type;
         $data['employeement_type_id'] = $employeement_type_name->emp_prefer_id;
@@ -5773,9 +5818,9 @@ public function ResetPassword(Request $request)
     //     $nurse_id = $request->nurse_id;
 
     //     $main_nurse_data = SpecialityModel::where("id",$nurse_id)->first();
-        
+
     //     $sub_nurse_data = SpecialityModel::where("parent",$nurse_id)->get();
-        
+
     //     $data['main_nurse_id'] = $nurse_id;
     //     $data['main_nurse_name'] = $main_nurse_data->name;
     //     $data['sub_nurse_data'] = $sub_nurse_data;
@@ -5788,25 +5833,25 @@ public function ResetPassword(Request $request)
         $nurse_id = $request->nurse_id;
 
         $main_nurse_data = SpecialityModel::where("id",$nurse_id)->first();
-        
+
         $sub_nurse_data = SpecialityModel::where("parent",$nurse_id)->get();
-        
+
         $data['main_nurse_id'] = $nurse_id;
         $data['main_nurse_name'] = (!empty($main_nurse_data))?$main_nurse_data->name:'';
         $data['sub_nurse_data'] = (!empty($sub_nurse_data))?$sub_nurse_data:'';
 
         $specialities_data = PractitionerTypeModel::where("parent","0")->get();
-        
+
         if(!empty($specialities_data)){
             $data['specialities_data'] = $specialities_data;
-            
+
         }
 
         return json_encode($data);
     }
 
     public function getSpecialityDatas(Request $request){
-        
+
         $speciality_id = $request->speciality_id;
         $main_specialty_data = DB::table("speciality")->where("id",$speciality_id)->first();
         $sub_specialty_data = DB::table("speciality")->where("parent",$speciality_id)->get();
@@ -5827,7 +5872,7 @@ public function ResetPassword(Request $request)
 
 
     }
-    
+
         public function updateActiveCountry(Request $request)
     {
         $request->validate([
@@ -5852,7 +5897,7 @@ public function ResetPassword(Request $request)
             $delete_profession_data = DB::table("profession_data")->where("profession_id",$profession_id)->delete();
         }else{
             $delete_profession_data = DB::table("profession_data")->where("experience_id",$experience_id)->delete();
-            
+
 
             $profession_experience_data = DB::table("user_experience")->where("experience_id",$experience_id)->first();
             //print_r($profession_experience_data);
@@ -5860,8 +5905,8 @@ public function ResetPassword(Request $request)
                 $delete_experience_data = DB::table("user_experience")->where("experience_id",$experience_id)->delete();
             }
         }
-        
-        
+
+
         if($delete_profession_data){
             return $delete_profession_data;
         }

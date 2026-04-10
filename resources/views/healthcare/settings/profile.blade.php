@@ -355,7 +355,7 @@ form#update_profile_form ul.select2-selection__rendered {
                               <div class="form-group">
                                 <label class="form-label" for="input-1">Postcode</label>
                                 
-                                <input class="form-control post_code" type="text" name="site_data[{{ $i }}][post_code]" value="@if(isset($site_data->post_code)){{ $site_data->post_code }}@endif">
+                                <input class="form-control post_code" type="text" name="site_data[{{ $i }}][post_code]" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="@if(isset($site_data->post_code)){{ $site_data->post_code }}@endif">
                                 <span id="reqpost_code-{{ $i }}" class="reqError text-danger valley"></span>
                               </div>
                               <div class="delete_another_location_btn">
@@ -394,7 +394,7 @@ form#update_profile_form ul.select2-selection__rendered {
                             <div class="form-group">
                               <label class="form-label" for="input-1">Postcode</label>
                               
-                              <input class="form-control post_code-1" type="text" name="site_data[1][post_code]" value="">
+                              <input class="form-control post_code-1" type="number" name="site_data[1][post_code]" class="phone" maxlength="10" value="">
                               <span id="reqpost_code-1" class="reqError text-danger valley"></span>
                             </div>
                             <div class="delete_another_location_btn">
@@ -678,7 +678,7 @@ form#update_profile_form ul.select2-selection__rendered {
                         <div class="form-group level-drp">
                           <label class="form-label accredition_label accredition_label" for="input-1">Phone</label>
                           
-                          <input type="number" name="phone" class="phone" maxlength="10" value="{{ $user_data->phone }}" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                          <input type="number" name="phone" class="phone" maxlength="10" value="{{ $user_data->phone }}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,10)">
                           <span id="reqsubaccredition" class="reqError text-danger valley"></span>
                         </div>  
                         @php
@@ -931,6 +931,10 @@ form#update_profile_form ul.select2-selection__rendered {
       i++;
     });
 
+    $(document).on('input', '.facility_name,.full_name', function () {
+        this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+    });
+
     function another_location(){
       var lastValue = $('.location_site_no').last().val();
       var nextValues = parseInt(lastValue)+1;
@@ -962,7 +966,7 @@ form#update_profile_form ul.select2-selection__rendered {
                 </div>\
                 <div class="form-group">\
                   <label class="form-label" for="input-1">Postcode</label>\
-                  <input class="form-control post_code-'+nextValues+'" type="text" name="site_data['+nextValues+'][post_code]"  value="">\
+                  <input class="form-control post_code-'+nextValues+'" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, \'\')" type="text" name="site_data['+nextValues+'][post_code]"  value="">\
                   <span id="reqpost_code-'+nextValues+'" class="reqError text-danger valley"></span>\
                 </div>\
                 <div class="delete_another_location_btn">\

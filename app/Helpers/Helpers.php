@@ -19,6 +19,8 @@ use App\Models\TrainingModel;
 use App\Models\SkillModel;
 use App\Models\VaccinationModel;
 use App\Models\JobsModel;
+use App\Events\JobPublished;
+use App\Notifications\JobPublishedNotification;
 
 function specialty()
 {
@@ -729,4 +731,366 @@ function expire_jobs($user_id)
 
 
         }
+}
+
+function normalizeJsonValues($value)
+{
+    $decoded = json_decode($value, true);
+
+    if (!is_array($decoded)) {
+        return [];
+    }
+
+    $result = [];
+
+    array_walk_recursive($decoded, function ($item) use (&$result) {
+        $result[] = (string) $item;
+    });
+
+    return array_values(array_unique(array_filter($result)));
+}
+
+function normalizeSimpleArray($value)
+{
+    $decoded = json_decode($value, true);
+
+    if (!is_array($decoded)) {
+        return [];
+    }
+
+    return collect($decoded)
+        ->flatten()
+        ->map(fn($v) => (string) $v)
+        ->filter()
+        ->values()
+        ->toArray();
+}
+
+/**
+ * For benefits like:
+ * {"1":["11"],"2":["17"],"3":["51"]}
+ *
+ * Returns:
+ * ["1","11","2","17","3","51"]
+ */
+function normalizeBenefitIds($value)
+{
+    $decoded = json_decode($value, true);
+
+    if (!is_array($decoded)) {
+        return [];
+    }
+
+    $result = [];
+
+    foreach ($decoded as $key => $vals) {
+        $result[] = (string) $key;
+
+        if (is_array($vals)) {
+            foreach ($vals as $v) {
+                $result[] = (string) $v;
+            }
+        } else {
+            $result[] = (string) $vals;
+        }
+    }
+
+    return array_values(array_unique(array_filter($result)));
+}
+
+function sendJobAlertEmails()
+{
+    $savedSearches = DB::table('saved_searches')->get();
+    $jobs = DB::table('job_boxes')->get();
+
+    foreach ($savedSearches as $search) {
+
+        $matchedJobs = [];
+
+        foreach ($jobs as $job) {
+
+            $totalFilters = 0;
+            $matchedFilters = 0;
+            $matchedFields = [];
+
+            // Mandatory match flags
+            $shiftMatched = false;
+            $benefitsMatched = false;
+
+            /*
+            |--------------------------------------------------------------------------
+            | 1. SHIFT TYPE
+            |--------------------------------------------------------------------------
+            */
+            $searchShift = normalizeSimpleArray($search->filter_work_shift ?? null);
+
+            if (!empty($searchShift)) {
+                $totalFilters++;
+
+                $jobShift = normalizeSimpleArray($job->shift_type ?? null);
+
+                if (!empty(array_intersect($jobShift, $searchShift))) {
+                    $matchedFilters++;
+                    $matchedFields[] = 'Shift Type';
+                    $shiftMatched = true;
+                }
+            } else {
+                $shiftMatched = true;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | 2. WORK ENVIRONMENT
+            |--------------------------------------------------------------------------
+            */
+            $searchEnv = normalizeJsonValues($search->filter_work_environment ?? null);
+
+            if (!empty($searchEnv)) {
+                $totalFilters++;
+
+                $jobEnv = normalizeJsonValues($job->work_environment ?? null);
+
+                if (!empty(array_intersect($jobEnv, $searchEnv))) {
+                    $matchedFilters++;
+                    $matchedFields[] = 'Work Environment';
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | 3. BENEFITS
+            |--------------------------------------------------------------------------
+            */
+            $searchBenefits = normalizeSimpleArray($search->filter_benefits_preferences ?? null);
+
+            if (!empty($searchBenefits)) {
+                $totalFilters++;
+
+                // IMPORTANT FIX: match keys + nested values
+                $jobBenefits = normalizeBenefitIds($job->benefits ?? null);
+
+                if (!empty(array_intersect($jobBenefits, $searchBenefits))) {
+                    $matchedFilters++;
+                    $matchedFields[] = 'Benefits';
+                    $benefitsMatched = true;
+                }
+            } else {
+                $benefitsMatched = true;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | 4. EXPERIENCE
+            |--------------------------------------------------------------------------
+            */
+            if (!empty($search->experience)) {
+                $totalFilters++;
+
+                $jobExperience = (int) ($job->experience ?? 0);
+                $searchExperience = (int) ($search->experience ?? 0);
+
+                // Recommended logic
+                if ($jobExperience <= $searchExperience) {
+                    $matchedFilters++;
+                    $matchedFields[] = 'Experience';
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | MATCH %
+            |--------------------------------------------------------------------------
+            */
+            $matchPercentage = $totalFilters > 0
+                ? round(($matchedFilters / $totalFilters) * 100, 2)
+                : 0;
+
+            /*
+            |--------------------------------------------------------------------------
+            | FINAL RULE
+            |--------------------------------------------------------------------------
+            */
+            if ($matchPercentage >= 50 && $shiftMatched && $benefitsMatched) {
+
+                if (!collect($matchedJobs)->pluck('id')->contains($job->id)) {
+
+                    $job->match_percentage = $matchPercentage;
+                    $job->matched_filters = $matchedFilters;
+                    $job->total_filters = $totalFilters;
+                    $job->matched_fields = $matchedFields;
+
+                    $job->shift_label = !empty($job->shift_type)
+                        ? implode(', ', normalizeSimpleArray($job->shift_type))
+                        : 'N/A';
+
+                    $job->salary_label = !empty($job->salary)
+                        ? $job->salary
+                        : 'N/A';
+
+                    $job->location_label = trim(
+                        ($job->city ?? '') . ', ' .
+                        ($job->state ?? '') . ', ' .
+                        ($job->country ?? ''),
+                        ', '
+                    );
+
+                    if (empty($job->location_label)) {
+                        $job->location_label = $job->location ?? 'N/A';
+                    }
+
+                    $matchedJobs[] = $job;
+                }
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | SEND EMAIL / NOTIFICATION
+        |--------------------------------------------------------------------------
+        */
+        if (!empty($matchedJobs)) {
+
+            // Optional: top 5 best jobs only
+            $matchedJobs = collect($matchedJobs)
+                ->sortByDesc('match_percentage')
+                ->take(5)
+                ->values()
+                ->all();
+
+            //$user = DB::table('users')->where('id', $search->user_id)->first();
+            $user = User::whereHasAppNotifications()
+                        ->where('id', $search->user_id)
+                        ->first();
+
+            if ($user && !empty($user->email)) {
+
+                // Render blade HTML correctly
+                $htmlBody = view('email.job-alert', [
+                    'user' => $user,
+                    'jobs' => $matchedJobs,
+                    'savedSearch' => $search, // IMPORTANT: use same variable as blade
+                ])->render();
+
+                // Send Email
+                \App\Helpers\ZeptoMailHelper::sendMail(
+                    $user->email,
+                    "Job Alert - Mediqa",
+                    $htmlBody
+                );
+
+                foreach ($matchedJobs as $matchedJob) {
+                        $jobModel = \App\Models\JobsModel::find($matchedJob->id);
+
+                        if ($jobModel) {
+                                $user->notify(new JobPublishedNotification($jobModel));
+                                JobPublished::dispatch($jobModel);
+                        }
+                }
+
+                //JobPublished::dispatch($matchedJobs);
+
+                
+
+                // $user->notify(new JobPublishedNotification($matchedJobs));
+
+                // JobPublished::dispatch($matchedJobs);
+
+                // //Laravel Notification
+                // if ($user instanceof \Illuminate\Notifications\Notifiable || method_exists($user, 'notify')) {
+                //     $userModel = \App\Models\User::find($user->id);
+                //     if ($userModel) {
+                //         $userModel->notify(new JobPublishedNotification($matchedJobs));
+                //     }
+                // }
+
+                // //Broadcast event
+                // JobPublished::dispatch($matchedJobs);
+            }
+        }
+
+        // Debug
+        // echo "<pre>";
+        // print_r($matchedJobs);
+    }
+}
+
+function filterSummuryData($filter_data){
+    $sector = isset($filter_data['sector']) ? $filter_data['sector'] : '';
+    
+    $filterNameData = [];
+
+    if($sector == 1){
+        $sector_data = 'Public & Government';     
+        $filterNameData['sector'] = $sector_data;                                                   
+    }
+
+    if($sector == 2){
+        $sector_data = 'Private';     
+        $filterNameData['sector'] = $sector_data;                                                   
+    }
+
+    if($sector == 3){
+        $sector_data = 'Public Government & Private';     
+        $filterNameData['sector'] = $sector_data;                                                   
+    }
+
+    $employment_type = isset($filter_data['employment_type']) ? $filter_data['employment_type'] : [];
+    $emp_arr = [];
+    foreach($employment_type as $emptype){
+        $emp_data = DB::table("employeement_type_preferences")->where("emp_prefer_id",$emptype)->first();
+        $emp_arr[] =  $emp_data->emp_type;                                                      
+    }
+
+    $filterNameData['employment_type'] = $emp_arr;
+
+    $work_shift_type = isset($filter_data['work_shift']) ? $filter_data['work_shift'] : [];
+    $work_shift_arr = [];
+    foreach($work_shift_type as $work_shift){
+        $work_shift_data = DB::table("work_shift_preferences")->where("work_shift_id",$work_shift)->first();
+        $work_shift_arr[] =  $work_shift_data->shift_name;                                                      
+    }
+
+    $filterNameData['work_shift'] = $work_shift_arr;
+
+    $work_environment_type = isset($filter_data['work_environment']) ? $filter_data['work_environment'] : [];
+    $work_environment_arr = [];
+    foreach($work_environment_type as $work_environment){
+        $work_environment_data = DB::table("work_enviornment_preferences")->where("prefer_id",$work_environment)->first();
+        $work_environment_arr[] =  $work_environment_data->env_name;                                                      
+    }
+
+    $filterNameData['work_environment'] = $work_environment_arr;
+
+    $benefits_preferences_type = isset($filter_data['benefits_preferences']) ? $filter_data['benefits_preferences'] : [];
+    $benefits_preferences_arr = [];
+    foreach($benefits_preferences_type as $benefits_preferences){
+        $benefits_preferences_data = DB::table("work_enviornment_preferences")->where("prefer_id",$benefits_preferences)->first();
+        $benefits_preferences_arr[] =  $benefits_preferences_data->env_name;                                                      
+    }
+
+    $filterNameData['benefits_preferences'] = $benefits_preferences_arr;
+
+    $nurse_type = isset($filter_data['nurse_type']) ? $filter_data['nurse_type'] : [];
+    $nurse_type_arr = [];
+    foreach($nurse_type as $ntype){
+        $nurse_type_data = DB::table("practitioner_type")->where("id",$ntype)->first();
+        $nurse_type_arr[] =  $nurse_type_data->name;                                                      
+    }
+
+    $filterNameData['nurse_type'] = $nurse_type_arr;
+
+    $speciality_type = isset($filter_data['speciality']) ? $filter_data['speciality'] : [];
+    $speciality_type_arr = [];
+    foreach($speciality_type as $stype){
+        $speciality_type_data = DB::table("speciality")->where("id",$stype)->first();
+        $speciality_type_arr[] =  $speciality_type_data->name;                                                      
+    }
+
+    $filterNameData['speciality'] = $speciality_type_arr;
+
+    $filterNameData['location_preference'] = isset($filter_data['location_preference']) ?$filter_data['location_preference']:'';
+    $filterNameData['experience_years'] = isset($filter_data['experience_years']) ?$filter_data['experience_years'].' years':'';
+    $filterNameData['salary'] = isset($filter_data['salary']) ?$filter_data['salary']:'';
+
+    return json_encode($filterNameData);
 }

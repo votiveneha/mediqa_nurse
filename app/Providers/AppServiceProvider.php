@@ -21,9 +21,9 @@ class AppServiceProvider extends ServiceProvider
     {
         \Illuminate\Support\Facades\View::composer('*', function ($view) {
             $unreadMessagesCount = 0;
-            $user = \Illuminate\Support\Facades\Auth::guard('nurse_middle')->user() 
+            $user = \Illuminate\Support\Facades\Auth::guard('nurse_middle')->user()
                 ?? \Illuminate\Support\Facades\Auth::guard('healthcare_facilities')->user();
-            
+
             if ($user) {
                 $unreadMessagesCount = \App\Models\Message::where('is_read', 0)
                     ->where('sender_id', '!=', $user->id)
@@ -33,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
                     })
                     ->count();
             }
-            
+
             $view->with('unreadMessagesCount', $unreadMessagesCount);
         });
     }
